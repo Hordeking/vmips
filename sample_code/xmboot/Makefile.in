@@ -100,7 +100,7 @@ lib.host.o: lib.c lib.h
 	$(CC) $(HOST_CFLAGS) -c -o $@ $<
 
 boot.host.o: boot.c
-	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
 
 coff.host: coff.host.o coff_main.host.o
 	$(CC) $(HOST_CFLAGS) -o $@ $+
@@ -112,10 +112,10 @@ coff_main.host.o: coff_main.c
 	$(CC) $(HOST_CFLAGS) -c -o $@ $+
 
 boot_main.host.o: boot_main.c
-	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
 
 xmrcv.host.o: xmrcv.c
-	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
 
 libtest.output: libtest.std libtest.input
 	./libtest.std < $(srcdir)/libtest.input > $(srcdir)/libtest.output

@@ -428,13 +428,13 @@ CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG1) {
 		*paddr = vaddr - KSEG1_CONST_TRANSLATION;
 		rv = true;
-	} else {
+	} else /* KUSEG */ {
 		match = find_matching_tlb_entry(vpn, asid);
 		if (!match || !match->valid()) {
 			*paddr = 0xffffffff;
 			rv = false;
 		} else {
-			*paddr = match->pfn() | (sp & ~VPNMASK);
+			*paddr = match->pfn() | (vaddr & ~VPNMASK);
 			rv = true;
 		}
 	}

@@ -1,8 +1,9 @@
-/* Typedefs */
-typedef unsigned int size_t;
+#include <stddef.h>
 
 /* Macros */
+#ifndef NULL
 #define NULL ((void *) 0L)
+#endif
 
 /* Terminal modes */
 #define ECHO   0x0001   /* Echo incoming characters */
@@ -20,7 +21,7 @@ void puts_nonl (const char *buf);
 char *gets (char *buf);
 int puts (const char *buf);
 int strcmp (const char *s1, const char *s2);
-int strlen (const char *s);
+size_t strlen (const char *s);
 char toupper (char c);
 char tolower (char c);
 int isspace (const char c);
@@ -31,3 +32,4 @@ int printf (const char *fmt, ...);
 char *strcpy (const char *s1, const char *s2);
 void *memcpy (void *dest, const void *src, size_t n);
 void *memmove (void *dest, const void *src, size_t n);
+void *memset(void *s, int c, size_t n);

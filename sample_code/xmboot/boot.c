@@ -1,5 +1,5 @@
 /* vmips boot monitor
- * $Date: 2001/07/14 05:54:40 $
+ * $Date: 2001/12/29 09:38:47 $
  * by Brian R. Gaeke
  */
 
@@ -144,13 +144,13 @@ boot (int argc, char **argv)
       return -1;
     }
 
-  memmove ((char *) h.text_addr, recv_buffer + h.text_offset, h.text_size);
+  memmove ((void *) h.text_addr, recv_buffer + h.text_offset, h.text_size);
   printf ("Moved %u bytes of text from %x to %x\n", h.text_size,
 	  recv_buffer + h.text_offset, h.text_addr);
-  memmove ((char *) h.data_addr, recv_buffer + h.data_offset, h.data_size);
+  memmove ((void *) h.data_addr, recv_buffer + h.data_offset, h.data_size);
   printf ("Moved %u bytes of data from %x to %x\n", h.data_size,
 	  recv_buffer + h.data_offset, h.data_addr);
-  memset ((char *) h.bss_addr, 0, h.bss_size);
+  memset ((void *) h.bss_addr, 0, h.bss_size);
   printf ("Zeroed out bss (%u bytes at %x)\n", h.bss_size, h.bss_addr);
 
   puts("When you walk through the storm");

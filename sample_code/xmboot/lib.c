@@ -110,7 +110,7 @@ strcmp (const char *s1, const char *s2)
   return 0;
 }
 
-int
+size_t
 strlen (const char *s)
 {
   int length = 0;

@@ -499,7 +499,8 @@ void
 CPU::lb_emulate(uint32 instr, uint32 pc)
 {
 	uint32 phys, virt, base;
-	int32 byte, offset;
+	int8 byte;
+	int32 offset;
 	bool cacheable;
 
 	/* Calculate virtual address. */
@@ -526,7 +527,8 @@ void
 CPU::lh_emulate(uint32 instr, uint32 pc)
 {
 	uint32 phys, virt, base;
-	int32 halfword, offset;
+	int16 halfword;
+	int32 offset;
 	bool cacheable;
 
 	/* Calculate virtual address. */
@@ -561,7 +563,7 @@ CPU::lh_emulate(uint32 instr, uint32 pc)
  */
 uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (machine->host_bigendian) {
+#if defined(TARGET_BIG_ENDIAN)
 		switch (offset)
 		{
 			case 0: return (regval & 0xffffff00) |
@@ -572,7 +574,7 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 						((unsigned)(memval & 0xffffff00) >> 8);
 			case 3: return memval;
 		}
-	} else {
+#elif defined(TARGET_LITTLE_ENDIAN)
 		switch (offset)
 		{
 			/* The SPIM source claims that "The description of the
@@ -590,14 +592,14 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 			case 3: /* 2 in book */
 				return (regval & 0xffffff00) | ((memval & 0xff000000) >> 24);
 		}
-	}
+#endif
 	fprintf(stderr, "Invalid offset %x passed to lwr\n", offset);
 	abort();
 }
 
 uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (machine->host_bigendian) {
+#if defined(TARGET_BIG_ENDIAN)
 		switch (offset)
 		{
 			case 0: return memval;
@@ -605,7 +607,7 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 			case 2: return (memval & 0xffff) << 16 | (regval & 0xffff);
 			case 3: return (memval & 0xff) << 24 | (regval & 0xffffff);
 		}
-	} else {
+#elif defined(TARGET_LITTLE_ENDIAN)
 		switch (offset)
 		{
 			case 0: return (memval & 0xff) << 24 | (regval & 0xffffff);
@@ -613,7 +615,7 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 			case 2: return (memval & 0xffffff) << 8 | (regval & 0xff);
 			case 3: return memval;
 		}
-	}
+#endif
 	fprintf(stderr, "Invalid offset %x passed to lwl\n", offset);
 	abort();
 }
@@ -814,42 +816,42 @@ CPU::sh_emulate(uint32 instr, uint32 pc)
 
 uint32 swl(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (machine->host_bigendian) {
+#if defined(TARGET_BIG_ENDIAN)
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return (memval & 0xff000000) | (regval >> 8 & 0xffffff); 
 			case 2: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
 			case 3: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 		}
-	} else {
+#elif defined(TARGET_LITTLE_ENDIAN)
 		switch (offset) {
 			case 0: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 			case 1: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
 			case 2: return (memval & 0xff000000) | (regval >> 8 & 0xffffff); 
 			case 3: return regval; 
 		}
-	}
+#endif
 	fprintf(stderr, "Invalid offset %x passed to swl\n", offset);
 	abort();
 }
 
 uint32 swr(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (machine->host_bigendian) {
+#if defined(TARGET_BIG_ENDIAN)
 		switch (offset) {
 			case 0: return ((regval << 24) & 0xff000000) | (memval & 0xffffff); 
 			case 1: return ((regval << 16) & 0xffff0000) | (memval & 0xffff); 
 			case 2: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
 			case 3: return regval; 
 		}
-	} else {
+#elif defined(TARGET_LITTLE_ENDIAN)
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
 			case 2: return ((regval << 16) & 0xffff0000) | (memval & 0xffff); 
 			case 3: return ((regval << 24) & 0xff000000) | (memval & 0xffffff); 
 		}
-	}
+#endif
 	fprintf(stderr, "Invalid offset %x passed to swr\n", offset);
 	abort();
 }
@@ -1291,7 +1293,7 @@ CPU::xor_emulate(uint32 instr, uint32 pc)
 void
 CPU::nor_emulate(uint32 instr, uint32 pc)
 {
-	reg[rd(instr)] = reg[rs(instr)] | (~reg[rt(instr)]);
+	reg[rd(instr)] = ~(reg[rs(instr)] | reg[rt(instr)]);
 }
 
 void

@@ -12,8 +12,8 @@
 #define UNKNOWN              2
 
 /* controls how fast things are */
-#define IOSPEED				40000   /* msec */
-#define CLOCK_GRANULARITY	1000000 /* msec */
+#define IOSPEED				40000   /* usec */
+#define CLOCK_GRANULARITY	1000000 /* usec */
 
 class SPIMConsoleKeyboard;
 class SPIMConsoleDisplay;

@@ -61,9 +61,6 @@ Explanations of files in the test_code directory
  sort.c - an insertion sort demo. uses random.c or the CP0 Random register.
  use memdump option to vmips and od(1) to see results.
 
- testdev.S - a program to copy words from the TestDev device at 0xa1000000;
- you can use the memdump option to vmips and od(1) to verify the results.
-
  tester.c - This was the first C program run on vmips.  It is a
  fixed-data, register implementation of the Euclidean Algorithm for
  computing the greatest common divisor. Here is a list of the (ten)
@@ -92,5 +89,5 @@ Explanations of files in the test_code directory
  the program terminated correctly (whichever register corresponds to the
  result will contain 0x0b).
 
-CVS: $Id: README,v 1.2 2001/05/13 20:47:51 brg Exp $
+CVS: $Id: README,v 1.2.2.1 2001/12/29 09:38:47 brg Exp $
 

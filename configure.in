@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
-dnl $Id: configure.in,v 1.42.2.2 2001/12/15 05:15:54 brg Exp $
+dnl $Id: configure.in,v 1.42.2.3 2002/01/12 09:43:42 brg Exp $
 AC_INIT(vmips.cc)
-AM_INIT_AUTOMAKE(vmips, 1.0.2)
+AM_INIT_AUTOMAKE(vmips, 1.0.3)
 AM_CONFIG_HEADER(config.h)
 
 dnl Look for mips libraries:

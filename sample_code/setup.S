@@ -17,9 +17,24 @@
 	.text
 	.globl __start
 
-/* Start by clearing everything out. */
 	.ent __start
 __start:
+	j begin
+	.end __start
+
+	/* Halt on user tlb exceptions. */
+	.org 0x100
+	break 0x0
+
+	/* Halt on exceptions. */
+	.org 0x180
+	break 0x0
+
+	.org 0x200
+	.globl begin
+	.ent begin
+begin:
+/* Start by clearing everything out. */
 	.set noat
 	move $1, $0
 	.set at
@@ -92,8 +107,5 @@ __start:
 
 	/* Wait a minute, wait a minute, stop the execution! */
 	break 0x0
-	.end __start
+	.end begin
 
-	/* Halt on exceptions. */
-	.org 0x180
-	break 0x0
