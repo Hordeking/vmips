@@ -127,7 +127,9 @@ protected:
 		((tvp)->tv_sec cmp (uvp)->tv_sec))
 #endif
 
-#ifndef timespecadd
+#ifdef timespecadd
+#undef timespecadd
+#endif
 #define timespecadd(vvp, uvp)						\
 	do {								\
 		(vvp)->tv_sec += (uvp)->tv_sec;				\
@@ -137,9 +139,10 @@ protected:
 			(vvp)->tv_nsec -= 1000000000;			\
 		}							\
 	} while (0)
-#endif
 
-#ifndef timespecsub
+#ifdef timespecsub
+#undef timespecsub
+#endif
 #define timespecsub(vvp, uvp)						\
 	do {								\
 		(vvp)->tv_sec -= (uvp)->tv_sec;				\
@@ -149,7 +152,6 @@ protected:
 			(vvp)->tv_nsec += 1000000000;			\
 		}							\
 	} while (0)
-#endif
 
 #ifndef	TIMEVAL_TO_TIMESPEC
 #define	TIMEVAL_TO_TIMESPEC(tv, ts)		\

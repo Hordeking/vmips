@@ -1,16 +1,22 @@
-
 These installation instructions are copied from the VMIPS Manual. For
 bug-reporting instructions, please see the README file in the source
 distribution, or read the VMIPS Manual.
+
+File: vmips.info,  Node: Installation,  Next: Reporting Bugs,  Prev: Extending,  Up: Top
 
 Installation
 ************
 
    VMIPS uses the GNU Autoconf/Automake system for configuration
 management.  This provides the familiar `configure' shell script
-interface for setting configuration variables. For more information
-about the special options that VMIPS `configure' accepts, read on, or
-give the `--help' option to `configure' for an abridged version.
+interface for setting configuration variables before compiling VMIPS.
+This means that the traditional `./configure; make; make install'
+sequence should work.  For more information about the special options
+that VMIPS `configure' accepts, read on, or give the `--help' option to
+`configure' for an abridged version.
+
+Prerequisites
+=============
 
    The VMIPS build process assumes that you have a C++ compiler
 installed on the host machine which can deal correctly with template
@@ -23,12 +29,24 @@ bug in question and will print an error message ("your C++ compiler's
 template function handling is buggy") if you attempt to use a deficient
 compiler.
 
-   The VMIPS build process assumes that you have a full set of GNU MIPS
-cross compilation tools installed, because you'll need them to do
-anything useful with VMIPS. For a concise summary of how to build the
-necessary MIPS cross tools, read "Building MIPS Cross Tools", below.
-Note that you must provide the same `--target' option to VMIPS
-`configure' that you provided to GNU Binutils `configure'.
+   If you want to build any of the sample code which is included with
+the VMIPS source distribution, you must have a full set of GNU MIPS
+cross compilation tools installed when you configure VMIPS.  You will
+need to tell `configure' the configuration prefix you used to install
+the MIPS tools, by specifying it as the value to the `--with-mips'
+argument. For example, if your MIPS cross compiler is
+`/opt/mipsTools/bin/mips-dec-ultrix4.3-gcc', then you should specify
+`--with-mips=/opt/mipsTools' on the `configure' command line.
+Additionally, you will also need to tell `configure' the target you
+used to configure the MIPS cross tools, by specifying it as the value
+to the `--target' argument (see below).  For a concise summary of how
+to build the necessary MIPS cross tools, read "Building MIPS Cross
+Tools", below.
+
+   If you want to run the test suite, you must additionally have Expect
+and DejaGNU installed (any version published since 2000 should be
+fine). Once VMIPS is compiled, you can type `make check' to run the
+test suite.
 
 Building from CVS
 =================
@@ -45,72 +63,134 @@ automatically run configure once it has been generated, you can run
 Options that configure supports
 ===============================
 
-   You will need to tell `configure' the configuration prefix you used
-to install the MIPS cross tools, by specifying it as the value to the
-`--with-mips' argument. For example, if your MIPS cross compiler is
-`/opt/mips/bin/mips-dec-ultrix4.3-gcc' and your MIPS-targeted
-libopcodes libtool library (which should have been installed by the
-binutils Makefile) is `/opt/mips/lib/libopcodes.la', then you should
-specify `--with-mips=/opt/mips' on the `configure' command line.
-Additionally, you will also need to tell `configure' the target you
-used to configure the MIPS cross tools, by specifying it as the value
-to the `--target' argument (see below).
-
    Some of the interesting options that `configure' supports are as
 follows:
 
 `--target=T'
      Specify the target used to configure your MIPS cross tools. `T'
-     must match the `--target' option provided to GNU Binutils
-     `configure'.
+     must match the value of the `--target' option provided to GNU
+     Binutils `configure'.
 
 `--with-mips=MDIR'
      Specify installation prefix of MIPS cross tools (default MDIR =
-     /opt/mips).
+     /opt/mips).  If you do not have MIPS cross tools, the VMIPS test
+     suite will not be available and sample code will not be built. If
+     you want `configure' to ignore your MIPS cross tools, you can
+     indicate this by specifying `--without-mips'.
 
-`--with-mips-lib=DIR'
-     Specify path to MIPS cross tools' libraries (default MDIR/lib).
+     This flag is used to set the default value of the vmipsrc
+     `mipstoolprefix' option. You can always edit the `mipstoolprefix'
+     option setting in `/etc/vmipsrc' after installation if you want to
+     change its value.
 
 `--with-mips-bin=DIR'
      Specify path to MIPS cross tools' executables (default MDIR/bin).
-
-`--with-mips-include=DIR'
-     Specify path to MIPS cross tools' includes (default MDIR/include).
-
-`--with-mips-bfdtarget=TARG'
-     Specify MIPS cross tools BFD target name (defaults to the first
-     target listed in the output of objdump -i). Normally you can let
-     configure guess this, unless you built your MIPS tools for a
-     target (mips-ecoff or mips-elf, for example) which supports both
-     big-endian and little-endian data.
+     This option may be useful as an override if -with-mips isn't
+     working for you, but beware -- it is rarely tested by the
+     developers.
 
 `--with-mips-endianness=VAL'
-     Specify endianness of the VMIPS simulated machine, which must
-     match the MIPS cross tools target's endianness.  VAL may be
-     specified as `big' or `little'.  It is best to let configure guess
-     this (using objdump -i), unless you have reason to believe it is
-     guessing wrong, because if you get it wrong, vmipstool may compile
-     ROMs that do not run correctly under vmips.
+     Specify the default endianness of the VMIPS simulated machine,
+     which must match the MIPS cross tools target's endianness.  VAL
+     may be specified as `big' or `little'.  If you have installed MIPS
+     cross tools, it is best to let configure guess this (which it will
+     do by running `mips-objdump -i'), unless you have reason to
+     believe it is guessing wrong, because if you get it wrong,
+     vmipstool may compile ROMs that do not run correctly under vmips.
+     If you are configuring without MIPS cross tools installed, this
+     will default to little-endian.
+
+     This flag is used to set the default value of the vmipsrc
+     `bigendian' option. You can always edit the `bigendian' option
+     setting in `/etc/vmipsrc' after installation if you want to change
+     this value.
 
 `--disable-debug'
-     Strip debugging symbols and turn on all the compiler optimizations.
-     The default is not to do this (i.e., leave in the debugging
-     symbols, and turn off all the compiler optimizations.)
+     When you use this flag, `configure' will
+        * Turn on various compiler optimizations (compile with -O2)
 
-`--disable-tty'
-     Do not include (default=include) support for the emulated serial
-     interface.
+        * Strip debugging symbols from executables (link with -s), but
+          only if `--enable-profiling' is not also turned on
+
+        * Initialize VMIPS registers to zero
+
+        * Disable runtime assertion checks
+
+     When you do not use this flag, `configure' will
+        * Turn on debug info in the compiler (compile with -g)
+
+        * Initialize VMIPS registers to random values
+
+        * Compile in runtime assertion checks
+
+`--enable-profiling'
+     Include (default=do not include) profiling instrumentation in the
+     VMIPS binary. This is only interesting if you are maintaining
+     VMIPS and trying to figure out why it is running more slowly than
+     it should be. This option doesn't seem to work very well on Mac OS
+     X. Setting this option inhibits stripping the executables.
+
+Post-Installation Setup
+=======================
+
+   If you are an end-user with a binary package for VMIPS and a MIPS
+cross compiler, you will probably want to make Vmipstool use the cross
+compiler when you run commands such as `vmipstool --compile'.
+
+   You should edit your `/etc/vmipsrc' or `~/.vmipsrc' file and change
+the `bigendian' and `mipstoolprefix' options to correspond to the
+installed MIPS cross tools. (See the `Customizing' chapter for more
+information on the syntax of these options.) Then, test it by trying to
+compile a C file by running `vmipstool --compile -c foo.c'. You should
+get an object file (`foo.o') of the right endianness and object format;
+you can check this using the `file' command on most Unix systems.
+
+Packaging VMIPS
+===============
+
+   If you are a system integrator or distributor who is building a
+package for VMIPS intended for distribution, you may be able to start
+by looking at the RPM vmips.spec file or the Debian dpkg packaging
+files included in the source distribution.
+
+   Your VMIPS package need not require a set of MIPS cross tools either
+at the build or install stage.  Starting with VMIPS 1.2, it is
+perfectly possible to build VMIPS without a cross-compiler,
+cross-assembler, or cross-linker.  Vmipstool will not be very useful
+without cross-tools, but it will build; however, an end-user can
+install cross-tools and edit the system-wide `vmipsrc' file to make the
+`mipstoolprefix' option value contain their location.
+
+   The VMIPS binary package should probably include the following files:
+   * the two executables `vmips' and `vmipstool'
+
+   * the two man pages `vmips.1' and `vmipstool.1'
+
+   * the VMIPS Programmer's Manual in some format (for example, the
+     Info file `vmips.info')
+
+   * the default GNU linker script used by vmipstool, `ld.script'
+
+   * the system-wide configuration file `/etc/vmipsrc'
+
+   * the assembler convenience header file `asm_regnames.h'
+
+   Help keep VMIPS free! As VMIPS is released under the GNU General
+Public License, please make an effort to distribute sources (or at
+least, post a link to the sources) if you distribute binaries or binary
+packages. Thanks!
 
 Building MIPS Cross Tools
 =========================
 
    First decide on an installation prefix. The following examples will
-use the prefix `/opt/mips', as above.
+use the prefix `/opt/mips', as above, which is the default place that
+the VMIPS `configure' script looks for them; you can however use any
+prefix you wish.
 
    Download a copy of Binutils, from any GNU mirror, or from the URL:
      <ftp://sources.redhat.com/pub/binutils/releases>
-   We recommend getting version 2.11.2. The file you will need would be
-named `binutils-2.11.2.tar.gz'.
+   We recommend getting version 2.11.2 or 2.13.2.1.
 
    Build binutils by running the following commands. We recommend
 `--disable-nls' because some recent versions do not build correctly with
@@ -121,15 +201,11 @@ NLS (linking against `libopcodes.a' results in unresolved symbols.)
      make
      make install install-info
 
-   Save a copy of `include/dis-asm.h' from the Binutils source
-distribution.  You'll need to install it as `include/dis-asm.h' in the
-VMIPS source distribution, in order to ensure compatibility between the
-version of Binutils you used and VMIPS.
-
    Download a copy of the GNU Compiler Collection (`gcc') from any GNU
 mirror, or from the URL:
      <ftp://gcc.gnu.org/pub/gcc/releases>
-   We recommend version 3.0.2. Download the file `gcc-3.0.2.tar.gz'.
+   You should be able to use any version from 3.0 through 3.4. We've
+mostly tested with 3.0.4. Our examples (below) will assume 3.0.4.
 
    You can read the documentation for building the compiler by pointing
 your World-Wide Web browser at <http://gcc.gnu.org/install>.  When you
@@ -138,7 +214,7 @@ documentation for building the compiler, because it is more complete
 than the following summary.
 
   1. Unpack the sources. Let's say you unpack them in `/usr/build',
-     creating the directory `/usr/build/gcc-3.0.2'.
+     creating the directory `/usr/build/gcc-3.0.4'.
 
   2. Create the build directory `/usr/build/gcc-mips-build'.
 
@@ -152,7 +228,7 @@ than the following summary.
      continuing a command on the following line, and are inserted for
      typesetting purposes.)
 
-          ../gcc-3.0.2/configure --target=mipsel-ecoff \
+          ../gcc-3.0.4/configure --target=mipsel-ecoff \
            --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
            --disable-threads --disable-shared
 
@@ -184,9 +260,10 @@ than the following summary.
        1. Download a copy of the GNU debugger from any GNU mirror, or
           from the URL:
                <ftp://ftp.gnu.org/pub/gnu/gdb/>
-          We recommend version 5.0. Download the file `gdb-5.0.tar.gz'.
+          We recommend version 5.2.1. Download the file
+          `gdb-5.2.1.tar.gz'.
 
-       2. Unpack the file and change to the directory `gdb-5.0'.
+       2. Unpack the file and change to the directory `gdb-5.2.1'.
 
        3. Type the following commands to configure and build GDB:
                ./configure --prefix=/opt/mips --target=mipsel-ecoff
@@ -198,15 +275,73 @@ than the following summary.
           section of the manual.
 
   8. If you want to build a MIPS C library, you can also do that now,
-     but it is not strictly required for many useful VMIPS tasks. Some
-     persons have reported success using the "newlib" C library from
-     Red Hat. The GNU C Library (glibc) is, as of this writing, fairly
-     difficult to build without modifications to gcc and/or binutils.
-     Instructions for building a C library will appear here when they
-     solidify.
+     but it is not strictly required for many useful VMIPS tasks.
+
+     Here is how to build the uClibc C library for use with VMIPS:
+
+     As noted in the uClibc INSTALL file, you will need Linux kernel
+     sources.  Just pick a recent version of Linux 2.4; you can
+     download it from <http://www.kernel.org> or one of its mirrors, if
+     you don't have it handy.  You will need to configure (but not
+     build) the Linux kernel for MIPS. Here's how:
+
+        * Edit `linux/Makefile', setting ARCH to `mips' and setting
+          CROSS_COMPILE to a value that corresponds to the path where
+          your MIPS cross compiler is installed, for example:
+          `/opt/mips-elf/bin/mips-elf-' (this is just like
+          `mipstoolprefix' in your `vmipsrc' file).
+
+        * Copy `arch/mips/defconfig' to `.config'.
+
+        * Run `make oldconfig' and `make dep'.
+
+     Next, download uClibc from <http://www.uclibc.org>, and unpack it
+     next to the Linux kernel sources. The last version we tested was
+     0.9.26.  Read the `INSTALL' file in that distribution.
+
+     When you configure uClibc with `make config', be sure to pick
+     `mips' as your Target Architecture, and `Generic (MIPS I)' as your
+     Target Processor. Be sure to pick the correct endianness (that is,
+     the one which corresponds to the default endianness of your cross
+     tools.) You should be sure to answer yes to 'Target CPU has a
+     memory management unit (MMU)' and no to 'Enable floating point
+     number support', because current versions of VMIPS do not include
+     floating-point support.  If you are intending to use uClibc to
+     build ROMs, you will probably want to turn off
+     position-independent code and shared library support.  Turn on
+     only those other features of uClibc as you expect you will need.
+     For the DEVEL_PREFIX, specify a new empty directory.
+
+     Then run `make CROSS=/opt/mips-elf/bin/mips-elf-' to build uClibc
+     (for CROSS, you should use the same value as you used for
+     CROSS_COMPILE in the Linux Makefile, above) and run `make install'
+     to install it.
+
+     In the directory you specified for DEVEL_PREFIX when configuring
+     uClibc, above, you will now have `usr/include' and `usr/lib'
+     subdirectories. You will now want to copy these to where your
+     cross compiler can detect and use them. For GCC, the directories
+     are
+
+        * PREFIX/TARGET-TRIPLET/lib  (for libraries)
+
+        * PREFIX/TARGET-TRIPLET/sys-include  (for includes)
+
+     For example, if you configured GCC for target `mips-unknown-elf'
+     with prefix `/usr/local/mips', you would copy the `usr/include'
+     directory to `/usr/local/mips/mips-unknown-elf/sys-include', and
+     copy the `usr/lib' directory to
+     `/usr/local/mips/mips-unknown-elf/lib'.
+
 
 The remainder of this file represents generic (i.e., not VMIPS-specific)
 instructions for using "configure".
+
+Copyright 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
+Foundation, Inc.
+
+   This file is free documentation; the Free Software Foundation gives
+unlimited permission to copy, distribute and modify it.
 
 Basic Installation
 ==================
@@ -218,20 +353,27 @@ various system-dependent variables used during compilation.  It uses
 those values to create a `Makefile' in each directory of the package.
 It may also create one or more `.h' files containing system-dependent
 definitions.  Finally, it creates a shell script `config.status' that
-you can run in the future to recreate the current configuration, a file
-`config.cache' that saves the results of its tests to speed up
-reconfiguring, and a file `config.log' containing compiler output
-(useful mainly for debugging `configure').
+you can run in the future to recreate the current configuration, and a
+file `config.log' containing compiler output (useful mainly for
+debugging `configure').
+
+   It can also use an optional file (typically called `config.cache'
+and enabled with `--cache-file=config.cache' or simply `-C') that saves
+the results of its tests to speed up reconfiguring.  (Caching is
+disabled by default to prevent problems with accidental use of stale
+cache files.)
 
    If you need to do unusual things to compile the package, please try
 to figure out how `configure' could check whether to do them, and mail
 diffs or instructions to the address given in the `README' so they can
-be considered for the next release.  If at some point `config.cache'
-contains results you don't want to keep, you may remove or edit it.
+be considered for the next release.  If you are using the cache, and at
+some point `config.cache' contains results you don't want to keep, you
+may remove or edit it.
 
-   The file `configure.in' is used to create `configure' by a program
-called `autoconf'.  You only need `configure.in' if you want to change
-it or regenerate `configure' using a newer version of `autoconf'.
+   The file `configure.ac' (or `configure.in') is used to create
+`configure' by a program called `autoconf'.  You only need
+`configure.ac' if you want to change it or regenerate `configure' using
+a newer version of `autoconf'.
 
 The simplest way to compile this package is:
 
@@ -265,14 +407,15 @@ Compilers and Options
 =====================
 
    Some systems require unusual options for compilation or linking that
-the `configure' script does not know about.  You can give `configure'
-initial values for variables by setting them in the environment.  Using
-a Bourne-compatible shell, you can do that on the command line like
-this:
-     CC=c89 CFLAGS=-O2 LIBS=-lposix ./configure
+the `configure' script does not know about.  Run `./configure --help'
+for details on some of the pertinent environment variables.
 
-Or on systems that have the `env' program, you can do it like this:
-     env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
+   You can give `configure' initial values for variables by setting
+them in the environment.  You can do that on the command line like this:
+
+     ./configure CC=c89 CFLAGS=-O2 LIBS=-lposix
+
+   *Note Defining Variables::, for more details.
 
 Compiling For Multiple Architectures
 ====================================
@@ -285,11 +428,11 @@ directory where you want the object files and executables to go and run
 the `configure' script.  `configure' automatically checks for the
 source code in the directory that `configure' is in and in `..'.
 
-   If you have to use a `make' that does not supports the `VPATH'
-variable, you have to compile the package for one architecture at a time
-in the source code directory.  After you have installed the package for
-one architecture, use `make distclean' before reconfiguring for another
-architecture.
+   If you have to use a `make' that does not support the `VPATH'
+variable, you have to compile the package for one architecture at a
+time in the source code directory.  After you have installed the
+package for one architecture, use `make distclean' before reconfiguring
+for another architecture.
 
 Installation Names
 ==================
@@ -332,22 +475,32 @@ you can use the `configure' options `--x-includes=DIR' and
 Specifying the System Type
 ==========================
 
-   There may be some features `configure' can not figure out
-automatically, but needs to determine by the type of host the package
-will run on.  Usually `configure' can figure that out, but if it prints
-a message saying it can not guess the host type, give it the
-`--host=TYPE' option.  TYPE can either be a short name for the system
-type, such as `sun4', or a canonical name with three fields:
+   There may be some features `configure' cannot figure out
+automatically, but needs to determine by the type of machine the package
+will run on.  Usually, assuming the package is built to be run on the
+_same_ architectures, `configure' can figure that out, but if it prints
+a message saying it cannot guess the machine type, give it the
+`--build=TYPE' option.  TYPE can either be a short name for the system
+type, such as `sun4', or a canonical name which has the form:
+
      CPU-COMPANY-SYSTEM
 
-See the file `config.sub' for the possible values of each field.  If
-`config.sub' isn't included in this package, then this package doesn't
-need to know the host type.
+where SYSTEM can have one of these forms:
 
-   If you are building compiler tools for cross-compiling, you can also
+     OS KERNEL-OS
+
+   See the file `config.sub' for the possible values of each field.  If
+`config.sub' isn't included in this package, then this package doesn't
+need to know the machine type.
+
+   If you are _building_ compiler tools for cross-compiling, you should
 use the `--target=TYPE' option to select the type of system they will
-produce code for and the `--build=TYPE' option to select the type of
-system on which you are compiling the package.
+produce code for.
+
+   If you want to _use_ a cross compiler, that generates code for a
+platform different from the build platform, you should specify the
+"host" platform (i.e., that on which the generated programs will
+eventually be run) with `--host=TYPE'.
 
 Sharing Defaults
 ================
@@ -360,19 +513,43 @@ default values for variables like `CC', `cache_file', and `prefix'.
 `CONFIG_SITE' environment variable to the location of the site script.
 A warning: not all `configure' scripts look for a site script.
 
-Operation Controls
+Defining Variables
 ==================
+
+   Variables not defined in a site shell script can be set in the
+environment passed to `configure'.  However, some packages may run
+configure again during the build, and the customized values of these
+variables may be lost.  In order to avoid this problem, you should set
+them in the `configure' command line, using `VAR=value'.  For example:
+
+     ./configure CC=/usr/local2/bin/gcc
+
+will cause the specified gcc to be used as the C compiler (unless it is
+overridden in the site shell script).
+
+`configure' Invocation
+======================
 
    `configure' recognizes the following options to control how it
 operates.
 
-`--cache-file=FILE'
-     Use and save the results of the tests in FILE instead of
-     `./config.cache'.  Set FILE to `/dev/null' to disable caching, for
-     debugging `configure'.
-
 `--help'
+`-h'
      Print a summary of the options to `configure', and exit.
+
+`--version'
+`-V'
+     Print the version of Autoconf used to generate the `configure'
+     script, and exit.
+
+`--cache-file=FILE'
+     Enable the cache: use and save the results of the tests in FILE,
+     traditionally `config.cache'.  FILE defaults to `/dev/null' to
+     disable caching.
+
+`--config-cache'
+`-C'
+     Alias for `--cache-file=config.cache'.
 
 `--quiet'
 `--silent'
@@ -385,8 +562,6 @@ operates.
      Look for the package's source code in directory DIR.  Usually
      `configure' can determine that directory automatically.
 
-`--version'
-     Print the version of Autoconf used to generate the `configure'
-     script, and exit.
+`configure' also accepts some other, not widely useful, options.  Run
+`configure --help' for more details.
 
-`configure' also accepts some other, not widely useful, options.

@@ -2,13 +2,22 @@
 ## You can change them on a system-wide basis using this file.
 ##
 # bootmsg
-# configfile=~/.vmipsrc
+# clockdevice
+# clockdeviceirq=7
+# clockintr=200000000
+# clockspeed=250000
 # haltbreak
+# haltdevice
 # haltibe
-# instdump
 # loadaddr=0xbfc00000
+# memdumpfile=memdump.bin
 # memsize=0x100000
+# nodbemsg
 # nodebug
+# nodeccsr
+# nodecrtc
+# nodecserial
+# nodecstat
 # nodumpcp0
 # nodumpcpu
 # noexcmsg
@@ -17,8 +26,21 @@
 # nohaltdumpcpu
 # nohaltjrra
 # noinstcounts
+# noinstdump
 # nomemdump
+# norealtime
 # noreportirq
+# notracing
 # romfile=romfile.rom
+# spimconsole
+# timeratio=1
+# traceendpc=0
+# tracesize=100000
+# tracestartpc=0
+# ttydev2=off
 # ttydev=/dev/tty
-# usetty
+##
+## The following options have defaults set by `configure':
+##
+nobigendian
+mipstoolprefix='/opt/mipsel-ecoff/bin/mipsel-ecoff-'

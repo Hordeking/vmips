@@ -20,6 +20,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 #include "sysinclude.h"
 #include "vmips.h"
+#include "stub-dis.h"
 
 extern "C" { 
 
@@ -30,12 +31,13 @@ extern "C" {
 
 static struct disassemble_info disasm_info;
 
-void
-setup_disassembler(FILE *stream)
+bool
+setup_disassembler (FILE *stream)
 {
 	/* Set up for libopcodes. */
 	INIT_DISASSEMBLE_INFO(disasm_info, stream, fprintf);
 	disasm_info.buffer_length = 4;
+	return true; /* success */
 }
 
 void
@@ -46,7 +48,7 @@ call_disassembler(uint32 pc, uint32 instr)
 	disasm_info.buffer = (bfd_byte *) &instr;
 
 	/* Disassemble the instruction, which is in *host* byte order. */
-	if (WORDS_BIGENDIAN) {
+	if (machine->host_bigendian) {
 		print_insn_big_mips(pc, &disasm_info);
 	} else {
 		print_insn_little_mips(pc, &disasm_info);

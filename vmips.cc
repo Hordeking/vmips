@@ -24,19 +24,27 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpzeroreg.h"
 #include "error.h"
 #include "haltreg.h"
+#include "haltdev.h"
 #include "intctrl.h"
 #include "range.h"
 #include "spimconsole.h"
+#include "mapper.h"
+#include "memorymodule.h"
+#include "cpu.h"
+#include "cpzero.h"
 #include "spimconsreg.h"
 #include "sysinclude.h"
 #include "vmips.h"
+#include "options.h"
+#include "decrtc.h"
+#include "decrtcreg.h"
+#include "deccsr.h"
+#include "deccsrreg.h"
+#include "decstat.h"
+#include "decserial.h"
 #include "stub-dis.h"
-
+#include "rommodule.h"
 #include <exception>
-
-
-static void vmips_unexpected();
-static void vmips_terminate();
 
 vmips *machine;
 
@@ -67,30 +75,31 @@ vmips::refresh_options(void)
  
 	opt_memdumpfile = opt->option("memdumpfile")->str;
 	opt_image = opt->option("romfile")->str;
-#if TTY
-	opt_usetty = opt->option("usetty")->flag;
 	opt_ttydev = opt->option("ttydev")->str;
 	opt_ttydev2 = opt->option("ttydev2")->str;
-#endif
+	opt_spimconsole = opt->option("spimconsole")->flag;
+
+	opt_decrtc = opt->option("decrtc")->flag;
+	opt_deccsr = opt->option("deccsr")->flag;
+	opt_decstat = opt->option("decstat")->flag;
+	opt_decserial = opt->option("decserial")->flag;
 }
 
 /* Set up some machine globals, and process command line arguments,
  * configuration files, etc.
  */
 vmips::vmips(int argc, char *argv[])
-	: opt(new Options(argc, argv)), halted(false),
+	: opt(new Options), halted(false),
 	  clock(0), clock_device(0), halt_device(0), spim_console(0),
 	  num_instrs(0)
 {
+    opt->process_options (argc, argv);
 	refresh_options();
 }
 
 vmips::~vmips() throw()
 {
-#if TTY
 	delete spim_console;
-#endif
-
 	delete halt_device;
 	delete clock_device;
 	delete clock;
@@ -120,9 +129,9 @@ vmips::setup_machine(void)
 /* Connect the file or device named NAME to line number L of
  * console device C, or do nothing if NAME is "off".
  */
-void vmips::setup_console_line(int l, char *name, SpimConsoleDevice *c) throw()
+void vmips::setup_console_line(int l, char *name, TerminalController *c, const
+char *c_name) throw()
 {
-#if TTY
 	/* If they said to turn off the tty line, do nothing. */
 	if (strcmp(name, "off") == 0)
 		return;
@@ -138,24 +147,21 @@ void vmips::setup_console_line(int l, char *name, SpimConsoleDevice *c) throw()
 
 	/* Connect it to the SPIM-compatible console device. */
 	c->connect_terminal(ttyfd, l);
-	boot_msg("Connected fd %d to %s line %d.\n", ttyfd,
-		  c->descriptor_str(), l);
-#endif /* TTY */
+	boot_msg("Connected fd %d to %s line %d.\n", ttyfd, c_name, l);
 }
 
-void vmips::setup_terminals() throw( std::bad_alloc )
+bool vmips::setup_spimconsole() throw( std::bad_alloc )
 {
-#if TTY
 	/* FIXME: It would be helpful to restore tty modes on a SIGINT or
 	   other abortive exit or when vmips has been foregrounded after
 	   being in the background. The restoration mechanism should use
 	   TerminalController::reinitialze_terminals() */
 
-	if( !opt_usetty )
-		return;
+	if (!opt_spimconsole)
+		return true;
 	
 	spim_console = new SpimConsoleDevice( clock );
-	physmem->add_device_mapping( spim_console, SPIM_BASE );
+	physmem->map_at_physical_address( spim_console, SPIM_BASE );
 	boot_msg("Mapping %s to physical address 0x%08x\n",
 		  spim_console->descriptor_str(), SPIM_BASE);
 	
@@ -166,9 +172,11 @@ void vmips::setup_terminals() throw( std::bad_alloc )
 	intc->connectLine(IRQ6, spim_console);
 	boot_msg("Connected IRQ2-IRQ6 to %s\n",spim_console->descriptor_str());
 
-	setup_console_line(0, opt_ttydev, spim_console);
-	setup_console_line(1, opt_ttydev2, spim_console);
-#endif /* TTY */
+	setup_console_line(0, opt_ttydev, spim_console,
+      spim_console->descriptor_str ());
+	setup_console_line(1, opt_ttydev2, spim_console,
+      spim_console->descriptor_str ());
+	return true;
 }
 
 bool vmips::setup_clockdevice() throw( std::bad_alloc )
@@ -185,7 +193,7 @@ bool vmips::setup_clockdevice() throw( std::bad_alloc )
 
 	/* Microsecond Clock at base physaddr CLOCK_BASE */
 	clock_device = new ClockDevice( clock, clock_irq, opt_clockintr );
-	physmem->add_device_mapping( clock_device, CLOCK_BASE );
+	physmem->map_at_physical_address( clock_device, CLOCK_BASE );
 	boot_msg( "Mapping %s to physical address 0x%08x\n",
 		  clock_device->descriptor_str(), CLOCK_BASE );
 
@@ -196,15 +204,86 @@ bool vmips::setup_clockdevice() throw( std::bad_alloc )
 	return true;
 }
 
-void vmips::setup_haltdevice() throw( std::bad_alloc )
+bool vmips::setup_decrtc() throw( std::bad_alloc )
+{
+	if (!opt_decrtc)
+		return true;
+
+	/* Always use IRQ3 ("hw interrupt level 1") for RTC. */
+	uint32 decrtc_irq = DeviceInt::num2irq (3);
+
+	/* DECstation 5000/200 DS1287-based RTC at base physaddr DECRTC_BASE */
+	decrtc_device = new DECRTCDevice( clock, decrtc_irq );
+	physmem->map_at_physical_address( decrtc_device, DECRTC_BASE );
+	boot_msg( "Mapping %s to physical address 0x%08x\n",
+		  decrtc_device->descriptor_str(), DECRTC_BASE );
+
+	intc->connectLine( decrtc_irq, decrtc_device );
+	boot_msg( "Connected %s to the %s\n", DeviceInt::strlineno(decrtc_irq),
+		  decrtc_device->descriptor_str() );
+
+	return true;
+}
+
+bool vmips::setup_deccsr() throw( std::bad_alloc )
+{
+	if (!opt_deccsr)
+		return true;
+
+	/* DECstation 5000/200 Control/Status Reg at base physaddr DECCSR_BASE */
+	deccsr_device = new DECCSRDevice ();
+	physmem->map_at_physical_address (deccsr_device, DECCSR_BASE);
+	boot_msg ("Mapping %s to physical address 0x%08x\n",
+		  deccsr_device->descriptor_str(), DECCSR_BASE);
+
+	return true;
+}
+
+bool vmips::setup_decstat() throw( std::bad_alloc )
+{
+	if (!opt_decstat)
+		return true;
+
+	/* DECstation 5000/200 CHKSYN + ERRADR at base physaddr DECSTAT_BASE */
+	decstat_device = new DECStatDevice( );
+	physmem->map_at_physical_address( decstat_device, DECSTAT_BASE );
+	boot_msg( "Mapping %s to physical address 0x%08x\n",
+		  decstat_device->descriptor_str(), DECSTAT_BASE );
+
+	return true;
+}
+
+bool vmips::setup_decserial() throw( std::bad_alloc )
+{
+	if (!opt_decserial)
+		return true;
+
+	/* DECstation 5000/200 DZ11 serial at base physaddr DECSERIAL_BASE */
+	decserial_device = new DECSerialDevice (clock);
+	physmem->map_at_physical_address (decserial_device, DECSERIAL_BASE );
+	boot_msg ("Mapping %s to physical address 0x%08x\n",
+		  decserial_device->descriptor_str (), DECSERIAL_BASE );
+
+	intc->connectLine (IRQ2, decserial_device);
+	boot_msg ("Connected IRQ2 to %s\n", decserial_device->descriptor_str ());
+
+	// Use printer line for console.
+	setup_console_line (3, opt_ttydev, decserial_device,
+      decserial_device->descriptor_str ());
+	return true;
+}
+
+bool vmips::setup_haltdevice() throw( std::bad_alloc )
 {
 	if( !opt_haltdevice )
-		return;
+		return true;
 
 	halt_device = new HaltDevice( this );
-	physmem->add_device_mapping( halt_device, HALT_BASE );
+	physmem->map_at_physical_address( halt_device, HALT_BASE );
 	boot_msg( "Mapping %s to physical address 0x%08x\n",
 		  halt_device->descriptor_str(), HALT_BASE );
+
+	return true;
 }
 
 void vmips::boot_msg( const char *msg, ... ) throw()
@@ -224,11 +303,12 @@ int
 vmips::host_endian_selftest(void)
 {
 	uint32 x;
+	char *p = (char *) &x;
 
-	((uint8 *) &x)[0] = 0;
-	((uint8 *) &x)[1] = 1;
-	((uint8 *) &x)[2] = 2;
-	((uint8 *) &x)[3] = 3;
+	p[0] = 0;
+	p[1] = 1;
+	p[2] = 2;
+	p[3] = 3;
 	if (x == 0x03020100) {
 		machine->host_bigendian = false;
 		boot_msg( "Little-Endian host processor detected.\n" );
@@ -243,18 +323,6 @@ vmips::host_endian_selftest(void)
 	}
 }
 
-int
-vmips::run_self_tests(void)
-{
-	int fail;
-
-	if ((fail = host_endian_selftest()) != 0) {
-		return fail;
-	} else {
-		return 0;
-	}
-}
-
 void
 vmips::halt(void) throw()
 {
@@ -262,19 +330,16 @@ vmips::halt(void) throw()
 }
 
 uint32
-vmips::auto_size_rom(FILE *rom) throw()
+vmips::get_file_size (FILE *fp) throw ()
 {
 	off_t here, there;
-	size_t len;
 
-	assert(rom);
-	here = ftell(rom);
-	fseek(rom,0,SEEK_END);
-	there = ftell(rom);
-	fseek(rom,0,SEEK_SET);
-	len = there - here;
-	len /= 4;
-	return len;
+	assert (fp && "Null pointer passed to vmips::get_file_size ()");
+	here = ftell (fp);
+	fseek (fp, 0, SEEK_END);
+	there = ftell (fp);
+	fseek (fp, here, SEEK_SET);
+	return there - here;
 }
 
 void
@@ -283,8 +348,10 @@ vmips::step(void)
 	/* Process instructions. */
 	cpu->step();
 
-	/* FIXME: make the cpu mark its time usage, this is just a hack. */
-	/* each instruction takes 2us = 2 micro seconds */
+	/* Keep track of time passing. Each instruction either takes
+	 * clock_nanos nanoseconds, or we use pass_realtime() to check the
+	 * system clock.
+     */
 	if( !opt_realtime )
 	   clock->increment_time(clock_nanos);
 	else
@@ -305,93 +372,137 @@ timediff(struct timeval *after, struct timeval *before)
         (before->tv_sec * 1000000 + before->tv_usec);
 }
 
+bool
+vmips::setup_rom ()
+{
+  // Open ROM image.
+  FILE *rom = fopen (opt_image, "r");
+  if (!rom) {
+    error ("Could not open ROM `%s': %s", opt_image, strerror (errno));
+    return false;
+  }
+  // Translate loadaddr to physical address.
+  opt_loadaddr -= KSEG1_CONST_TRANSLATION;
+  ROMModule *rm;
+  try {
+    rm = new ROMModule (rom);
+  } catch (int errcode) {
+    error ("mmap failed for %s: %s", opt_image, strerror (errcode));
+    return true;
+  }
+  // Map the ROM image to the virtual physical memory.
+  physmem->map_at_physical_address (rm, opt_loadaddr);
+  boot_msg ("Mapping ROM image (%s, %u words) to physical address 0x%08x\n",
+            opt_image, rm->getExtent () / 4, rm->getBase ());
+  // Point debugger at wherever the user thinks the ROM is.
+  if (opt_debug)
+    if (dbgr->setup (opt_loadaddr, rm->getExtent () / 4) < 0)
+      return false; // Error in setting up debugger.
+  return true;
+}
+
+bool
+vmips::setup_ram () throw( std::bad_alloc )
+{
+  /* Install RAM at base physical address 0 */
+  memmod = new MemoryModule(opt_memsize);
+  uint32 memphysaddr = 0;
+  physmem->map_at_physical_address(memmod, memphysaddr);
+  boot_msg( "Mapping RAM module (host=%p, %uKB) to physical address 0x%x\n",
+	    memmod->getAddress (), memmod->getExtent () / 1024, memmod->getBase ());
+  return true;
+}
+
+bool
+vmips::setup_clock () throw( std::bad_alloc )
+{
+  /* Set up the clock with the current time. */
+  timeval start;
+  gettimeofday(&start, NULL);
+  timespec start_ts;
+  TIMEVAL_TO_TIMESPEC( &start, &start_ts );
+  clock = new Clock( start_ts );
+  return true;
+}
+
+static void
+halt_machine_by_signal (int sig)
+{
+  machine->halt();
+}
+
 int
 vmips::run()
 {
+	/* Check host processor endianness. */
+	if (host_endian_selftest () != 0) {
+		error( "Could not determine host processor endianness." );
+		return 1;
+	}
+
 	/* Set up the rest of the machine components. */
 	setup_machine();
 
-	/* Open ROM image. */
-	FILE *rom = fopen(opt_image,"r");
-	if (!rom) {
-		error("Could not open ROM `%s': %s",
-		       opt_image, strerror(errno));
-		return 2;
-	}
+	if (!setup_rom ()) 
+	  return 1;
 
-	/* Print lots of cutesy information. */
-	uint32 rom_size = auto_size_rom(rom);
-	boot_msg( "Auto-size ROM image: %d words.\n", rom_size );
-
-	/* Run self tests. These may or may not become real tests... */
-	boot_msg( "Running self tests.\n" );
-	if (run_self_tests() != 0) {
-		error( "Failed self tests." );
-		return 1;
-	}
-	boot_msg( "Self tests passed.\n" );
-
-	/* Map the ROM image to the virtual physical memory. */
-	if (opt_debug) {
-		/* Point debugger at wherever the user thinks the ROM is. */
-		dbgr->setup(opt_loadaddr, rom_size);
-	}
-
-	/* Translate loadaddr to physical address. */
-	opt_loadaddr -= KSEG1_CONST_TRANSLATION;
-	physmem->add_file_mapping(rom, opt_loadaddr, MEM_READ);
-	boot_msg( "Mapping ROM image (%s): %u words at 0x%08x [%08x]\n",
-		  opt_image,
-		  physmem->find_mapping_range(opt_loadaddr)->getExtent() / 4,
-		  physmem->find_mapping_range(opt_loadaddr)->getBase() +
-		  KSEG1_CONST_TRANSLATION,
-		  physmem->find_mapping_range(opt_loadaddr)->getBase() );
-
-	/* Install RAM at base physical address 0 */
-	memmod = new MemoryModule(opt_memsize);
-	physmem->add_core_mapping(memmod->addr,0,memmod->len);
-	boot_msg( "Mapped (host=%p) %uk RAM at physical address 0\n",
-		  memmod->addr, memmod->len / 1024 );
+	if (!setup_ram ())
+	  return 1;
 
 	/* Direct the libopcodes disassembler output to stderr. */
-	setup_disassembler(stderr);
+	if (!setup_disassembler (stderr))
+	  return 1;
 
-	/* setup the halt device */
-	setup_haltdevice();
+	if (!setup_haltdevice ())
+	  return 1;
 
-	/* setup the clock with the current time */
-	timeval start;
-	gettimeofday(&start, NULL);
-	timespec start_ts;
-	TIMEVAL_TO_TIMESPEC( &start, &start_ts );
-	clock = new Clock( start_ts );
+	if (!setup_clock ())
+	  return 1;
 
-	if( !setup_clockdevice() )
-		return 1;
+	if (!setup_clockdevice ())
+	  return 1;
 
-	setup_terminals();
+	if (!setup_decrtc ())
+	  return 1;
+
+	if (!setup_deccsr ())
+	  return 1;
+
+	if (!setup_decstat ())
+	  return 1;
+
+	if (!setup_decserial ())
+	  return 1;
+
+	if (!setup_spimconsole ())
+	  return 1;
+
+    signal (SIGQUIT, halt_machine_by_signal);
 
 	/* Reset the CPU. */
 	boot_msg( "\n*************RESET*************\n\n" );
 	cpu->reset();
 
+	timeval start;
 	if (opt_instcounts)
 		gettimeofday(&start, NULL);
 
 	if (opt_debug) {
 		dbgr->serverloop();
 	} else {
-		while (! halted) {
+		while (! halted)
 			step();
-		}
 	}
 
-	struct timeval end;
+	timeval end;
 	if (opt_instcounts)
 		gettimeofday(&end, NULL);
 
-    /* Halt! */
+	/* Halt! */
 	boot_msg( "\n*************HALT*************\n\n" );
+
+    /* If we're tracing, dump the trace. */
+    cpu->maybe_dump_trace ();
 
 	/* If user requested it, dump registers from CPU and/or CP0. */
 	if (opt_haltdumpcpu || opt_haltdumpcp0) {
@@ -410,12 +521,9 @@ vmips::run()
 	}
 
 	if (opt_memdump) {
-		FILE *ramdump;
-
 		fprintf(stderr,"Dumping RAM to %s...", opt_memdumpfile);
-		ramdump = fopen(opt_memdumpfile,"w");
-		if (ramdump != NULL) {
-			fwrite(memmod->addr,memmod->len,1,ramdump);
+		if (FILE *ramdump = fopen (opt_memdumpfile, "w")) {
+			fwrite (memmod->getAddress (), memmod->getExtent (), 1, ramdump);
 			fclose(ramdump);
 			fprintf(stderr,"succeeded.\n");
 		} else {
@@ -426,6 +534,14 @@ vmips::run()
 	/* We're done. */
 	boot_msg( "Goodbye.\n" );
 	return 0;
+}
+
+static void vmips_unexpected() {
+  fatal_error ("unexpected exception");
+}
+
+static void vmips_terminate() {
+  fatal_error ("uncaught exception");
 }
 
 int
@@ -443,13 +559,3 @@ catch( std::bad_alloc &b ) {
 	fatal_error( "unable to allocate memory" );
 }
 
-
-static void vmips_unexpected()
-{
-	fatal_error( "unexpected exception" );
-}
-
-static void vmips_terminate()
-{
-	fatal_error( "uncaught exception" );
-}

@@ -12,7 +12,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=\$${prefix}/../etc --target=mipsel-ecoff
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=/etc
 
 	touch configure-stamp
 
@@ -22,7 +22,6 @@ build-stamp:
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#/usr/bin/docbook-to-man debian/vmips.sgml > vmips.1
 
 	touch build-stamp
 
@@ -43,7 +42,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/vmips.
-	$(MAKE) install prefix=$(CURDIR)/debian/vmips/usr
+	$(MAKE) install prefix=$(CURDIR)/debian/vmips/usr sysconfdir=$(CURDIR)/debian/vmips/etc
 
 
 # Build architecture-independent files here.

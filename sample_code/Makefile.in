@@ -25,6 +25,8 @@ pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
 
+top_builddir = ..
+
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
@@ -32,12 +34,12 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 
 SUBDIRS=. xmboot
-VMIPSTOOL=../vmipstool
+VMIPSTOOL = $(top_builddir)/vmipstool -n -F $(top_builddir)/vmipsrc --ld-script=$(srcdir)/ld.script
 SETUP=setup.o
 ASRCS=setup.S
 CLEANFILES=$(SETUP)
 DISTCLEANFILES=
-DISTFILES= Makefile.in asm_regnames.h ld.script.in $(ASRCS)
+DISTFILES= Makefile.in asm_regnames.h ld.script $(ASRCS)
 #------
 
 all: $(SETUP) build_xmboot
@@ -52,7 +54,7 @@ dvi check installcheck:
 
 install: ld.script
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(pkgincludedir)
-	$(INSTALL_DATA) ld.script $(DESTDIR)$(pkgdatadir)/ld.script
+	$(INSTALL_DATA) $(srcdir)/ld.script $(DESTDIR)$(pkgdatadir)/ld.script
 	$(INSTALL_DATA) $(srcdir)/asm_regnames.h $(DESTDIR)$(pkgincludedir)/asm_regnames.h
 
 clean:

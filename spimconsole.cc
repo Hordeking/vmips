@@ -20,20 +20,17 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "spimconsole.h"
 #include "spimconsreg.h"
 #include "mapper.h"
+#include "vmips.h"
 #include <cassert>
 
-SpimConsoleDevice::SpimConsoleDevice( Clock *clock ) throw( std::bad_alloc )
-	: TerminalController( clock,
-			      KEYBOARD_POLL_NS,
-			      KEYBOARD_REPOLL_NS, 
-			      DISPLAY_READY_DELAY_NS ),
-	trigger(0), clock_interrupt(false), clock_state(UNREADY)
+SpimConsoleDevice::SpimConsoleDevice (Clock *clock) throw (std::bad_alloc)
+	: TerminalController (clock, KEYBOARD_POLL_NS, KEYBOARD_REPOLL_NS,
+                          DISPLAY_READY_DELAY_NS),
+	  DeviceMap (36),
+	  trigger (0), clock_interrupt (false), clock_state (UNREADY)
 {
-	// FIXME: hack until ranges are done right
-	extent = 36;
-
-	display_interrupt[0] = display_interrupt[1] = false;
-	keyboard_interrupt[0] = keyboard_interrupt[1] = false;
+	display_interrupt_enable[0] = display_interrupt_enable[1] = false;
+	keyboard_interrupt_enable[0] = keyboard_interrupt_enable[1] = false;
 
 	trigger = new ClockTrigger( this );
 	clock->add_deferred_task( trigger, CLOCK_TRIGGER_NS );
@@ -56,7 +53,7 @@ void SpimConsoleDevice::unready_display( int line, char data )
 void SpimConsoleDevice::ready_display( int line ) throw()
 {
 	TerminalController::ready_display( line );
-	if( display_interrupt[line] )
+	if( display_interrupt_enable[line] )
 		assertInt( line == 0 ? IRQ4 : IRQ6 );
 }
 
@@ -69,7 +66,7 @@ void SpimConsoleDevice::unready_keyboard( int line ) throw()
 void SpimConsoleDevice::ready_keyboard( int line ) throw()
 {
 	TerminalController::ready_keyboard( line );
-	if( keyboard_interrupt[line] )
+	if( keyboard_interrupt_enable[line] )
 		assertInt( line == 0 ? IRQ3 : IRQ5 );
 }
 
@@ -97,9 +94,11 @@ uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
 	
 	switch( offset / 4 ) {
 	case 0:		// keyboard 1 control
-		word = keyboard_interrupt[0] ? CTL_IE : 0;
+		word = keyboard_interrupt_enable[0] ? CTL_IE : 0;
 		if( line_connected(0) )
 			word |= lines[0].keyboard_state;
+		if (!keyboard_interrupt_enable[0])
+			deassertInt (IRQ3);	
 		break;
 	case 1:		// keyboard 1 data
 		if( line_connected(0) ) {
@@ -108,18 +107,22 @@ uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
 		}
 		break;
 	case 2:		// display 1 control
-		word = display_interrupt[0] ? CTL_IE : 0;
+		word = display_interrupt_enable[0] ? CTL_IE : 0;
 		if( line_connected(0) )
 			word |= lines[0].display_state;
 		else
 			word |= CTL_RDY;
+		if (!display_interrupt_enable[0])
+			deassertInt (IRQ4);	
 		break;
 	case 3:		// display 1 data
 		break;
 	case 4:		// keyboard 2 control
-		word = keyboard_interrupt[1] ? CTL_IE : 0;
+		word = keyboard_interrupt_enable[1] ? CTL_IE : 0;
 		if( line_connected(1) )
 			word |= lines[1].keyboard_state;
+		if (!keyboard_interrupt_enable[1])
+			deassertInt (IRQ5);	
 		break;
 	case 5:		// keyboard 2 data
 		if( line_connected(1) ) {
@@ -128,11 +131,13 @@ uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
 		}
 		break;
 	case 6:		// display 2 control
-		word = display_interrupt[1] ? CTL_IE : 0;
+		word = display_interrupt_enable[1] ? CTL_IE : 0;
 		if( line_connected(1) )
 			word |= lines[1].display_state;
 		else
 			word |= CTL_RDY;
+		if (!display_interrupt_enable[1])
+			deassertInt (IRQ6);	
 		break;
 	case 7:		// display 2 data
 		break;
@@ -144,29 +149,26 @@ uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
 	default:
 		assert( ! "reached" );
 	}
-
-	// FIXME: this is the broken spim byte swaping thing
-	return Mapper::mips_to_host_word(word);
+	return machine->physmem->mips_to_host_word(word);
 }
 
 void SpimConsoleDevice::store_word( uint32 offset, uint32 data,
 				    DeviceExc *client )
 {
-	// FIXME: this is the broken spim byte swapping thing
-	data = Mapper::host_to_mips_word(data);
+	data = machine->physmem->host_to_mips_word(data);
 
 	switch( offset / 4 ) {
 	case 0:		// keyboard 1 control
-		keyboard_interrupt[0] = data & CTL_IE;
-		if( line_connected(0) && keyboard_interrupt[0]
+		keyboard_interrupt_enable[0] = data & CTL_IE;
+		if( line_connected(0) && keyboard_interrupt_enable[0]
 		    && lines[0].display_state == READY )
 			assertInt( IRQ3 );
 		break;
 	case 1:		// keyboard 1 data
 		break;
 	case 2:		// display 1 control
-		display_interrupt[0] = data & CTL_IE;
-		if( line_connected(0) && display_interrupt[0]
+		display_interrupt_enable[0] = data & CTL_IE;
+		if( line_connected(0) && display_interrupt_enable[0]
 		    && lines[0].display_state == READY )
 			assertInt( IRQ4 );
 		break;
@@ -175,16 +177,16 @@ void SpimConsoleDevice::store_word( uint32 offset, uint32 data,
 			unready_display( 0, data );
 		break;
 	case 4:		// keyboard 2 control
-		keyboard_interrupt[1] = data & CTL_IE;
-		if( line_connected(1) && keyboard_interrupt[1] &&
+		keyboard_interrupt_enable[1] = data & CTL_IE;
+		if( line_connected(1) && keyboard_interrupt_enable[1] &&
 		    lines[1].keyboard_state == READY )
 			assertInt( IRQ5 );
 		break;
 	case 5:		// keyboard 2 data
 		break;
 	case 6:		// display 2 control
-		display_interrupt[1] = data & CTL_IE;
-		if( line_connected(1) && display_interrupt[1] &&
+		display_interrupt_enable[1] = data & CTL_IE;
+		if( line_connected(1) && display_interrupt_enable[1] &&
 		    lines[1].display_state == READY )
 			assertInt( IRQ6 );
 		break;
@@ -202,7 +204,7 @@ void SpimConsoleDevice::store_word( uint32 offset, uint32 data,
 	}
 }
 
-char *SpimConsoleDevice::descriptor_str()
+const char *SpimConsoleDevice::descriptor_str() const
 {
 	return "SPIM console";
 }

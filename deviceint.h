@@ -75,7 +75,7 @@ protected:
 
 	/* This method, in derived classes, should return a string describing
 	   the device. */
-	virtual char *descriptor_str(void) = 0;
+	virtual const char *descriptor_str(void) const = 0;
 
 	DeviceInt() throw();
 

@@ -27,12 +27,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "range.h"
 #include "devicemap.h"
 
-/* Initialization: create a dummy Range object. */
-DeviceMap::DeviceMap() throw()
-    : Range(0, 0, NULL, DEVICE, 0)
-{
-}
-
 uint16
 DeviceMap::fetch_halfword(uint32 offset, DeviceExc *client)
 {

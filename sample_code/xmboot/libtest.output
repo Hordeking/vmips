@@ -11,3 +11,10 @@ ok isdigit
 ok strtol
 ok strcpy
 ok memmove
+ok strcat
+ok toupper
+ok tolower
+ok isprint
+ok memcpy
+ok memset
+ok atoi

@@ -26,13 +26,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "intctrl.h"
 #include "task.h"
 #include "terminalcontroller.h"
-
 #include <new>
-
 
 /* SPIM-compatible console device. */
 class SpimConsoleDevice : public TerminalController, public DeviceMap,
-			  public DeviceInt
+                          public DeviceInt
 {
 public:
 	/* Create a new SPIM-compatible console device with CLOCK as the time
@@ -68,7 +66,7 @@ public:
 	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
 
 	/* Return a description of this device. */
-	virtual char *descriptor_str();
+	virtual const char *descriptor_str() const;
 
 protected:
 	class ClockTrigger : public CancelableTask
@@ -92,8 +90,8 @@ protected:
 
 protected:
 	ClockTrigger	*trigger;
-	bool		display_interrupt[2];
-	bool		keyboard_interrupt[2];
+	bool		display_interrupt_enable[2];
+	bool		keyboard_interrupt_enable[2];
 	bool		clock_interrupt;
 	State		clock_state;
 };

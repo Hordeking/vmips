@@ -20,20 +20,33 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _TLBENTRY_H_
 #define _TLBENTRY_H_
 
+/* Class representing a TLB entry for CP0.
+ * 
+ * The TLB entry is 64 bits wide and contains 7 fields, which may be
+ * accessed using the accessor functions implemented here; they are
+ * merely a convenience, as the entryHi and entryLo fields are public.
+ */
+
+#include "cpzeroreg.h"
 #include "sysinclude.h"
 
 class TLBEntry {
 public:
 	uint32 entryHi;
 	uint32 entryLo;
-	TLBEntry();
-	uint32 vpn(void);
-	uint16 asid(void);
-	uint32 pfn(void);
-	bool noncacheable(void);
-	bool dirty(void);
-	bool valid(void);
-	bool global(void);
+	TLBEntry () {
+#ifdef INTENTIONAL_CONFUSION
+		entryHi = random ();
+		entryLo = random ();
+#endif
+	}
+	uint32 vpn() const { return (entryHi & EntryHi_VPN_MASK); }
+	uint16 asid() const { return (entryHi & EntryHi_ASID_MASK); }
+	uint32 pfn() const { return (entryLo & EntryLo_PFN_MASK); }
+	bool noncacheable() const { return (entryLo >> 11) & 0x01; }
+	bool dirty() const { return (entryLo >> 10) & 0x01; }
+	bool valid() const { return (entryLo >> 9) & 0x01; }
+	bool global() const { return (entryLo >> 8) & 0x01; }
 };
 
 #endif /* _TLBENTRY_H_ */

@@ -1,3 +1,1538 @@
+2004-06-23 01:30  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/do-cvs2cl: Apparently this was only on the 1.1 branch
+
+2004-06-23 01:28  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: Release announcement for version 1.2
+
+2004-06-23 00:53  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in, debian/changelog: Update version number to
+	1.2.
+
+2004-06-23 00:49  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, NEWS: Regenerated.
+
+2004-06-23 00:49  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Mention the typical sequence for running
+	"configure".
+
+2004-06-23 00:45  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Fix typos.
+
+2004-06-23 00:42  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/rel-checklist.txt: Add note about new major releases
+
+2004-06-23 00:39  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add a section on how to build a C library
+	(namely, uClibc), which I've been meaning to do for a long time.
+
+2004-06-22 23:35  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmipstool.texi: Describe how vmipstool gets the cross
+	compiler, etc.
+
+2004-06-22 23:32  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: Finish updating the installation section
+	of the documentation.
+
+2004-06-22 19:41  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Big revisions to Installation section...not done
+	yet though.  Also wrapped many paragraphs at 80 columns.  Stopped
+	at 'how to build mips gcc' section.
+
+2004-06-22 03:51  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Modify installation section to say that you need
+	mips cross tools ONLY if you want to run tests/build sample code.
+
+2004-06-21 18:53  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: I think the package files for debian + red hat are OK
+	now.
+
+2004-06-21 18:36  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/rules: Get rid of /usr/../etc weirdness!
+
+2004-06-21 18:23  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/rules: Get rid of weird commented out docbook-to-man
+	thingy.
+
+2004-06-21 18:23  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/changelog: Update version.
+
+2004-06-21 18:21  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in: Apparently, versions with dashes in them
+	are just bad news for packaging programs like dpkg and rpm.
+
+2004-06-21 18:00  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in: Updated spec file.
+
+2004-06-18 04:35  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Cross off some items that have been finished.
+
+2004-06-18 04:35  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Don't depend on BUFSIZ, whatever that is.
+
+2004-06-18 04:28  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in: Update spec file to contain vmipstool man page.
+
+2004-06-18 04:21  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/invoke.texi: Mention quoting, comments in vmipsrc.
+
+2004-06-17 01:00  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.misc-tests/Makefile.am,
+	vmips.misc-tests/Makefile.in, vmips.outcheck/Makefile.am,
+	vmips.outcheck/Makefile.in, vmips.regcheck/Makefile.am,
+	vmips.regcheck/Makefile.in: Regenerated using testmkmf-all.
+
+2004-06-17 01:00  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in, utils/testcase-maker: Change
+	location of ld.script in vmipstool command line.
+
+2004-06-17 01:00  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/Makefile.in: Change location of ld.script in
+	vmipstool command line and in installation.  Distribute ld.script
+	instead of ld.script.in.
+
+2004-06-17 00:09  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/time_sort: I can't remember having ever used this.
+
+2004-06-17 00:09  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/bootstrap: Expand unbootstrap list -- it should cover all
+	files made by bootstrapping or configuring (although it may have
+	more than this, now!)
+
+2004-06-17 00:04  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: We may not be using the default linker script, even
+	if we hit this error message.
+
+2004-06-17 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/bootstrap: Don't remove ld scripts.
+
+2004-06-17 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated.
+
+2004-06-17 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Add verbiage about point #3.
+
+2004-06-16 23:58  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Last usages of @mipsbfdtarget@ are gone, so we
+	don't have to compute it.  Get rid of join.sh, too, by being more
+	clever with awk.  The ld scripts are no longer output from
+	configure.
+
+2004-06-16 23:58  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, join.sh: join.sh is history. Yay!
+
+2004-06-16 23:57  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.script, boot.script.in,
+	loadtest.script: Simplify ld.scripts - no OUTPUT_FORMAT is
+	necessary if you just want the default, which we do! This means
+	boot.script doesn't need to be generated from boot.script.in by
+	configure.
+
+2004-06-16 23:45  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/: ld.script, ld.script.in: Amazingly, the
+	OUTPUT_FORMAT() line was never needed, and I just never thought of
+	getting rid of it, until now, even though it's fairly obvious if
+	you just read the ld manual.  This is great, because we don't need
+	to build ld.script at configure time.
+
+2004-06-16 23:33  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Make error message slightly less broken.
+
+2004-06-16 23:22  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Right, vmipstool uses different
+	linker scripts in this dir.
+
+2004-06-16 03:15  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Expanded to-do list for release + after
+
+2004-06-14 01:41  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Actually implement the program_available() check.
+
+2004-06-13 04:30  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated.
+
+2004-06-13 04:30  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, options.h, vmipstool.cc: Go back to defining
+	SYSCONFDIR and PKGDATADIR on the command line. It's ugly, but it
+	works, which is more than can be said of the pathnames.h thing
+	(which somehow ended up in the distribution??! I hate you,
+	automake!)
+
+2004-06-12 14:36  Brian R. Gaeke <brg@dgate.org>
+
+	* Doxyfile: Update version number.
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmipstool.texi: Enlarge the description with a clarifying
+	note saying you don't *have* to use vmipstool.	Add a description
+	of the --swap-words option.
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Fix some line-too-long errors from tex.
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeoptdoc: Remove excess whitespace (4 - 8 blanks) from the
+	beginning of options documentation lines... it makes the man pages
+	look a little better (though they still look gross.)
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/invoke.texi: Update vmips command-line options: remove -D,
+	add -n & -F.  Update description of how vmips reads its options.
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Include pathnames.h.  Add runtime checks for the
+	programs we want to run (stubs for now), to assist in
+	configuration/installation debugging.
+
+2004-06-12 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipsrc.in: Update with current defaults.
+
+2004-06-12 02:06  Brian R. Gaeke <brg@dgate.org>
+
+	* options.h: Include pathnames.h.
+
+2004-06-12 02:06  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Remove pathname substitutions from here -- they
+	weren't working anyway.  We'll use a generated header file,
+	pathnames.h, instead.
+
+2004-06-12 02:06  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Move pathnames into generated header file
+	pathnames.h.  Update SOURCES variables.  Add rule to build
+	pathnames.h.
+
+2004-06-11 17:49  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: profiling note
+
+2004-06-10 01:24  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Update to release notes concerning
+	--disable-debug bug, and use @option{} when mentioning command-line
+	options.
+
+2004-06-10 01:13  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated Makefile.ins
+
+2004-06-10 01:11  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Set CFLAGS in all cases according to the setting of
+	CXXFLAGS.  Fix a bug in the previous patch.
+
+2004-06-10 01:01  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Strip binary if optimizing and not profiling. This
+	was in the manual, but apparently it wasn't true!  Also, only chmod
+	buildstat.sh if it exists.
+
+2004-06-10 00:54  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Start updating the Installation section of the
+	documentation: remove invalid configure options, update the
+	description of --disable-debug, and add --enable-profiling.
+
+2004-06-10 00:32  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: BYTESWAPPED has been expunged. Now
+	there's only one chapter left to update.
+
+2004-06-10 00:23  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: Added blurb about DEC stuff to manual.
+
+2004-06-09 23:43  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Regenerated.
+
+2004-06-09 23:37  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: Merge some old notes about PIC,
+	-mno-abicalls and -fno-pic into the manual.
+
+2004-06-07 22:12  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Fix bug in mipstoolprefix detection.  If we intend
+	to build sample_code and test_code, subst @MIPS_CODE_DIRS@; 
+	otherwise, warn the user.  Don't AC_DEFINE MIPSTOOLPREFIX anymore. 
+	Don't try to run mips-objdump if it doesn't look like it's
+	executable.
+
+2004-06-07 22:12  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Rearrange SUBDIRS; build sample_code and test_code
+	only if configure says so.
+
+2004-06-07 21:18  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: vmipsrc stuff seems to be fixed now.
+
+2004-06-07 21:10  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/: Makefile.in, xmboot/Makefile.in: Fix makefiles to
+	use correct vmipstool settings
+
+2004-06-03 17:43  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: test_code seems to be in ok shape now.
+
+2004-06-03 17:42  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, sample_code/Makefile.in:
+	Regenerated.
+
+2004-06-03 17:38  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: Makefile.in, vmips.misc-tests/Makefile.am,
+	vmips.misc-tests/Makefile.in, vmips.outcheck/Makefile.am,
+	vmips.outcheck/Makefile.in, vmips.regcheck/Makefile.am,
+	vmips.regcheck/Makefile.in: Regenerated.
+
+2004-06-03 17:38  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Make the default mipstoolprefix something that will
+	break.
+
+2004-06-03 17:13  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/testcase-maker: Test_code should use the versions of
+	ld.script and vmipsrc that are in the build directory.
+
+2004-06-03 17:10  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: If we can't run something, we should exit with an
+	error code! Blindingly obvious in retrospect, yes...
+
+2004-06-03 03:05  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: mipstoolprefix stuff is done
+
+2004-06-03 03:04  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipsrc.in: Receive a definition of the mipstoolprefix option
+	from configure.
+
+2004-06-03 03:04  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Substitute the definition of the mipstoolprefix
+	option into generated files, such as vmipsrc.
+
+2004-06-02 04:15  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: The node Extending has been partially
+	updated.
+
+2004-06-02 03:53  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: vmipstool now takes its value for MIPSTOOLPREFIX from
+	the vmipsrc.
+
+2004-06-02 03:53  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Make vmipstool take its value for MIPSTOOLPREFIX
+	from the vmipsrc.  Correct a factual inaccuracy in the comment in
+	setup_paths().
+
+2004-06-02 03:52  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeoptdoc: Make it possible to generate vmipsrc form from
+	the command line.
+
+2004-06-02 03:12  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: The 'asname' variable was never used; now it's
+	gone.
+
+2004-06-02 03:12  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Give tracestartpc and traceendpc better
+	descriptions.  Add mipstoolprefix option.
+
+2004-06-02 02:01  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Added release history section for vmips 1.2.
+
+2004-06-02 02:01  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: OK, in the interest of getting this release out
+	sometime before the second coming of the great prophet Zarquon, I'm
+	turfing the DECstation serial bugs to the next release. I wrote a
+	release history section for vmips 1.2.
+
+2004-06-01 23:38  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Update documentation update item.
+
+2004-06-01 23:37  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add some pending updates.
+
+2004-06-01 22:38  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h, optiontbl.h: Make it easier to start and stop
+	tracing from the command line.
+
+2004-05-22 16:35  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/config/unix.exp: Testsuite must use defaults generated
+	by configure in addition to hardcoded defaults.
+
+2004-05-22 01:23  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: First draft of support for
+	byte-swapped operation.
+
+2004-05-22 01:23  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Pass -fno-pic to the compiler and assembler.
+
+2004-05-22 01:23  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Don't set up machine components (e.g., mapper) until
+	after we know the host machine's endianness, because they may
+	depend on knowing it.
+
+2004-05-01 20:10  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Make the 1.2 to-do list less verbose
+
+2004-04-15 21:24  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Put next_epc with the other exception bookkeeping
+	variables.  Add a comment.
+
+2004-04-15 21:24  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: TARGET_BIG_ENDIAN is no longer referenced. hurray!
+
+2004-04-15 21:17  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: It won't work to get pkgdatadir from the vmipsrc,
+	because pkgdatadir is where you look to find out where vmipsrc is!!
+
+2004-04-15 21:17  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Allow user to override location of system-wide
+	vmipsrc using the VMIPS_PKGDATADIR environment variable.
+
+2004-04-15 21:17  Brian R. Gaeke <brg@dgate.org>
+
+	* rommodule.cc: It's pretty silly to check for MEM_READ and
+	MEM_WRITE when we know we're always mapping in a file to serve as
+	READ-ONLY memory!!
+
+2004-04-15 20:42  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: #define constants are icky; use 'const unsigned
+	int's instead.
+
+2004-04-15 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated Makefile.ins
+	using automake-1.4-p4
+
+2004-04-15 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: More completed items... need to review testsuite too
+
+2004-04-15 00:03  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Rework vmipstool's options parsing code to share
+	functionality with vmips.  Use the value of the 'bigendian' option.
+	 Running the test suite will require manual twiddling of the
+	'bigendian' option in your ~/.vmipsrc until vmipstool is able to
+	find ./vmipsrc (i.e., work without being installed).
+
+2004-04-14 23:35  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add sources that will be required to build
+	vmipstool.
+
+2004-04-14 23:04  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Call Options::process_options explicitly.
+
+2004-04-14 23:04  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, options.h: Separate the process_options call from the
+	constructor.  Make the Options constructor take no arguments.  Make
+	process_options a public method.
+
+2004-04-14 22:37  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/lib/vmips.exp: Get the current endianness from  instead
+	of ; test its value against values appropriate for the 'bigendian'
+	VMIPS option.
+
+2004-04-14 22:37  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/Makefile.am: Pass endianness to the testsuite using the
+	BIGENDIAN variable instead of the ENDIAN_FLAG variable.
+
+2004-04-14 22:37  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Don't create the ENDIAN_FLAG variable.
+
+2004-04-14 22:08  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: vmipstool now guesses the endianflag based on the
+	target endianness.
+
+2004-04-14 22:08  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Don't need to use ENDIAN_FLAG here. Instead, guess
+	an endianness flag based on TARGET_BIG_ENDIAN (for now).
+
+2004-04-14 22:08  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: TARGET_LITTLE_ENDIAN is no longer needed.
+
+2004-04-14 21:40  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Set vmipstool's global variables at runtime using a
+	new procedure, setup_paths().
+
+2004-04-09 23:49  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/rel-checklist.txt: Add paragraph spacing Revise "NEWS" item
+
+2004-04-09 23:48  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: We *do* support the Z-packet interface
+
+2004-04-09 23:44  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: The version release history has been merged into
+	vmips.texi
+
+2004-04-09 23:40  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Make the spim console device's table of registers
+	look better, by using a @multitable.
+
+2004-04-08 23:23  Brian R. Gaeke <brg@dgate.org>
+
+	* options.h: Make print_package_version take the tool name and
+	version number as arguments.
+	
+	Make some of class Options's methods virtual and protected instead
+	of private.  This is probably going to be the shortest path to
+	making Options reusable by vmipstool.
+
+2004-04-08 23:23  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Make print_package_version take the tool name and
+	version number as arguments.
+
+2004-04-08 00:08  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: One more thing off the list
+
+2004-04-08 00:05  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add release dates to the version history.
+
+2004-04-08 00:02  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: NEWS and INSTALL are now automatically generated from
+	the Texinfo manual.
+
+2004-04-08 00:01  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, NEWS: Use versions which are built automatically from
+	the Texinfo manual.
+
+2004-04-08 00:01  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeINSTALL: Script to automatically build the NEWS and
+	INSTALL files from the Texinfo manual.
+
+2004-04-07 23:36  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: The rest of the version history has been added.
+
+2004-04-07 23:26  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Shorten & update section on simplifying vmips
+	configuration - most of the work is done, but not all.
+
+2004-04-07 23:21  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.misc-tests/: clocker.exp, echo.exp: Start vmips
+	using the option returned by vmips_endian_option.
+
+2004-04-07 23:21  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipsrc.in: Let 'configure' substitute the correct default value
+	of the 'bigendian' option.
+
+2004-04-07 23:21  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, debug.cc, mapper.cc: Use 'bigendian' option instead of
+	TARGET_BIG_ENDIAN.
+
+2004-04-07 23:11  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Minor wording change reflecting how vmipstool will
+	derive configuration options
+
+2004-04-07 23:09  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/config/unix.exp: 
+	Always start vmips with correct 'bigendian' option, guessed by
+	looking at vmips_target_endian's result.
+
+2004-04-07 23:07  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Make errors finding mips tools into warnings.  Do
+	something sane on --without-mips-endianness (default to little;
+	warn user.) Set value of "bigendian" vmipsrc option.  Add FIXMEs at
+	end of file.
+
+2004-04-01 23:55  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: do not forget release dates.
+
+2004-04-01 23:55  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: to-do, vmips.texi: Start filling in the release history in
+	a special section of the manual.
+
+2004-04-01 23:35  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Update from 1.1 branch.
+
+2004-04-01 23:33  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add Release History section (currently empty).
+
+2004-04-01 23:23  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Mark items that are done. Yay!
+
+2004-04-01 23:06  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, debug.cc, debug.h: Move Debug::packet_push_word and
+	packet_push_byte to class CPU.
+
+2004-04-01 22:45  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Don't check AC_C_BIGENDIAN.  Get rid of checks for
+	a bunch of functions we don't use or which are required by standard
+	C++.
+
+2004-04-01 22:38  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc: Include options.h.	Don't redeclare 'machine' here. 
+	Initialize opt_bigendian using the TARGET_BIG_ENDIAN flag. Use it
+	instead of  TARGET_{BIG,LITTLE}_ENDIAN.  In is_breakpoint_insn,
+	compare against the appropriate breakpoint instruction	for the
+	current endianness.
+
+2004-04-01 22:25  Brian R. Gaeke <brg@dgate.org>
+
+	* sysinclude.h: Get rid of WORDS_BIGENDIAN and BYTESWAPPED macros,
+	which are no longer used.
+
+2004-04-01 22:19  Brian R. Gaeke <brg@dgate.org>
+
+	* sysinclude.h: Don't include getopt.h.
+
+2004-04-01 22:19  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Update comments.  Don't check for getopt.
+
+2004-04-01 22:01  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: Introduce opt_bigendian and byteswapped member
+	variables.  Mapper's swap functions are no longer static.
+
+2004-04-01 22:01  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Introduce opt_bigendian and byteswapped member
+	variables.  Initialize them in the constructor.  Use them instead
+	of the BYTESWAPPED macro.  Mapper's swap functions are no longer
+	static.
+
+2004-04-01 22:01  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc, spimconsole.cc: Mapper's swap functions are no longer
+	static.
+
+2004-04-01 19:01  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: cosmetic change only
+
+2004-04-01 18:54  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, debug.h: Make Debug::packet_pop_word and packet_pop_byte
+	non-static.  Add opt_bigendian member to class Debug.
+
+2004-04-01 18:43  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: Use opt_bigendian instead of TARGET_BIG_ENDIAN and
+	TARGET_LITTLE_ENDIAN (although its user-supplied value is not yet
+	used.)
+	
+	Make lwl, lwr, swl, swr be members of class CPU.
+	
+	In debug_registers_to_packet(), do some simple typographical
+	cleanups, and make debug_packet_push_{word,byte} wrappers around
+	the corresponding methods of class Debug.
+
+2004-03-31 18:41  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.c: Ignore the field widths on field
+	specifiers.
+
+2004-03-31 18:41  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/bootenv.c: Make better guesses at console and
+	systype environment variables.
+
+2004-03-31 18:41  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/: ttytest/dz11driver.c, xmboot/serial.c: During
+	setup, select serial line 3, by making sure that the TLINE bits of
+	CSR are set and that the proper LNENB bit of TCR is set.
+
+2004-03-31 18:41  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Connect the tty to the 'printer' serial line (line 3)
+	of the DEC serial device.
+
+2004-03-31 18:41  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc, decserial.h: Add support for multiple lines.  Use
+	only one interrupt enable for all displays and keyboards.  Create
+	new TCR_LINE_ENABLED function to check whether a given line enable 
+	is set in TCR.	Create new CSR_TLINE function to convert from a
+	line number to a CSR  TLINE field (similarly with RBUF_RLINE). 
+	Create new GET_CURRENT_CSR_TLINE function to fetch the TLINE field
+	from the CSR.  Fiddle with debug printouts. The interrupt handling
+	is not quite all  right yet -- as evidenced by the Linux dz
+	driver's failure to work with  this version of the emulation.
+
+2004-02-19 04:26  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: update 'bigendian' autoconf strategy note.
+
+2004-02-19 03:42  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/changelog: updated version number.
+
+2004-02-14 23:42  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ttytest/setup.S: add more comments.
+
+2004-01-31 15:35  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/rel-checklist.txt: Task list for new VMIPS releases.
+
+2004-01-31 15:33  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/identify_elf.cc: WIP for elf loader
+
+2004-01-28 01:32  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Restructure vmipstool to fit a very simple pattern:
+	most --options invoke a "main"-like subroutine, named after the
+	option, and exit with its return value as the exit code.  Try to
+	reformat code to be less wasteful with vertical whitespace.  Add
+	--swap-words to the help output.  Refactor
+	file-existence/readability checking into can_read_file().  Give
+	search_path() a comment.  Use bools where applicable instead of
+	ints.  Declare variables closer to their uses.
+
+2004-01-28 00:24  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: AC_OUTPUT vmipsrc.
+
+2004-01-28 00:18  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipsrc, vmipsrc.in: vmipsrc renamed as vmipsrc.in
+
+2004-01-27 18:45  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Add more to-do items to comment.
+
+2004-01-27 18:44  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Fix bugs in trace output. Make it Scheme-readable.
+
+2004-01-26 01:36  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/texi2pod.pl: update from gcc cvs head - I left the @chapter
+	ignoring thing in though.  (The man pages still look really scary.)
+
+2004-01-26 01:25  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeoptdoc: We're going to use makeoptdoc to generate the
+	system vmipsrc, eventually.  This is a start at having it output a
+	complete set of documentation to go in the vmipsrc (eventually
+	along with the default values).
+
+2004-01-26 01:21  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/maketoc: Allow lines of equals to set off topics.
+
+2004-01-26 01:19  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: Makefile.in, copyright.texi, invoke.texi, to-do,
+	vmips.texi, vmipstool.texi: Relicense ALL the documentation. Move
+	license to end of main manual. @include it from copyright.texi from
+	all the other .texi files. GC old files out of the Makefile.
+
+2004-01-26 01:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: fdl.texi, vmips.texi: Relicense documentation under MIT
+	license.  Fix up copyright years and edition markings for third
+	edition/1.2 version of manual.
+
+2004-01-26 00:58  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/netbsd-cross: Hopefully, this will be obsoleted by the nifty
+	new NetBSD cross-build system.
+
+2004-01-26 00:57  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/linux-cross: Out of date.
+
+2004-01-26 00:38  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Put a warning on the description of the bigendian
+	option.  Give it a default.
+
+2004-01-25 23:48  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Add bigendian option.
+
+2004-01-25 23:47  Brian R. Gaeke <brg@dgate.org>
+
+	* stub-dis.cc: Use machine->host_bigendian instead of
+	WORDS_BIGENDIAN.
+
+2004-01-25 23:47  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Don't output anything based on #defines:
+	WORDS_BIGENDIAN, TARGET_BIG_ENDIAN, TARGET_LITTLE_ENDIAN, or
+	BYTESWAPPED, when handling --print-config.
+
+2004-01-25 23:46  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: In host_endian_selftest(), use a single cast to char *
+	instead of four casts to uint8 *.
+
+2004-01-24 22:29  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Big ol' release status update
+
+2004-01-24 22:03  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Tighten up some of the verbose bracing.  Fix a
+	comment.
+
+2004-01-24 15:56  Brian R. Gaeke <brg@dgate.org>
+
+	* THANKS: Update entries for Larus, Twohey. Add Chen.
+
+2004-01-24 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ttytest/dz11driver.c: Implement
+	dz11_display_interrupt_enable() and
+	dz11_keyboard_interrupt_enable().
+
+2004-01-24 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Reindent store_word().	First draft of complete
+	support for interrupts.
+
+2004-01-24 02:17  Brian R. Gaeke <brg@dgate.org>
+
+	* spimconsole.cc: If someone turns off the interrupt enable bit
+	while an interrupt is asserted, we should deassert that interrupt
+	immediately.
+
+2004-01-24 02:13  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ttytest/: Makefile, intrio.c, rb.c, rb.h, rb_test.c,
+	slb.c, slb.h, ttygeneric.c: Convert everything to use "simple
+	linear buffers" or "straight line buffers" -- a dumber buffering
+	mechanism than ring buffers, but the ring buffers here don't work
+	anyway.
+
+2004-01-19 15:30  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: It's so annoying to have to turn off instdump all
+	the time.
+
+2004-01-19 15:28  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/README: update.
+
+2004-01-19 15:23  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot_main.c, xmrcv_main.c:
+	Removing more old code and makefile targets that we don't use
+	anymore.
+
+2004-01-19 15:16  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, README, coff_main.c: I'm taking
+	the host-machine versions of boot.host and coff_main out of the
+	build; they're old and not so useful, and they don't link on mac os
+	x.
+
+2004-01-11 23:41  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ttytest/README: A bit of documentation
+
+2004-01-11 23:39  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.c: Added dumb memory allocator
+
+2004-01-11 23:38  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ttytest/: Makefile, __main.c, dz11driver.c, intrio.c,
+	intrio.h, lib.c, lib.h, main.c, pollio.c, pollio.h, rb.c, rb.h,
+	rb_test.c, serial.h, set_status.S, set_status.h, setup.S,
+	spimdriver.c, ttygeneric.c, ttygeneric.h: Just a little something
+	I've been working on, to try to make sure that the dz11 and
+	spimconsole serial emulations can both do interrupt and polled i/o
+	correctly, and to create a unified programmatic interface to them
+	both.
+
+2004-01-11 23:32  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/serial.c: Get rid of gratuitous uppercasing. 
+	Fix some indentation.
+
+2004-01-11 23:31  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Catch errors from Debug::setup instead of ignoring
+	them.
+
+2004-01-11 23:30  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc: Catch more error conditions.  Fix some indentation.
+
+2004-01-05 22:34  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Add connection to IRQ2 for interrupt-driven DZ11 serial
+	device i/o.
+
+2004-01-05 22:33  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, options.h: Get rid of the crufty old homebrew hash
+	table options structure; use a STL map instead.
+
+2004-01-05 21:58  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, optiontbl.h: Get rid of 'configfile' option - it has
+	been superseded by the -F flag.
+
+2004-01-05 21:46  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: config/unix.exp, vmips.misc-tests/clocker.exp,
+	vmips.misc-tests/echo.exp: Always pass -n -F /dev/null when
+	starting vmips in the testsuite! This will avoid users' filthy
+	vmipsrc files impurifying our precious bodily fluids...er, I mean,
+	messing up the test results.
+
+2004-01-05 21:44  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, options.h: Include <string>.  Remove description of
+	-D, which is gone.  Add -n and -F options.  Constify argument to
+	process_one_option().  process_options_from_args() is history;	its
+	functionality has been	folded into process_options().
+
+2004-01-05 20:22  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Simplify checking for exceptions during instruction
+	execution, in situations involving address translation and fetching
+	from memory.  This wraps up SourceForge patches 870124 and 870200,
+	from Paul Twohey.
+
+2004-01-05 19:54  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Various cleanups submitted by Paul Twohey (870178).
+
+2004-01-05 16:42  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.h: Apply patch 870172 from SourceForge, by Paul Twohey,
+	documenting many methods in cpzero.h and making some of them
+	private.
+
+2004-01-05 01:47  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Use a call to warning() instead of fprintf (stderr,
+	"Warning:...");.
+
+2004-01-05 01:44  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Get rid of the undocumented and unused VMIPS
+	environment variable.
+
+2004-01-05 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in: Provide SYSCONFDIR and PKGDATADIR in
+	config.h instead of on the compiler command line.  Turn off the
+	check for statically linking a program with getpwnam().
+
+2004-01-02 14:14  Brian R. Gaeke <brg@dgate.org>
+
+	* spimconsole.cc, spimconsole.h: Rename *_interrupt variables to
+	*_interrupt_enable, for clarity.
+
+2004-01-02 14:13  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.h: Add interrupt_enable variables and ready/unready
+	method prototypes, for interrupt support.  Make DECSerialDevice
+	derive from DeviceInt.
+
+2004-01-02 14:13  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Add note about how we don't yet support multiple
+	lines.	Try to start using "line" variable instead of hardcoding
+	line 0.  Reformat whitespace.  Start adding support for interrupts.
+
+2004-01-02 00:58  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: handler5.S, handler5.par: Different
+	GAS behavior between targets can apparently result in different NOP
+	paddings being inserted around cop0 moves. Pad them manually and
+	put .set noreorder ... .set reorder around it in the hopes of
+	stifling GAS's attempts to be smart.  Change the expected NextEPC.
+
+2004-01-02 00:28  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated all Makefile.in
+	and Makefile.am files using testmkmf-all and automake 1.4-p5.
+
+2004-01-02 00:24  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/Makefile.am: Clarify nonsensical comments in generated
+	site.exp files.  Quote everything that is 'set' in site.exp, to
+	avoid runtime errors from tcl (especially with "set target_alias
+	...", whose value is frequently empty.)
+
+2004-01-01 23:33  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Take out @ifnottex from Top node.
+
+2004-01-01 15:36  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: lib.c, lib.h: Fix prototype of putchar to
+	match the standard.
+
+2004-01-01 15:35  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: Fix typo in error checking code.
+
+2003-12-22 23:07  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.misc-tests/Makefile.am,
+	vmips.misc-tests/Makefile.in, vmips.outcheck/Makefile.am,
+	vmips.outcheck/Makefile.in, vmips.regcheck/Makefile.am,
+	vmips.regcheck/Makefile.in: Regenerated using testmkmf-all and
+	automake-1.4p5
+
+2003-12-22 22:48  Brian R. Gaeke <brg@dgate.org>
+
+	* missing: Add "missing" script from automake-1.6
+
+2003-12-22 22:41  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/sltiu.S: Add missing __start label.
+
+2003-12-22 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Define more assembler-related symbols to pacify
+	automake.
+
+2003-12-22 22:32  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/testcase-maker: Add definition of CCASCOMPILE for
+	automake-1.6
+
+2003-12-22 21:12  Brian R. Gaeke <brg@dgate.org>
+
+	* acconfig.h, acinclude.m4, configure.in: Change to use 3-arg form
+	of AC_DEFINE everywhere, thus making acconfig.h unnecessary.
+
+2003-12-19 02:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: note about making w/o cross tools
+
+2003-12-19 02:06  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Tracing stuff is all done, but untested Add note about
+	fdl
+
+2003-12-19 01:57  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Add call to CPU::maybe_dump_trace(), to finally dump
+	the trace to a file when the machine halts, if tracing is turned
+	on.
+
+2003-12-19 01:57  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Add prototype for maybe_dump_trace().	Add several
+	comments.
+
+2003-12-19 01:57  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Add maybe_dump_trace() to finally dump the trace to a
+	file when it is time, if tracing is turned on.
+
+2003-12-19 01:45  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated with
+	automake-1.4p5, after the configure.in change to support EXEEXT
+
+2003-12-19 01:41  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Unbreak the testsuite by adding configure check for
+	EXEEXT.
+
+2003-12-19 01:31  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Through the magic of STL containers, we now have a
+	limited-size trace.
+
+2003-12-19 01:30  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Make the tracesize option available as a CPU data member. 
+	Make the trace records be a deque instead of a vector. (Yikes.) Add
+	record_size() and pop_front_record() methods to Trace.
+
+2003-12-19 01:30  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Make the tracesize option available as a CPU data member.
+	 Try to truncate trace to tracesize whenever we add records and we
+	end up	having more than tracesize records.
+
+2003-12-19 01:16  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Get rid of the conditions for stopping/starting tracing.
+	We will want to make them much more flexible later, but right now
+	we can't, so we leave it on all the time.
+
+2003-12-19 01:07  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: The options for turning on tracing are in place.
+
+2003-12-19 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: Add tracing option.  Get rid of #if TRACE, and
+	replace it with a check for the tracing option.  Fix up and add
+	some comments.
+
+2003-12-19 00:39  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.misc-tests/Makefile.in,
+	vmips.outcheck/Makefile.in, vmips.regcheck/Makefile.in: Regenerated
+	with automake-1.4p5
+
+2003-12-19 00:27  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Excise load_initial_program() and opt_loadprogram.
+	We'll come back to it later.  Add options to help us fix the
+	tracing stuff: "tracing" and "tracesize".
+
+2003-12-19 00:27  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc, vmips.h: Excise load_initial_program() and
+	opt_loadprogram. We'll come back to it later.
+
+2003-12-19 00:24  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: It's nice to get instruction counts,
+	now that we have halt-from-keyboard.
+
+2003-12-19 00:17  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: more thoughts on fix0ring vmips.cc
+
+2003-12-19 00:16  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: You can halt the machine from the keyboard now.
+
+2003-12-19 00:11  Brian R. Gaeke <brg@dgate.org>
+
+	* deccsr.cc, deccsr.h, deccsrreg.h, decrtc.cc, decrtc.h,
+	decrtcreg.h, decserial.cc, decserial.h, decserialreg.h, decstat.cc,
+	decstat.h, rommodule.cc, rommodule.h: Add copyright notices.
+
+2003-12-17 23:13  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Add a to-do comment.
+
+2003-12-13 23:07  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	test_code/vmips.misc-tests/Makefile.in,
+	test_code/vmips.outcheck/Makefile.in,
+	test_code/vmips.regcheck/Makefile.in: Regenerated with automake
+	1.4-p5
+
+2003-12-13 22:57  Brian R. Gaeke <brg@dgate.org>
+
+	* terminalcontroller.cc, terminalcontroller.h: Move line_connected
+	to the .h file where it can be inlined into its callers. Turn
+	copy_unready_keyboards into a simple assignment, for efficiency
+	(we'll have to see whether this is portable, or whether we have to
+	use memcpy). De-virtualize both of these methods.
+
+2003-12-13 22:56  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Support easy halting from the console by using SIGQUIT.
+
+2003-12-13 21:57  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: No longer using libtool.
+
+2003-12-13 21:55  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: No need to link statically.
+
+2003-12-13 21:50  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: GC a bunch of now-dead stuff from the configure
+	script, because we now have our own mips disassembler library (and
+	vmipstool).
+
+2003-12-13 21:35  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, task.cc, task.h: Fold method bodies from task.cc
+	into task.h
+
+2003-12-07 21:42  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, sysinclude.h, terminalcontroller.h: Fix errors found by
+	gcc-3.3.1.  cpu.cc: Use std::copy instead of array assignment. 
+	sysinclude.h: Include <algorithm>.  terminalcontroller.h: Get rid
+	of "inline" qualifiers on out-of-line methods.
+
+2003-11-30 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/: Makefile.am, Makefile.in: Add headers to
+	libopcodes_mips_a_SOURCES. Regenerated Makefile.in.
+
+2003-11-30 22:34  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.am: Include headers in libopcodes_mips
+	sources.
+
+2003-11-30 22:15  Brian R. Gaeke <brg@dgate.org>
+
+	* options.h: Get rid of more OPTIONS_DEBUG stuff.
+
+2003-11-30 22:15  Brian R. Gaeke <brg@dgate.org>
+
+	* spimconsole.cc: Add explicit DeviceMap constructor call to set
+	extent.  Fix and/or remove some FIXMEs.
+
+2003-11-30 22:14  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Do not set OPTIONS_DEBUG in a debugging VMIPS.	Set
+	NDEBUG in an optimized VMIPS.
+
+2003-11-30 22:14  Brian R. Gaeke <brg@dgate.org>
+
+	* clockdev.cc: 
+	Make assertions in constructor more verbose.  Add explicit
+	DeviceMap constructor call to set extent.
+
+2003-11-30 22:06  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Fix and/or remove some FIXMEs.
+
+2003-11-30 22:06  Brian R. Gaeke <brg@dgate.org>
+
+	* acconfig.h: Add description for NDEBUG.
+
+2003-11-30 22:06  Brian R. Gaeke <brg@dgate.org>
+
+	* devicemap.h: Add explicit DeviceMap constructor call to set
+	extent.
+
+2003-11-30 22:05  Brian R. Gaeke <brg@dgate.org>
+
+	* spimconsole.h: Minor formatting fixes.
+
+2003-11-30 21:37  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Rename insert_into_rangelist() to add_range().  (Make
+	its assert more verbose.) BYTESWAPPED is now Boolean-valued and
+	always defined.  Get rid of old add_*_mapping methods.
+
+2003-11-30 21:37  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: Rename insert_into_rangelist() to add_range().  Get rid
+	of old add_*_mapping methods.  Add map_at_physical_address()
+	wrapper method.
+
+2003-11-30 21:36  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Remove memorymodule.cc from the build.  Add
+	rommodule.cc and rommodule.h to the build.
+
+2003-11-30 21:36  Brian R. Gaeke <brg@dgate.org>
+
+	* devicemap.cc, devicemap.h: Move constructor body into class
+	definition.  Use new 4-arg Range constructor call.
+
+2003-11-30 21:35  Brian R. Gaeke <brg@dgate.org>
+
+	* rommodule.cc, rommodule.h: Add definition of class representing a
+	ROM module.
+
+2003-11-30 21:35  Brian R. Gaeke <brg@dgate.org>
+
+	* memorymodule.cc: Move method bodies into class definition.
+
+2003-11-30 21:35  Brian R. Gaeke <brg@dgate.org>
+
+	* memorymodule.h: Turn MemoryModule into a subclass of Range, and
+	deallocate in its destructor.  Move method bodies into class
+	definition.
+
+2003-11-30 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Get rid of OPTIONS_DEBUG stuff. I think this code is
+	basically fully debugged,  and if we need to make any more changes
+	to it, we should consider replacing it.  BYTESWAPPED is now
+	Boolean-valued and always defined.
+
+2003-11-30 21:33  Brian R. Gaeke <brg@dgate.org>
+
+	* range.cc, range.h: Most of the simple Range methods are moved
+	into range.h.  All the stuff done in Range's destructor is now done
+	in various subclasses.	Range types and ProxyRanges are history.
+
+2003-11-30 21:33  Brian R. Gaeke <brg@dgate.org>
+
+	* sysinclude.h: BYTESWAPPED is now Boolean-valued and always
+	defined.
+
+2003-11-30 21:32  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Rewrite setup_rom() to build a ROMModule and map it. 
+	Use the new unified interface Mapper::map_at_physical_address()
+	instead of the	random add_*_mapping methods.  Use the new
+	Range-based MemoryModule.  Rearrange definitions of
+	vmips_unexpected() and vmips_terminate() so that  forward
+	declarations are not necessary.
+
+2003-11-30 17:43  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in: Regenerated
+
+2003-11-30 16:13  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/README: Add explanatory file
+
+2003-11-30 15:55  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add libopcodes_mips directory to build.	Remove
+	include/* from build.  Link against libopcodes_mips instead of the
+	prebuilt mips cross-tool libs.	Add rule for building
+	libopcodes_mips.
+
+2003-11-30 15:45  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Add libopcodes_mips's Makefile.
+
+2003-11-30 15:42  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/: Makefile.am, Makefile.in, ansidecl.h, bfd.h,
+	bfdlink.h, config.h, dis-asm.h, dis-buf.c, elf-bfd.h,
+	libbfd-support.c, libbfd.h, mips-dis.c, mips-opc.c, mips16-opc.c,
+	opintl.h, symcat.h, sysdep.h, elf/common.h, elf/external.h,
+	elf/internal.h, elf/mips.h, elf/reloc-macros.h, opcode/mips.h:
+	Check in libopcodes_mips, which contains the subset of binutils
+	stuff which is normally linked in to vmips.
+
+2003-11-29 15:39  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Generalize auto_size_rom() and rename it to
+	get_file_size().  Clean up setup_rom() a little.  Start filling in
+	load_initial_program().
+
+2003-11-29 15:38  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Use the vmips.cc file sizing code.
+
+2003-11-29 15:38  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Rename auto_size_rom() to get_file_size() and make it
+	static.
+
+2003-11-29 15:22  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Add 'loadprogram' option.
+
+2003-11-29 15:11  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/serial.c: Get rid of all the nasty conditional
+	compilation Other minor cleanups.  Add serial_init() call to allow
+	for dz initialization.
+
+2003-11-29 15:11  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/serial.h: Add prototype for serial_init()
+	call, to allow for dz initialization.
+
+2003-11-29 15:11  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot_main.c: Add stub version of serial_init()
+
+2003-11-29 15:11  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: Call serial_init() before doing any
+	i/o.
+
+2003-11-29 15:02  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc, vmips.h: Add stub support for loading in a program.
+	Minor cleanups.
+
+2003-11-29 00:29  Brian R. Gaeke <brg@dgate.org>
+
+	* decserialreg.h: Fix bug in CSR CLR. Add LPR bits.
+
+2003-11-29 00:29  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.h: Get rid of tdr member.
+
+2003-11-29 00:28  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Get rid of tdr member. Implement MSE bit in CSR.
+
+2003-11-16 14:17  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, tlbentry.cc, tlbentry.h: Move TLBEntry's methods
+	inline and make them const.  Get rid of tlbentry.cc.
+
+2003-11-16 13:25  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/lib/vmips-outcheck.exp: Turn off grep_pattern unless we
+	see it is turned on.
+
+2003-11-16 13:25  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: Makefile.in, vmips.misc-tests/Makefile.in,
+	vmips.outcheck/Makefile.am, vmips.outcheck/Makefile.in,
+	vmips.regcheck/Makefile.am, vmips.regcheck/Makefile.in:
+	Regenerated.
+
+2003-10-25 13:22  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/README: update list of things to test
+
+2003-10-25 13:21  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: whoops, profiling should be off by default!
+
+2003-10-25 13:20  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/: unaligned.S, unaligned.par: add test
+	for address error on unaligned accesses.
+
+2003-10-25 12:56  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/lib/vmips-outcheck.exp: Add option to check output
+	against a regular expression, instead of  requiring an exact match.
+
+2003-10-25 12:55  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in: Makefile.am: Add gcov target
+	configure.in: Add --enable-profiling option to configure
+
+2003-10-25 12:54  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.outcheck/instcounts.S,
+	vmips.outcheck/instcounts.par, vmips.outcheck/simpledis.S,
+	vmips.outcheck/simpledis.par, vmips.regcheck/haltdev.S,
+	vmips.regcheck/haltdev.par: Add new tests: instcounts - test
+	instcounts option simpledis - simple test of disassembler
+	(instdump) option haltdev - test of Paul Twohey's halt device
+
+2003-10-24 22:10  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add decserialreg.h
+
+2003-09-24 22:21  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: One more update
+
 2003-09-24 22:15  Brian R. Gaeke <brg@dgate.org>
 
 	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, tlbwr.S:
@@ -1333,7 +2868,7 @@
 
 2002-06-07 18:38  Brian R. Gaeke <brg@dgate.org>
 
-	* include/dis-asm.h, test_code/vmips.misc-tests/Makefile.am,
+	* test_code/vmips.misc-tests/Makefile.am,
 	test_code/vmips.misc-tests/Makefile.in,
 	test_code/vmips.outcheck/Makefile.am,
 	test_code/vmips.outcheck/Makefile.in,
@@ -3161,11 +4696,6 @@
 	* ANNOUNCE: file ANNOUNCE was initially added on branch
 	vmips-1_0-branch.
 
-2001-10-21 03:39  Brian R. Gaeke <brg@dgate.org>
-
-	* include/dis-asm.h: Update to 2.10.1's version, because that's the
-	version we recommend.
-
 2001-10-21 02:32  Brian R. Gaeke <brg@dgate.org>
 
 	* AUTHORS, INSTALL, README, doc/vmips.texi: AUTHORS: Remove brg's
@@ -3635,13 +5165,13 @@
 
 2001-07-06 21:25  Brian R. Gaeke <brg@dgate.org>
 
-	* vmips.cc, include/dis-asm-2.9.1.h, sample_code/setup.S,
-	test_code/Makefile.in, test_code/tlbwr.S: vmips.cc: Dump tlb along
-	with cp0 registers whenever applicable.  sample_code/setup.S:
-	Initialize tlb to have all entries with ASID = 0x3f  so that they
-	don't all match ASID = 0.  test_code/Makefile.in: Add tlbwr.S, and
-	tlbwr.rom, and rules to make it.  test_code/tlbwr.S: New test case
-	for tlbwr.  include/dis-asm-2.9.1.h: For convenience's sake.
+	* vmips.cc, sample_code/setup.S, test_code/Makefile.in,
+	test_code/tlbwr.S: vmips.cc: Dump tlb along with cp0 registers
+	whenever applicable.  sample_code/setup.S: Initialize tlb to have
+	all entries with ASID = 0x3f  so that they don't all match ASID =
+	0.  test_code/Makefile.in: Add tlbwr.S, and tlbwr.rom, and rules to
+	make it.  test_code/tlbwr.S: New test case for tlbwr. 
+	include/dis-asm-2.9.1.h: For convenience's sake.
 
 2001-07-06 00:37  Brian R. Gaeke <brg@dgate.org>
 
@@ -3663,9 +5193,9 @@
 2001-07-01 22:19  Brian R. Gaeke <brg@dgate.org>
 
 	* configure.in, options.cc, options.h, stub-dis.cc, vmipstool.cc,
-	doc/invoke.texi, include/dis-asm.h, test_code/ulw.S: configure.in:
-	Problems finding mips tools, etc., are now errors, not warnings. 
-	options.cc, options.h: Support --version, --help, --print-config. 
+	doc/invoke.texi, test_code/ulw.S: configure.in: Problems finding
+	mips tools, etc., are now errors, not warnings.  options.cc,
+	options.h: Support --version, --help, --print-config. 
 	doc/invoke.texi: Add documentation for these new options. 
 	stub-dis.cc: Apparently setting disasm_info.octets_per_byte is no
 	longer	necessary (done in dis-asm.h).	vmipstool.cc: Add bug
@@ -4211,10 +5741,10 @@
 
 2001-06-09 23:05  Brian R. Gaeke <brg@dgate.org>
 
-	* .gdbinit, spimconsole.cc, stub-dis.cc, include/dis-asm.h:
-	spimconsole.cc: Null out some pointers at initialization time. 
-	stub-dis.cc: Set octets_per_byte here.	include/dis-asm.h: Upgrade
-	to a recent version of the file .gdbinit: this is no longer useful
+	* .gdbinit, spimconsole.cc, stub-dis.cc: spimconsole.cc: Null out
+	some pointers at initialization time.  stub-dis.cc: Set
+	octets_per_byte here.  include/dis-asm.h: Upgrade to a recent
+	version of the file .gdbinit: this is no longer useful
 
 2001-06-09 19:33  Brian R. Gaeke <brg@dgate.org>
 
@@ -6547,11 +8077,6 @@
 
 1999-11-13 15:50  Brian R. Gaeke <brg@dgate.org>
 
-	* include/dis-asm.h: include/dis-asm.h: Updated from
-	binutils-991112.
-
-1999-11-13 15:50  Brian R. Gaeke <brg@dgate.org>
-
 	* Makefile.am, configure.in, vmips.cc: Makefile.am: Search
 	user-provided MIPS cross include directory for	includes.  Pull in
 	CXXFLAGS from configure, for debugging.  vmips_CXXFLAGS  and
@@ -6640,10 +8165,6 @@
 
 	* configure.in: added check for print_insn_little_mips() in
 	libopcodes (does it work yet?)
-
-1999-08-17 15:04  Brian R. Gaeke <brg@dgate.org>
-
-	* include/dis-asm.h: header file for libopcodes, swiped from same.
 
 1999-08-17 15:03  Brian R. Gaeke <brg@dgate.org>
 

@@ -5,24 +5,37 @@
 #include "asm_regnames.h"
 
 	.text
-	.globl __start
+	.org 0x0
+	break
 
+	.globl __start
 	.ent __start
 __start:
+	j realstart
+
+	.org 0x080
+	break
+	.org 0x180
+	break
+
+	.org 0x200
+realstart:
 	/* Save return address and globals pointer on stack. */
-	addiu sp, sp, -8
-	sw ra, 4(sp)
-	sw gp, 0(sp)
+	/* (2 extra words for arguments to main) */
+	addiu sp, sp, -16
+	sw ra, 12(sp)
+	sw gp, 8(sp)
 
 	/* Set up the globals pointer. */
 	la gp, _gp
 
 	/* Call the function. */
-	jal entry
+	jal MyMain
 
-	/* Restore return address and globals pointer. */
-	lw ra, 4(sp)
-	lw gp, 0(sp)
+	/* Restore return address, globals pointer, and stack pointer. */
+	lw ra, 12(sp)
+	lw gp, 8(sp)
+	addiu sp, sp, 16
 
 	/* Return to caller (in ROM). */
 	jr ra

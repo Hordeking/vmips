@@ -25,16 +25,7 @@ the "Reporting Bugs" appendix of the Info manual.
 VMIPS was written by Brian Gaeke.
 @c man end
 @c man begin COPYRIGHT
-Copyright @copyright{} 2001 Brian R. Gaeke.
-
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
+@include copyright.texi
 @c man end
 @c man begin DESCRIPTION
 When you invoke vmips, it loads a ROM file specified on the command line,
@@ -52,7 +43,7 @@ The format of the VMIPS command line is any one of the following:
 
 @c man begin SYNOPSIS
 @example
-vmips [-D] [-o option_string] ... rom_file
+vmips [-n] [-F FILE] [-o option_string] ... rom_file
 vmips --help
 vmips --version
 vmips --print-config
@@ -63,12 +54,12 @@ vmips --print-config
 This is what the different command line options mean:
 
 @table @samp
-@item -D
-Turns on debugging of option parsing. This is not generally
-useful to the end user unless you are confused about VMIPS's
-interpretation of your command line or startup file(s).
-VMIPS has to be compiled with -DOPTIONS_DEBUG for this option
-to be available.
+@item -F FILE
+Read options from FILE instead of the @file{.vmipsrc} in your home directory.
+
+@item -n
+Do not read the system-wide configuration file, usually called
+@file{/usr/local/etc/vmipsrc}.
 
 @item --help
 Prints a short summary of VMIPS command line options, and exits
@@ -105,25 +96,34 @@ option is mandatory.
 The VMIPS simulator gets runtime options from four different sources,
 in this order: first, it checks its compile-time defaults, which are
 set by the site administrator in the source file @file{optiontbl.h}. Then,
-the system-wide configuration file is read; usually this is in
-@file{/usr/local/share/vmipsrc}, but it may have been moved by the site
-administrator. (This is configurable in the source file @file{options.h}, and
-by specifying the --prefix and --sharedir options to the GNU @command{configure}
+the system-wide configuration file is read, unless you specify the @samp{-n}
+option; usually this file is called
+@file{/usr/local/etc/vmipsrc}, but it may have been moved by the site
+administrator or by the maintainers of your distribution.
+(This is configurable in the source file @file{options.h}, and
+by specifying the --prefix and --sysconfdir options to the GNU
+@command{configure}
 script when building VMIPS.) Next, it checks the user's own configuration
-file, usually the file @file{.vmipsrc} in your home directory. Last, it
+file, usually the file @file{.vmipsrc} in your home directory, or whatever
+file you specify using the @samp{-F} option. Last, it
 reads the command line, and gets any options listed there.
 
 @section Format of the configuration file
 
 The configuration file may contain as many options per line as you want,
-provided no line exceeds BUFSIZ (usually 1,024) characters.  Whitespace
-separates options from one another. A string or number option named
-NAME can appear as NAME=VALUE, where VALUE is the string or number
-in question. If the number begins with 0x, it will be interpreted
-as a 32-bit hexadecimal number, and if it begins with 0, it will be
-interpreted as octal. Otherwise, it will be interpreted as a decimal
-number. Numbers are always unsigned. A Boolean option named NAME can
-appear as either NAME (to set it to TRUE) or noNAME (to set it to FALSE).
+provided no single line exceeds 1,024 characters in length.  Whitespace
+separates options from one another.  Single quotes and backslash are valid
+in the configuration file. Their meanings are similar to those found in
+the Bourne shell: any text within paired single quotes is uninterpreted,
+as is any character immediately following a backslash.  A comment is
+any text starting from a hash mark to the end of the line, inclusive.
+
+A string or number option named NAME can appear as NAME=VALUE, where VALUE
+is the string or number in question.  If the number begins with 0x, it will
+be interpreted as a 32-bit hexadecimal number, and if it begins with 0,
+it will be interpreted as octal. Otherwise, it will be interpreted as a
+decimal number. Numbers are always unsigned. A Boolean option named NAME
+can appear as either NAME (to set it to TRUE) or noNAME (to set it to FALSE).
 
 @section Summary of configuration options
 

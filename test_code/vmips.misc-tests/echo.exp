@@ -6,7 +6,8 @@
 #
 
 load_lib vmips-misc.exp; misc_test_setup echo
-spawn -noecho $vmips -o excmsg -o noinstdump -o nobootmsg $romfile
+spawn -noecho $vmips -n -F /dev/null -o [vmips_endian_option] -o excmsg \
+ -o noinstdump -o nobootmsg $romfile
 
 expect { 
 	-ex "? "    { sleep 0.04; send "x" } 

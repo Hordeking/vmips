@@ -1,7 +1,7 @@
 /* A program to test printf under vmips. */
 #include "lib.h"
 
-void entry(void)
+int main (int argc, char **argv)
 {
 	char c = 'x';
 
@@ -14,4 +14,5 @@ void entry(void)
 	printf("This is a hex int: [0x%x]\n", 0xdead);
 	printf("This is a HEX int: [0X%X]\n", 0xBEEF);
 	printf("This is a string: [%s]\n", "Cheese");
+	return 0;
 }

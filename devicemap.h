@@ -25,11 +25,13 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "sysinclude.h"
 #include "range.h"
 
-/* Physical memory map for a device supporting memory-mapped I/O. */
+/* Physical memory map for a device supporting memory-mapped I/O. This is
+ * an abstract class.
+ */
 class DeviceMap : public Range {
 protected:
-    /* abstract class */
-    DeviceMap() throw();
+    DeviceMap() throw() : Range(0, 0, 0, 0) { }
+    DeviceMap(uint32 _extent) throw() : Range(0, _extent, 0, 0) { }
 
 public:
     /* Fetch word at byte offset OFFSET as part of load type MODE, which

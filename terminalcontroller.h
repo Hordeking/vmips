@@ -85,7 +85,9 @@ public:
 	virtual void remove_terminal( int line ) throw();
 
 	/* Return true if line LINE is connected, false otherwise. */
-	inline virtual bool line_connected( int line ) throw();
+	bool line_connected (int line) {
+      return line >= 0 && line < MAX_TERMINALS && lines[line].tty_fd != -1;
+    }
 
 	/* Reinitialize terminals to a state suitable for use as part of a
 	   vmips simulation. Usefull for restoring tty settings when vmips
@@ -128,8 +130,6 @@ protected:
 	   preparation was sucessful, false otherwise. */
 	virtual bool prepare_tty( int line ) throw();
 
-	/* Make a copy of unready_keyboards in SET. */
-	inline virtual void copy_unready_keyboards( fd_set *set ) throw();
 
 protected:
 	class DisplayDelay : public CancelableTask
@@ -185,6 +185,11 @@ protected:
 	Clock		*clock;
 	int		max_fd;			// cache of largest fd + 1
 	fd_set		unready_keyboards;	// unready keyboard descriptors
+
+	/* Make a copy of unready_keyboards in SET. */
+	void copy_unready_keyboards (fd_set *set) {
+		*set = unready_keyboards;
+	}
 	
 	enum State {
 		UNREADY	= 0,

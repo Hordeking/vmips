@@ -24,16 +24,15 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 ClockDevice::ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
 	throw( std::bad_alloc )
-	: irq(irq), frequency_ns(frequency_ns),
+	: DeviceMap(20), irq(irq), frequency_ns(frequency_ns),
 	  clock(clock), clock_trigger(0), clock_state(UNREADY),
 	  interrupt_enabled(false)
 {
-	assert( clock );
-	assert( frequency_ns > 0 );
-	assert( irq != IRQ0 && irq != IRQ1 );
-
-	/* FIXME: hack to until we get working ranges. */
-	extent = 20;
+	assert (clock && "ClockDevice initialized with null Clock");
+	assert (frequency_ns > 0
+            && "ClockDevice initialized with non-positive frequency");
+	assert (irq != IRQ0 && irq != IRQ1
+            && "ClockDevice initialized with invalid IRQ");
 
 	clock_trigger = new ClockTrigger(this);
 	clock->add_deferred_task( clock_trigger, frequency_ns );
@@ -104,7 +103,7 @@ void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 		return;
 	case 2:		// simulated time - seconds
 	{
-		if( (long)data < 0 )
+		if( (int32)data < 0 )
 			return;
 
 		timespec time = { data, clock->get_time().tv_nsec };
@@ -113,7 +112,7 @@ void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 	}
 	case 3:		// simulated time - micro seconds
 	{
-		if( (long)data < 0 )
+		if( (int32)data < 0 )
 			return;
 
 		timespec time =  { clock->get_time().tv_sec, data };
@@ -130,7 +129,7 @@ void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 	}
 }
 
-char *ClockDevice::descriptor_str()
+const char *ClockDevice::descriptor_str() const
 {
 	return "Clock device";
 }

@@ -7,19 +7,22 @@ Acknowledgements
  My experience in Computer Science 61C at UC Berkeley helped to reinforce
  my convictions in the matter. ;-)
 
- I looked to James Larus's SPIM simulator, to which I have also been a
- code contributor, for examples of what to do (and sometimes, what not
- to do) when faced with certain tricky issues.
+ I looked to James Larus's <larus@microsoft.com> SPIM simulator, to
+ which I have also been a code contributor, for examples of what to do
+ (and sometimes, what not to do) when faced with certain tricky issues.
 
  Galen Hancock <galen@csua.berkeley.edu> has provided some patches.
 
- Paul Twohey <twohey@csua.berkeley.edu> has provided some patches,
+ Paul Twohey <twohey@csua.berkeley.edu> has provided several major patches,
  and has generously tested new versions of VMIPS as they are released,
- on various architectures.
+ on various architectures. He has filed many insightful bug reports and
+ also provided MIPS tools for Mac OS X.
  
  Steve Tu <sktu@ocf.berkeley.edu> contributed a rewrite of the CPU core
  inner loop.
 
  Sanjeev Datla <sanjeev_datla@hotmail.com> has done some testing and
  contributed fixes for TLB bugs.
+
+ Chen Mingyu <cmy@ict.ac.cn> found two bugs in the TLB emulation.
 

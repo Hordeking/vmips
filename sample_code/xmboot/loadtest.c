@@ -1,7 +1,14 @@
 #include "lib.h"
 
-void entry(void)
+int MyMain (int argc, char **argv)
 {
-	printf("Hello, world!\n");
+  int i;
+  printf ("Hello, world!\n");
+  printf ("Argc is %d\n", argc);
+  for (i = 0; i < argc; ++i) {
+    printf ("Arg %d is %s\n", i, argv[i]);
+  }
+  printf ("Ok, goodbye.\n");
+  return 0;
 }
 

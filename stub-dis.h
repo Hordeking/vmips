@@ -23,7 +23,10 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 #include "sysinclude.h"
 
-void setup_disassembler(FILE *stream);
+/* Set up the disassembler interface. Returns true if successful;
+ * false if there were any problems.
+ */
+bool setup_disassembler(FILE *stream);
 void call_disassembler(uint32 pc, uint32 instr);
 
 #endif /* _STUB_DIS_H_ */

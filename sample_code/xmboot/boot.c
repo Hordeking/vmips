@@ -1,10 +1,15 @@
 /* vmips boot monitor
- * $Date: 2001/12/19 07:35:43 $
+ * $Date: 2003/11/29 21:11:02 $
  * by Brian R. Gaeke
  */
 
 #include "lib.h"
 #include "coff.h"
+#include "serial.h"
+#include "xmrcv.h"
+#include "cpzeroreg.h"
+#include "set_status.h"
+#include "bootenv.h"
 
 /* Maximum number of arguments to a command in the boot monitor. */
 #define MAXARGS 10
@@ -18,7 +23,8 @@
 typedef int (*func) (int argc, char **argv);
 
 /* Defines a program being called by the booter: */
-typedef void (*entry_type) (void);
+/* typedef void (*entry_type) (void); */
+typedef func entry_type;
 
 /* An entry in the command table: */
 struct command_table_entry
@@ -45,7 +51,13 @@ int str_to_command (char *input, struct parsed_command *output);
 int help (int argc, char **argv);
 int peek (int argc, char **argv);
 int poke (int argc, char **argv);
+int load_rom (int argc, char **argv);
+int do_printenv (int argc, char **argv);
+int do_setenv (int argc, char **argv);
+int do_unsetenv (int argc, char **argv);
 void entry (void);
+void set_bev (int yesOrNo);
+void set_interrupts (int yesOrNo);
 
 /* Global variables. */
 
@@ -61,13 +73,18 @@ struct command_table_entry command_table[] = {
   {"poke", "Write value to address", poke},
   {"info", "Print information about loaded program", info},
   {"boot", "Run a program which has previously been loaded", boot},
+  {"rom", "Load a file from ROM", load_rom},
+  {"printenv", "Print the boot environment", do_printenv},
+  {"setenv", "Set an environment variable", do_setenv},
+  {"unsetenv", "Delete an environment variable", do_unsetenv},
   {0, 0}
 };
 
 /* Buffer in which to store a received file. */
 unsigned char *recv_buffer = (unsigned char *) BASE_ADDR;
+unsigned char *orig_recv_buffer = (unsigned char *) BASE_ADDR;
 
-/* Size of last file received, or -1 if none yet received. */
+/* Size in bytes of last file received, or -1 if none yet received. */
 static long recv_size = -1;
 
 /* These functions support the XModem receive code (xmrcv.c). */
@@ -89,6 +106,7 @@ receive (int argc, char **argv)
 {
   int rv;
 
+  recv_buffer = orig_recv_buffer; /* if we ROM'd something before */
   puts ("Ready to receive file.");
   term_disable(COOKED);
   rv = xmrcv (&recv_size, recv_buffer);
@@ -144,22 +162,34 @@ boot (int argc, char **argv)
       return -1;
     }
 
+  printf ("Moving %lu bytes of text from %lx-%lx to %lx-%lx...", h.text_size,
+	  (unsigned long) recv_buffer + h.text_offset, (unsigned long) recv_buffer + h.text_offset+h.text_size,
+	  (unsigned long) h.text_addr, h.text_addr+h.text_size);
   memmove ((void *) h.text_addr, recv_buffer + h.text_offset, h.text_size);
-  printf ("Moved %u bytes of text from %x to %x\n", h.text_size,
-	  recv_buffer + h.text_offset, h.text_addr);
+  puts ("ok.");
+  printf ("Moving %lu bytes of data from %lx-%lx to %lx-%lx...", h.data_size,
+	  (unsigned long) recv_buffer + h.data_offset, (unsigned long) recv_buffer + h.data_offset+h.data_size,
+	  (unsigned long) h.data_addr, h.data_addr+h.data_size);
   memmove ((void *) h.data_addr, recv_buffer + h.data_offset, h.data_size);
-  printf ("Moved %u bytes of data from %x to %x\n", h.data_size,
-	  recv_buffer + h.data_offset, h.data_addr);
+  puts ("ok.");
+  printf ("Zeroing out bss (%lu bytes at %lx)...", h.bss_size, h.bss_addr);
   memset ((void *) h.bss_addr, 0, h.bss_size);
-  printf ("Zeroed out bss (%u bytes at %x)\n", h.bss_size, h.bss_addr);
+  puts ("ok.");
 
   puts("When you walk through the storm");
   puts("hold your head up high");
   puts("And don't ... be afraid ... of the dark!");
 
   harry = (entry_type) (h.file_header.entry_addr);
-  harry();
 
+  /* Turn off boot-time exception handler on the way out */
+  set_bev (0);
+
+  /* Jump to the program */
+  harry(argc - 1, argv + 1);
+
+  /* What, we're back here again?! */
+  set_bev (1);
   puts ("\n\nProgram terminated");
   return 0;
 }
@@ -222,12 +252,12 @@ help (int argc, char **argv)
   return 0;
 }
 
-int
+void
 print_mem(unsigned long address, unsigned long value)
 {
   char *c = (char *) &value;
 #define printify(x) (isprint(x) ? (x) : '.')
-  printf("%x: %x [%c%c%c%c]\n", address, value, printify(c[0]),
+  printf("%lx: %lx [%c%c%c%c]\n", address, value, printify(c[0]),
     printify(c[1]), printify(c[2]), printify(c[3]));
 #undef printify
 }
@@ -236,7 +266,6 @@ int
 peek (int argc, char **argv)
 {
   unsigned long address, length, value, i;
-  char *c = (char *) &value;
 
   if (argc < 3)
     {
@@ -256,8 +285,7 @@ peek (int argc, char **argv)
 int
 poke (int argc, char **argv)
 {
-  unsigned long address, value, i;
-  char *c = (char *) &value;
+  unsigned long address, value;
 
   if (argc < 3)
     {
@@ -269,7 +297,60 @@ poke (int argc, char **argv)
   *((volatile unsigned long *)address) = value;
   value = *((volatile unsigned long *)address);
   print_mem(address, value);
-  return -1;
+  return 0;
+}
+
+int
+do_printenv (int argc, char **argv)
+{
+  printenv ();
+  return 0;
+}
+
+int
+do_setenv (int argc, char **argv)
+{
+  char *varname, *value;
+  if (argc != 3) {
+	puts ("Usage: setenv varname value");
+	return -1;
+  }
+  varname = argv[1];
+  value = argv[2];
+  setenv (varname, value);
+  return 0;
+}
+
+int
+do_unsetenv (int argc, char **argv)
+{
+  char *varname;
+  if (argc != 2) {
+	puts ("Usage: unsetenv varname");
+	return -1;
+  }
+  varname = argv[1];
+  unsetenv (varname);
+  return 0;
+}
+
+int
+load_rom (int argc, char **argv)
+{
+  unsigned long address, nwords;
+
+  if (argc != 3)
+    {
+      puts ("Usage: rom addr nwords");
+      return -1;
+    }
+  address = (unsigned long) strtol (argv[1], NULL, 0);
+  nwords = (unsigned long) strtol (argv[2], NULL, 0);
+  /* Don't actually copy, just make-believe it was received into ROM. */
+  recv_buffer = (unsigned char *) address;
+  recv_size = nwords * 4;
+  puts ("Ok.");
+  return 0;
 }
 
 /* Main entry point of the command processor. */
@@ -282,8 +363,19 @@ entry (void)
   /* You can turn this on to try out the microsecond clock. */
   /* turn_on_clock_interrupts(); */
   halted = 0;
-  term_enable(COOKED);
+  serial_init ();
+  term_enable (COOKED);
+  initbootenv ();
   puts ("\n\nVmips boot monitor");
+  set_status (Status_CU0_MASK | Status_DS_BEV_MASK);
+  set_cause (0);
+  if ((recv_buffer != orig_recv_buffer) && (recv_size != -1))
+    {
+      char *newargv[] = { "boot", NULL };
+      printf ("Autobooting preloaded ROM file at %x\n",
+              (unsigned int) recv_buffer);
+      boot (1, newargv);
+    }
   while (!halted)
     {
       puts_nonl ("> ");
@@ -299,4 +391,35 @@ entry (void)
     }
   puts ("Halting.");
   return;
+}
+
+void set_bev (int yesOrNo)
+{
+	int t = get_status ();
+	if (yesOrNo) {
+		t |= Status_DS_BEV_MASK;
+	} else {
+		t &= ~Status_DS_BEV_MASK;
+	}
+	set_status (t);
+}
+
+void set_interrupts (int yesOrNo)
+{
+	int t = get_status ();
+	if (yesOrNo) {
+		t |= Status_IEc_MASK;
+		t |= Status_IM_MASK;
+	} else {
+		t &= ~Status_IEc_MASK;
+		t &= ~Status_IM_MASK;
+	}
+	set_status (t);
+}
+
+void turn_on_clock_interrupts (void)
+{
+	int t = get_status ();
+	t |= (Status_IEc_MASK | 0x08000 /* clock interrupt line */);
+	set_status (t);
 }

@@ -1,6 +1,6 @@
 #include "xmrcv.h"
 
-int xmrcv(int *bytes_rcvd, unsigned char *buf)
+int xmrcv(long *bytes_rcvd, unsigned char *buf)
 {
 	int err = 0, x, i, packetno = 0;
 	unsigned char ch, seq, cmpl_seq, cksum, their_cksum;

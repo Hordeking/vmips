@@ -38,16 +38,16 @@ OPTDOC = options.texi
 OPTIONTBLH = $(top_srcdir)/optiontbl.h
 # This is less than optimal. We could consolidate CHAPTERS and DISTFILES
 # more than they are currently.
-CHAPTERS = $(srcdir)/to-do \
- $(srcdir)/linux-cross
+CHAPTERS = $(srcdir)/to-do
 CLEANFILES = vmips.log vmips.aux vmips.cp vmips.fn vmips.vr \
  vmips.tp vmips.ky vmips.pg vmips.toc vmips.cps vmips.fns vmips.pgs vmips.pod
 DISTCLEANFILES = 
 USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.dvi vmips.info vmips.html vmips.ps \
  vmips.pdf $(MANPAGES)
 MAINTAINERCLEANFILES = $(USERDOCS) vmips.pod vmipstool.pod
-DISTFILES = Makefile.in linux-cross to-do vmips.texi invoke.texi \
- $(USERDOCS) options.texi vmipstool.texi texinfo.tex fdl.texi
+DISTFILES = Makefile.in to-do vmips.texi invoke.texi \
+ $(USERDOCS) options.texi vmipstool.texi texinfo.tex copyright.texi \
+ rel-checklist.txt
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 MANSECT = 1
 vmips_MANPAGE = vmips.$(MANSECT)

@@ -71,8 +71,8 @@ CPZero::reset(void)
 	/* Reset Random register to upper bound (8<=Random<=63) */
 	reg[Random] = Random_UPPER_BOUND << 8;
 	/* Reset Status register: clear KUc, IEc, SwC (i.e., caches are not
-	 * switched), TS (TLB shutdown has not occurred), and set BEV (Bootstrap
-	 * exception vectors ARE in effect).
+	 * switched), TS (TLB shutdown has not occurred), and set
+	 * BEV (Bootstrap exception vectors ARE in effect).
 	 */
 	reg[Status] = (reg[Status] | Status_DS_BEV_MASK) &
 		~(Status_KUc_MASK | Status_IEc_MASK | Status_DS_SwC_MASK |
@@ -141,30 +141,27 @@ CPZero::address_trans(uint32 vaddr, int mode, bool *cacheable,
 {
 	if (kernel_mode()) {
 		switch(vaddr & KSEG_SELECT_MASK) {
-			case KSEG0:
-				*cacheable = true;
-				return vaddr - KSEG0_CONST_TRANSLATION;
-				break;
-			case KSEG1:
-				*cacheable = false;
-				return vaddr - KSEG1_CONST_TRANSLATION;
-				break;
-			case KSEG2:
-			case KSEG2_top:
-				return tlb_translate(KSEG2, vaddr, mode, cacheable, client);
-				break;
-			default: /* KUSEG */
-				return tlb_translate(KUSEG, vaddr, mode, cacheable, client);
-				break;
-		}
-	} else /* user mode */ {
-		if (vaddr & KERNEL_SPACE_MASK) {
-			/* Can't go there. */
-			client->exception(mode == DATASTORE ? AdES : AdEL, mode);
-			return 0xffffffff;
-		} else /* user space address */ {
+		case KSEG0:
+			*cacheable = true;
+			return vaddr - KSEG0_CONST_TRANSLATION;
+		case KSEG1:
+			*cacheable = false;
+			return vaddr - KSEG1_CONST_TRANSLATION;
+		case KSEG2:
+		case KSEG2_top:
+			return tlb_translate(KSEG2, vaddr, mode, cacheable, client);
+		default: /* KUSEG */
 			return tlb_translate(KUSEG, vaddr, mode, cacheable, client);
 		}
+	}
+	
+	/* user mode */
+	if (vaddr & KERNEL_SPACE_MASK) {
+		/* Can't go there. */
+		client->exception(mode == DATASTORE ? AdES : AdEL, mode);
+		return 0xffffffff;
+	} else /* user space address */ {
+		return tlb_translate(KUSEG, vaddr, mode, cacheable, client);
 	}
 }
 
@@ -200,7 +197,8 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 	DeviceExc *client)
 {
 	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & EntryHi_VPN_MASK;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
+	uint32 vpn = vaddr & EntryHi_VPN_MASK;
 
 	match = find_matching_tlb_entry(vpn, asid);
 	tlb_miss_user = false;
@@ -251,11 +249,11 @@ CPZero::mtc0_emulate(uint32 instr, uint32 pc)
 
 	/* DO AS I SAY, NOT AS I DO...
 	 * This preserves the bits which are readable but not writable,
-     * and writes the bits which are writable with new data, thus
+	 * and writes the bits which are writable with new data, thus
 	 * making it suitable for mtc0-type operations.
 	 * If you want to write all the bits which are _connected_,
 	 * use reg[regno] = new_data & write_masks[regno]; .
-     */
+	 */
 	reg[regno] = (reg[regno] & (read_masks[regno] & ~write_masks[regno]))
 		| (new_data & write_masks[regno]);
 }
@@ -265,11 +263,11 @@ CPZero::bc0x_emulate(uint32 instr, uint32 pc)
 {
 	uint16 condition = cpu->rt(instr);
 	switch(condition) {
-		case 0: /* bc0f */ if (! cpCond) { cpu->branch(instr, pc); } break;
-		case 1: /* bc0t */ if (cpCond) { cpu->branch(instr, pc); } break;
-		case 2: /* bc0fl - not valid, but not reserved(A-17, H&K) - no-op. */ ;
-		case 3: /* bc0tl - not valid, but not reserved(A-21, H&K) - no-op. */ ;
-		default: cpu->exception(RI); break; /* reserved */
+	case 0: /* bc0f */ if (! cpCond) { cpu->branch(instr, pc); } break;
+	case 1: /* bc0t */ if (cpCond) { cpu->branch(instr, pc); } break;
+	case 2: /* bc0fl - not valid, but not reserved(A-17, H&K) - no-op. */ ;
+	case 3: /* bc0tl - not valid, but not reserved(A-21, H&K) - no-op. */ ;
+	default: cpu->exception(RI); break; /* reserved */
 	}
 }
 
@@ -330,21 +328,21 @@ CPZero::cpzero_emulate(uint32 instr, uint32 pc)
 {
 	if (cpu->rs(instr) > 15) {
 		switch(cpu->funct(instr)) {
-			case 1: tlbr_emulate(instr, pc); break;
-			case 2: tlbwi_emulate(instr, pc); break;
-			case 6: tlbwr_emulate(instr, pc); break;
-			case 8: tlbp_emulate(instr, pc); break;
-			case 16: rfe_emulate(instr, pc); break;
-			default: cpu->exception(RI,ANY,0); break;
+		case 1: tlbr_emulate(instr, pc); break;
+		case 2: tlbwi_emulate(instr, pc); break;
+		case 6: tlbwr_emulate(instr, pc); break;
+		case 8: tlbp_emulate(instr, pc); break;
+		case 16: rfe_emulate(instr, pc); break;
+		default: cpu->exception(RI,ANY,0); break;
 		}
 	} else {
 		switch(cpu->rs(instr)) {
-			case 0: mfc0_emulate(instr,pc); break;
-			case 2: cpu->exception(RI,ANY,0); break; /* cfc0 - reserved */
-			case 4: mtc0_emulate(instr,pc); break;
-			case 6: cpu->exception(RI,ANY,0); break; /* ctc0 - reserved */
-			case 8: bc0x_emulate(instr,pc); break;
-			default: cpu->exception(RI,ANY,0); break;
+		case 0: mfc0_emulate(instr,pc); break;
+		case 2: cpu->exception(RI,ANY,0); break; /* cfc0 - reserved */
+		case 4: mtc0_emulate(instr,pc); break;
+		case 6: cpu->exception(RI,ANY,0); break; /* ctc0 - reserved */
+		case 8: bc0x_emulate(instr,pc); break;
+		default: cpu->exception(RI,ANY,0); break;
 		}
 	}
 }
@@ -352,13 +350,13 @@ CPZero::cpzero_emulate(uint32 instr, uint32 pc)
 void
 CPZero::adjust_random(void)
 {
-/* For initial == 12, lower bound == 8, upper bound == 63, the
- * sequence looks like this:
- *  12 11 10  9  8 63 62 61 60 ... 12 11 10  9  8 63 ... (x)
- *  51 52 53 54 55  0  1  2  3 ... 51 52 53 54 55  0 ... (63 - x)
- */
+	/* For initial == 12, lower bound == 8, upper bound == 63, the
+	 * sequence looks like this:
+	 *  12 11 10  9  8 63 62 61 60 ... 12 11 10  9  8 63 ... (x)
+	 *  51 52 53 54 55  0  1  2  3 ... 51 52 53 54 55  0 ... (63 - x)
+	 */
 	int32 r = (int32) (reg[Random] >> 8);
-    r = -(((Random_UPPER_BOUND - r + 1) %
+	r = -(((Random_UPPER_BOUND - r + 1) %
 		(Random_UPPER_BOUND - Random_LOWER_BOUND + 1)) -
 			Random_UPPER_BOUND);
 	reg[Random] = (uint32) (r << 8);
@@ -367,12 +365,13 @@ CPZero::adjust_random(void)
 uint32
 CPZero::getIP(void)
 {
-    uint32 HwIP = 0, IP = 0;
+	uint32 HwIP = 0, IP = 0;
 	if (intc != NULL) {
-		HwIP = intc->calculateIP();	/* Check for a hardware interrupt. */
+		/* Check for a hardware interrupt. */
+		HwIP = intc->calculateIP();
 	}
 	IP = (reg[Cause] & Cause_IP_SW_MASK) | HwIP;
-    return IP;
+	return IP;
 }
 
 void
@@ -389,7 +388,7 @@ CPZero::enter_exception(uint32 pc, uint32 excCode, uint32 ce, bool dly)
 	 * Unusable exception. (If we are passed ce=-1 we don't want
 	 * to toggle bits in Cause.) */
 	if (excCode == CpU) {
-	  reg[Cause] |= ((ce & 0x3) << 28);
+		reg[Cause] |= ((ce & 0x3) << 28);
 	}
 	/* Update IP, BD, ExcCode fields of Cause register. */
 	reg[Cause] |= getIP () | (dly << 31) | (excCode << 2);
@@ -417,11 +416,11 @@ bool
 CPZero::cop_usable(int coprocno)
 {
 	switch (coprocno) {
-		case 3: return (reg[Status] & Status_CU3_MASK);
-		case 2: return (reg[Status] & Status_CU2_MASK);
-		case 1: return (reg[Status] & Status_CU1_MASK);
-		case 0: return (reg[Status] & Status_CU0_MASK);
-		default: fatal_error ("Bad coprocno passed to CPZero::cop_usable()");
+	case 3: return (reg[Status] & Status_CU3_MASK);
+	case 2: return (reg[Status] & Status_CU2_MASK);
+	case 1: return (reg[Status] & Status_CU1_MASK);
+	case 0: return (reg[Status] & Status_CU0_MASK);
+	default: fatal_error ("Bad coprocno passed to CPZero::cop_usable()");
 	};
 }
 
@@ -465,7 +464,8 @@ bool
 CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 {
 	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & EntryHi_VPN_MASK;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
+	uint32 vpn = vaddr & EntryHi_VPN_MASK;
 	bool rv;
 
 	if ((!kernel_mode()) && (vaddr & KERNEL_SPACE_MASK)) {

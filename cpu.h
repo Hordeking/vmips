@@ -25,6 +25,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "mapper.h"
 #include "cpzero.h"
 #include "debug.h"
+#include <map>
+#include <deque>
 
 class vmips;
 
@@ -40,21 +42,114 @@ struct excPriority {
 	int mode;
 };
 
+struct last_change {
+    uint32 pc;
+    uint32 instr;
+    uint32 old_value;
+    last_change () { }
+    last_change (uint32 pc_, uint32 instr_, uint32 old_value_) :
+        pc(pc_), instr(instr_), old_value(old_value_) { }
+    static last_change make (uint32 pc_, uint32 instr_, uint32 old_value_) {
+        last_change rv (pc_, instr_, old_value_);
+        return rv;
+    }
+};
+
+class Trace {
+public:
+	struct Operand {
+		const char *tag;
+		int regno;
+		uint32 val;
+		Operand () : regno (-1) { }
+		Operand (const char *tag_, int regno_, uint32 val_) :
+			tag(tag_), regno(regno_), val(val_) { }
+		static Operand make (const char *tag_, int regno_, uint32 val_) {
+			Operand rv (tag_, regno_, val_);
+			return rv;
+		}
+		Operand (const char *tag_, uint32 val_) :
+			tag(tag_), regno(-1), val(val_) { }
+		static Operand make (const char *tag_, uint32 val_) {
+			Operand rv (tag_, val_);
+			return rv;
+		}
+	};
+	struct Record {
+		typedef std::vector<Operand> OperandListType;
+        OperandListType inputs;
+        OperandListType outputs;
+		uint32 pc;
+		uint32 instr;
+		uint32 saved_reg[32];
+		void inputs_push_back_op (const char *tag, int regno, uint32 val) {
+			inputs.push_back(Operand::make(tag, regno, val));
+		}
+		void inputs_push_back_op (const char *tag, uint32 val) {
+			inputs.push_back(Operand::make(tag, val));
+		}
+		void outputs_push_back_op (const char *tag, int regno, uint32 val) {
+			outputs.push_back(Operand::make(tag, regno, val));
+		}
+		void outputs_push_back_op (const char *tag, uint32 val) {
+			outputs.push_back(Operand::make(tag, val));
+		}
+		void clear () { inputs.clear (); outputs.clear (); pc = 0; instr = 0; }
+	};
+	typedef std::deque<Record> RecordListType;
+	typedef RecordListType::iterator record_iterator;
+private:
+	RecordListType records;
+public:
+    std::map <int, last_change> last_change_for_reg;
+	record_iterator rbegin () { return records.begin (); }
+	record_iterator rend () { return records.end (); }
+    void clear () { records.clear (); last_change_for_reg.clear (); }
+    size_t record_size () const { return records.size (); }
+    void pop_front_record () { records.pop_front (); }
+    void push_back_record (Trace::Record &r) { records.push_back (r); }
+	bool exception_happened;
+	int last_exception_code;
+};
+
 class CPU : public DeviceExc {
+private:
+	/* Tracing data. */
+	bool tracing;
+	Trace current_trace;
+	Trace::Record current_trace_record;
+
+	/* Tracing support methods. */
+	void start_tracing ();
+	void write_trace_to_file ();
+	void write_trace_instr_inputs (uint32 instr);
+	void write_trace_instr_outputs (uint32 instr);
+	void write_trace_record_1 (uint32 pc, uint32 instr);
+	void write_trace_record_2 (uint32 pc, uint32 instr);
+	void stop_tracing ();
+
+	/* Ordinary stuff. */
+	virtual ~CPU () {}
 	friend class CPZero;
 
-private:
-	uint32 pc;
-	uint32 reg[32]; /* general purpose registers */
-	uint32 instr;
-	uint32 hi;
-	uint32 lo;
+	uint32 pc;      // Program counter
+	uint32 reg[32]; // General-purpose registers
+	uint32 instr;   // The current instruction
+	uint32 hi, lo;  // Division and multiplication results
+
+	/* Exception bookkeeping. */
+	uint32 last_epc;
+	int last_prio;
+	uint32 next_epc;
+
+	/* Other components of the VMIPS machine. */
 	Mapper *mem;
 	CPZero *cpzero;
 	vmips *machine;
+
+    /* Delay slot handling. */
 	int delay_state;
 	uint32 delay_pc;
-	uint32 next_epc;
 
 	/* Options used: */
 	bool opt_excmsg;
@@ -63,6 +158,11 @@ private:
 	bool opt_haltibe;
 	bool opt_haltjrra;
 	bool opt_instdump;
+	bool opt_tracing;
+	uint32 opt_tracesize;
+	uint32 opt_tracestartpc;
+	uint32 opt_traceendpc;
+	bool opt_bigendian; // True if CPU in big endian mode.
 
 	int exception_priority(uint16 excCode, int mode);
 	uint32 calc_jump_target(uint32 instr, uint32 pc);
@@ -70,6 +170,10 @@ private:
 	void mult64(uint32 *hi, uint32 *lo, uint32 n, uint32 m);
 	void mult64s(uint32 *hi, uint32 *lo, int32 n, int32 m);
 	void cop_unimpl (int coprocno, uint32 instr, uint32 pc);
+	uint32 lwr(uint32 regval, uint32 memval, uint8 offset);
+	uint32 lwl(uint32 regval, uint32 memval, uint8 offset);
+	uint32 swl(uint32 regval, uint32 memval, uint8 offset);
+	uint32 swr(uint32 regval, uint32 memval, uint8 offset);
 
 	void funct_emulate(uint32 instr, uint32 pc);
 	void regimm_emulate(uint32 instr, uint32 pc);
@@ -165,12 +269,17 @@ public:
 	void exception(uint16 excCode, int mode = ANY, int coprocno = -1);
 	void reset(void);
 
+	/* Tracing support functions. */
+	void maybe_dump_trace ();
+
 	/* Debug functions. */
 	char *debug_registers_to_packet(void);
 	void debug_packet_to_registers(char *packet);
 	uint8 pending_exception(void);
 	uint32 debug_get_pc(void);
 	void debug_set_pc(uint32 newpc);
+	void debug_packet_push_word(char *packet, uint32 n);
+	void debug_packet_push_byte(char *packet, uint8 n);
 	int debug_fetch_region(uint32 addr, uint32 len, char *packet,
 		DeviceExc *client);
 	int debug_store_region(uint32 addr, uint32 len, char *packet,

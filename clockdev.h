@@ -52,7 +52,7 @@ public:
 	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
 
 	/* Return a description of this device. */
-	virtual char *descriptor_str();
+	virtual const char *descriptor_str() const;
 
 protected:
 	/* Transition the clock into the UNREADY state and deassert the

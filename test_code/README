@@ -62,25 +62,18 @@ Test-suite automation information
    Exception prioritizing
    Non-boot-time exception vectors
    All the TLB exceptions
+    Check TLB does the right thing when you have a dirty vs non-dirty entry
    Unimplemented Coprocessor exceptions
    Reserved Instruction exceptions
    Exceptions due to PC address translation
-   Address error exceptions due to unaligned accesses
-  /* Instructions:
-   *  add when the answer doesn't overflow
-   *  blez, bgtz, slti, lbu, lhu, sb, sh, jalr, divu, subu, or, nor
-   *  tlbp when the tlb entry you want isn't there
-   *  mult when you don't HAVE_LONG_LONG
-   * 8/Jan/2002: these are done.
-   */
   Interrupts
   Options:
-   Instdump, dumpcpu, dumpcp0, haltdumpcp0, instcounts, bootmsg
+   dumpcpu, dumpcp0, haltdumpcp0, bootmsg
    Non-existing romfile
    tilde_expand where it's not your home directory
    Behavior w/ bogus args and/or unknown options
   Address translations in KSEG0 or KSEG2 or KUSEG or User mode
 
 
-CVS: $Id: README,v 1.23.2.1 2003/08/18 01:01:45 brg Exp $
+CVS: $Id: README,v 1.26 2003/10/25 18:22:08 brg Exp $
  

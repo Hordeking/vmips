@@ -47,42 +47,6 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
 
-/* Define if your processor stores words with the most significant
-   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-#undef WORDS_BIGENDIAN
-
-/* Define to 1 if the MIPS cross target is Big-Endian, 0 otherwise. */
-#undef TARGET_BIG_ENDIAN
-
-/* Define to 1 if the MIPS cross target is Little-Endian, 0 otherwise. */
-#undef TARGET_LITTLE_ENDIAN
-
-/* Define if the SPIM-compatible console device is to be compiled in. */
-#undef TTY
-
-/* Define to initialize registers to random values instead of zero. */
-#undef INTENTIONAL_CONFUSION
-
-/* Define to enable the -D option for debugging of options parsing. */
-#undef OPTIONS_DEBUG
-
-/* Define to the type pointed to by the third argument to getsockname, if it
- * is not socklen_t.
- */
-#undef socklen_t
-
-/* Define to the full path plus the shared prefix (what comes before cc, as,
- * ld, etc., usually consisting of the GNU target name plus a hyphen) of
- * your MIPS cross tools.
- */
-#undef MIPSTOOLPREFIX
-
-/* Define to whatever option forces your MIPS cross tools to match the
- * endianness denoted by the current setting of TARGET_BIG_ENDIAN or
- * TARGET_LITTLE_ENDIAN.
- */
-#undef ENDIAN_FLAG
-
 /* The number of bytes in a char.  */
 #undef SIZEOF_CHAR
 
@@ -98,17 +62,11 @@
 /* The number of bytes in a short.  */
 #undef SIZEOF_SHORT
 
-/* Define if you have the getopt function.  */
-#undef HAVE_GETOPT
-
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
-
-/* Define if you have the mktime function.  */
-#undef HAVE_MKTIME
 
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
@@ -116,29 +74,14 @@
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
-/* Define if you have the strcasecmp function.  */
-#undef HAVE_STRCASECMP
-
 /* Define if you have the strdup function.  */
 #undef HAVE_STRDUP
 
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
 
-/* Define if you have the strtol function.  */
-#undef HAVE_STRTOL
-
-/* Define if you have the strtoul function.  */
-#undef HAVE_STRTOUL
-
-/* Define if you have the <dlfcn.h> header file.  */
-#undef HAVE_DLFCN_H
-
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
-
-/* Define if you have the <getopt.h> header file.  */
-#undef HAVE_GETOPT_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
@@ -158,6 +101,16 @@
 /* Version number of package */
 #undef VERSION
 
+/* Define to initialize registers to random values instead of zero. */
+#undef INTENTIONAL_CONFUSION
+
+/* Define if you don't want any assertions checked at runtime. */
+#undef NDEBUG
+
+/* Define to the type pointed to by the third argument to getsockname,
+     if it is not socklen_t. */
+#undef socklen_t
+
 /* Define if __attribute__((noreturn)) syntax can be used to specify
    that a function will never return. */
 #undef HAVE_ATTRIBUTE_NORETURN
@@ -171,4 +124,10 @@
 
 /* Currently not used. */
 #undef AS
+
+/* Currently not used. */
+#undef CCASFLAGS
+
+/* Currently not used. */
+#undef CCAS
 

@@ -24,8 +24,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "excnames.h"
 #include "cpzeroreg.h"
 #include "vmips.h"
+#include "options.h"
 
-extern vmips *machine;
 extern int remotegdb_backend_error;
 
 Debug::Debug()
@@ -36,12 +36,17 @@ Debug::Debug()
 	signo = exccode_to_signal(Bp);
 	cpu = NULL;
 	mem = NULL;
-    listener = -1;
+	listener = -1;
 	threadno_step = -1;
 	threadno_gen = -1;
 	rom_baseaddr = 0;
 	rom_nwords = 0;
-	rom_bp_bitmap = NULL;
+	got_interrupt = false;
+	opt_bigendian = machine->opt->option("bigendian")->flag;
+}
+
+Debug::~Debug()
+{
 }
 
 void
@@ -60,17 +65,15 @@ Debug::attach(CPU *c, Mapper *m)
 	if (m) mem = m;
 }
 
+void
+debugger_interrupt (int sig)
+{
+	machine->dbgr->got_interrupt = true;
+}
+
 int
 Debug::setup(uint32 baseaddr, uint32 nwords)
 {
-	/* Allocate space for one bit per ROM word in the ROM breakpoint
-	 * bitmap (rom_bp_bitmap). Initially, all breakpoints are cleared.
-	 */
-	rom_bp_bitmap = new uint8[nwords / 8];
-	for (uint32 i = 0; i < (nwords/8); i++) {
-		rom_bp_bitmap[i] = 0;
-	}
-		
 	rom_baseaddr = baseaddr;
 	rom_nwords = nwords;
 
@@ -79,48 +82,46 @@ Debug::setup(uint32 baseaddr, uint32 nwords)
 	if (listener >= 0) {
 		/* Print out where we bound to. */
 		print_local_name(listener);
-		return 0;
 	} else {
 		return -1;
 	}
+
+	struct sigaction sa;
+	sa.sa_handler = debugger_interrupt;
+	sa.sa_flags = 0;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGINT, &sa, NULL) < 0) {
+		perror ("sigaction");
+		return -1;
+	}
+	return 0;
 }
 
-/* True if a ROM breakpoint has been set for the instruction given in ADDR,
+/* True if a breakpoint has been set for the instruction given in ADDR,
  * and false otherwise.
  */
 bool
-Debug::rom_breakpoint_exists(uint32 addr)
+Debug::breakpoint_exists(uint32 addr)
 {
-	uint8 *bitmap_entry;
-	uint8 bitno;
-	
-	get_breakpoint_bitmap_entry(addr, bitmap_entry, bitno);
-	if (! bitmap_entry) return false;
-	return (*bitmap_entry & (1 << bitno)) != 0;
+	return (bp_set.find (addr) != bp_set.end ());
 }
 
-/* Set a ROM breakpoint for the instruction given in ADDR. */
+/* Set a breakpoint for the instruction given in ADDR. */
 void
-Debug::declare_rom_breakpoint(uint32 addr)
+Debug::declare_breakpoint(uint32 addr)
 {
-	uint8 *bitmap_entry;
-	uint8 bitno;
-	
-	get_breakpoint_bitmap_entry(addr, bitmap_entry, bitno);
-	if (! bitmap_entry) return;
-	*bitmap_entry |= (1 << bitno);
+	bp_set.insert (addr);
 }
 
-/* Unset a ROM breakpoint for the instruction given in ADDR. */
+/* Unset a breakpoint for the instruction given in ADDR. */
 void
-Debug::remove_rom_breakpoint(uint32 addr)
+Debug::remove_breakpoint(uint32 addr)
 {
-	uint8 *bitmap_entry;
-	uint8 bitno;
-	
-	get_breakpoint_bitmap_entry(addr, bitmap_entry, bitno);
-	if (! bitmap_entry) return;
-	*bitmap_entry &= ~(1 << bitno);
+	wordset::iterator i = bp_set.find (addr);
+	if (i != bp_set.end ()) {
+		bp_set.erase (i);
+	}
 }
 
 /* True if ADDR is a virtual address within a known ROM block. This is pretty
@@ -132,27 +133,6 @@ Debug::address_in_rom(uint32 addr)
 	return !((addr < rom_baseaddr) || (addr > (rom_baseaddr + 4*rom_nwords)));
 }
 
-/* Given the address (ADDR) of an instruction, return the corresponding
- * entry in the ROM breakpoint bitmap (in ENTRY) and the corresponding
- * bit number in that entry (in BITNO).
- */
-void
-Debug::get_breakpoint_bitmap_entry(uint32 addr, uint8 *&entry, uint8 &bitno)
-{
-	uint32 wordno;
-
-	if (! address_in_rom(addr)) {
-		fprintf(stderr, "That doesn't look like a ROM address to me: %08x\n",
-			addr);
-		entry = NULL;
-		return;
-	}
-	addr -= rom_baseaddr;
-	wordno = addr >> 5;
-	bitno = addr >> 2 & 0x07;
-	entry = &rom_bp_bitmap[wordno];
-}
-
 /* Determine whether the packet pointer passed in points to a (serial-encoded)
  * GDB break instruction, and return true if this is the case.
  */
@@ -160,40 +140,24 @@ bool
 Debug::is_breakpoint_insn(char *packetptr)
 {
 	int posn = 0;
-#if TARGET_BIG_ENDIAN
-	char break_insn[] = BIG_BREAKPOINT;
-#elif TARGET_LITTLE_ENDIAN
-	char break_insn[] = LITTLE_BREAKPOINT;
-#endif
-	int bytes = sizeof(break_insn);
+	char big_break_insn[] = BIG_BREAKPOINT;
+	char little_break_insn[] = LITTLE_BREAKPOINT;
+	char *break_insn;
+	int bytes;
 
+	if (opt_bigendian) {
+		break_insn = big_break_insn;
+		bytes = sizeof (big_break_insn);
+	} else /* if MIPS target is little endian */ {
+		break_insn = little_break_insn;
+		bytes = sizeof (little_break_insn);
+	}
 	while (--bytes) {
 		if (packet_pop_byte(&packetptr) != break_insn[posn++]) 
 			return false;
 	}
 	return true;
 }
-
-void
-Debug::packet_push_word(char *packet, uint32 n)
-{
-	char packetpiece[10];
-
-	if (TARGET_LITTLE_ENDIAN) {
-		n = Mapper::swap_word(n);
-	}
-	sprintf(packetpiece, "%08x", n);
-	strcat(packet, packetpiece);
-} 
-
-void
-Debug::packet_push_byte(char *packet, uint8 n)
-{
-	char packetpiece[4];
-
-	sprintf(packetpiece, "%02x", n);
-	strcat(packet, packetpiece);
-} 
 
 uint32
 Debug::packet_pop_word(char **packet)
@@ -210,9 +174,8 @@ Debug::packet_pop_word(char **packet)
 	}
 	*q++ = '\0';
 	val = strtoul(valstr, NULL, 16);
-	if (TARGET_LITTLE_ENDIAN) {
-		val = Mapper::swap_word(val);
-	}
+	if (!opt_bigendian)
+		val = machine->physmem->swap_word(val);
     *packet = p;
 	return val;
 }
@@ -252,13 +215,15 @@ Debug::setup_listener_socket(void)
 	addr.sin_port = 0;
 	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	value = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value,
-    	sizeof(value)) < 0) {
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value,
+		sizeof(value)) < 0) {
 		perror("setsockopt SO_REUSEADDR");
 		return -1;
 	}
 	if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 		perror("bind");
+		fprintf(stderr, "Failed bind addr: %s\n",
+			inet_ntoa(addr.sin_addr));
 		return -1;
 	}
 	if (listen(sock, 1) < 0) {
@@ -308,6 +273,11 @@ Debug::serverloop(void)
 		fprintf(stderr, "Waiting for connection from debugger.\n");
 		clientsock = accept(listener, (struct sockaddr *) &clientaddr,
 			&clientaddrlen);
+		if (clientsock < 0) {
+			perror ("accept");
+			return clientsock;
+		}
+
 		fprintf(stderr, "Debugger connected.\n");
 
 		/* Set the client socket nonblocking */
@@ -347,6 +317,10 @@ Debug::targetloop(void)
 			case 'k': result = target_kill(buf); break;
 			case 'H': result = target_set_thread(buf); break;
 			case '?': result = target_last_signal(buf); break;
+			case 'Z': result = target_set_or_remove_breakpoint(buf, true);
+                      break;
+			case 'z': result = target_set_or_remove_breakpoint(buf, false);
+                      break;
 			default:  result = target_unimplemented(buf); break;
 		}
 		packetno++;
@@ -476,46 +450,56 @@ Debug::target_write_memory(char *pkt)
 	char *datastr = strchr(pkt, ':');
 	uint32 addr, len;
 	if (! lenstr) {
-		/* fprintf(stderr, "STUB: Malformed write memory request (no ,) [%s]\n",
-			&pkt[1]); */
+		/* This write-memory request is malformed, because the comma is
+         * missing.  Send back an error packet. */
 		return error_packet(1);
 	}
 	lenstr[0] = 0;
 	lenstr++;
 	if (! datastr) {
-		/* fprintf(stderr, "STUB: Malformed write memory request (no :) [%s]\n",
-			&pkt[1]); */
+		/* This write-memory request is malformed, because the colon is
+         * missing.  Send back an error packet. */
 		return error_packet(1);
 	}
 	datastr[0] = 0;
 	datastr++;
-	/* fprintf(stderr, "STUB: write memory addr=%s len=%s data=%s\n",
-		addrstr, lenstr, datastr); */
+	/* At this point we have found all the arguments: the address, the length
+     * of data, and the data itself. We must translate the first two into
+     * integers, and then do some special handling for ROM breakpoint
+     * support.
+     */
 
 	addr = strtoul(addrstr, NULL, 16);
 	len = strtoul(lenstr, NULL, 16);
 
 	if ((len == 4) && address_in_rom(addr) && is_breakpoint_insn(datastr)) {
-		/* fprintf(stderr, "ROM breakpoint SET at %lx\n", addr); */
-		declare_rom_breakpoint(addr);
+		/* If attempting to write a word to ROM which is a breakpoint
+         * instruction, assume GDB is trying to set a breakpoint. 
+         */
+		declare_breakpoint(addr);
 	} else if ((len == 4) && address_in_rom(addr) &&
-	           rom_breakpoint_exists(addr) && !is_breakpoint_insn(datastr)) {
-		/* fprintf(stderr, "ROM breakpoint CLEARED at %lx\n", addr); */
-		remove_rom_breakpoint(addr);
+	           breakpoint_exists(addr) && !is_breakpoint_insn(datastr)) {
+		/* If attempting to write a word to ROM which is not a breakpoint
+         * instruction, and GDB previously set a breakpoint there, assume GDB
+         * is trying to clear a breakpoint. 
+         */
+		remove_breakpoint(addr);
 	} else {
 		if (cpu->debug_store_region(addr, len, datastr, this) < 0) {
 			return error_packet(1);
 		}
 	}
-
 	return rawpacket("OK");
 }
 
 uint8
 Debug::single_step(void)
 {
-	if (rom_breakpoint_exists(cpu->debug_get_pc())) {
+	if (breakpoint_exists(cpu->debug_get_pc())) {
 		return Bp; /* Simulate hitting the breakpoint. */
+	}
+	if (got_interrupt == true) {
+		return Bp; /* interrupt. */
 	}
 	machine->step();
 	return cpu->pending_exception();
@@ -528,16 +512,23 @@ Debug::target_continue(char *pkt)
 	uint32 addr;
 	int exccode;
 
-	if (! addrstr[0]) {
-		/* fprintf(stderr, "STUB: continue from last addr\n"); */
-	} else {
-		/* fprintf(stderr, "STUB: continue from addr=%s\n", addrstr); */
+	if (addrstr[0] != '\0') {
+		/* The user specified an address to continue from. Continue from the
+		 * address given in ADDRSTR by fiddling with the CPU's PC.
+		 */
 		addr = strtoul(addrstr, NULL, 16);
 		cpu->debug_set_pc(addr);
 	}
-	do { /* nothing */; } while ((exccode = single_step()) == 0);
-	signo = exccode_to_signal(exccode);
-	return signal_packet(signo);
+	do {
+		exccode = single_step();
+		if (got_interrupt && (exccode == Bp)) {
+			got_interrupt = false;
+			return signal_packet (exccode_to_signal (Bp));
+		} else if (exccode != 0) {
+			signo = exccode_to_signal (exccode);
+			return signal_packet(signo);
+		}
+	} while (true);
 }
 
 char * 
@@ -564,6 +555,44 @@ char *
 Debug::target_last_signal(char *pkt)
 {
 	return signal_packet(signo);
+}
+
+char * 
+Debug::target_set_or_remove_breakpoint(char *pkt, bool setting)
+{
+	char *typestr = &pkt[1];
+	char *addrstr = strchr (pkt, ',');
+	char *lenstr;
+	uint32 type, addr, len;
+	if (!addrstr) {
+		/* Requests must specify address in hex after first comma. */
+		return error_packet(1);
+	}
+	*addrstr++ = '\0';
+	lenstr = strchr (addrstr, ',');
+	if (!lenstr) {
+		/* Requests must specify length in hex after second comma. */
+		return error_packet(1);
+	}
+	*lenstr++ = '\0';
+	type = strtoul(typestr, NULL, 10);
+	addr = strtoul(addrstr, NULL, 16);
+	len = strtoul(lenstr, NULL, 16);
+	switch (type) {
+	case 0: /* software breakpoint */
+    case 1: /* hardware breakpoint */
+		if (setting) {
+			declare_breakpoint (addr);
+		} else {
+			remove_breakpoint (addr);
+		}
+		return rawpacket("OK");
+    case 2: /* write watchpoint */
+    case 3: /* read watchpoint */
+    case 4: /* access watchpoint */
+	default:
+		return rawpacket(""); /* Not supported. */
+	}
 }
 
 char * 

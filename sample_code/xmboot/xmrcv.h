@@ -12,4 +12,4 @@
 extern int receive_byte(unsigned char *ch);
 extern int send_byte(unsigned char ch);
 
-int xmrcv(int *bytes_rcvd, unsigned char *buf);
+int xmrcv(long *bytes_rcvd, unsigned char *buf);

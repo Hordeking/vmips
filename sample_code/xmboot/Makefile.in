@@ -25,42 +25,51 @@ pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
 
+top_builddir = ../..
+
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 
+VMIPSTOOL = $(top_builddir)/vmipstool -n -F $(top_builddir)/vmipsrc
 CC=@CC@
-CFLAGS=$(CPPFLAGS) -g -G 0
-HOST_CFLAGS=$(CPPFLAGS) -g
+CFLAGS=$(CPPFLAGS) -g -G 0 -Wall
+HOST_CFLAGS=$(CPPFLAGS) -g -Wall
 CPPFLAGS=-I$(top_srcdir) -I$(top_srcdir)/sample_code
 OBJS=$(COBJS) $(AOBJS)
 SETUP=../setup.o
-VMIPSTOOL=../../vmipstool
 
-DISTFILES= Makefile.in README boot.c boot_main.c coff.c coff.h \
- coff_main.c lib.c lib.h libtest.c libtest.input libtest.output loadtest.c \
+DISTFILES= Makefile.in README boot.c coff.c coff.h \
+ lib.c lib.h libtest.c libtest.input libtest.output loadtest.c \
  loadtest.script loadtest_setup.S pftest.c serial.c xmrcv.c xmrcv.h \
- xmrcv_main.c xmsend.c utils.S
+ boot.script boot_setup.S bootenv.c bootenv.h \
+ catrom panic.c serial.c serial.h set_status.h set_status.S testbootenv.c \
+ vmips16M pftest.output runtests testbootenv.output
 
-all: boot.rom pftest.rom boot.host coff.host loadtest
+all: boot.rom
+
+romkernel: $(KERNEL) catrom boot.rom
+	./catrom -a -n -v boot.rom $(KERNEL) boot$(KERNEL).rom
+
+kernelrom: $(KERNEL) catrom boot.rom
+	./catrom -b -n -v boot.rom $(KERNEL) boot$(KERNEL).rom
 
 install: boot.rom
 	$(mkinstalldirs) $(pkglibdir)
 	$(INSTALL_DATA) boot.rom $(pkglibdir)/boot.rom
 
-loadtest: loadtest_setup.o loadtest.o lib.o serial.o
+LIBGCC=$(shell $(VMIPSTOOL) --compile --print-libgcc-file-name)
+
+loadtest: loadtest_setup.o loadtest.o lib.o serial.o $(LIBGCC)
 	-$(VMIPSTOOL) --ld-script=$(srcdir)/loadtest.script --link -o $@ $+
 
 %.rom: %.exe
 	$(VMIPSTOOL) --make-rom $< $@
 
-pftest.exe: $(SETUP) pftest.o lib.o serial.o
-	$(VMIPSTOOL) --link -o $@ $+
-
-boot.exe: $(SETUP) boot.o coff.o lib.o xmrcv.o serial.o
-	$(VMIPSTOOL) --link -o $@ $+
+boot.exe: boot_setup.o boot.o coff.o lib.o xmrcv.o serial.o panic.o set_status.o bootenv.o
+	$(VMIPSTOOL) --ld-script=$(srcdir)/boot.script --link -o $@ $+
 
 %.o: %.c
 	$(VMIPSTOOL) --compile $(CFLAGS) -c -o $@ $<
@@ -72,56 +81,23 @@ boot.exe: $(SETUP) boot.o coff.o lib.o xmrcv.o serial.o
 	$(VMIPSTOOL) --assemble $(CFLAGS) -o $@ $<
 
 clean:
-	-rm -f *.rom *.exe *.o core setup.s libtest libtest.std ld.script
-	-rm -f setup.S boot.host coff.host loadtest
+	-rm -f *.rom *.exe *.o core loadtest libtest testbootenv pftest
 
 distclean: clean
 
 maintainer-clean: distclean
 
-libtest.std: libtest.std.o
+libtest: libtest.host.o lib.host.o
 	$(CC) $(HOST_CFLAGS) -o $@ $+
 
-libtest: libtest.o lib.host.o
+testbootenv: bootenv.host.o testbootenv.host.o
 	$(CC) $(HOST_CFLAGS) -o $@ $+
 
-libtest.std.o: libtest.c
-	$(CC) $(HOST_CFLAGS) -DUSE_STANDARD_LIBRARY -c -o $@ $+
-
-libtest.o: libtest.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-boot.host: boot.host.o coff.host.o lib.host.o xmrcv.host.o boot_main.host.o
+pftest: pftest.host.o lib.host.o
 	$(CC) $(HOST_CFLAGS) -o $@ $+
 
-lib.o: lib.c lib.h
-
-lib.host.o: lib.c lib.h
+%.host.o: %.c
 	$(CC) $(HOST_CFLAGS) -c -o $@ $<
-
-boot.host.o: boot.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-coff.host: coff.host.o coff_main.host.o
-	$(CC) $(HOST_CFLAGS) -o $@ $+
-
-coff.host.o: coff.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-coff_main.host.o: coff_main.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-boot_main.host.o: boot_main.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-xmrcv.host.o: xmrcv.c
-	$(CC) $(HOST_CFLAGS) -c -o $@ $+
-
-libtest.output: libtest.std libtest.input
-	./libtest.std < $(srcdir)/libtest.input > $(srcdir)/libtest.output
-
-check: libtest libtest.input libtest.output
-	./libtest < $(srcdir)/libtest.input | diff -u $(srcdir)/libtest.output -
 
 # Snarfed from automake and modified.
 distdir: $(DISTFILES)

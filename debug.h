@@ -43,15 +43,17 @@ private:
 	long threadno_gen;
 	uint32 rom_baseaddr;
 	uint32 rom_nwords;
-	uint8 *rom_bp_bitmap;
+	typedef std::set<uint32> wordset;
+	wordset bp_set;
+	bool opt_bigendian;
 
 public:
 	Debug();
+	virtual ~Debug();
+	bool got_interrupt;
 
-	static void packet_push_word(char *packet, uint32 n);
-	static void packet_push_byte(char *packet, uint8 n);
-	static uint32 packet_pop_word(char **packet);
-	static uint8 packet_pop_byte(char **packet);
+	uint32 packet_pop_word(char **packet);
+	uint8 packet_pop_byte(char **packet);
 
 	int setup(uint32 baseaddr, uint32 nwords);
 	int serverloop(void);
@@ -78,13 +80,14 @@ private:
 	char *target_last_signal(char *pkt);
 	char *target_unimplemented(char *pkt);
 	int exccode_to_signal(int exccode);
-	/* ROM breakpoint support methods. */
-	bool rom_breakpoint_exists(uint32 addr);
-	void declare_rom_breakpoint(uint32 addr);
-	void remove_rom_breakpoint(uint32 addr);
+	/* Breakpoint support methods. */
+	bool breakpoint_exists(uint32 addr);
+	void declare_breakpoint(uint32 addr);
+	void remove_breakpoint(uint32 addr);
 	bool address_in_rom(uint32 addr);
 	void get_breakpoint_bitmap_entry(uint32 addr, uint8 *&entry, uint8 &bitno);
 	bool is_breakpoint_insn(char *packetptr);
+	char *target_set_or_remove_breakpoint(char *pkt, bool setting);
 };
 
 #endif /* _DEBUG_H_ */

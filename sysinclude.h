@@ -44,14 +44,14 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _GNU_SOURCE
 # define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
-#ifdef HAVE_GETOPT_H
-# include <getopt.h>
-#endif /* HAVE_GETOPT_H */
 #include <stdarg.h>
 #include <cassert>
 #include <vector>
+#include <set>
 #include <new>
 #include <exception>
+#include <algorithm>
+#include <signal.h>
 
 /* We need this for mmap(2). */
 #if !defined(MAP_FAILED)
@@ -109,28 +109,6 @@ typedef unsigned char uint8;
 typedef char int8;
 #else
 #error "Can't find an 8-bit type, and I need one."
-#endif
-
-/* Define BYTESWAPPED if the MIPS target is byte-swapped with respect to
- * the host processor.
- */
-#if TARGET_BIG_ENDIAN
-#if !defined(WORDS_BIGENDIAN)
-#define BYTESWAPPED
-#endif
-#elif TARGET_LITTLE_ENDIAN
-#if defined(WORDS_BIGENDIAN)
-#define BYTESWAPPED
-#endif
-#else
-#error "MIPS cross tools are neither big nor little endian - unsupported"
-#endif
-
-#if WORDS_BIGENDIAN
-# undef WORDS_BIGENDIAN
-# define WORDS_BIGENDIAN 1
-#else
-# define WORDS_BIGENDIAN 0
 #endif
 
 #endif /* _SYSINCLUDE_H_ */

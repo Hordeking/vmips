@@ -16,8 +16,8 @@ set timeout 5
 # Need to use the right options here: pass real time to simulated clock
 # at 1 times wall clock time.
 #
-spawn -noecho $vmips -o noinstdump -o nobootmsg -o realtime -o timeratio=1 \
- $romfile
+spawn -noecho $vmips -n -F /dev/null -o [vmips_endian_option] -o noinstdump \
+ -o nobootmsg -o realtime -o timeratio=1 $romfile
 
 expect { 
 	-re {^\.\.\.\.\.$}    { verbose "Got 5 dots in 5 seconds"; send "\004" }

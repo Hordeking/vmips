@@ -102,7 +102,9 @@ AC_DEFUN(VMIPS_TYPE_SOCKLEN_T,
 vmips_cv_type_socklen_t=yes, vmips_cv_type_socklen_t=no)])
 if test "x$vmips_cv_type_socklen_t" = "xno"
 then
-  AC_DEFINE(socklen_t, int)
+  AC_DEFINE(socklen_t, int,
+    [Define to the type pointed to by the third argument to getsockname,
+     if it is not socklen_t.])
 fi])
 
 dnl Local macro: VMIPS_LINK_STATIC_GETPWNAM

@@ -13,9 +13,14 @@ __start:
 	li a0, CTL_IE
 	sw a0, 0(a1)
 	/* Turn interrupts on in the CP0. */
+	.set noreorder
 	mfc0 a0, Status
+	nop
 	ori a0, a0, 0x0401		/* IM2 and IEc */
 	mtc0 a0, Status
+	nop
+	nop
+	.set reorder
 	/* Sit and stew until something happens. */
 	move v0, zero 
 	move t0, zero 

@@ -20,12 +20,16 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpu.h"
 #include "vmips.h"
 #include "options.h"
-#include "regnames.h"
 #include "excnames.h"
 #include "cpzeroreg.h"
 #include "error.h"
 #include "remotegdb.h"
 #include "stub-dis.h"
+
+/* certain fixed register numbers which are handy to know */
+static const int reg_zero = 0;  /* always zero */
+static const int reg_sp = 29;   /* stack pointer */
+static const int reg_ra = 31;   /* return address */
 
 /* pointer to CPU method returning void and taking two uint32's */
 typedef void (CPU::*emulate_funptr)(uint32, uint32);
@@ -38,10 +42,10 @@ CPU::strdelaystate(const int state)
 	return statestr[state];
 }
 
-CPU::CPU(vmips *mch, Mapper *m, CPZero *cp0)
+CPU::CPU (vmips *mch, Mapper *m, CPZero *cp0) :
+	tracing (false), last_epc (0), last_prio (0), delay_state (NORMAL)
 {
-	delay_state = NORMAL;
-	reg[REG_ZERO] = 0;
+	reg[reg_zero] = 0;
 	attach(mch,m,cp0);
 }
 
@@ -56,6 +60,11 @@ CPU::attach(vmips *mch, Mapper *m, CPZero *cp0)
 		opt_haltibe = machine->opt->option("haltibe")->flag;
 		opt_haltjrra = machine->opt->option("haltjrra")->flag;
 		opt_instdump = machine->opt->option("instdump")->flag;
+		opt_tracing = machine->opt->option("tracing")->flag;
+		opt_tracesize = machine->opt->option("tracesize")->num;
+		opt_tracestartpc = machine->opt->option("tracestartpc")->num;
+		opt_traceendpc = machine->opt->option("traceendpc")->num;
+		opt_bigendian = machine->opt->option("bigendian")->flag;
 	}
 	if (m) mem = m;
 	if (cp0) cpzero = cp0;
@@ -70,7 +79,7 @@ CPU::reset(void)
 		reg[r] = random();
 	}
 #endif /* INTENTIONAL_CONFUSION */
-	reg[REG_ZERO] = 0;
+	reg[reg_zero] = 0;
 	pc = 0xbfc00000;
 	cpzero->reset();
 }
@@ -100,7 +109,7 @@ CPU::dump_regs_and_stack(FILE *f)
 	uint32 stackphys;
 
 	dump_regs(f);
-	if (cpzero->debug_tlb_translate(reg[REG_SP], &stackphys)) {
+	if (cpzero->debug_tlb_translate(reg[reg_sp], &stackphys)) {
 		mem->dump_stack(f, stackphys);
 	} else {
 		fprintf(f, "Stack: (not mapped in TLB)\n");
@@ -258,10 +267,8 @@ CPU::exception_priority(uint16 excCode, int mode)
 }
 
 void
-CPU::exception(uint16 excCode, int mode, int coprocno)
+CPU::exception(uint16 excCode, int mode /* = ANY */, int coprocno /* = -1 */)
 {
-	static uint32 last_epc = 0;
-	static int last_prio = 0;
 	int prio;
 	uint32 base, vector, epc;
 	bool delaying = (delay_state == DELAYSLOT);
@@ -339,6 +346,17 @@ CPU::exception(uint16 excCode, int mode, int coprocno)
 		fprintf(stderr,
 			" Priority is %d; delay state is %s; mem access mode is %s\n",
 			prio, strdelaystate(delay_state), strmemmode(mode));
+		if (excCode == Int) {
+		  uint32 status, bad, cause;
+		  cpzero->read_debug_info(&status, &bad, &cause);
+		  fprintf (stderr, " Interrupt cause = %x, status = %x\n", cause, status);
+		}
+	}
+    if (opt_tracing) {
+		if (tracing) {
+			current_trace.exception_happened = true;
+			current_trace.last_exception_code = excCode;
+		}
 	}
 	pc = base + vector;
 	exception_pending = true;
@@ -425,7 +443,7 @@ CPU::jal_emulate(uint32 instr, uint32 pc)
 	delay_state = DELAYING;
 	delay_pc = calc_jump_target(instr, pc);
 	/* RA gets addr of instr after delay slot (2 words after this one). */
-	reg[REG_RA] = pc + 8;
+	reg[reg_ra] = pc + 8;
 }
 
 /* Take the PC-relative branch for which the offset is specified by
@@ -566,14 +584,14 @@ CPU::lb_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch byte.
 	 * Because it is assigned to a signed variable (int32 byte)
 	 * it will be sign-extended.
 	 */
 	byte = mem->fetch_byte(phys, cacheable, this);
-	if ((byte & 0xff == 0xff) && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Load target register with data. */
 	reg[rt(instr)] = byte;
@@ -600,14 +618,14 @@ CPU::lh_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch halfword.
 	 * Because it is assigned to a signed variable (int32 halfword)
 	 * it will be sign-extended.
 	 */
 	halfword = mem->fetch_halfword(phys, cacheable, this);
-	if ((halfword & 0xffff == 0xffff) && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Load target register with data. */
 	reg[rt(instr)] = halfword;
@@ -617,9 +635,10 @@ CPU::lh_emulate(uint32 instr, uint32 pc)
  * since I didn't manage to come up with a better way to write them.
  * Improvements are welcome.
  */
-uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
+uint32
+CPU::lwr(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (TARGET_BIG_ENDIAN) {
+	if (opt_bigendian) {
 		switch (offset)
 		{
 			case 0: return (regval & 0xffffff00) |
@@ -630,7 +649,7 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 						((unsigned)(memval & 0xffffff00) >> 8);
 			case 3: return memval;
 		}
-	} else if (TARGET_LITTLE_ENDIAN) {
+	} else /* if MIPS target is little endian */ {
 		switch (offset)
 		{
 			/* The SPIM source claims that "The description of the
@@ -652,9 +671,10 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 	fatal_error("Invalid offset %x passed to lwr\n", offset);
 }
 
-uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
+uint32
+CPU::lwl(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (TARGET_BIG_ENDIAN) {
+	if (opt_bigendian) {
 		switch (offset)
 		{
 			case 0: return memval;
@@ -662,7 +682,7 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 			case 2: return (memval & 0xffff) << 16 | (regval & 0xffff);
 			case 3: return (memval & 0xff) << 24 | (regval & 0xffffff);
 		}
-	} else if (TARGET_LITTLE_ENDIAN) {
+	} else /* if MIPS target is little endian */ {
 		switch (offset)
 		{
 			case 0: return (memval & 0xff) << 24 | (regval & 0xffffff);
@@ -691,11 +711,11 @@ CPU::lwl_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(wordvirt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch word. */
 	memword = mem->fetch_word(phys, DATALOAD, cacheable, this);
-	if (memword == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 	
 	/* Insert bytes into the left side of the register. */
 	which_byte = virt & 0x03;
@@ -722,11 +742,11 @@ CPU::lw_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch word. */
 	word = mem->fetch_word(phys, DATALOAD, cacheable, this);
-	if (word == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Load target register with data. */
 	reg[rt(instr)] = word;
@@ -746,11 +766,11 @@ CPU::lbu_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch byte.  */
 	byte = mem->fetch_byte(phys, cacheable, this) & 0x000000ff;
-	if ((byte & 0xff == 0xff) && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Load target register with data. */
 	reg[rt(instr)] = byte;
@@ -776,11 +796,11 @@ CPU::lhu_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch halfword.  */
 	halfword = mem->fetch_halfword(phys, cacheable, this) & 0x0000ffff;
-	if ((halfword & 0xffff == 0xffff) && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Load target register with data. */
 	reg[rt(instr)] = halfword;
@@ -803,11 +823,11 @@ CPU::lwr_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(wordvirt, DATALOAD, &cacheable, this);
-	if (phys == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Fetch word. */
 	memword = mem->fetch_word(phys, DATALOAD, cacheable, this);
-	if (memword == 0xffffffff && exception_pending) return;
+	if (exception_pending) return;
 	
 	/* Insert bytes into the left side of the register. */
 	which_byte = virt & 0x03;
@@ -832,7 +852,7 @@ CPU::sb_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATASTORE, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Store byte. */
 	mem->store_byte(phys, data, cacheable, this);
@@ -862,22 +882,23 @@ CPU::sh_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATASTORE, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Store halfword. */
 	mem->store_halfword(phys, data, cacheable, this);
 }
 
-uint32 swl(uint32 regval, uint32 memval, uint8 offset)
+uint32
+CPU::swl(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (TARGET_BIG_ENDIAN) {
+	if (opt_bigendian) {
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return (memval & 0xff000000) | (regval >> 8 & 0xffffff); 
 			case 2: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
 			case 3: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 		}
-	} else if (TARGET_LITTLE_ENDIAN) {
+	} else /* if MIPS target is little endian */ {
 		switch (offset) {
 			case 0: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 			case 1: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
@@ -888,16 +909,17 @@ uint32 swl(uint32 regval, uint32 memval, uint8 offset)
 	fatal_error("Invalid offset %x passed to swl\n", offset);
 }
 
-uint32 swr(uint32 regval, uint32 memval, uint8 offset)
+uint32
+CPU::swr(uint32 regval, uint32 memval, uint8 offset)
 {
-	if (TARGET_BIG_ENDIAN) {
+	if (opt_bigendian) {
 		switch (offset) {
 			case 0: return ((regval << 24) & 0xff000000) | (memval & 0xffffff); 
 			case 1: return ((regval << 16) & 0xffff0000) | (memval & 0xffff); 
 			case 2: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
 			case 3: return regval; 
 		}
-	} else if (TARGET_LITTLE_ENDIAN) {
+	} else /* if MIPS target is little endian */ {
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
@@ -928,11 +950,11 @@ CPU::swl_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(wordvirt, DATASTORE, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Read data from memory. */
 	memdata = mem->fetch_word(phys, DATASTORE, cacheable, this);
-	if (wordvirt == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Write back the left side of the register. */
 	which_byte = virt & 0x03UL;
@@ -962,7 +984,7 @@ CPU::sw_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(virt, DATASTORE, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Store word. */
 	mem->store_word(phys, data, cacheable, this);
@@ -988,11 +1010,11 @@ CPU::swr_emulate(uint32 instr, uint32 pc)
 
 	/* Translate virtual address to physical address. */
 	phys = cpzero->address_trans(wordvirt, DATASTORE, &cacheable, this);
-	if (phys == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Read data from memory. */
 	memdata = mem->fetch_word(phys, DATASTORE, cacheable, this);
-	if (wordvirt == 0xffffffffUL && exception_pending) return;
+	if (exception_pending) return;
 
 	/* Write back the right side of the register. */
 	which_byte = virt & 0x03UL;
@@ -1049,7 +1071,7 @@ srl(int32 a, int32 b)
 	} else if (b == 32) {
 		return 0;
 	} else {
-	return (a >> b) & ((1 << (32 - b)) - 1);
+		return (a >> b) & ((1 << (32 - b)) - 1);
 	}
 }
 
@@ -1059,7 +1081,7 @@ sra(int32 a, int32 b)
 	if (b == 0) {
 		return a;
 	} else {
-	return (a >> b) | (((a >> 31) & 0x01) * (((1 << b) - 1) << (32 - b)));
+		return (a >> b) | (((a >> 31) & 0x01) * (((1 << b) - 1) << (32 - b)));
 	}
 }
 
@@ -1097,7 +1119,7 @@ void
 CPU::jr_emulate(uint32 instr, uint32 pc)
 {
 	if (opt_haltjrra) {
-		if (rs(instr) == REG_RA) {
+		if (rs(instr) == reg_ra) {
 			fprintf(stderr,
 				"** Procedure call return instr reached -- HALTING **\n");
 			machine->halt();
@@ -1393,7 +1415,7 @@ CPU::bgez_emulate(uint32 instr, uint32 pc)
 void
 CPU::bltzal_emulate(uint32 instr, uint32 pc)
 {
-	reg[REG_RA] = pc + 8;
+	reg[reg_ra] = pc + 8;
 	if ((int32)reg[rs(instr)] < 0) {
 		branch(instr, pc);
 	}
@@ -1402,7 +1424,7 @@ CPU::bltzal_emulate(uint32 instr, uint32 pc)
 void
 CPU::bgezal_emulate(uint32 instr, uint32 pc)
 {
-	reg[REG_RA] = pc + 8;
+	reg[reg_ra] = pc + 8;
 	if ((int32)reg[rs(instr)] >= 0) {
 		branch(instr, pc);
 	}
@@ -1413,6 +1435,307 @@ void
 CPU::RI_emulate(uint32 instr, uint32 pc)
 {
 	exception(RI);
+}
+
+void
+CPU::write_trace_to_file ()
+{
+	static int count = 0;
+	++count;
+	char filename[80];
+	sprintf (filename, "traceout%d.txt", count);
+	FILE *traceout = fopen (filename, "w");
+	for (Trace::record_iterator ri = current_trace.rbegin (), re =
+         current_trace.rend (); ri != re; ++ri) {
+        Trace::Record &tr = *ri;
+		fprintf (traceout, "(TraceRec (PC #x%08x) (Insn #x%08x) ", tr.pc, tr.instr);
+
+		if (! tr.inputs.empty ()) {
+
+		fprintf (traceout, "(Inputs (");
+		for (std::vector<Trace::Operand>::iterator oi = tr.inputs.begin (),
+			oe = tr.inputs.end (); oi != oe; ++oi) {
+			Trace::Operand &op = *oi;
+			if (op.regno != -1) {
+				fprintf (traceout, "(%s %d #x%08x) ", op.tag, op.regno, op.val);
+			} else {
+				fprintf (traceout, "(%s #x%08x) ", op.tag, op.val);
+			}
+		}
+		fprintf (traceout, "))");
+
+		}
+
+		if (!tr.outputs.empty ()) {
+
+		fprintf (traceout, "(Outputs (");
+		for (std::vector<Trace::Operand>::iterator oi = tr.outputs.begin (),
+			oe = tr.outputs.end (); oi != oe; ++oi) {
+			Trace::Operand &op = *oi;
+			if (op.regno != -1) {
+				fprintf (traceout, "(%s %d #x%08x) ", op.tag, op.regno, op.val);
+			} else {
+				fprintf (traceout, "(%s #x%08x) ", op.tag, op.val);
+			}
+		}
+		fprintf (traceout, "))");
+
+		}
+		fprintf (traceout, ")\n");
+	}
+	// print lastchanges
+	fprintf (traceout, "(LastChanges (");
+	for (unsigned i = 0; i < 32; ++i) { 
+		if (current_trace.last_change_for_reg.find (i) !=
+				current_trace.last_change_for_reg.end ()) {
+			last_change &lc = current_trace.last_change_for_reg[i];
+			fprintf (traceout,
+				"(Reg %d PC %x Instr %x OldValue %x CurValue %x) ",
+				i, lc.pc, lc.instr, lc.old_value, reg[i]);
+		}
+	}
+	fprintf (traceout, "))\n");
+	fclose (traceout);
+}
+
+void
+CPU::maybe_dump_trace()
+{
+	if (opt_tracing)
+		write_trace_to_file ();
+}
+
+void
+CPU::start_tracing()
+{
+	tracing = true;
+	current_trace.clear ();
+}
+
+void
+CPU::write_trace_instr_inputs (uint32 instr)
+{
+    // rs,rt:  add,addu,and,beq,bne,div,divu,mult,multu,nor,or,sb,sh,sllv,slt,
+    //         sltu,srav,srlv,sub,subu,sw,swl,swr,xor
+    // rs:     addi,addiu,andi,bgez,bgezal,bgtz,blez,bltz,bltzal,jal,jr,lb,lbu,
+    //         lh,lhu,lw,lwl,lwr,mthi,mtlo,ori,slti,sltiu,xori
+    // hi:     mfhi
+    // lo:     mflo
+    // rt:     mtc0
+    // rt,shamt: sll,sra,srl
+	// NOT HANDLED: syscall,break,jalr,cpone,cpthree,cptwo,cpzero,
+	//              j,lui,lwc1,lwc2,lwc3,mtc0,swc1,swc2,swc3
+	switch(opcode(instr))
+	{
+		case 0:
+			switch(funct(instr))
+			{
+				case 4: //sllv
+				case 6: //srlv
+				case 7: //srav
+				case 24: //mult
+				case 25: //multu
+				case 26: //div
+				case 27: //divu
+				case 32: //add
+				case 33: //addu
+				case 34: //sub
+				case 35: //subu
+				case 36: //and
+				case 37: //or
+				case 38: //xor
+				case 39: //nor
+				case 42: //slt
+				case 43: //sltu
+					current_trace_record.inputs_push_back_op("rs",
+                        rs(instr), reg[rs(instr)]);
+					current_trace_record.inputs_push_back_op("rt",
+                        rt(instr), reg[rt(instr)]);
+					break;
+				case 0: //sll
+				case 2: //srl
+				case 3: //sra
+					current_trace_record.inputs_push_back_op("rt",
+                        rt(instr), reg[rt(instr)]);
+					break;
+				case 8: //jr
+				case 17: //mthi
+				case 19: //mtlo
+					current_trace_record.inputs_push_back_op("rs",
+                        rs(instr), reg[rs(instr)]);
+					break;
+				case 16: //mfhi
+					current_trace_record.inputs_push_back_op("hi",
+                        hi);
+					break;
+				case 18: //mflo
+					current_trace_record.inputs_push_back_op("lo",
+                        lo);
+					break;
+			}
+			break;
+		case 1:
+			switch(rt(instr)) {
+				case 0: //bltz
+				case 1: //bgez
+				case 16: //bltzal
+				case 17: //bgezal
+					current_trace_record.inputs_push_back_op("rs",
+                        rs(instr), reg[rs(instr)]);
+					break;
+			}
+			break;
+		case 3: //jal
+		case 6: //blez
+		case 7: //bgtz
+		case 8: //addi
+		case 9: //addiu
+		case 12: //andi
+		case 32: //lb
+		case 33: //lh
+		case 35: //lw
+		case 36: //lbu
+		case 37: //lhu
+		case 40: //sb
+		case 41: //sh
+		case 42: //swl
+		case 43: //sw
+		case 46: //swr
+			current_trace_record.inputs_push_back_op("rs",
+				rs(instr), reg[rs(instr)]);
+			current_trace_record.inputs_push_back_op("rt",
+				rt(instr), reg[rt(instr)]);
+			break;
+		case 4: //beq
+		case 5: //bne
+		case 10: //slti
+		case 11: //sltiu
+		case 13: //ori
+		case 14: //xori
+		case 34: //lwl
+		case 38: //lwr
+			current_trace_record.inputs_push_back_op("rs",
+				rs(instr), reg[rs(instr)]);
+			break;
+	}
+}
+
+
+void
+CPU::write_trace_instr_outputs (uint32 instr)
+{
+    // hi,lo: div,divu,mult,multu
+    // hi:    mthi
+    // lo:    mtlo
+    // rt:    addi,addiu,andi,lb,lbu,lh,lhu,lui,lw,lwl,lwr,mfc0,ori,slti,sltiu,
+    //        xori
+    // rd:    add,addu,and,jalr,mfhi,mflo,nor,or,sllv,slt,sltu,sll,sra,srav,srl,
+    //        srlv,sub,subu,xor
+    // r31:   jal
+	// NOT HANDLED: syscall,break,jalr,cpone,cpthree,cptwo,cpzero,j,lwc1,lwc2,
+    //              lwc3,mtc0,swc1,swc2,swc3,jr,jalr,mfc0,bgtz,blez,sb,sh,sw,
+    //              swl,swr,beq,bne
+	switch(opcode(instr))
+	{
+		case 0:
+			switch(funct(instr))
+			{
+				case 26: //div
+				case 27: //divu
+				case 24: //mult
+				case 25: //multu
+					current_trace_record.outputs_push_back_op("lo",
+                        lo);
+					current_trace_record.outputs_push_back_op("hi",
+                        hi);
+					break;
+				case 17: //mthi
+					current_trace_record.outputs_push_back_op("hi",
+                        hi);
+					break;
+				case 19: //mtlo
+					current_trace_record.outputs_push_back_op("lo",
+                        lo);
+					break;
+				case 32: //add
+				case 33: //addu
+				case 36: //and
+				case 39: //nor
+				case 37: //or
+				case 4: //sllv
+				case 42: //slt
+				case 43: //sltu
+				case 7: //srav
+				case 6: //srlv
+				case 34: //sub
+				case 35: //subu
+				case 38: //xor
+				case 0: //sll
+				case 3: //sra
+				case 2: //srl
+				case 16: //mfhi
+				case 18: //mflo
+					current_trace_record.outputs_push_back_op("rd",
+                        rd(instr),reg[rd(instr)]);
+					break;
+			}
+			break;
+		case 8: //addi
+		case 9: //addiu
+		case 12: //andi
+		case 32: //lb
+		case 36: //lbu
+		case 33: //lh
+		case 37: //lhu
+		case 35: //lw
+		case 34: //lwl
+		case 38: //lwr
+		case 13: //ori
+		case 10: //slti
+		case 11: //sltiu
+		case 14: //xori
+		case 15: //lui
+			current_trace_record.outputs_push_back_op("rt",rt(instr),
+                reg[rt(instr)]);
+			break;
+		case 3: //jal
+			current_trace_record.outputs_push_back_op("ra",
+                reg[reg_ra]);
+			break;
+	}
+}
+
+void
+CPU::write_trace_record_1(uint32 pc, uint32 instr)
+{
+	current_trace_record.clear ();
+	current_trace_record.pc = pc;
+	current_trace_record.instr = instr;
+	write_trace_instr_inputs (instr);
+	std::copy (&reg[0], &reg[32], &current_trace_record.saved_reg[0]);
+}
+
+void
+CPU::write_trace_record_2 (uint32 pc, uint32 instr)
+{
+	write_trace_instr_outputs (instr);
+	// which insn was the last to change each reg?
+	for (unsigned i = 0; i < 32; ++i) { 
+		if (current_trace_record.saved_reg[i] != reg[i]) {
+			current_trace.last_change_for_reg[i] = last_change::make (pc, instr,
+				current_trace_record.saved_reg[i]);
+		}
+	}
+	current_trace.push_back_record (current_trace_record);
+    if (current_trace.record_size () > opt_tracesize) {
+		current_trace.pop_front_record ();
+	}
+}
+
+void
+CPU::stop_tracing()
+{
+	tracing = false;
 }
 
 /* dispatching */
@@ -1457,11 +1780,15 @@ CPU::step()
 	};
 
 	/* Clear exception_pending flag if it was set by a
-	 * prior instruction. */
+	 * prior instruction.
+	 */
 	exception_pending = false;
 
 	/* decrement Random register */
 	cpzero->adjust_random();
+
+	if (opt_tracing && !tracing && pc == opt_tracestartpc)
+		start_tracing();
 
 	/* save address of instruction responsible for exceptions which may occur */
 	if (delay_state != DELAYSLOT) {
@@ -1470,21 +1797,21 @@ CPU::step()
 
 	/* get physical address of next instruction */
 	real_pc = cpzero->address_trans(pc,INSTFETCH,&cacheable, this);
-	if (real_pc == 0xffffffff && exception_pending) {
+	if (exception_pending) {
 		if (opt_excmsg) {
 			fprintf(stderr,
 				"** PC address translation caused the exception! **\n");
 		}
-		return;
+		goto out;
 	}
 
 	/* get next instruction */
 	instr = mem->fetch_word(real_pc,INSTFETCH,cacheable, this);
-	if (instr == 0xffffffff && exception_pending) {
+	if (exception_pending) {
 		if (opt_excmsg) {
 			fprintf(stderr, "** Instruction fetch caused the exception! **\n");
 		}
-		return;
+		goto out;
 	}
 
 	/* diagnostic output - display disassembly of instr */
@@ -1493,18 +1820,29 @@ CPU::step()
 		call_disassembler(pc,instr);
 	}
 
+	/* first half of trace recording for this instruction */
+	if (opt_tracing && tracing)
+		write_trace_record_1 (pc, instr);
+
 	/* Check for a (hardware or software) interrupt */
 	if (cpzero->interrupt_pending()) {
 		exception(Int);
 		goto out;
 	}
-	
+
 	/* Jump to the appropriate emulation function. */
 	(this->*opcodeJumpTable[opcode(instr)])(instr, pc);
 
 out:
 	/* Register zero must always be zero; this instruction forces this. */
-	reg[REG_ZERO] = 0;
+	reg[reg_zero] = 0;
+
+	/* 2nd half of trace recording for this instruction */
+	if (opt_tracing && tracing) {
+		write_trace_record_2 (pc, instr);
+		if (pc == opt_traceendpc)
+			stop_tracing();
+	}
 
 	/* If there is an exception pending, we return now, so that we don't
 	 * clobber the exception vector.
@@ -1530,6 +1868,8 @@ out:
 		 * The next instruction is on the other end of the branch.
 		 * The next instruction EPC will be PC.
 		 */
+		if (delay_pc == 0)
+			warning ("Jumped to zero (jump was at 0x%x)\n", pc - 4);
 		delay_state = NORMAL;
 		pc = delay_pc;
 	} else if (delay_state == NORMAL) {
@@ -1622,20 +1962,18 @@ CPU::debug_registers_to_packet(void)
      */
 	packet[0] = '\0';
 	r = 0;
-	for (i = 0; i < 32; i++) {
-		Debug::packet_push_word(packet, reg[i]); r++;
-	}
+	for (i = 0; i < 32; i++)
+		debug_packet_push_word(packet, reg[i]); r++;
 	uint32 sr, bad, cause;
 	cpzero->read_debug_info(&sr, &bad, &cause);
-	Debug::packet_push_word(packet, sr); r++;
-	Debug::packet_push_word(packet, lo); r++;
-	Debug::packet_push_word(packet, hi); r++;
-	Debug::packet_push_word(packet, bad); r++;
-	Debug::packet_push_word(packet, cause); r++;
-	Debug::packet_push_word(packet, pc); r++;
-	for (; r < 90; r++) { /* unimplemented regs at end */
-		Debug::packet_push_word(packet, 0);
-	}
+	debug_packet_push_word(packet, sr); r++;
+	debug_packet_push_word(packet, lo); r++;
+	debug_packet_push_word(packet, hi); r++;
+	debug_packet_push_word(packet, bad); r++;
+	debug_packet_push_word(packet, cause); r++;
+	debug_packet_push_word(packet, pc); r++;
+	for (; r < 90; r++) /* unimplemented regs at end */
+		debug_packet_push_word(packet, 0);
 	return packet;
 }
 
@@ -1647,16 +1985,15 @@ CPU::debug_packet_to_registers(char *packet)
 {
 	int i;
 
-	for (i = 0; i < 32; i++) {
-		reg[i] = Debug::packet_pop_word(&packet);
-	}
+	for (i = 0; i < 32; i++)
+		reg[i] = machine->dbgr->packet_pop_word(&packet);
 	uint32 sr, bad, cause;
-	sr = Debug::packet_pop_word(&packet);
-	lo = Debug::packet_pop_word(&packet);
-	hi = Debug::packet_pop_word(&packet);
-	bad = Debug::packet_pop_word(&packet);
-	cause = Debug::packet_pop_word(&packet);
-	pc = Debug::packet_pop_word(&packet);
+	sr = machine->dbgr->packet_pop_word(&packet);
+	lo = machine->dbgr->packet_pop_word(&packet);
+	hi = machine->dbgr->packet_pop_word(&packet);
+	bad = machine->dbgr->packet_pop_word(&packet);
+	cause = machine->dbgr->packet_pop_word(&packet);
+	pc = machine->dbgr->packet_pop_word(&packet);
 	cpzero->write_debug_info(sr, bad, cause);
 }
 
@@ -1687,6 +2024,24 @@ CPU::debug_get_pc(void)
 	return pc;
 }
 
+void
+CPU::debug_packet_push_word(char *packet, uint32 n)
+{
+	if (!opt_bigendian)
+		n = mem->swap_word(n);
+	char packetpiece[10];
+	sprintf(packetpiece, "%08x", n);
+	strcat(packet, packetpiece);
+}
+
+void
+CPU::debug_packet_push_byte(char *packet, uint8 n)
+{
+	char packetpiece[4];
+	sprintf(packetpiece, "%02x", n);
+	strcat(packet, packetpiece);
+}
+
 /* Fetch LEN bytes starting from virtual address ADDR into the packet
  * PACKET, sending exceptions (if any) to CLIENT. Returns -1 if an exception
  * was encountered, 0 otherwise.  If an exception was encountered, the
@@ -1706,17 +2061,17 @@ CPU::debug_fetch_region(uint32 addr, uint32 len, char *packet,
 		/* Stop now and return an error code if translation
 		 * caused an exception.
 		 */
-		if (real_addr == 0xffffffff && client->exception_pending) {
+		if (client->exception_pending) {
 			return -1;
 		}
 		byte = mem->fetch_byte(real_addr, true, client);
 		/* Stop now and return an error code if the fetch
 		 * caused an exception.
 		 */
-		if (byte == 0xff && client->exception_pending) {
+		if (client->exception_pending) {
 			return -1;
 		}
-		Debug::packet_push_byte(packet, byte);
+		debug_packet_push_byte(packet, byte);
 	}
 	return 0;
 }
@@ -1736,9 +2091,9 @@ CPU::debug_store_region(uint32 addr, uint32 len, char *packet,
 	bool cacheable = false;
 
 	for (; len; addr++, len--) {
-		byte = Debug::packet_pop_byte(&packet);
+		byte = machine->dbgr->packet_pop_byte(&packet);
 		real_addr = cpzero->address_trans(addr, DATALOAD, &cacheable, client);
-		if (real_addr == 0xffffffff && client->exception_pending) {
+		if (client->exception_pending) {
 			return -1;
 		}
 		mem->store_byte(real_addr, byte, true, client);

@@ -72,7 +72,8 @@ static Option nametable[] = {
         short explanation of the exception code, its priority,
         the delay slot state of the virtual CPU, and states
         what type of memory access the exception was caused by,
-        if applicable. **/
+        if applicable. Interrupt exceptions also have Cause
+        and Status register information printed. **/
 
     { "bootmsg", FLAG },
     /** Controls whether boot-time and halt-time messages will be printed.
@@ -188,11 +189,6 @@ static Option nametable[] = {
         typically 0xbfc00000) and executed when the virtual
         machine is reset. **/
 
-    { "configfile", STR },
-    /** This is the name of the user configuration file. It
-        will be ~username-expanded and checked for configuration
-        options before the virtual machine boots. **/
-
     { "loadaddr", NUM },
     /** This is the virtual address where the ROM will be loaded.
         Note that the MIPS reset exception vector is always 0xbfc00000
@@ -221,10 +217,9 @@ static Option nametable[] = {
     /** If @option{reportirq} is set, then any change in the interrupt
         inputs from a device will be reported on stderr. **/
 
-    { "usetty", FLAG },
-    /** If @option{usetty} is set, then the SPIM-compatible console device
-        will be configured. If it is not set, then no console device will be
-        available to the virtual machine. **/
+    { "spimconsole", FLAG },
+    /** When set, configure the SPIM-compatible console device.
+        This is incompatible with @option{decserial}. **/
 
     { "ttydev", STR },
     /** This pathname will be used as the device from which reads from the
@@ -275,19 +270,81 @@ static Option nametable[] = {
     /** If this option is set, then the clock device is enabled. This will
         allow MIPS programs to take advantage of a high precision clock. **/
 
+    { "dbemsg", FLAG },
+    /** If this option is set, then the physical addresses of accesses
+        that cause data bus errors (DBE exceptions) will be printed. **/
+
+    { "decrtc", FLAG },
+    /** If this option is set, then the DEC RTC device will be
+        configured. **/
+
+    { "deccsr", FLAG },
+    /** If this option is set, then the DEC CSR (Control/Status Register)
+        will be configured. **/
+
+    { "decstat", FLAG },
+    /** If this option is set, then the DEC CHKSYN and ERRADR registers
+        will be configured. **/
+
+    { "decserial", FLAG },
+    /** If this option is set, then the DEC DZ11 serial device
+        will be configured. This is incompatible with @option{spimconsole}. **/
+
+    { "tracing", FLAG },
+    /** If this option is set, VMIPS will keep a trace of the last few
+        instructions executed in memory, and write it out when the machine
+        halts.  This incurs a substantial performance penalty.  Use the
+        @option{tracesize} option to set the size of the trace you want. **/
+
+    { "tracesize", NUM },
+    /** Set this option to the maximum number of instructions to keep in the
+        dynamic instruction trace. This has no effect if @option{tracing} is
+        not set. **/
+
+    { "bigendian", FLAG },
+    /** If this option is set, then the emulated MIPS CPU will be in
+        Big-Endian mode.  Otherwise, it will be in Little-Endian mode. You
+        must set it to correspond to the type of binaries that your
+        assembler and compiler are configured to produce, which is not
+        necessarily the same as the endianness of the CPU on which you
+        are running VMIPS.  (The default may not be meaningful for your
+        setup!) **/
+
+    { "tracestartpc", NUM },
+    /** If the tracing option is set, then this is the PC at which tracing
+        will start. Otherwise it has no effect. **/
+
+    { "traceendpc", NUM },
+    /** If the tracing option is set, then this is the PC at which tracing
+        will stop. Otherwise it has no effect. **/
+
+    { "mipstoolprefix", STR },
+    /** vmipstool uses this option to locate your MIPS-targetted cross
+        compilation tools, if you have them installed. If your MIPS GCC
+        is installed as /opt/mips/bin/mips-elf-gcc, then you should set
+        this option to "/opt/mips/bin/mips-elf-". vmipstool looks for
+        the "gcc", "ld", "objcopy" and "objdump" programs starting with
+        this prefix. This option should be set in your installed
+        system-wide VMIPS configuration file (vmipsrc) by the "configure"
+        script; the compiled-in default is designed to cause an error. **/
+
     { NULL, 0 }
 };
 
 /* This is the official default options list. */
 static char *defaults_table[] = {
     "nohaltdumpcpu", "nohaltdumpcp0", "noexcpriomsg",
-    "noexcmsg", "bootmsg", "instdump", "nodumpcpu", "nodumpcp0",
+    "noexcmsg", "bootmsg", "noinstdump", "nodumpcpu", "nodumpcp0",
     "haltibe", "nohaltjrra", "haltbreak", "haltdevice", "romfile=romfile.rom",
-    "configfile=~/.vmipsrc", "loadaddr=0xbfc00000", "noinstcounts",
+    "loadaddr=0xbfc00000", "noinstcounts",
     "memsize=0x100000", "nomemdump", "memdumpfile=memdump.bin",
-    "noreportirq", "usetty", "ttydev=/dev/tty", "ttydev2=off",
+    "noreportirq", "ttydev=/dev/tty", "ttydev2=off",
     "nodebug", "norealtime", "timeratio=1", "clockspeed=250000",
-	"clockintr=200000000", "clockdeviceirq=7", "clockdevice",
+    "clockintr=200000000", "clockdeviceirq=7", "clockdevice",
+    "nodbemsg", "nodecrtc", "nodeccsr", "nodecstat", "nodecserial",
+    "spimconsole", "notracing", "tracesize=100000", "nobigendian",
+    "tracestartpc=0", "traceendpc=0",
+    "mipstoolprefix=/nonexistent/mips/bin/mipsel-ecoff-",
     NULL
 };
 

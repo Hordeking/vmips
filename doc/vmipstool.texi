@@ -18,16 +18,7 @@ the "Reporting Bugs" appendix of the Info manual.
 vmipstool was written by Brian Gaeke.
 @c man end
 @c man begin COPYRIGHT
-Copyright @copyright{} 2001 Brian R. Gaeke.
-
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.
-
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
+@include copyright.texi
 @c man end
 @end ignore
 
@@ -36,7 +27,11 @@ permission notice identical to this one.
 
 @c man begin DESCRIPTION
 @command{vmipstool} is intended to be a friendly front-end to the process
-of compiling, linking, and assembling code for VMIPS.
+of compiling, linking, and assembling code for VMIPS using the GNU Compiler
+Collection (GCC) and GNU Binutils.
+
+Note that you do not need to use @command{vmipstool}, or even GCC, to compile
+programs for VMIPS; you can use any MIPS compiler and assembler you have handy.
 @c man end
 
 The format of the vmipstool command line is as follows:
@@ -53,6 +48,7 @@ vmipstool [ --verbose ] [ --dry-run ] [ --ld-script=T ] --link
 vmipstool [ --verbose ] [ --dry-run ] --make-rom PROG PROG.rom
 vmipstool [ --verbose ] [ --dry-run ] --disassemble-rom PROG.rom
 vmipstool [ --verbose ] [ --dry-run ] --disassemble PROG (or FILE.o)
+vmipstool [ --verbose ] [ --dry-run ] --swap-words INPUT OUTPUT
 vmipstool --help
 vmipstool --version
 @end example
@@ -105,5 +101,20 @@ Disassemble arbitrary data, possibly including ROM files. (More
 information is available with --disassemble, but it only works on programs
 which have not been written into ROMs.)
 
+@item --swap-words
+Copy the input file to the output file, reversing the byte-order of each
+32-bit word in the process. This can be used to translate chunks of data
+from big-endian to little-endian, or vice-versa.
+
 @end table
 @c man end
+
+@c man begin FILES
+Note that @command{vmipstool} consults your @file{/etc/vmipsrc} and
+@file{~/.vmipsrc} to determine where the MIPS cross compiler, assembler,
+and @command{objdump} and @command{objcopy} tools are.  If you install new
+cross-tools, you should edit these configuration files to reflect the new
+location of the MIPS tools, and to reflect their default endianness, by
+changing the settings of @option{mipstoolprefix} and @option{bigendian}.
+@c man end
+

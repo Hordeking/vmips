@@ -17,11 +17,11 @@ coff_analyze (char *buf, struct coff_info *header)
   section = ((struct coff_section_header *) &buf[76]);
   for (i = 0; i < header->file_header.no_sections; i++)
     {
-	  if (strlen(section->section_name) != 0)  {
-	    if (section->section_phys_addr != section->section_virt_addr)  {
-		  puts("bad relocation");
+      if (strlen(section->section_name) != 0)  {
+	/* if (section->section_phys_addr != section->section_virt_addr)  {
+	  puts("bad relocation");
           return -1;
-        }
+	  } */
         if (strcmp(section->section_name, ".text") == 0) {
           header->text_addr = section->section_virt_addr;
           header->text_offset = section->section_file_loc;
@@ -52,16 +52,16 @@ print_coff_header (struct coff_info *header)
       puts ("Little-Endian mips coff binary");
     }
   printf
-    ("size: text %x data %x bss %x entry %x\n"
-     "base: text %x data %x bss %x\n" "gp: %x\n",
+    ("size: text %lx data %lx bss %lx entry %lx\n"
+     "base: text %lx data %lx bss %lx\n" "gp: %lx\n",
      header->file_header.text_size, header->file_header.data_size,
      header->file_header.bss_size, header->file_header.entry_addr,
      header->file_header.text_start, header->file_header.data_start,
      header->file_header.bss_start, header->file_header.gp_value);
-  printf ("sections: .text@0x%x, %u bytes, at file offset %lu\n",
+  printf ("sections: .text@0x%x, %u bytes, at file offset %u\n",
 	  (unsigned int) header->text_addr, (unsigned int) header->text_size,
 	  (unsigned int) header->text_offset);
-  printf ("          .data@0x%x, %u bytes, at file offset %lu\n",
+  printf ("          .data@0x%x, %u bytes, at file offset %u\n",
 	  (unsigned int) header->data_addr, (unsigned int) header->data_size,
 	  (unsigned int) header->data_offset);
   printf ("          .bss@0x%x, %u bytes\n", (unsigned int) header->bss_addr,

@@ -1,4 +1,3 @@
-OUTPUT_FORMAT(ecoff-littlemips)
 SECTIONS {
  ENTRY( __start )
  . = 0x80000000;

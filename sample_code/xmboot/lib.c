@@ -2,12 +2,13 @@
 
 #include <stdarg.h>
 #include "lib.h"
+#include "serial.h"
 
 int errno;
 
 static short modes;
 
-int
+void
 set_echo (int onoff)
 {
   term_disable (ECHO);
@@ -15,13 +16,13 @@ set_echo (int onoff)
     term_enable (ECHO);
 }
 
-int
+void
 term_enable (int mode)
 {
   modes |= mode;
 }
 
-int
+void
 term_disable (int mode)
 {
   modes &= ~mode;
@@ -49,11 +50,12 @@ getchar (void)
 }
 
 int
-putchar (unsigned char ch)
+putchar (int ch)
 {
-  if ((modes & ONLCR) && (ch == '\n'))
+  unsigned char ch_uchar = (unsigned char) ch;
+  if ((modes & ONLCR) && (ch_uchar == '\n'))
     putchar ('\r');
-  return ((write (1, &ch, 1) < 1) ? -1 : 0);
+  return ((write (1, &ch_uchar, 1) < 1) ? -1 : 0);
 }
 
 void
@@ -92,6 +94,7 @@ puts (const char *buf)
 {
   puts_nonl (buf);
   putchar ('\n');
+  return 0;
 }
 
 int
@@ -110,6 +113,27 @@ strcmp (const char *s1, const char *s2)
   return 0;
 }
 
+int
+strncmp (const char *s1, const char *s2, size_t n)
+{
+  const char *p = s1;
+  const char *q = s2;
+
+  while ((*p != '\0') || (*q != '\0'))
+    {
+      if (*p != *q)
+        return (*p - *q);
+      p++;
+      q++;
+      n--;
+      if (n == 0)
+        {
+          return 0;
+        }
+    }
+  return 0;
+}
+
 size_t
 strlen (const char *s)
 {
@@ -118,6 +142,18 @@ strlen (const char *s)
   while (*s++)
     length++;
   return length;
+}
+
+char *
+strcat (char *dest, const char *src)
+{
+  int i, start = strlen (dest);
+  for (i = 0; i < strlen (src); ++i)
+    {
+      dest[start + i] = src[i];
+    }
+  dest[start + i] = '\0';
+  return dest;
 }
 
 static int
@@ -312,7 +348,12 @@ printf (const char *fmt, ...)
         }
       else
         {
-          if (f[1] == 'l') { nextarg_is_long++; f++; }
+          while (isdigit(f[1])) f++;
+          if (f[1] == 'l')
+            {
+              nextarg_is_long++;
+              f++;
+            }
           switch (f[1])
             {
             case 'c':
@@ -355,19 +396,37 @@ printf (const char *fmt, ...)
               break;
             }
           f += 2;
+          nextarg_is_long = 0;
         }
     }
   return count;
 }
 
 char *
-strcpy(char *dest, const char *src)
+strcpy (char *dest, const char *src)
 {
   char *rv = dest;
 
-  do {
-	  *dest++ = *src++;
-  } while (*src);
+  do
+    {
+      *dest++ = *src++;
+    }
+  while (*src);
+  *dest++ = '\0';
+  return rv;
+}
+
+char *
+strncpy (char *dest, const char *src, size_t n)
+{
+  char *rv = dest;
+
+  do
+    {
+      *dest++ = *src++;
+      n--;
+    }
+  while (*src && n);
   *dest++ = '\0';
   return rv;
 }
@@ -376,8 +435,8 @@ void *
 memcpy (void *dest, const void *src, size_t n)
 {
   void *rv = dest;
-  char *dest_c = (char *) dest;
-  char *src_c = (char *) src;
+  unsigned char *dest_c = (unsigned char *) dest;
+  unsigned char *src_c = (unsigned char *) src;
 
   while (n--)
     {
@@ -393,26 +452,29 @@ memmove (void *dest, const void *src, size_t n)
   unsigned char *dest_c = (unsigned char *) dest;
   unsigned char *src_c = (unsigned char *) src;
 
-  if (dest_c - src_c < 0) {
-    /* Copy forwards. */
-    while (n--)
-      {
-        *dest_c++ = *src_c++;
-      }
-  } else if (dest_c - src_c > 0) {
-    /* Copy backwards. */
-    dest_c += n;
-    src_c += n;
-    while (n--)
-      {
-        *--dest_c = *--src_c;
-      }
-  }
+  if (dest_c - src_c < 0)
+    {
+      /* Copy forwards. */
+      while (n--)
+        {
+          *dest_c++ = *src_c++;
+        }
+    }
+  else if (dest_c - src_c > 0)
+    {
+      /* Copy backwards. */
+      dest_c += n;
+      src_c += n;
+      while (n--)
+        {
+          *--dest_c = *--src_c;
+        }
+    }
   return rv;
 }
 
 void *
-memset(void *s, int c, size_t n)
+memset (void *s, int c, size_t n)
 {
   unsigned char *dest_c = (char *) s;
   void *rv = s;
@@ -423,5 +485,67 @@ memset(void *s, int c, size_t n)
       *dest_c++ = c_c;
     }
   return rv;
+}
+
+int
+atoi (const char *nptr)
+{
+  return strtol (nptr, (char **) NULL, 10);
+}
+
+/* The following is an incredibly dumb memory allocator, for
+   use only when the alternatives are too horrible to contemplate.
+   You cannot free memory with it! */
+
+extern char *_end, *_data; /* provided by linker */
+static char *mem_brk = 0;
+const int data_size_limit = 0x100000;
+
+/* If process would exceed max data size, return -1.
+   Otherwise, set the mem_brk and return 0. */
+int
+brk (void *end_data_segment)
+{
+  if (!mem_brk)
+    mem_brk = _end;
+
+  if (mem_brk - _data > data_size_limit) {
+    return -1;
+  } else {
+    mem_brk = end_data_segment;
+    return 0;
+  }
+}
+
+void *
+sbrk (ptrdiff_t increment)
+{
+  if (brk (mem_brk + increment) == 0)
+    return (void *) mem_brk;
+  else
+    return (void *) -1;
+}
+
+void *
+malloc (size_t alloc_size)
+{
+  static char *next_alloc = 0;
+  char *cur_brk;
+  char *rv;
+  if (!next_alloc)
+    next_alloc = _end;
+  alloc_size = (alloc_size + 3) & ~3;
+  cur_brk = (char *) sbrk (0);
+  if (next_alloc + alloc_size > cur_brk)
+    sbrk (cur_brk - (next_alloc + alloc_size));
+  rv = next_alloc;
+  next_alloc += alloc_size;
+  return rv;
+}
+
+void
+free (void *ptr)
+{
+  /* Do nothing */
 }
 

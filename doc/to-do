@@ -1,10 +1,87 @@
 
-Things yet to be done
----------------------
+Things to do after the release
+==============================
 
-Version 1.0 was released 27 Oct 2001.
-Version 1.1 will be the next feature release.
+Add 'How to add test cases' section to the documentation. Generate
+test_code/README based on that section, a la INSTALL.
 
-For the future enhancements that used to be here, see the "Future Directions"
-section of the manual.
+Nuke sysinclude.h; I think it'd be better to just include system headers
+wherever they are needed, because it will reduce the amount of #including
+overall. In the cases where actual fixes need to be inserted, we can have
+a compatibility library instead of a header file. 
+
+Fix the bugs in the DECstation-compatible serial emulation, and make a
+MIPS Linux demo ROM.
+
+Clean out the sample_code directory. The setup code should probably be moved
+into the test_code directory.
+
+Separate old xmodem stuff out from xmboot and rename it to be
+decboot.
+
+Modify the CPU<->coprocessor interface. We shouldn't have to do any
+unnecessary instruction parsing in the coprocessor code.
+ * This means exposing interfaces that correspond
+   to the standard coprocessor interface instructions:
+   lwcZ/swcZ/mfcZ/mtcZ/cfcZ/ctcZ/bcZf/bcZt, and any of the ones I've
+   left out.
+   + bcZf/bcZt can be further simplified by only exposing the CpCond bit,
+     as is done in real MIPS designs.
+ * Any instructions that really are specific to the coprocessor can have
+   their parsing handled in the coprocessor, but we should handle these
+   special cases in the CPU core.
+ * Also, we can make these methods part of a new Coprocessor interface
+   class, and have a sane way of attaching cpzero as well as an fpu. Then
+   the special case handling of the no-fpu case in cpone_emulate() can go
+   away, by means of a minimal "nofpu" fpu implementation.
+
+Make attaching devices systematic and sane, instead of the attach()
+ad-hockery we have all over the place now.
+ * Idea: everything can attach itself by calling
+   "machine->attach(this)", which gets dealt with by virtual function
+   dispatch.
+ * Idea 2 (a little Chris Lattner theory): each class registers
+   itself using a static constructor, and then the user can specify a
+   list of modules to attach.
+
+Build a better debugger interface, especially for exception handling reasons.
+ * We want to be able to make vmips stop without throwing an exception
+   or having had a breakpoint set beforehand, so that the debugger can
+   inspect vmips's state at random points.
+   + Prototyped a solution where vmips catching SIGINT causes a return
+     to the debugger by making believe that we caught a SIGTRAP. This
+     seems to work OK but seems way clumsy.
+ * We want to be able to see exceptions happen in the debugger: both
+   before and after the jump to the exception handler.
+   + Currently when the program takes an exception, the debugger shows
+     you the exception handler, with no clue as to why you got there;
+     GDB doesn't let you see EPC, and since taking an exception craps on
+     the real PC, backtraces don't give you enough information to see what
+     caused the exception.
+   + This has the real possibility of being a place where we might want to
+     do something differently than the way the real hardware does it. For
+     instance, it's useful to be able to step through an exception handler,
+     as if it were a magical jump instruction, even though it might not
+     physically be possible on real hardware.
+ * Also, GDB just basically doesn't understand exceptions, which makes it
+   hard to tell what is really going on, because the exception-to-signal
+   mapping is not one-to-one. Using "-o excmsg" can help, but it's hardly
+   a clean solution.
+   + We might want to look at the possibility of implementing a
+     VMIPS-specific remote target, if it wouldn't incur too much of a
+     maintainability burden.
+ * GDB can't tell the difference between an interrupt (e.g. the timer
+   going off) and an exception (e.g., a bus error); consequently,
+   running any more than a small amount of code with interrupts on and
+   the debugger attached is tiresome because you have to tell GDB to
+   "continue" all the time.
+
+Look at the lh/lb/sh/sb <--> lw/sw conversion code for device drivers
+and make sure that it is correct for all possible situations. Rewrite
+it so that it uses reinterpret_cast<> to do its dirty work.
+
+Rework the vmips.cc stuff into a sort of "Model-View-Controller" pattern.
+That is, most of the devices (+ mapper, CPU, etc.) we have now constitute
+a "Model"; vmips.cc is a "Controller" with a sort of implicit "View".
+This is a good idea for implementing GUIs and other interfaces to vmips.
 

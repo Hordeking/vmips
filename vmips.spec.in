@@ -8,33 +8,41 @@ Group: Emulators
 URL: http://www.dgate.org/vmips/
 Source: ftp://ftp.dgate.org/pub/vmips/snapshots/vmips-@VERSION@.tar.gz
 Packager: VMIPS Maintainers <vmips@dgate.org>
+BuildRoot: %{_tmppath}/vmips-buildroot
 
 %description
-VMIPS is a software simulator for a virtual machine based
-on a MIPS R3000 CPU.  This RPM distribution is targeted for little-endian
-MIPS systems using ECOFF binary format.
+VMIPS is a software simulator for a virtual machine based on a MIPS R3000 CPU.
 
 %prep
-%setup
-./configure --prefix=/usr --sysconfdir=/etc --target=mipsel-ecoff
+%setup -q
+%configure --sysconfdir=/etc
 
 %build
 make
 
 %install
-make install
+%makeinstall sysconfdir=$RPM_BUILD_ROOT/etc
 
 %files
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS VERSION
 /usr/bin/vmips
 /usr/bin/vmipstool
-/usr/info/vmips.info
-/usr/man/man1/vmips.1
+/usr/info/vmips.info.gz
+/usr/share/man/man1/vmips.1.gz
+/usr/share/man/man1/vmipstool.1.gz
 /usr/include/vmips/asm_regnames.h
 /usr/share/vmips/ld.script
 %config /etc/vmipsrc
 
 %changelog
+* Mon Jun 21 2004 VMIPS Maintainers <vmips@dgate.org>
+- Use a buildroot and standard 'configure' and 'makeinstall' macros.
+- Get rid of mipsel-ecoff configuration flags.
+- Gzip man pages & info
+
+* Fri Jun 18 2004 VMIPS Maintainers <vmips@dgate.org>
+- Add vmipstool man page.
+
 * Fri Feb 21 2003 VMIPS Maintainers <vmips@dgate.org>
 - Add configuration information for mipsel-ecoff.
 

@@ -153,11 +153,6 @@ void TerminalController::remove_terminal( int line ) throw()
 	assert( !line_connected( line ) );
 }
 
-inline bool TerminalController::line_connected( int line ) throw()
-{
-	return line >= 0 && line < MAX_TERMINALS && lines[line].tty_fd != -1;
-}
-
 void TerminalController::reinitialize_terminals() throw()
 {
 	for( int i = 0; i < MAX_TERMINALS; i++ ) {
@@ -290,23 +285,6 @@ bool TerminalController::prepare_tty( int line ) throw()
 
 	return true;
 }
-
-inline void TerminalController::copy_unready_keyboards( fd_set *set ) throw()
-{
-	assert( set );
-
-#ifdef	FD_COPY
-	FD_COPY( &unready_keyboards, set );
-#else
-	FD_ZERO(set);
-
-	for( int i = 0; i < MAX_TERMINALS; i++ ) {
-		if( line_connected( i ) && lines[i].keyboard_state == UNREADY )
-			FD_SET( lines[i].tty_fd, set );
-	}
-#endif	/* FD_COPY */
-}
-
 
 TerminalController::DisplayDelay::DisplayDelay( TerminalController *controller,
 						int line ) throw()

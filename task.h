@@ -24,8 +24,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 class Task
 {
 public:
-	Task() throw();
-	virtual ~Task() throw();
+	Task() throw() { }
+	virtual ~Task() throw() { }
 
 	/* The task to be performed. */
 	virtual void task() = 0;
@@ -37,15 +37,15 @@ public:
 class CancelableTask : public Task
 {
 public:
-	CancelableTask() throw();
-	virtual ~CancelableTask() throw();
+	CancelableTask() throw() : needed(true) { }
+	virtual ~CancelableTask() throw() { }
 
 	/* Mark this task is no longer needed. When task() is called it will
 	   not call real_task() */
-	virtual void cancel() throw();
+	virtual void cancel() throw() { needed = false; }
 	
 	/* Perform real_task() if it is still needed, otherwise return. */
-	virtual void task();
+	virtual void task() { if (needed) real_task(); }
 
 protected:
 	/* The real task to be performed. */

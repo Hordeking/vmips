@@ -1,4 +1,4 @@
-/* Definitions to support the main driver program.
+/* Definitions to support the main driver program.  -*- C++ -*-
    Copyright 2001, 2003 Brian R. Gaeke.
    Copyright 2002, 2003 Paul Twohey.
 
@@ -22,17 +22,23 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _VMIPS_H_
 
 #include "sysinclude.h"
-#include "intctrl.h"
-#include "cpzero.h"
-#include "mapper.h"
-#include "clock.h"
-#include "clockdev.h"
-#include "cpu.h"
-#include "haltdev.h"
-#include "memorymodule.h"
-#include "options.h"
-#include "spimconsole.h"
-#include "terminalcontroller.h"
+
+class Mapper;
+class CPZero;
+class CPU;
+class IntCtrl;
+class Options;
+class MemoryModule;
+class Debug;
+class Clock;
+class ClockDevice;
+class HaltDevice;
+class SpimConsoleDevice;
+class TerminalController;
+class DECRTCDevice;
+class DECCSRDevice;
+class DECStatDevice;
+class DECSerialDevice;
 
 long timediff(struct timeval *after, struct timeval *before);
 
@@ -45,6 +51,7 @@ public:
 	IntCtrl		*intc;
 	Options		*opt;
 	MemoryModule	*memmod;
+	Debug	*dbgr;
 	bool		host_bigendian;
 	bool		halted;
 
@@ -52,6 +59,11 @@ protected:
 	Clock		*clock;
 	ClockDevice	*clock_device;
 	HaltDevice	*halt_device;
+	SpimConsoleDevice	*spim_console;
+	DECRTCDevice	*decrtc_device;
+	DECCSRDevice	*deccsr_device;
+	DECStatDevice	*decstat_device;
+	DECSerialDevice	*decserial_device;
 
 	/* Cached versions of options: */
 	bool		opt_bootmsg;
@@ -65,6 +77,11 @@ protected:
 	bool		opt_instcounts;
 	bool		opt_memdump;
 	bool		opt_realtime;
+	bool		opt_decrtc;
+	bool		opt_deccsr;
+	bool		opt_decstat;
+	bool		opt_decserial;
+	bool		opt_spimconsole;
 	uint32		opt_clockspeed;
 	uint32		clock_nanos;
 	uint32		opt_clockintr;
@@ -74,18 +91,10 @@ protected:
 	uint32		opt_timeratio;
 	char		*opt_image;
 	char		*opt_memdumpfile;
-
-#if TTY
-	SpimConsoleDevice	*spim_console;
-	bool			opt_usetty;
 	char			*opt_ttydev;
 	char			*opt_ttydev2;
-#endif
 
 private:
-	bool dumpcpu, dumpcp0;
-
-	Debug	*dbgr;
 	uint32	num_instrs;
 
 protected:
@@ -93,21 +102,41 @@ protected:
 	   printf(3) style format string for the remaing arguments. */
 	virtual void boot_msg( const char *msg, ... ) throw();
 
-	/* Initialize any configured terminal devices and connect them to
+	/* Initialize the SPIM-compatible console device and connect it to
 	   configured terminal lines. */
-	virtual void setup_terminals() throw( std::bad_alloc );
+	virtual bool setup_spimconsole() throw (std::bad_alloc);
 
 	/* Initialize the clock device if it is configured. Return true if
 	   there are no initialization problems, otherwise return false. */
 	virtual bool setup_clockdevice() throw( std::bad_alloc );
 
+	/* Initialize the DEC RTC if it is configured. Return true if
+	   there are no initialization problems, otherwise return false. */
+	virtual bool setup_decrtc() throw( std::bad_alloc );
+
+	/* Initialize the DEC CSR if it is configured. Return true if
+	   there are no initialization problems, otherwise return false. */
+	virtual bool setup_deccsr() throw( std::bad_alloc );
+
+	/* Initialize the DEC status registers if configured. Return true if
+	   there are no initialization problems, otherwise return false. */
+	virtual bool setup_decstat() throw( std::bad_alloc );
+
+	virtual bool setup_decserial() throw( std::bad_alloc );
+
+	virtual bool setup_rom();
+
+	virtual bool setup_ram() throw (std::bad_alloc);
+
+	virtual bool setup_clock() throw (std::bad_alloc);
+
 	/* Connect the file or device named NAME to line number L of
 	   console device C, or do nothing if NAME is "off".  */
 	virtual void setup_console_line(int l, char *name,
-		SpimConsoleDevice *c) throw();
+		TerminalController *c, const char *c_name) throw();
 
 	/* Initialize the halt device if it is configured. */
-	virtual void setup_haltdevice() throw( std::bad_alloc );
+    bool vmips::setup_haltdevice() throw( std::bad_alloc );
 
 public:
 	void refresh_options(void);
@@ -122,10 +151,9 @@ public:
 	/* Halt the simulation. */
 	void halt(void) throw();
 
-	/* Return the size of the file ROM, in target-processor words. */
-	uint32 auto_size_rom(FILE *rom) throw();
+	/* Return the size of the open file FP, in bytes. */
+	static uint32 get_file_size (FILE *fp) throw ();
 	int host_endian_selftest(void);
-	int run_self_tests(void);
 	void step(void);
 	int run(void);
 };

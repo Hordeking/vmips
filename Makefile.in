@@ -66,97 +66,85 @@ target_triplet = @target@
 AS = @AS@
 ASFLAGS = @ASFLAGS@
 AWK = @AWK@
+BIGENDIAN = @BIGENDIAN@
 CC = @CC@
+CCAS = @CCAS@
+CCASFLAGS = @CCASFLAGS@
 CPP = @CPP@
 CXX = @CXX@
-DLLTOOL = @DLLTOOL@
-ECHO = @ECHO@
-ENDIAN_FLAG = @ENDIAN_FLAG@
 EXEEXT = @EXEEXT@
-LIBTOOL = @LIBTOOL@
+LDFLAGS = @LDFLAGS@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
-OBJDUMP = @OBJDUMP@
-OBJEXT = @OBJEXT@
+MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
+MIPS_CODE_DIRS = @MIPS_CODE_DIRS@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SOLARIS_DL_HACK = @SOLARIS_DL_HACK@
-STRIP = @STRIP@
 VERSION = @VERSION@
-mipsbfdtarget = @mipsbfdtarget@
 mipsbin = @mipsbin@
-mipscpp = @mipscpp@
-mipsincdirs = @mipsincdirs@
-mipslibdirs = @mipslibdirs@
-mipstoolprefix = @mipstoolprefix@
 
-SUBDIRS = . sample_code test_code doc 
+SUBDIRS = libopcodes_mips . @MIPS_CODE_DIRS@ doc
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
 DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control  debian/copyright debian/dirs debian/docs debian/info debian/rules
 
-EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh  $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
+EXTRA_DIST = VERSION $(REDHAT_PKG_FILES)  $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
 
 
 # What are we building here?
 bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
-CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\"   $(mipsincdirs) -I$(top_srcdir)/include @CXXFLAGS@
+CXXFLAGS = -I$(top_srcdir)/libopcodes_mips @CXXFLAGS@  -DSYSCONFDIR=\"$(sysconfdir)\" -DPKGDATADIR=\"$(pkgdatadir)\"
 
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc   mapper.cc memorymodule.cc options.cc range.cc intctrl.cc   spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc   clock.cc task.cc terminalcontroller.cc haltdev.cc   cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   range.h regnames.h spimconsole.h spimconsreg.h   sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h excnames.h error.h   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h   haltreg.h wipe.h stub-dis.h
+vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc   mapper.cc options.cc range.cc intctrl.cc   spimconsole.cc stub-dis.cc vmips.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc   decstat.cc decserial.cc rommodule.cc   cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   range.h spimconsole.h spimconsreg.h   sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h excnames.h error.h   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h   decstat.h decserial.h decserialreg.h rommodule.h
 
-vmips_LDADD = $(mipslibdirs) -lopcodes -lbfd -liberty
-vmips_LDFLAGS = -static
+vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # Huh, huhuh, it says tool.
-vmipstool_SOURCES = vmipstool.cc
-vmipstool_CXXFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\"
+vmipstool_SOURCES = vmipstool.cc options.cc error.cc   sysinclude.h options.h error.h
+
 
 # Install a sample vmipsrc.
 sysconf_DATA = vmipsrc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  buildstat.sh vmips.spec
+CONFIG_CLEAN_FILES =  buildstat.sh vmips.spec vmipsrc
 bin_PROGRAMS =  vmips$(EXEEXT) vmipstool$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
-LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-vmips_OBJECTS =  cpu.$(OBJEXT) cpzero.$(OBJEXT) devicemap.$(OBJEXT) \
-mapper.$(OBJEXT) memorymodule.$(OBJEXT) options.$(OBJEXT) \
-range.$(OBJEXT) intctrl.$(OBJEXT) spimconsole.$(OBJEXT) \
-stub-dis.$(OBJEXT) tlbentry.$(OBJEXT) vmips.$(OBJEXT) \
-deviceint.$(OBJEXT) debug.$(OBJEXT) remotegdb.$(OBJEXT) \
-clockdev.$(OBJEXT) error.$(OBJEXT) clock.$(OBJEXT) task.$(OBJEXT) \
-terminalcontroller.$(OBJEXT) haltdev.$(OBJEXT)
-vmips_DEPENDENCIES = 
-vmipstool_OBJECTS =  vmipstool.$(OBJEXT)
+vmips_OBJECTS =  cpu.o cpzero.o devicemap.o mapper.o options.o range.o \
+intctrl.o spimconsole.o stub-dis.o vmips.o deviceint.o debug.o \
+remotegdb.o clockdev.o error.o clock.o terminalcontroller.o haltdev.o \
+decrtc.o deccsr.o decstat.o decserial.o rommodule.o
+vmips_DEPENDENCIES =  libopcodes_mips/libopcodes_mips.a
+vmips_LDFLAGS = 
+vmipstool_OBJECTS =  vmipstool.o options.o error.o
 vmipstool_LDADD = $(LDADD)
 vmipstool_DEPENDENCIES = 
 vmipstool_LDFLAGS = 
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DATA =  $(sysconf_DATA)
 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-Makefile.am Makefile.in NEWS THANKS acconfig.h acinclude.m4 aclocal.m4 \
+Makefile.am Makefile.in NEWS THANKS acinclude.m4 aclocal.m4 \
 buildstat.sh.in config.guess config.h.in config.sub configure \
-configure.in install-sh ltmain.sh missing mkinstalldirs vmips.spec.in
+configure.in install-sh missing mkinstalldirs vmips.spec.in vmipsrc.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -168,7 +156,7 @@ OBJECTS = $(vmips_OBJECTS) $(vmipstool_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .lo .o .obj .s
+.SUFFIXES: .S .c .cc .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps Makefile
 
@@ -199,7 +187,7 @@ $(srcdir)/config.h.in: $(srcdir)/stamp-h.in
 		rm -f $(srcdir)/stamp-h.in; \
 		$(MAKE) $(srcdir)/stamp-h.in; \
 	else :; fi
-$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
 
@@ -214,6 +202,8 @@ maintainer-clean-hdr:
 buildstat.sh: $(top_builddir)/config.status buildstat.sh.in
 	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 vmips.spec: $(top_builddir)/config.status vmips.spec.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+vmipsrc: $(top_builddir)/config.status vmipsrc.in
 	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-binPROGRAMS:
@@ -230,8 +220,8 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 
@@ -244,11 +234,6 @@ uninstall-binPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
-# FIXME: We should only use cygpath when building on Windows,
-# and only if it is available.
-.c.obj:
-	$(COMPILE) -c `cygpath -w $<`
-
 .s.o:
 	$(COMPILE) -c $<
 
@@ -257,7 +242,6 @@ uninstall-binPROGRAMS:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
-	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -265,25 +249,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 maintainer-clean-compile:
-
-.c.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.s.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-.S.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
-
-distclean-libtool:
-
-maintainer-clean-libtool:
 
 vmips$(EXEEXT): $(vmips_OBJECTS) $(vmips_DEPENDENCIES)
 	@rm -f vmips$(EXEEXT)
@@ -294,10 +259,6 @@ vmipstool$(EXEEXT): $(vmipstool_OBJECTS) $(vmipstool_DEPENDENCIES)
 	$(CXXLINK) $(vmipstool_LDFLAGS) $(vmipstool_OBJECTS) $(vmipstool_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
-.cc.obj:
-	$(CXXCOMPILE) -c `cygpath -w $<`
-.cc.lo:
-	$(LTCXXCOMPILE) -c $<
 
 install-sysconfDATA: $(sysconf_DATA)
 	@$(NORMAL_INSTALL)
@@ -443,7 +404,7 @@ distdir: $(DISTFILES)
 	-rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
-	$(mkinstalldirs) $(distdir)/debian $(distdir)/include
+	$(mkinstalldirs) $(distdir)/debian
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
@@ -464,6 +425,68 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+clock.o: clock.cc clock.h task.h devreg.h sysinclude.h config.h error.h \
+	wipe.h
+clockdev.o: clockdev.cc clockdev.h clock.h task.h devreg.h sysinclude.h \
+	config.h devicemap.h range.h accesstypes.h deviceint.h \
+	intctrl.h
+cpu.o: cpu.cc cpu.h sysinclude.h config.h deviceexc.h accesstypes.h \
+	mapper.h range.h cpzero.h tlbentry.h cpzeroreg.h debug.h \
+	vmips.h options.h excnames.h error.h remotegdb.h stub-dis.h
+cpzero.o: cpzero.cc cpzero.h tlbentry.h cpzeroreg.h sysinclude.h \
+	config.h mapper.h accesstypes.h range.h excnames.h cpu.h \
+	deviceexc.h debug.h intctrl.h error.h
+debug.o: debug.cc debug.h sysinclude.h config.h deviceexc.h \
+	accesstypes.h remotegdb.h cpu.h mapper.h range.h cpzero.h \
+	tlbentry.h cpzeroreg.h excnames.h vmips.h options.h
+deccsr.o: deccsr.cc sysinclude.h config.h deccsrreg.h deccsr.h \
+	devicemap.h range.h accesstypes.h
+decrtc.o: decrtc.cc sysinclude.h config.h devicemap.h range.h \
+	accesstypes.h clock.h task.h devreg.h decrtcreg.h decrtc.h \
+	deviceint.h intctrl.h
+decserial.o: decserial.cc sysinclude.h config.h deviceexc.h \
+	accesstypes.h deviceint.h intctrl.h cpu.h mapper.h range.h \
+	cpzero.h tlbentry.h cpzeroreg.h debug.h decserial.h devicemap.h \
+	terminalcontroller.h clock.h task.h devreg.h decserialreg.h \
+	vmips.h
+decstat.o: decstat.cc sysinclude.h config.h deviceexc.h accesstypes.h \
+	cpu.h mapper.h range.h cpzero.h tlbentry.h cpzeroreg.h debug.h \
+	decstat.h devicemap.h vmips.h
+deviceint.o: deviceint.cc sysinclude.h config.h deviceint.h intctrl.h \
+	options.h vmips.h
+devicemap.o: devicemap.cc sysinclude.h config.h accesstypes.h range.h \
+	devicemap.h
+error.o: error.cc sysinclude.h config.h error.h
+haltdev.o: haltdev.cc haltdev.h devicemap.h sysinclude.h config.h \
+	range.h accesstypes.h vmips.h
+intctrl.o: intctrl.cc sysinclude.h config.h deviceint.h intctrl.h
+mapper.o: mapper.cc sysinclude.h config.h excnames.h mapper.h \
+	accesstypes.h range.h cpu.h deviceexc.h cpzero.h tlbentry.h \
+	cpzeroreg.h debug.h devicemap.h error.h options.h vmips.h \
+	memorymodule.h
+options.o: options.cc options.h sysinclude.h config.h optiontbl.h \
+	error.h
+range.o: range.cc sysinclude.h config.h range.h accesstypes.h error.h
+remotegdb.o: remotegdb.cc remotegdb.h sysinclude.h config.h
+rommodule.o: rommodule.cc rommodule.h range.h sysinclude.h config.h \
+	accesstypes.h vmips.h
+spimconsole.o: spimconsole.cc spimconsole.h clock.h task.h devreg.h \
+	sysinclude.h config.h devicemap.h range.h accesstypes.h \
+	deviceint.h intctrl.h terminalcontroller.h spimconsreg.h \
+	mapper.h vmips.h
+stub-dis.o: stub-dis.cc sysinclude.h config.h vmips.h stub-dis.h \
+	libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h
+terminalcontroller.o: terminalcontroller.cc error.h sysinclude.h \
+	config.h terminalcontroller.h clock.h task.h devreg.h
+vmips.o: vmips.cc clock.h task.h devreg.h sysinclude.h config.h \
+	clockdev.h devicemap.h range.h accesstypes.h deviceint.h \
+	intctrl.h clockreg.h cpzeroreg.h error.h haltreg.h haltdev.h \
+	spimconsole.h terminalcontroller.h mapper.h memorymodule.h \
+	cpu.h deviceexc.h cpzero.h tlbentry.h debug.h spimconsreg.h \
+	vmips.h options.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
+	decstat.h decserial.h decserialreg.h stub-dis.h rommodule.h
+vmipstool.o: vmipstool.cc sysinclude.h config.h options.h error.h
 
 info-am:
 info: info-recursive
@@ -508,28 +531,25 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS \
-		mostlyclean-compile mostlyclean-libtool \
-		mostlyclean-tags mostlyclean-generic
+		mostlyclean-compile mostlyclean-tags \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-recursive
 
-clean-am:  clean-hdr clean-binPROGRAMS clean-compile clean-libtool \
-		clean-tags clean-generic mostlyclean-am
+clean-am:  clean-hdr clean-binPROGRAMS clean-compile clean-tags \
+		clean-generic mostlyclean-am
 
 clean: clean-recursive
 
 distclean-am:  distclean-hdr distclean-binPROGRAMS distclean-compile \
-		distclean-libtool distclean-tags distclean-generic \
-		clean-am
-	-rm -f libtool
+		distclean-tags distclean-generic clean-am
 
 distclean: distclean-recursive
 	-rm -f config.status
 
 maintainer-clean-am:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
-		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-tags maintainer-clean-generic \
-		distclean-am
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -540,13 +560,11 @@ maintainer-clean: maintainer-clean-recursive
 mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool uninstall-sysconfDATA \
-install-sysconfDATA install-data-recursive uninstall-data-recursive \
-install-exec-recursive uninstall-exec-recursive installdirs-recursive \
-uninstalldirs-recursive all-recursive check-recursive \
-installcheck-recursive info-recursive dvi-recursive \
-mostlyclean-recursive distclean-recursive clean-recursive \
+maintainer-clean-compile uninstall-sysconfDATA install-sysconfDATA \
+install-data-recursive uninstall-data-recursive install-exec-recursive \
+uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
+all-recursive check-recursive installcheck-recursive info-recursive \
+dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
 dvi-am dvi check check-am installcheck-am installcheck all-recursive-am \
@@ -555,12 +573,18 @@ install uninstall-am uninstall all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-vmipstool.o: vmipstool.cc
-	$(CXXCOMPILE) $(vmipstool_CXXFLAGS) -c $<
+
+# This library contains the subset of libbfd/libopcodes that we use.
+# We build libopcodes_mips before trying to link vmips.
+libopcodes_mips/libopcodes_mips.a:
+	cd libopcodes_mips && $(MAKE) all
 
 # Miscellaneous targets.
 tags: TAGS
 	ctags *.cc
+
+gcov:
+	@for f in $(vmips_SOURCES); do echo $$f; gcov $$f; done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

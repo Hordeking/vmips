@@ -20,6 +20,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 #include "sysinclude.h"
 #include "deviceint.h"
+#include "options.h"
 #include "vmips.h"
 
 extern vmips *machine;

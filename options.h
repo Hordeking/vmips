@@ -21,6 +21,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _OPTIONS_H_
 
 #include "sysinclude.h"
+#include <string>
+#include <map>
 
 /* This defines the name of the system default configuration file. */
 #define SYSTEM_CONFIG_FILE SYSCONFDIR"/vmipsrc"
@@ -51,35 +53,28 @@ typedef struct {
 #define TABLESIZE 256
 
 class Options {
-private:
-	Option table[TABLESIZE];
-	uint16 hash(char *name);
-#ifdef OPTIONS_DEBUG
-	bool options_debug;
-#endif
+protected:
+    typedef std::map<std::string, Option> OptionMap;
+    OptionMap table;
 
-private:
-	void process_options(int argc, char **argv);
 	void process_defaults(void);
-	void process_one_option(char *option);
+	void process_one_option(const char *const option);
 	int process_first_option(char **bufptr, int lineno = 0, char *fn = NULL);
 	int process_options_from_file(char *filename);
-	void process_options_from_args(int argc, char **argv);
 	int tilde_expand(char *filename);
-	void usage(char *argv0);
+	virtual void usage(char *argv0);
 	void set_str_option(char *key, char *value);
 	void set_num_option(char *key, uint32 value);
 	void set_flag_option(char *key, bool value);
 	char *strprefix(char *crack_smoker, char *crack);
 	int find_option_type(char *option);
 	Option *optstruct(char *name, bool install = false);
-#ifdef OPTIONS_DEBUG
-	void dump_options_table(Option *table);
-#endif
-	void print_package_version(void);
+	void print_package_version(char *toolname, char *version);
 	void print_config_info(void);
 public:
-	Options(int argc, char **argv);
+	Options () { }
+    virtual ~Options () { }
+	virtual void process_options(int argc, char **argv);
 	union OptionValue *option(char *name);
 };
 

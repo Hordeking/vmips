@@ -24,8 +24,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "range.h"
 #include "devicemap.h"
 #include "error.h"
-
-using namespace std;
+#include "options.h"
+#include "vmips.h"
+#include "memorymodule.h"
 
 /* Set the associated CPU of this Mapper object to M, if it is
  * non-NULL.
@@ -36,17 +37,19 @@ Mapper::attach(CPU *m)
 	if (m) cpu = m;
 }
 
-Mapper::Mapper() :
-	last_used_mapping(NULL)
+Mapper::Mapper () :
+	last_used_mapping (NULL)
 {
+	opt_bigendian = machine->opt->option("bigendian")->flag;
+	byteswapped = (((opt_bigendian) && (!machine->host_bigendian))
+			   || ((!opt_bigendian) && machine->host_bigendian));
 }
 
 /* Deconstruction. Deallocate the range list. */
 Mapper::~Mapper()
 {
-	for (Ranges::iterator i = ranges.begin(); i != ranges.end(); i++) {
+	for (Ranges::iterator i = ranges.begin(); i != ranges.end(); i++)
 		delete *i;
-	}
 }
 
 /* Add range R to the mapping. R must not overlap with any existing
@@ -54,90 +57,23 @@ Mapper::~Mapper()
  * R overlapped with an existing range. 
  */
 int
-Mapper::insert_into_rangelist(Range *r) throw()
+Mapper::add_range(Range *r)
 {
-	assert (r);
+	assert (r && "Null range object passed to Mapper::add_range()");
 
 	/* Check to make sure the range is non-overlapping. */
 	for (Ranges::iterator i = ranges.begin(); i != ranges.end(); i++) {
 		if (r->overlaps(*i)) {
 			error("Attempt to map two VMIPS components to the "
-			       "same memory area.");
+			       "same memory area: (base %x extent %x) and "
+			       "(base %x extent %x).", r->getBase(), r->getExtent(),
+			       (*i)->getBase(), (*i)->getExtent());
 			return -1;
 		}
 	}
 
 	/* Once we're satisfied that it doesn't overlap, add it to the list. */
 	ranges.push_back(r);
-	return 0;
-}
-
-/* The file in FP will be added to the physical memory using mmap(2)
- * at the physical base address BASE.  PERMS are inclusive-OR of MEM_READ
- * for read access and MEM_WRITE for write access.
- *
- * Returns 0 on success and -1 on failure.
- */
-int
-Mapper::add_file_mapping(FILE *fp, uint32 base, int perms)
-	throw()
-{
-	off_t here;			/* caller's current file position */
-	off_t there;		/* end of file */
-	uint32 len;			/* difference between here and there */
-	caddr_t pa;			/* mmap return value */
-	int mmap_prot = 0;	/* mmap protection bits */ 
-
-	/* Find out the size of the file. */
-	here = ftell(fp);
-	fseek(fp,0,SEEK_END);
-	there = ftell(fp);
-	len = there - here;
-
-	/* Set the appropriate mmap(2) permissions bits. */
-	if (perms & MEM_READ) mmap_prot |= PROT_READ;
-	if (perms & MEM_WRITE) mmap_prot |= PROT_WRITE;
-
-	/* Try to map the file into memory. */
-	pa = (caddr_t) mmap(0, len, mmap_prot, MAP_PRIVATE, fileno(fp), here);
-	if (pa == MAP_FAILED) {
-		error("Mapper::add_file_mapping mmap MAP_FAILED: %s",
-		       strerror(errno));
-		return -1;
-	}
-	return add_core_mapping(pa, base, len, MMAP, perms);
-}
-
-/* The block of memory at P of length LEN will be added to the physical
- * memory at the physical base address BASE.  MAPTYPE is MALLOC if this
- * was a block which can be free(3)'d; it is MMAP if this block can be
- * munmap(2)'d. Otherwise, MAPTYPE is OTHER.  PERMS are inclusive-OR of
- * MEM_READ for read access and MEM_WRITE for write access. Returns 0
- * on success, -1 on failure.
- */
-int
-Mapper::add_core_mapping(caddr_t p, uint32 base, uint32 len,
-	range_type maptype, int perms) throw()
-{
-	try {
-		insert_into_rangelist(new Range(base, len, p, maptype, perms));
-	} catch (std::bad_alloc) {
-		return -1;
-	}
-	return 0;
-}
-
-/* The memory-mapped device D will be added to the physical memory at
- * the physical base address BASE. Returns 0 on success, -1 on failure.
- */
-int
-Mapper::add_device_mapping(DeviceMap *d, uint32 base) throw()
-{
-	try {
-		insert_into_rangelist(new ProxyRange(d, base));
-	} catch (std::bad_alloc) {
-		return -1;
-	}
 	return 0;
 }
 
@@ -152,7 +88,7 @@ Mapper::find_mapping_range(uint32 p) throw()
 	if (last_used_mapping && last_used_mapping->incorporates(p))
 		return last_used_mapping;
 
-	for (Ranges::iterator i = ranges.begin(); i != ranges.end(); i++) {
+	for (Ranges::iterator i = ranges.begin(), e = ranges.end(); i != e; ++i) {
 		if ((*i)->incorporates(p)) {
 			last_used_mapping = *i;
 			return *i;
@@ -196,11 +132,9 @@ Mapper::swap_halfword(uint16 h)
 uint32
 Mapper::mips_to_host_word(uint32 w)
 {
-#if defined(BYTESWAPPED)
-	return swap_word(w);
-#else
+	if (byteswapped)
+		w = swap_word (w);
 	return w;
-#endif
 }
 
 /* Convert word W from host processor byte-order to target processor
@@ -209,11 +143,9 @@ Mapper::mips_to_host_word(uint32 w)
 uint32
 Mapper::host_to_mips_word(uint32 w)
 {
-#if defined(BYTESWAPPED)
-	return swap_word(w);
-#else
+	if (byteswapped)
+		w = swap_word (w);
 	return w;
-#endif
 }
 
 /* Convert halfword H from target processor byte-order to host processor
@@ -222,11 +154,9 @@ Mapper::host_to_mips_word(uint32 w)
 uint16
 Mapper::mips_to_host_halfword(uint16 h)
 {
-#if defined(BYTESWAPPED)
-	return swap_halfword(h);
-#else
+	if (byteswapped)
+		h = swap_halfword(h);
 	return h;
-#endif
 }
 
 /* Convert halfword H from host processor byte-order to target processor
@@ -235,11 +165,32 @@ Mapper::mips_to_host_halfword(uint16 h)
 uint16
 Mapper::host_to_mips_halfword(uint16 h)
 {
-#if defined(BYTESWAPPED)
-	return swap_halfword(h);
-#else
+	if (byteswapped)
+		h = swap_halfword(h);
 	return h;
-#endif
+}
+
+void
+Mapper::bus_error (DeviceExc *client, int32 mode, uint32 addr,
+                   int32 width, uint32 data)
+{
+	last_berr_info.valid = true;
+	last_berr_info.client = client;
+	last_berr_info.mode = mode;
+	last_berr_info.addr = addr;
+	last_berr_info.width = width;
+	last_berr_info.data = data;
+	if (machine->opt->option("dbemsg")->flag) {
+		fprintf (stderr, "%s %s %s physical address 0x%x caused bus error",
+			(mode == DATASTORE) ? "store" : "load",
+			(width == 4) ? "word" : ((width == 2) ? "halfword" : "byte"),
+			(mode == DATASTORE) ? "to" : "from",
+			addr);
+		if (mode == DATASTORE)
+			fprintf (stderr, ", data = 0x%x", data);
+		fprintf (stderr, "\n");
+	}
+    client->exception((mode == INSTFETCH ? IBE : DBE), mode);
 }
 
 /* Fetch a word from the physical memory from physical address
@@ -273,7 +224,7 @@ Mapper::fetch_word(uint32 addr, int32 mode, bool cacheable, DeviceExc *client)
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(mode == INSTFETCH ? IBE : DBE,mode);
+		bus_error (client, mode, addr, 4);
 		return 0xffffffff;
 	}
 	offset = addr - l->getBase();
@@ -313,7 +264,7 @@ Mapper::fetch_halfword(uint32 addr, bool cacheable, DeviceExc *client)
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(DBE,DATALOAD);
+		bus_error (client, DATALOAD, addr, 2);
 		return 0xffff;
 	}
 	offset = addr - l->getBase();
@@ -342,7 +293,7 @@ Mapper::fetch_byte(uint32 addr, bool cacheable, DeviceExc *client)
 
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(DBE,DATALOAD);
+		bus_error (client, DATALOAD, addr, 1);
 		return 0xff;
 	}
 	offset = addr - l->getBase();
@@ -374,7 +325,7 @@ Mapper::store_word(uint32 addr, uint32 data, bool cacheable, DeviceExc *client)
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(DBE,DATASTORE);
+		bus_error (client, DATASTORE, addr, 4, data);
 		return;
 	}
 	offset = addr - l->getBase();
@@ -409,7 +360,7 @@ Mapper::store_halfword(uint32 addr, uint16 data, bool cacheable, DeviceExc
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(DBE,DATASTORE);
+		bus_error (client, DATASTORE, addr, 2, data);
 		return;
 	}
 	offset = addr - l->getBase();
@@ -438,7 +389,7 @@ Mapper::store_byte(uint32 addr, uint8 data, bool cacheable, DeviceExc *client)
 
 	l = find_mapping_range(addr);
 	if (!l) {
-		client->exception(DBE,DATASTORE);
+		bus_error (client, DATASTORE, addr, 1, data);
 		return;
 	}
 	offset = addr - l->getBase();
@@ -465,18 +416,16 @@ Mapper::dump_stack(FILE *f, uint32 stackphys)
 	if ((l = find_mapping_range(stackphys)) == NULL) {
 		fprintf(f, "(points to hole in address space)");
 	} else {
-		if (l->getType() != MALLOC) {
+		if (!dynamic_cast<MemoryModule *> (l)) {
 			fprintf(f, "(points to non-RAM address space)");
 		} else {
 			for (int i = 0; i > -8; i--) {
 				uint32 data =
 					((uint32 *) l->
 					 getAddress())[(stackphys - l->getBase()) / 4 + i];
-#if defined(BYTESWAPPED)
-				fprintf(f, "%08x ", swap_word(data));
-#else
+				if (byteswapped)
+					data = swap_word (data);
 				fprintf(f, "%08x ", data);
-#endif
 			}
 		}
 	}

@@ -3,7 +3,7 @@
  * It is a good idea to put some simplistic tests here for any function
  * you add to the little C library.
  *
- * $Id: libtest.c,v 1.5 2000/11/11 10:50:06 brg Exp $
+ * $Id: libtest.c,v 1.6 2003/04/06 15:10:40 brg Exp $
  */
 
 #ifdef USE_STANDARD_LIBRARY
@@ -17,14 +17,14 @@ int
 main (int argc, char **argv)
 {
   int fail, i;
-  char buf[200];
+  char buf[200], dest[200], c;
 
   /* test puts */
   puts ("ok puts");
 
   /* test printf */
-  printf("o%c pr%cntf", 'k', 'i');
-  printf("\n");
+  printf ("o%c pr%cntf", 'k', 'i');
+  printf ("\n");
 
   /* test puts_nonl */
   puts_nonl ("ok puts_nonl\n");
@@ -321,6 +321,185 @@ main (int argc, char **argv)
   else
     {
       puts ("ok memmove");
+    }
+
+  /* test strcat */
+  fail = 0;
+  buf[0] = 'b';
+  buf[1] = 'a';
+  buf[2] = 'r';
+  buf[3] = '\0';
+  dest[0] = 'f';
+  dest[1] = 'o';
+  dest[2] = 'o';
+  dest[3] = '\0';
+  if (strcat (dest, buf) != dest)
+    {
+      puts ("[strcat retval]");
+      fail++;
+    }
+  if (strcmp (dest, "foobar") != 0)
+    {
+      puts ("[strcat foobar]");
+      fail++;
+    }
+  buf[0] = '\0';
+  dest[0] = 'f';
+  dest[1] = 'o';
+  dest[2] = 'o';
+  dest[3] = '\0';
+  strcat (dest, buf);
+  if (strcmp (dest, "foo") != 0)
+    {
+      puts ("[strcat foo]");
+      fail++;
+    }
+  dest[0] = '\0';
+  buf[0] = 'f';
+  buf[1] = 'o';
+  buf[2] = 'o';
+  buf[3] = '2';
+  buf[4] = '\0';
+  strcat (dest, buf);
+  if (strcmp (dest, "foo2") != 0)
+    {
+      puts ("[strcat foo2]");
+      fail++;
+    }
+  if (fail)
+    {
+      puts ("fail strcat");
+    }
+  else
+    {
+      puts ("ok strcat");
+    }
+
+  /* test toupper */
+  fail = 0;
+  c = 'a';
+  if (toupper (c) != 'A')
+    {
+      fail++;
+    }
+  c = 'z';
+  if (toupper (c) != 'Z')
+    {
+      fail++;
+    }
+
+  if (fail)
+    {
+      puts ("fail toupper");
+    }
+  else
+    {
+      puts ("ok toupper");
+    }
+
+  /* test tolower */
+  fail = 0;
+  c = 'A';
+  if (tolower (c) != 'a')
+    {
+      fail++;
+    }
+  c = 'Z';
+  if (tolower (c) != 'z')
+    {
+      fail++;
+    }
+
+  if (fail)
+    {
+      puts ("fail tolower");
+    }
+  else
+    {
+      puts ("ok tolower");
+    }
+
+
+  /* test isprint */
+  fail = 0;
+  if (isprint (''))
+    {
+      fail++;
+    }
+  if (!isprint ('G'))
+    {
+      fail++;
+    }
+  if (fail)
+    {
+      puts ("fail isprint");
+    }
+  else
+    {
+      puts ("ok isprint");
+    }
+
+  /* test memcpy */
+  fail = 0;
+  buf[0] = 0;
+  buf[1] = 1;
+  buf[2] = 2;
+  dest[0] = 0;
+  dest[1] = 0;
+  dest[2] = 0;
+  memcpy (dest, buf, 3);
+  if (!(dest[0] == 0 && dest[1] == 1 && dest[2] == 2))
+    {
+      fail++;
+    }
+  if (fail)
+    {
+      puts ("fail memcpy");
+    }
+  else
+    {
+      puts ("ok memcpy");
+    }
+
+  /* test memset */
+  memset (buf, '4', 50);
+  for (i = 0; i < 50; ++i)
+    {
+      if (buf[i] != '4')
+	{
+	  fail++;
+	}
+    }
+  if (fail)
+    {
+      puts ("fail memset");
+    }
+  else
+    {
+      puts ("ok memset");
+    }
+
+  /* test atoi */
+  fail = 0;
+  if (atoi ("2134") != 2134)
+    {
+      fail++;
+    }
+  if (atoi ("0") != 0)
+    {
+      fail++;
+    }
+  if (atoi ("-30000") != -30000)
+    {
+      fail++;
+    }
+  if (fail)
+    {
+      puts ("fail atoi");
+    }
+  else
+    {
+      puts ("ok atoi");
     }
 
   return 0;

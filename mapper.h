@@ -21,21 +21,30 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _MAPPER_H_
 
 #include <vector>
-
-#include "range.h"
-#include "devicemap.h"
-#include "deviceexc.h"
 #include "accesstypes.h"
-#include "debug.h"
+#include "range.h"
 
 class CPU;
-/* avoid circular dep. cpu.h -> mapper.h -> cpu.h -> ... */
+class Range;
+class DeviceMap;
+class DeviceExc;
 
 class Mapper {
 public:
 	/* We keep lists of ranges in a vector of pointers to range
 	   objects. */
 	typedef std::vector<Range *> Ranges;
+
+	struct BusErrorInfo {
+	  bool valid;
+	  DeviceExc *client;
+	  int32 mode;
+	  uint32 addr;
+	  int32 width;
+	  uint32 data;
+	};
+
+	BusErrorInfo last_berr_info;
 
 private:
 	/* A pointer to the last mapping that was successfully returned by
@@ -48,6 +57,8 @@ private:
 	/* A pointer to the currently associated CPU object. */
 	CPU *cpu;
 
+	bool opt_bigendian;
+	bool byteswapped;
 public:
 	Mapper();
 	~Mapper();
@@ -56,18 +67,21 @@ public:
 	 * ranges in the mapping. Return 0 if R added sucessfully or -1 if
 	 * R overlapped with an existing range. 
 	 */
-	int insert_into_rangelist(Range *r) throw();
-	int add_file_mapping(FILE *fp, uint32 base, int perms = MEM_READ_WRITE)
-		throw();
-	int add_core_mapping(caddr_t p, uint32 base, uint32 len,
-		range_type maptype = MALLOC, int perms = MEM_READ_WRITE) throw();
-	int add_device_mapping(DeviceMap *d, uint32 base) throw();
-	static uint32 swap_word(uint32 w);
-	static uint16 swap_halfword(uint16 h);
-	static uint32 mips_to_host_word(uint32 w);
-	static uint32 host_to_mips_word(uint32 w);
-	static uint16 mips_to_host_halfword(uint16 h);
-	static uint16 host_to_mips_halfword(uint16 h);
+	int add_range (Range *r);
+	/* Add range R to the mapping, as with add_range(), but first set its
+	 * base address to PA.
+	 */
+	int map_at_physical_address (Range *r, uint32 pa) {
+		r->setBase (pa); return add_range (r);
+	}
+	uint32 swap_word(uint32 w);
+	uint16 swap_halfword(uint16 h);
+	uint32 mips_to_host_word(uint32 w);
+	uint32 host_to_mips_word(uint32 w);
+	uint16 mips_to_host_halfword(uint16 h);
+	uint16 host_to_mips_halfword(uint16 h);
+	void bus_error (DeviceExc *client, int32 mode, uint32 addr, int32 width,
+		uint32 data = 0xffffffff);
 	uint32 fetch_word(uint32 addr, int32 mode, bool cacheable,
 		DeviceExc *client);
 	uint16 fetch_halfword(uint32 addr, bool cacheable, DeviceExc *client);
@@ -81,6 +95,7 @@ public:
 	Range *find_mapping_range(uint32 p) throw();
 	void attach(CPU *m = NULL);
 	void dump_stack(FILE *f, uint32 stackphys);
+	void get_last_berr_info (BusErrorInfo &info) { info = last_berr_info; }
 };
 
 #endif /* _MAPPER_H_ */

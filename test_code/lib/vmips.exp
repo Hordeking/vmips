@@ -12,14 +12,14 @@ proc vmips_default_timeout {} {
 # target's endianness.
 #
 proc vmips_target_endian {} {
-	global endian_flag
-	if ![info exists endian_flag] {
-		perror "endian_flag was not set"
+	global endian_option
+	if ![info exists endian_option] {
+		perror "endian_option was not set"
 		return "little"
 	}
-	if {$endian_flag == "-EB"} {
+	if {$endian_option == "bigendian"} {
 		set target_endian "big"
-	} elseif {$endian_flag == "-EL"} {
+	} elseif {$endian_option == "nobigendian"} {
 		set target_endian "little"
 	}
 	return $target_endian
