@@ -85,9 +85,9 @@ sb-print.rom: sb-print.exe
 noinst_PROGRAMS =  loser bdexcp poke2 instcounts exception emptymain simpledis unaligned hello2 hello sb-print
 
 LINK = $(VMIPSTOOL) --link -o $@
-COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
+COMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
 EXEEXT = .exe
 
 CLEANFILES =  loser.rom bdexcp.rom poke2.rom instcounts.rom exception.rom emptymain.rom simpledis.rom unaligned.rom hello2.rom hello.rom sb-print.rom

@@ -1,16 +1,16 @@
 
-   VMIPS 1.3 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.3.1 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
-This release primarily focuses on improvements to existing features and
-code clean-up. 
+This release primarily focuses on minor bug fixes and portability
+improvements.
 
-   You can download VMIPS 1.3 from any of the following sites:
+   You can download VMIPS 1.3.1 from any of the following sites:
 
 * ftp://download.sourceforge.net/pub/sourceforge/vmips/
-* ftp://ftp.dgate.org/vmips/releases/vmips-1.3/
+* ftp://ftp.dgate.org/vmips/releases/vmips-1.3.1/
 * http://download.sourceforge.net/vmips/
-* http://www.dgate.org/vmips/releases/vmips-1.3/
-* http://vmips.sourceforge.net/releases/vmips-1.3/
+* http://www.dgate.org/vmips/releases/vmips-1.3.1/
+* http://vmips.sourceforge.net/releases/vmips-1.3.1/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -22,44 +22,23 @@ features since the last publically released version are detailed in
    The home page for VMIPS is "http://www.dgate.org/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.3 (since version 1.2.2):
+   User-visible changes in version 1.3.1 (since version 1.3):
 
-   * The VMIPS code base has been cleaned up substantially. The most
-     important visible effect of this is that VMIPS compiles much more
-     quickly now.
+   * VMIPS now compiles and passes most of its regression tests under
+     Microsoft Windows using Cygwin. There is one known failure
+     (misc-tests/echo), but the failure stems from the testsuite, not
+     VMIPS; I suspect that my old version of Expect is at fault.
 
-   * A new, experimental executable-file loader has been integrated.
-     Presently it is only usable for loading ECOFF files into the
-     kernel segments (0x80000000-0xbfffffff). The ROM monitor has a new
-     `call' command you can use to take advantage of this.
+   * The build status report script, `buildstat.sh', has been removed
+     from the distribution.  (Since it was broken in version 1.3 and no
+     one complained, we're assuming that no one will miss it much!)
 
-   * Vmipstool can now disassemble binary instructions from the command
-     line, e.g.  `vmipstool --disassemble-word <pc> <instr>'.
-
-   * The `excmsg' option used to report all exceptions, including
-     things like clock interrupts. This made using `excmsg' in any
-     nontrivial kernel code almost impossible. Now you must also specify
-     'reportirq' to get reports of interrupt exceptions.
-
-   * The `haltjrra' option has been removed.
-
-   * The DECstation 5000/200-compatible CSR device now supports delivery
-     of interrupts from devices attached to CSR interrupt lines, such
-     as the DZ11 serial device.
-
-   * The DZ11 serial device now supports interrupt-driven I/O properly.
-     It previously only worked correctly if polling was used.
-
-   * The documentation has received the usual slight adjustments. In
-     addition, the test-suite documentation has been extensively
-     revised and integrated into the programmer's manual.
-
-   * The options-processing code has been revised slightly to print a
-     better error message when an invalid option is specified.
+   * Two bugs in the testsuite that could have led to spurious test
+     failures have been fixed.
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_3-branch". VMIPS 1.3 itself can be checked out using the tag
-"release-1-3".
+"vmips-1_3-branch". VMIPS 1.3.1 itself can be checked out using the tag
+"release-1-3-1".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.

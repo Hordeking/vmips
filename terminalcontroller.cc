@@ -160,7 +160,7 @@ void TerminalController::reinitialize_terminals() throw()
 		if( !line_connected(i) )
 			continue;
 		
-		if( !prepare_tty( lines[i].tty_fd ) ) {
+		if( !prepare_tty( i ) ) {
 			error("tty on line %d cannot be restored, removing",i);
 			remove_terminal( i );
 		}

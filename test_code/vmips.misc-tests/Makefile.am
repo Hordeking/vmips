@@ -28,9 +28,9 @@ clocker.rom: clocker.exe
 noinst_PROGRAMS =  sort echo clocker
 
 LINK = $(VMIPSTOOL) --link -o $@
-COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
+COMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
 EXEEXT = .exe
 
 CLEANFILES =  sort.rom echo.rom clocker.rom

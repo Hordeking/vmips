@@ -75,8 +75,11 @@ CCAS = @CCAS@
 CCASFLAGS = @CCASFLAGS@
 CPP = @CPP@
 CXX = @CXX@
+HAVE_LIB = @HAVE_LIB@
 LDFLAGS = @LDFLAGS@
+LIB = @LIB@
 LN_S = @LN_S@
+LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
 PACKAGE = @PACKAGE@
@@ -228,9 +231,9 @@ bltzal_SOURCES = bltzal.S
 noinst_PROGRAMS = bgezal xor tester logical mumble divu mthi_lo blez haltdev sub lwl lwr swl swr multu shift coproc bltz sltiu addi srlv add jalr bc0 load tlbwr slti store handler5 bgtz syscall bltzal
 
 LINK = $(VMIPSTOOL) --link -o $@
-COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
-CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
+COMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
 EXEEXT = .exe
 
 CLEANFILES = bgezal.rom xor.rom tester.rom logical.rom mumble.rom divu.rom mthi_lo.rom blez.rom haltdev.rom sub.rom lwl.rom lwr.rom swl.rom swr.rom multu.rom shift.rom coproc.rom bltz.rom sltiu.rom addi.rom srlv.rom add.rom jalr.rom bc0.rom load.rom tlbwr.rom slti.rom store.rom handler5.rom bgtz.rom syscall.rom bltzal.rom

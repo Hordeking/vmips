@@ -2,12 +2,11 @@ These installation instructions are copied from the VMIPS Manual. For
 bug-reporting instructions, please see the README file in the source
 distribution, or read the VMIPS Manual.
 
-File: vmips.info,  Node: Installation,  Next: Reporting Bugs,  Prev: Test Suite,  Up: Top
 
-Installation
-************
+Appendix A Installation
+***********************
 
-   VMIPS uses the GNU Autoconf/Automake system for configuration
+VMIPS uses the GNU Autoconf/Automake system for configuration
 management.  This provides the familiar `configure' shell script
 interface for setting configuration variables before compiling VMIPS.
 This means that the traditional `./configure; make; make install'
@@ -15,19 +14,18 @@ sequence should work.  For more information about the special options
 that VMIPS `configure' accepts, read on, or give the `--help' option to
 `configure' for an abridged version.
 
-Prerequisites
-=============
+A.1 Prerequisites
+=================
 
-   The VMIPS build process assumes that you have a C++ compiler
-installed on the host machine which can deal correctly with template
-functions.  In particular, using GCC 2.91.66, also known as EGCS 1.1.2
-(the system compiler on Red Hat Linux 6.x systems)--or, we suspect, any
-older compiler--is not possible, because the compiler will crash,
-giving an "internal compiler error" message when trying to compile
-various VMIPS subsystems.  For that reason, `configure' checks for the
-bug in question and will print an error message ("your C++ compiler's
-template function handling is buggy") if you attempt to use a deficient
-compiler.
+The VMIPS build process assumes that you have a C++ compiler installed
+on the host machine which can deal correctly with template functions.
+In particular, using GCC 2.91.66, also known as EGCS 1.1.2 (the system
+compiler on Red Hat Linux 6.x systems)--or, we suspect, any older
+compiler--is not possible, because the compiler will crash, giving an
+"internal compiler error" message when trying to compile various VMIPS
+subsystems.  For that reason, `configure' checks for the bug in
+question and will print an error message ("your C++ compiler's template
+function handling is buggy") if you attempt to use a deficient compiler.
 
    If you want to build any of the sample code which is included with
 the VMIPS source distribution, you must have a full set of GNU MIPS
@@ -48,10 +46,10 @@ and DejaGNU installed (any version published since 2000 should be
 fine). Once VMIPS is compiled, you can type `make check' to run the
 test suite.
 
-Building from CVS
-=================
+A.2 Building from CVS
+=====================
 
-   If you retrieved your sources from the CVS repository, you will need
+If you retrieved your sources from the CVS repository, you will need
 Automake version 1.4 or later, Autoconf version 2.13 or later, and
 libtool 1.2f or later. Newer versions of Autoconf (2.52f, 2.53) have
 been tested, and should also work.  You will need perl 5 to build the
@@ -60,10 +58,10 @@ including `configure'. To generate these, run `utils/bootstrap'. To
 automatically run configure once it has been generated, you can run
 `utils/bootstrap -c CONFIGURE-ARGS'.
 
-Options that configure supports
-===============================
+A.3 Options that configure supports
+===================================
 
-   Some of the interesting options that `configure' supports are as
+Some of the interesting options that `configure' supports are as
 follows:
 
 `--target=T'
@@ -130,11 +128,12 @@ follows:
      it should be. This option doesn't seem to work very well on Mac OS
      X. Setting this option inhibits stripping the executables.
 
-Post-Installation Setup
-=======================
 
-   If you are an end-user with a binary package for VMIPS and a MIPS
-cross compiler, you will probably want to make Vmipstool use the cross
+A.4 Post-Installation Setup
+===========================
+
+If you are an end-user with a binary package for VMIPS and a MIPS cross
+compiler, you will probably want to make Vmipstool use the cross
 compiler when you run commands such as `vmipstool --compile'.
 
    You should edit your `/etc/vmipsrc' or `~/.vmipsrc' file and change
@@ -145,13 +144,13 @@ compile a C file by running `vmipstool --compile -c foo.c'. You should
 get an object file (`foo.o') of the right endianness and object format;
 you can check this using the `file' command on most Unix systems.
 
-Packaging VMIPS
-===============
+A.5 Packaging VMIPS
+===================
 
-   If you are a system integrator or distributor who is building a
-package for VMIPS intended for distribution, you may be able to start
-by looking at the RPM vmips.spec file or the Debian dpkg packaging
-files included in the source distribution.
+If you are a system integrator or distributor who is building a package
+for VMIPS intended for distribution, you may be able to start by
+looking at the RPM vmips.spec file or the Debian dpkg packaging files
+included in the source distribution.
 
    Your VMIPS package need not require a set of MIPS cross tools either
 at the build or install stage.  Starting with VMIPS 1.2, it is
@@ -180,16 +179,16 @@ Public License, please make an effort to distribute sources (or at
 least, post a link to the sources) if you distribute binaries or binary
 packages. Thanks!
 
-Building MIPS Cross Tools
-=========================
+A.6 Building MIPS Cross Tools
+=============================
 
-   First decide on an installation prefix. The following examples will
-use the prefix `/opt/mips', as above, which is the default place that
-the VMIPS `configure' script looks for them; you can however use any
-prefix you wish.
+First decide on an installation prefix. The following examples will use
+the prefix `/opt/mips', as above, which is the default place that the
+VMIPS `configure' script looks for them; you can however use any prefix
+you wish.
 
    Download a copy of Binutils, from any GNU mirror, or from the URL:
-     <ftp://sources.redhat.com/pub/binutils/releases>
+     `ftp://sources.redhat.com/pub/binutils/releases'
    We recommend getting version 2.11.2 or 2.13.2.1.
 
    Build binutils by running the following commands. We recommend
@@ -203,12 +202,12 @@ NLS (linking against `libopcodes.a' results in unresolved symbols.)
 
    Download a copy of the GNU Compiler Collection (`gcc') from any GNU
 mirror, or from the URL:
-     <ftp://gcc.gnu.org/pub/gcc/releases>
+     `ftp://gcc.gnu.org/pub/gcc/releases'
    You should be able to use any version from 3.0 through 3.4. We've
 mostly tested with 3.0.4. Our examples (below) will assume 3.0.4.
 
    You can read the documentation for building the compiler by pointing
-your World-Wide Web browser at <http://gcc.gnu.org/install>.  When you
+your World-Wide Web browser at `http://gcc.gnu.org/install'.  When you
 encounter difficulties, you should consider consulting the
 documentation for building the compiler, because it is more complete
 than the following summary.
@@ -259,7 +258,7 @@ than the following summary.
 
        1. Download a copy of the GNU debugger from any GNU mirror, or
           from the URL:
-               <ftp://ftp.gnu.org/pub/gnu/gdb/>
+               `ftp://ftp.gnu.org/pub/gnu/gdb/'
           We recommend version 5.2.1. Download the file
           `gdb-5.2.1.tar.gz'.
 
@@ -281,7 +280,7 @@ than the following summary.
 
      As noted in the uClibc INSTALL file, you will need Linux kernel
      sources.  Just pick a recent version of Linux 2.4; you can
-     download it from <http://www.kernel.org> or one of its mirrors, if
+     download it from `http://www.kernel.org' or one of its mirrors, if
      you don't have it handy.  You will need to configure (but not
      build) the Linux kernel for MIPS. Here's how:
 
@@ -295,7 +294,7 @@ than the following summary.
 
         * Run `make oldconfig' and `make dep'.
 
-     Next, download uClibc from <http://www.uclibc.org>, and unpack it
+     Next, download uClibc from `http://www.uclibc.org', and unpack it
      next to the Linux kernel sources. The last version we tested was
      0.9.26.  Read the `INSTALL' file in that distribution.
 
@@ -337,16 +336,16 @@ than the following summary.
 The remainder of this file represents generic (i.e., not VMIPS-specific)
 instructions for using "configure".
 
-Copyright 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
+Copyright (C) 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
 Foundation, Inc.
 
    This file is free documentation; the Free Software Foundation gives
 unlimited permission to copy, distribute and modify it.
 
-Basic Installation
-==================
+0.1 Basic Installation
+======================
 
-   These are generic installation instructions.
+These are generic installation instructions.
 
    The `configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
@@ -403,24 +402,25 @@ The simplest way to compile this package is:
      all sorts of other programs in order to regenerate files that came
      with the distribution.
 
-Compilers and Options
-=====================
+0.2 Compilers and Options
+=========================
 
-   Some systems require unusual options for compilation or linking that
-the `configure' script does not know about.  Run `./configure --help'
-for details on some of the pertinent environment variables.
+Some systems require unusual options for compilation or linking that the
+`configure' script does not know about.  Run `./configure --help' for
+details on some of the pertinent environment variables.
 
-   You can give `configure' initial values for variables by setting
-them in the environment.  You can do that on the command line like this:
+   You can give `configure' initial values for configuration parameters
+by setting variables in the command line or in the environment.  Here
+is an example:
 
      ./configure CC=c89 CFLAGS=-O2 LIBS=-lposix
 
    *Note Defining Variables::, for more details.
 
-Compiling For Multiple Architectures
-====================================
+0.3 Compiling For Multiple Architectures
+========================================
 
-   You can compile the package for more than one kind of computer at the
+You can compile the package for more than one kind of computer at the
 same time, by placing the object files for each architecture in their
 own directory.  To do this, you must use a version of `make' that
 supports the `VPATH' variable, such as GNU `make'.  `cd' to the
@@ -434,10 +434,10 @@ time in the source code directory.  After you have installed the
 package for one architecture, use `make distclean' before reconfiguring
 for another architecture.
 
-Installation Names
-==================
+0.4 Installation Names
+======================
 
-   By default, `make install' will install the package's files in
+By default, `make install' will install the package's files in
 `/usr/local/bin', `/usr/local/man', etc.  You can specify an
 installation prefix other than `/usr/local' by giving `configure' the
 option `--prefix=PATH'.
@@ -457,10 +457,10 @@ you can set and what kinds of files go in them.
 with an extra prefix or suffix on their names by giving `configure' the
 option `--program-prefix=PREFIX' or `--program-suffix=SUFFIX'.
 
-Optional Features
-=================
+0.5 Optional Features
+=====================
 
-   Some packages pay attention to `--enable-FEATURE' options to
+Some packages pay attention to `--enable-FEATURE' options to
 `configure', where FEATURE indicates an optional part of the package.
 They may also pay attention to `--with-PACKAGE' options, where PACKAGE
 is something like `gnu-as' or `x' (for the X Window System).  The
@@ -472,14 +472,14 @@ find the X include and library files automatically, but if it doesn't,
 you can use the `configure' options `--x-includes=DIR' and
 `--x-libraries=DIR' to specify their locations.
 
-Specifying the System Type
-==========================
+0.6 Specifying the System Type
+==============================
 
-   There may be some features `configure' cannot figure out
-automatically, but needs to determine by the type of machine the package
-will run on.  Usually, assuming the package is built to be run on the
-_same_ architectures, `configure' can figure that out, but if it prints
-a message saying it cannot guess the machine type, give it the
+There may be some features `configure' cannot figure out automatically,
+but needs to determine by the type of machine the package will run on.
+Usually, assuming the package is built to be run on the _same_
+architectures, `configure' can figure that out, but if it prints a
+message saying it cannot guess the machine type, give it the
 `--build=TYPE' option.  TYPE can either be a short name for the system
 type, such as `sun4', or a canonical name which has the form:
 
@@ -502,21 +502,21 @@ platform different from the build platform, you should specify the
 "host" platform (i.e., that on which the generated programs will
 eventually be run) with `--host=TYPE'.
 
-Sharing Defaults
-================
+0.7 Sharing Defaults
+====================
 
-   If you want to set default values for `configure' scripts to share,
-you can create a site shell script called `config.site' that gives
-default values for variables like `CC', `cache_file', and `prefix'.
+If you want to set default values for `configure' scripts to share, you
+can create a site shell script called `config.site' that gives default
+values for variables like `CC', `cache_file', and `prefix'.
 `configure' looks for `PREFIX/share/config.site' if it exists, then
 `PREFIX/etc/config.site' if it exists.  Or, you can set the
 `CONFIG_SITE' environment variable to the location of the site script.
 A warning: not all `configure' scripts look for a site script.
 
-Defining Variables
-==================
+0.8 Defining Variables
+======================
 
-   Variables not defined in a site shell script can be set in the
+Variables not defined in a site shell script can be set in the
 environment passed to `configure'.  However, some packages may run
 configure again during the build, and the customized values of these
 variables may be lost.  In order to avoid this problem, you should set
@@ -527,11 +527,10 @@ them in the `configure' command line, using `VAR=value'.  For example:
 will cause the specified gcc to be used as the C compiler (unless it is
 overridden in the site shell script).
 
-`configure' Invocation
-======================
+0.9 `configure' Invocation
+==========================
 
-   `configure' recognizes the following options to control how it
-operates.
+`configure' recognizes the following options to control how it operates.
 
 `--help'
 `-h'

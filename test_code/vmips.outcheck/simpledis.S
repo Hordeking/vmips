@@ -2,7 +2,7 @@
 	.text
 	.globl __start
 __start:
-	add v0, v1, a0
-	sub a1, a2, a3
-	mult t0, t1
+	addu v0, v1, a0
+	subu a1, a2, a3
+	multu t0, t1
 	break

@@ -4,7 +4,7 @@ AC_INIT(vmips.cc)
 dnl Get the canonical and user-supplied names for the host and target. 
 AC_CANONICAL_SYSTEM
 program_prefix=NONE
-AM_INIT_AUTOMAKE(vmips, 1.3)
+AM_INIT_AUTOMAKE(vmips, 1.3.1)
 AM_CONFIG_HEADER(config.h)
 
 dnl Look for mips tool installation:
@@ -31,14 +31,25 @@ dnl Check for C compiler.
 dnl We have to do this early because AC_TRY_CPP depends on it.
 AC_PROG_CC
 
+dnl Checks for interesting flavors of Unix.
+AC_AIX
+AC_ISC_POSIX
+AC_MINIX
+
+dnl Check for executable extension.
+dnl Note that this is also required for the testsuite to function (see the
+dnl automake-1.7.8 manual) because the testsuite Makefile.am files
+dnl explicitly set EXEEXT.
+AC_EXEEXT
+
 AC_MSG_CHECKING([for mips tool prefix])
 mipstoolprefix=""
-for file in ${mipsdir}/mips*/bin/*gcc ${mipsbin}/*gcc 
+for file in ${mipsdir}/mips*/bin/*gcc$EXEEXT ${mipsbin}/*gcc$EXEEXT
 do
 	case $file in
 		*\**) mipstoolprefix="";;
 		*\*) mipstoolprefix="";;
-		*) mipstoolprefix=`echo "$file" |sed 's/gcc//'`;;
+		*) mipstoolprefix=`echo "$file" |sed "s/gcc$EXEEXT//"`;;
 	esac
 done
 AC_MSG_RESULT($mipstoolprefix)
@@ -146,17 +157,6 @@ then
 fi
 AC_SUBST(LDFLAGS)
 
-dnl Checks for interesting flavors of Unix.
-AC_AIX
-AC_ISC_POSIX
-AC_MINIX
-
-dnl Check for executable extension.
-dnl Note that this is also required for the testsuite to function (see the
-dnl automake-1.7.8 manual) because the testsuite Makefile.am files
-dnl explicitly set EXEEXT.
-AC_EXEEXT
-
 AC_PROG_AWK
 AC_PROG_CXX
 if test "x$GXX" = "xyes"
@@ -216,8 +216,7 @@ AC_SUBST(CCASFLAGS)
 AC_DEFINE(CCAS,[],[Currently not used.])
 AC_SUBST(CCAS)
 
-AC_OUTPUT([buildstat.sh
- Makefile
+AC_OUTPUT([Makefile
  vmips.spec
  vmipsrc
  doc/Makefile
@@ -227,5 +226,4 @@ AC_OUTPUT([buildstat.sh
  test_code/Makefile
  test_code/vmips.misc-tests/Makefile
  test_code/vmips.outcheck/Makefile
- test_code/vmips.regcheck/Makefile],
- [test -f buildstat.sh && chmod +x buildstat.sh])
+ test_code/vmips.regcheck/Makefile])

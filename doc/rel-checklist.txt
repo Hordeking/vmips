@@ -33,6 +33,10 @@ Add news item to web page
 
 Release on SourceForge
     Upload tarball, rpm, srpm to upload.sourceforge.net/incoming
+    Add News item to summary page with short paragraph describing release
 
 Send ANNOUNCE as e-mail to mailing list
+
+Announce release on Freshmeat.net
+    Use the same short paragraph as SF.net news item
 

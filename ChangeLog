@@ -1,3 +1,584 @@
+2005-01-06 22:59  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: Updated ANNOUNCE using new text from NEWS
+
+2005-01-06 22:58  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS, test_code/README: Regenerated using doc/makeINSTALL.
+
+2005-01-06 22:57  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add one more item about testsuite spurious
+	  failures which should be fixed now.  Mention the expected failure
+	  under Windows.
+
+2005-01-06 22:31  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/rel-checklist.txt: Add a few items to the end of the release
+	  checklist.
+
+2005-01-06 22:19  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/: simpledis.S, simpledis.par: Random
+	  register initialization in debug builds means that we need to use
+	  the non-trapping versions of these instructions.
+
+2005-01-06 22:19  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/instcounts.par: It seems that it's
+	  possible that on really fast machines, 10 instructions can just
+	  whizz by and you won't even notice it.... :-)
+
+2005-01-06 21:54  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add warning about ancient versions of Expect.
+
+2005-01-06 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/testcase-maker: Don't explicitly specify '-o ' in the
+	  automake variables. For some reason this breaks on later versions
+	  of automake.	 (0@$%#~ing automake!!)
+
+2005-01-06 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.misc-tests/Makefile.am,
+	  vmips.outcheck/Makefile.am, vmips.regcheck/Makefile.am:
+	  Regenerated using testmkmf-all.
+
+2005-01-06 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* libopcodes_mips/Makefile.in, test_code/Makefile.in,
+	  test_code/vmips.misc-tests/Makefile.in,
+	  test_code/vmips.outcheck/Makefile.in,
+	  test_code/vmips.regcheck/Makefile.in: Regenerated using automake
+	  (GNU automake) 1.4-p4.
+
+2005-01-06 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add release history item for version 1.3.1.
+
+2005-01-06 21:34  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Move the check for EXEEXT and the things it depends
+	  on earlier in the configuration script, and respect EXEEXT when
+	  we are looking for mips tools. This lets us look for and find
+	  gcc.exe on Windows.
+
+2005-01-06 21:33  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, NEWS, test_code/README: Regenerated using
+	  doc/makeINSTALL.  (So much the worse for us that Emacs 21 doesn't
+	  do as nice a job with ASCII-text Info rendering as Emacs 20
+	  did...)
+
+2005-01-06 21:33  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: Update release announcement for version 1.3.1.
+
+2005-01-06 18:05  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/changelog: Updated version to 1.3.1.
+
+2005-01-06 18:04  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in: Update version to 1.3.1
+
+2005-01-06 18:02  Brian R. Gaeke <brg@dgate.org>
+
+	* terminalcontroller.cc: Partial merge from HEAD- fix bug in
+	  reinitialize_terminals(), which was passing the wrong argument to
+	  prepare_tty().
+
+	  This function is technically dead in vmips-1_3-branch, but we use
+	  it in CVS HEAD versions of VMIPS, and the bug's been fixed there,
+	  so this is very low-risk.
+
+2005-01-06 17:55  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in: Partial merge from HEAD: don't build
+	  or distribute buildstat.sh
+
+2005-01-06 17:53  Brian R. Gaeke <brg@dgate.org>
+
+	* buildstat.sh.in: This script is broken in the 1.3 branch!
+
+2005-01-04 03:41  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/coproc-methods.txt: Add doco about coprocessor methods.
+
+2005-01-04 03:39  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/interact-commands: interactive commands list
+
+2005-01-04 03:34  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in: More bits required to get
+	  libtinyscheme to build :-) You'd think library subdirs would be
+	  easy in automake???
+
+2005-01-04 03:27  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add libtinyscheme and its wrappers to the build
+
+2005-01-04 03:26  Brian R. Gaeke <brg@dgate.org>
+
+	* scheme.cc, scheme.h, schemeprocs.cc: Add wrapper procedures for
+	  scheme interpreter
+
+2005-01-04 03:24  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Add declarations of state variables for scheme
+	  interpreter Get rid of some of the weird protected stuff
+
+2005-01-04 03:24  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Add hooks for scheme interpreter - replaces most of
+	  interact()
+
+2004-12-30 21:06  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Add member variables for simple disk controller &
+	  prototype for setup method.
+
+2004-12-30 21:06  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Add setup code for simple disk controller.
+
+2004-12-30 21:06  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Add diskimage option.
+
+2004-12-30 21:06  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Add some helpful assertions. DECSerial should not
+	  be attached without DECCSR.
+
+2004-12-30 21:06  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add disk controller & disk sources to the build.
+
+2004-12-30 21:04  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/test_disk.cc: Disk test program.
+
+2004-12-30 21:02  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/disk-dma.txt: Add docs for disk controller
+
+2004-12-30 20:57  Brian R. Gaeke <brg@dgate.org>
+
+	* disk.cc, disk.h, diskctrl.cc, diskctrl.h, diskctrlreg.h: Simple
+	  disk controller with DMA
+
+2004-12-29 05:04  Brian R. Gaeke <brg@dgate.org>
+
+	* fileutils.cc: Remove dead variable
+
+2004-12-29 02:26  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: Clean this up a bit; add many more comments.
+
+2004-12-28 03:56  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Remove dead decl of randomize().
+
+2004-12-28 03:55  Brian R. Gaeke <brg@dgate.org>
+
+	* fileutils.cc, fileutils.h, rommodule.cc, vmips.cc, vmips.h: Move
+	  get_file_size out of class vmips and out of vmips.cc into
+	  fileutils.cc, and add its prototype to fileutils.h.  Also, in
+	  get_file_size, make sure always to restore the original file
+	  position.  Also, in can_read_file, check the pointer argument to
+	  make sure that it is non-null.
+
+2004-12-28 02:45  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: If mips-nm prints 64-bit numbers, chop
+	  off the top 32 bits.
+
+2004-12-28 02:03  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: Fix bug in certain shells when
+	  DEBUG_VMIPSDEC is unset.
+
+2004-12-28 01:12  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpzero.cc, cpzero.h, fpu.h: Make fpu and cpzero use
+	  exactly the same interfaces for reading and writing registers
+	  (read_reg and write_reg) and getting the coprocessor condition
+	  bit (cpCond).
+
+2004-12-28 00:46  Brian R. Gaeke <brg@dgate.org>
+
+	* clock.cc, clock.h, cpu.cc: Update copyright dates.
+
+2004-12-28 00:29  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Recommend building only the C compiler.
+
+2004-12-28 00:27  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Update to-do list and configuration instructions.
+
+2004-12-22 21:28  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Instead of a binary "halted" bit, use a "state"
+	  variable, which allows more states.  Add enum for machine states.
+	  Add halted() method, which has the same meaning as the old
+	  "halted" variable.  Add prototypes for attn_key() and interact().
+
+2004-12-22 21:27  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Instead of a binary "halted" bit, use a "state"
+	  variable, which allows more states. Rework main loop around the
+	  state variable.  Change halt() and add attn_key() to perform
+	  state transitions.  Add interact() to present a simple
+	  command-prompt loop to the user when the attention key is
+	  pressed.  Add boot message mentioning the keystroke commands.
+
+2004-12-22 21:27  Brian R. Gaeke <brg@dgate.org>
+
+	* terminalcontroller.h: Add prototype for suspend().  Fix typo in
+	  comment.
+
+2004-12-22 21:27  Brian R. Gaeke <brg@dgate.org>
+
+	* terminalcontroller.cc: Include vmips.h.  Add suspend() method -
+	  opposite of reinitialize_terminals().  Fix a bug in
+	  reinitialize_terminals() - it wants the line number as argument,
+	  not the tty fd.  Add a check for the attention keypress.
+
+2004-12-22 21:27  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc: Change explicit references to class vmips state
+	  variable "halted" to use new accessor/mutator methods instead.
+
+2004-12-22 20:33  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.h: Remove dead instance variable debugger_shutdown.
+
+2004-12-22 18:18  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: Add env. var. to start gdb on vmips
+
+2004-12-22 18:02  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ld.script: Add yet another data section.
+
+2004-12-22 18:02  Brian R. Gaeke <brg@dgate.org>
+
+	* decstat.cc: Add descriptions of registers
+
+2004-12-09 02:48  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Remove the rest of the throw specs. Maybe future
+	  compilers will make them zero-cost, but that is not true today.
+	  Also, disable the Clock destructor - after booting Linux, we
+	  often crash there. This merits further investigation; for now,
+	  we'll go ahead and leak a few words of memory.
+
+2004-12-09 02:48  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: Remove the rest of the throw specs. Maybe future
+	  compilers will make them zero-cost, but that is not true today.
+	  Also, make some comments more specific about side-effects.
+
+2004-12-09 02:48  Brian R. Gaeke <brg@dgate.org>
+
+	* decstat.h: Remove the rest of the throw specs. Maybe future
+	  compilers will make them zero-cost, but that is not true today.
+	  Also, wrap an overly-long line.
+
+2004-12-09 02:48  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Remove the rest of the throw specs. Maybe future
+	  compilers will make them zero-cost, but that is not true today.
+	  Also, comment out some debugging printfs.
+
+2004-12-09 02:48  Brian R. Gaeke <brg@dgate.org>
+
+	* clock.cc, clock.h, clockdev.cc, clockdev.h, decrtc.cc, decrtc.h,
+	  decserial.h, decstat.cc, deviceint.cc, deviceint.h, devicemap.cc,
+	  devicemap.h, error.cc, error.h, haltdev.cc, haltdev.h,
+	  intctrl.cc, intctrl.h, mapper.cc, spimconsole.cc, spimconsole.h,
+	  task.h, terminalcontroller.cc, terminalcontroller.h, vmips.h:
+	  Remove the rest of the throw specs. Maybe future compilers will
+	  make them zero-cost, but that is not true today.
+
+2004-12-09 02:27  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: More checking & better error
+	  messages.  Make boot.rom into a variable.  Get rid of some
+	  commented-out cruft.
+
+2004-11-29 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: Ignore user's vmipsrc.
+
+2004-11-29 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Destroy all vmips components before destroying the
+	  machine object itself.
+
+2004-11-29 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: Make the destructor more robust - there need not be a
+	  clock_trigger.
+
+2004-11-29 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: We're going to have a real destructor.
+
+2004-11-29 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Open the trace file when CPU is constructed, and close it
+	  when it is destroyed.  When the trace is flushed to disk, it is
+	  also cleared from memory.  Tracing methods shouldn't do anything
+	  if !opt_tracing.  When the trace gets to be too big for the
+	  memory vector, it is flushed to disk, instead of just deleting
+	  the oldest records.
+
+2004-11-28 23:45  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: lib.c, lib.h: Dummy file- and vararg-
+	  versions of stdio functions.
+
+2004-11-28 23:43  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc: more debugging printouts
+
+2004-11-28 23:34  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, fpconvert.S,
+	  fpconvert.par, fpunary.S, fpunary.par: added fp convert &
+	  unary-op tests, regenerated Makefiles.
+
+2004-11-28 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/printfphex.cc: A program that prints out the hex
+	  representations of FP values.
+
+2004-11-28 02:26  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc: Operands were backwards in binary op macro.  Add to-do
+	  list.
+
+2004-11-28 02:23  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, fpdiv.S,
+	  fpdiv.par, fpmul.S, fpmul.par, fpsub.S, fpsub.par: Adding new FP
+	  arithmetic tests - regenerated Makefiles.
+
+2004-11-28 01:38  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.h: Add prototypes for *_fixedpt_operand and compare methods.
+
+2004-11-28 01:38  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc: Add *_fixedpt_operand methods.  Constify operands of
+	  *_operand methods.  Implement the rest of the operators,
+	  comparisons & conversions.
+
+2004-11-27 23:17  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/asm_regnames.h: Include fpu register names.
+
+2004-11-27 23:17  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc, fpu.h: Rename get_{float,double}_reg ->
+	  get_{float,double}_operand.  Implement
+	  put_{float,double}_operand.  get_operand is history.	Implement
+	  add_emulate.
+
+2004-11-27 23:14  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: vmips.misc-tests/Makefile.am,
+	  vmips.misc-tests/Makefile.in, vmips.outcheck/Makefile.am,
+	  vmips.outcheck/Makefile.in, vmips.regcheck/Makefile.am,
+	  vmips.regcheck/Makefile.in, vmips.regcheck/fpadd.S,
+	  vmips.regcheck/fpadd.par: Added fpadd test, regenerated
+	  Makefiles.
+
+2004-11-27 16:24  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc, fpu.h: Implement accessors for registers.
+
+2004-11-27 15:44  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/coproc.par: Don't look at R10 when
+	  checking this test's results.
+
+2004-11-27 15:44  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/coproc.S: Don't try to treat lwc1/swc1
+	  like they are normal loads, since we're working on fpu support.
+
+2004-11-27 15:07  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.h: Declare data members to represent the register file &
+	  condition code.  Implement get_reg, put_reg and cpCond.
+
+2004-11-27 15:07  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc: Include excnames.h.  Implement get_reg, put_reg,
+	  mfc1_emulate, cfc1_emulate, mtc1_emulate, ctc1_emulate, and
+	  bc1x_emulate.
+
+2004-11-27 15:07  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Use cpu's register file accessors.  Decoding methods
+	  are static now.  Tidy up bc0x_emulate and cpzero_emulate.
+
+2004-11-27 15:07  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Make exception_priority const.  CPZero doesn't need to be
+	  a friend anymore.  Make branch & exception public.  Add register
+	  file accessors.
+
+2004-11-27 15:07  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Make exception_priority const.  Make its exception
+	  priority list static const.
+
+2004-11-27 01:52  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, buildstat.sh.in, configure.in: Remove buildstat.sh -
+	  it was broken, and no one noticed :-P
+
+2004-11-27 01:47  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: note to self
+
+2004-11-27 01:46  Brian R. Gaeke <brg@dgate.org>
+
+	* fpu.cc, fpu.h: Stub implementation of R3010 FPU.
+
+2004-11-27 01:46  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Make the instruction decoding methods static inline and
+	  public.  Instantiate the FPU and use it to handle CP1
+	  instructions.
+
+2004-11-27 01:46  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Make the instruction decoding methods static inline and
+	  public.  Instantiate the FPU and use it to handle CP1
+	  instructions.  Implement lwc1 and swc1 in terms of FPU get/put
+	  reg. methods.  Move the table of emulation functions back up to
+	  the top of step(), to squelch a bogus g++-3.0 warning.
+
+2004-11-27 01:46  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add fpu.cc and fpu.h to the build.
+
+2004-10-19 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.c: When allocating memory, keep track of
+	  the size of each block.
+
+2004-10-19 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* range.h: De-virtualize many of these methods and remove their
+	  throw() specifications.  This allows for many more inlining
+	  opportunities and fewer runtime exception specification checks.
+	  In some of my benchmarking, this alone produced a 35% performance
+	  boost!
+
+2004-10-19 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* range.cc: Get rid of the throw() specifications, which incur
+	  runtime checks! Explicitly eliminate the extra call to getBase()
+	  in incorporates().
+
+2004-10-18 22:34  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.c: Fix bugs in malloc, brk, sbrk. Add
+	  calloc.
+
+2004-10-18 22:34  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.h: add calloc prototype
+
+2004-10-18 00:36  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Replace an anonymous enum (delay_state values) with int
+	  constants.  Move the "jumping to zero" warning to
+	  control_transfer.  Tighten up the PC & delay_state updating code
+	  at the end of CPU::step().
+
+2004-10-17 21:45  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Add prototypes for new methods: control_transfer, jump,
+	  and calc_branch_target.
+
+2004-10-17 21:45  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Refactor control transfer instructions so that they share
+	  more code.  Remove some excess whitespace and braces.  Rewrite
+	  some comments for clarity and brevity.  Rearrange CPU::step().
+
+2004-10-17 02:51  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Add prototype for dump_cpu_info().
+
+2004-10-17 02:51  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Refactor cpu/cp0 dump sequence into dump_cpu_info().
+	  CPU::dump_regs_and_stack() no longer dumps regs; it only dumps
+	  the stack. It has been renamed to CPU::dump_stack() to reflect
+	  this.  Rename maybe_dump_trace to flush_trace.
+
+2004-10-17 02:51  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Tidy up whitespace.  CPU::dump_regs_and_stack() no longer
+	  dumps regs; it only dumps the stack. It has been renamed to
+	  CPU::dump_stack() to reflect this.  Remove "void" from empty
+	  parameter lists.  Rename maybe_dump_trace to flush_trace.
+
+2004-10-17 02:51  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: CPU::dump_regs_and_stack() no longer dumps regs; it only
+	  dumps the stack. It has been renamed to CPU::dump_stack() to
+	  reflect this.  Rename maybe_dump_trace to flush_trace.
+
+2004-10-17 02:39  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Include fileutils.h.	Make strdelaystate, strexccode, and
+	  strmemmode static.  Split open_trace_file and close_trace_file
+	  out from write_trace_to_file.  Get rid of some extra brackets.
+
+2004-10-17 02:36  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.h: Clean up the comments. Make almost everything private -
+	  except for whatever has to be public (friend class CPZero
+	  notwithstanding.)
+
+2004-10-08 02:49  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog, NEWS, vmips.spec.in, doc/vmips.texi, test_code/README,
+	  utils/do-cvs2cl: Updated to match version released as vmips-1.3.
+
+2004-10-08 02:46  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in, debian/changelog: Update version number to
+	  1.4a for trunk
+
+2004-10-08 02:16  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in: - Use _variables instead of hardcoded paths in
+	  files section - Fix source url
+
+	  (These changes were made to make the specfile work again on RH
+	  Enterprise Server.)
+
+2004-10-08 01:30  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/do-cvs2cl: Update the way we call cvs2cl.
+
+2004-10-08 01:29  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: Regenerated using cvs2cl.
+
 2004-10-08 01:15  Brian R. Gaeke <brg@dgate.org>
 
 	* ANNOUNCE: Announcement of 1.3 release

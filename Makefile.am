@@ -5,7 +5,7 @@ REDHAT_PKG_FILES = vmips.spec vmips.spec.in
 DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
  debian/copyright debian/dirs debian/docs debian/info debian/rules
 EXTRA_DIST = VERSION $(REDHAT_PKG_FILES) \
- $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
+ $(sysconf_DATA) $(DEBIAN_PKG_FILES)
 
 # What are we building here?
 bin_PROGRAMS = vmips vmipstool
@@ -35,7 +35,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # This library contains the subset of libbfd/libopcodes that we use.
-# We build libopcodes_mips before trying to link vmips.
+# We build libopcodes_mips before trying to link vmips or vmipstool.
 libopcodes_mips/libopcodes_mips.a:
 	cd libopcodes_mips && $(MAKE) all
 
