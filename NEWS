@@ -1,8 +1,42 @@
+ 
+User-visible changes in version 1.0 (since version 0.9):
 
-User-visible changes since version 20001014:
+* A standard clock device has been added.
+* The "vmipstool" front end to compilation tools was added, and most of
+  the random scripts lying around have been consolidated into it.
+* The memory-mapped test device known as "TestDev" has been removed.
+* Debian and Red Hat packaging files have been added.
+* The installation procedure has been greatly improved.
+* The VMIPS manual has been completed.
+* Many, many bugs fixed as a result of a concerted attempt at testing
+  everything.  Doubtless, some bugs still remain.
+* Some portability fixes.
+* Dumping of the stack (when registers are dumped) now works.
+* Many strange messages the debugger backend used to print out have been
+  quelled. Also, killing the debugger connection should no longer cause
+  a crash.
+* vmips now supports --help, --version and --print-config command-line
+  options.
+* The SPIM-compatible console device now works better when the host
+  machine is byte-swapped with respect to the MIPS target.
 
-* Reading and writing memory and registers and single-stepping
-  programs from gdb now works. ("continue" isn't quite there yet.)
+User-visible changes in version 0.9 (since version 20001014):
+
+* vmips.debug is no longer built.
+* Read-only memory is now really read-only.  This allowed us to add
+  debugger support for breakpoints in ROM.
+* Debugger support for exception handling -- CPU exceptions are now
+  delivered to your GDB, if it is attached, giving you a chance to poke
+  around before the target is made aware of the condition.
+* Many tasty configury updates, making it easier to build.
+* Miscellaneous bugs fixed in many places.
+* Branch on coprocessor 0 instructions now have defined behavior.
+* Many places which erroneously had text after #endif in the source have
+  been corrected to use comments instead, allowing you to compile vmips
+  with newer C++ compilers.
+* Some old test code that used to run at the beginning of every vmips
+  job has been removed, so you will no longer see the familiar messages
+  it printed out.
 
 User-visible changes since version 20000517:
 

@@ -59,16 +59,16 @@ CPU::dump_regs(FILE *f)
 }
 
 void
-CPU::dump_stack(FILE *f)
-{
-	fprintf(f,"(stack dump not implemented)\n");
-}
-
-void
 CPU::dump_regs_and_stack(FILE *f)
 {
+	uint32 stackphys;
+
 	dump_regs(f);
-	dump_stack(f);
+	if (cpzero->debug_tlb_translate(reg[sp], &stackphys)) {
+		mem->dump_stack(f, stackphys);
+	} else {
+		fprintf(f, "(stack not mapped in TLB)\n");
+	}
 }
 
 /* Instruction decoding */
@@ -621,7 +621,7 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 void
 CPU::lwl_emulate(uint32 instr, uint32 pc)
 {
-	uint32 phys, virt, base, memword;
+	uint32 phys, virt, wordvirt, base, memword;
 	uint8 which_byte;
 	int32 offset;
 	bool cacheable;
@@ -630,9 +630,11 @@ CPU::lwl_emulate(uint32 instr, uint32 pc)
 	base = reg[rs(instr)];
 	offset = s_immed(instr);
 	virt = base + offset;
+	/* We request the word containing the byte-address requested. */
+	wordvirt = virt & ~0x03UL;
 
 	/* Translate virtual address to physical address. */
-	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
+	phys = cpzero->address_trans(wordvirt, DATALOAD, &cacheable, this);
 	if (phys == 0xffffffff && exception_pending) return;
 
 	/* Fetch word. */
@@ -731,7 +733,7 @@ CPU::lhu_emulate(uint32 instr, uint32 pc)
 void
 CPU::lwr_emulate(uint32 instr, uint32 pc)
 {
-	uint32 phys, virt, base, memword;
+	uint32 phys, virt, wordvirt, base, memword;
 	uint8 which_byte;
 	int32 offset;
 	bool cacheable;
@@ -740,9 +742,11 @@ CPU::lwr_emulate(uint32 instr, uint32 pc)
 	base = reg[rs(instr)];
 	offset = s_immed(instr);
 	virt = base + offset;
+	/* We request the word containing the byte-address requested. */
+	wordvirt = virt & ~0x03UL;
 
 	/* Translate virtual address to physical address. */
-	phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
+	phys = cpzero->address_trans(wordvirt, DATALOAD, &cacheable, this);
 	if (phys == 0xffffffff && exception_pending) return;
 
 	/* Fetch word. */
@@ -998,7 +1002,7 @@ srl(int32 a, int32 b)
 int32
 sra(int32 a, int32 b)
 {
-	return (a >> b) | (((a >> 31) & 0x01) * ~((1 << b) - 1));
+	return (a >> b) | (((a >> 31) & 0x01) * (((1 << b) - 1) << (32 - b)));
 }
 
 void
@@ -1119,9 +1123,9 @@ CPU::mult64(uint32 *hi, uint32 *lo, uint32 n, uint32 m)
 {
 #ifdef HAVE_LONG_LONG
 	uint64 result;
-	result = n * m;
-	*hi = (result >> 32) & 0x0ffffffffUL;
-	*lo = result & 0x0ffffffffUL;
+	result = ((uint64)n) * ((uint64)m);
+	*hi = (uint32) (result >> 32);
+	*lo = (uint32) result;
 #else /* HAVE_LONG_LONG */
 	/*           n = (w << 16) | x ; m = (y << 16) | z
 	 *     w x   g = a + e ; h = b + f ; p = 65535
@@ -1130,7 +1134,7 @@ CPU::mult64(uint32 *hi, uint32 *lo, uint32 n, uint32 m)
 	 *   a b c   a = (z * w + ((z * x) div p)) div p
 	 * d e f     f = (y * x) mod p
 	 * -------   e = (y * w + ((y * x) div p)) mod p
-	 * i g h c   d = (y * w + ((y * x) div p)) mod p
+	 * i g h c   d = (y * w + ((y * x) div p)) div p
 	 */
 	uint16 w,x,y,z,a,b,c,d,e,f,g,h,i;
 	uint32 p;
@@ -1158,9 +1162,9 @@ CPU::mult64s(uint32 *hi, uint32 *lo, int32 n, int32 m)
 {
 #ifdef HAVE_LONG_LONG
 	int64 result;
-	result = n * m;
-	*hi = (result >> 32) & 0x0ffffffffUL;
-	*lo = result & 0x0ffffffffUL;
+	result = ((int64)n) * ((int64)m);
+	*hi = (uint32) (result >> 32);
+	*lo = (uint32) result;
 #else /* HAVE_LONG_LONG */
 	int32 result_sign = (n<0)^(m<0);
 	int32 n_abs = n;

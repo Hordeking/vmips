@@ -1,0 +1,144 @@
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+
+CC=@CC@
+CFLAGS=$(CPPFLAGS) -g -G 0
+HOST_CFLAGS=$(CPPFLAGS) -g
+CPPFLAGS=-I$(top_srcdir) -I$(top_srcdir)/sample_code
+OBJS=$(COBJS) $(AOBJS)
+SETUP=../setup.o
+VMIPSTOOL=../../vmipstool
+
+DISTFILES= Makefile.in README boot.c boot_main.c coff.c coff.h \
+ coff_main.c lib.c lib.h libtest.c libtest.input libtest.output loadtest.c \
+ loadtest.script loadtest_setup.S pftest.c serial.c xmrcv.c xmrcv.h \
+ xmrcv_main.c xmsend.c utils.S
+
+all: boot.rom pftest.rom boot.host coff.host loadtest
+
+install: boot.rom
+	$(mkinstalldirs) $(pkglibdir)
+	$(INSTALL_DATA) boot.rom $(pkglibdir)/boot.rom
+
+loadtest: loadtest_setup.o loadtest.o lib.o serial.o
+	$(VMIPSTOOL) --ld-script=$(srcdir)/loadtest.script --link -o $@ $+
+
+%.rom: %.exe
+	$(VMIPSTOOL) --make-rom $< $@
+
+pftest.exe: $(SETUP) pftest.o lib.o serial.o
+	$(VMIPSTOOL) --link -o $@ $+
+
+boot.exe: $(SETUP) boot.o coff.o lib.o xmrcv.o serial.o
+	$(VMIPSTOOL) --link -o $@ $+
+
+%.o: %.c
+	$(VMIPSTOOL) --compile $(CFLAGS) -c -o $@ $<
+
+%.o: %.s
+	$(VMIPSTOOL) --assemble -o $@ $<
+
+%.o: %.S
+	$(VMIPSTOOL) --assemble $(CFLAGS) -o $@ $<
+
+clean:
+	-rm -f *.rom *.exe *.o core setup.s libtest libtest.std ld.script
+	-rm -f setup.S boot.host coff.host loadtest
+
+distclean: clean
+
+maintainer-clean: distclean
+
+libtest.std: libtest.std.o
+	$(CC) $(HOST_CFLAGS) -o $@ $+
+
+libtest: libtest.o lib.host.o
+	$(CC) $(HOST_CFLAGS) -o $@ $+
+
+libtest.std.o: libtest.c
+	$(CC) $(HOST_CFLAGS) -DUSE_STANDARD_LIBRARY -c -o $@ $+
+
+libtest.o: libtest.c
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
+
+boot.host: boot.host.o coff.host.o lib.host.o xmrcv.host.o boot_main.host.o
+	$(CC) $(HOST_CFLAGS) -o $@ $+
+
+lib.o: lib.c lib.h
+
+lib.host.o: lib.c lib.h
+	$(CC) $(HOST_CFLAGS) -c -o $@ $<
+
+boot.host.o: boot.c
+	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+
+coff.host: coff.host.o coff_main.host.o
+	$(CC) $(HOST_CFLAGS) -o $@ $+
+
+coff.host.o: coff.c
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
+
+coff_main.host.o: coff_main.c
+	$(CC) $(HOST_CFLAGS) -c -o $@ $+
+
+boot_main.host.o: boot_main.c
+	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+
+xmrcv.host.o: xmrcv.c
+	$(CC) -nostdinc $(HOST_CFLAGS) -c -o $@ $+
+
+libtest.output: libtest.std libtest.input
+	./libtest.std < $(srcdir)/libtest.input > $(srcdir)/libtest.output
+
+check: libtest libtest.input libtest.output
+	./libtest < $(srcdir)/libtest.input | diff -u $(srcdir)/libtest.output -
+
+# Snarfed from automake and modified.
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+

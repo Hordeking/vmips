@@ -229,7 +229,9 @@ Mapper::swap_halfword(uint16 h)
  * ones is returned.
  * 
  * This routine may trigger exceptions IBE and/or DBE in the client
- * processor, if the address is unaligned or unmapped.
+ * processor, if the address is unmapped.
+ * This routine may trigger exception AdEL in the client
+ * processor, if the address is unaligned.
  */
 uint32
 Mapper::fetch_word(uint32 addr, int32 mode, bool cacheable, DeviceExc *client)
@@ -238,12 +240,13 @@ Mapper::fetch_word(uint32 addr, int32 mode, bool cacheable, DeviceExc *client)
 	uint32 offset;
 
 	if (addr % 4 != 0) {
-		client->exception(mode == INSTFETCH ? IBE : DBE,mode);
+		client->exception(AdEL,mode);
 		return 0xffffffff;
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(mode == INSTFETCH ? IBE : DBE,mode);
+		return 0xffffffff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canRead(offset))) {
@@ -266,7 +269,9 @@ Mapper::fetch_word(uint32 addr, int32 mode, bool cacheable, DeviceExc *client)
  * of all ones is returned.
  * 
  * This routine may trigger exception DBE in the associated processor,
- * if the address is unaligned or unmapped.
+ * if the address is unmapped.
+ * This routine may trigger exception AdEL in the client
+ * processor, if the address is unaligned.
  */
 uint16
 Mapper::fetch_halfword(uint32 addr, bool cacheable, DeviceExc *client)
@@ -275,12 +280,13 @@ Mapper::fetch_halfword(uint32 addr, bool cacheable, DeviceExc *client)
 	uint32 offset;
 
 	if (addr % 2 != 0) {
-		client->exception(DBE,DATALOAD);
+		client->exception(AdEL,DATALOAD);
 		return 0xffff;
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(DBE,DATALOAD);
+		return 0xffff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canRead(offset))) {
@@ -313,6 +319,7 @@ Mapper::fetch_byte(uint32 addr, bool cacheable, DeviceExc *client)
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(DBE,DATALOAD);
+		return 0xff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canRead(offset))) {
@@ -329,12 +336,13 @@ Mapper::store_word(uint32 addr, uint32 data, bool cacheable, DeviceExc *client)
 	uint32 offset;
 
 	if (addr % 4 != 0) {
-		client->exception(DBE,DATASTORE);
+		client->exception(AdES,DATASTORE);
 		return 0xffffffff;
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(DBE,DATASTORE);
+		return 0xffffffff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canWrite(offset))) {
@@ -359,12 +367,13 @@ Mapper::store_halfword(uint32 addr, uint16 data, bool cacheable, DeviceExc
 	uint32 offset;
 
 	if (addr % 2 != 0) {
-		client->exception(DBE,DATASTORE);
+		client->exception(AdES,DATASTORE);
 		return 0xffff;
 	}
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(DBE,DATASTORE);
+		return 0xffff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canWrite(offset))) {
@@ -390,6 +399,7 @@ Mapper::store_byte(uint32 addr, uint8 data, bool cacheable, DeviceExc *client)
 	l = find_mapping_range(addr);
 	if (!l) {
 		client->exception(DBE,DATASTORE);
+		return 0xff;
 	}
 	offset = addr - l->getBase();
 	if (!(l && l->canWrite(offset))) {
@@ -398,4 +408,31 @@ Mapper::store_byte(uint32 addr, uint8 data, bool cacheable, DeviceExc *client)
 		return 0xff;
 	}
 	return l->store_byte(addr - l->getBase(), data, client);
+}
+
+void
+Mapper::dump_stack(FILE * f, uint32 stackphys)
+{
+	Range *l;
+
+	if ((l = find_mapping_range(stackphys)) == NULL) {
+		fprintf(f, "(stack points to hole in address space)\n");
+	} else {
+		if (l->getType() != MALLOC) {
+			fprintf(f, "(stack points to non-RAM address space)\n");
+		} else {
+			fprintf(f, "Stack: ");
+			for (int i = 0; i > -8; i--) {
+				uint32 data =
+					((uint32 *) l->
+					 getAddress())[(stackphys - l->getBase()) / 4 + i];
+#if defined(BYTESWAPPED)
+				fprintf(f, "%08lx ", swap_word(data));
+#else
+				fprintf(f, "%08lx ", data);
+#endif
+			}
+		}
+		fprintf(f, "\n");
+	}
 }

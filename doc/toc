@@ -1,19 +1,6 @@
 VMIPS hacking guide
 
 CONTENTS:
-        Delay slot handling
-        Exception prioritizing
-        The current (re-)implementation of memory-mapped devices
-        Overview of the SPIM-compatible console device
-        Description of SPIM's implementation of the keyboard
-        Notes on caches
         Things yet to be done
-        January 1999 status report
-        A simple test case for VMIPS
-        VMIPS interrupt controller
-        How the interrupt controller is integrated
         Notes on cross-compiling glibc
-        Bugs in EGCS dealing with kernel code
-        Dealing with PIC MIPS code
-        Clues for a MIPS ELF ld script
 

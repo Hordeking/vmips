@@ -49,6 +49,7 @@ public:
 	int verify_rangelist(void);
 	Range *find_mapping_range(uint32 p, Range *first = NULL);
 	void attach(CPU *m = NULL);
+	void dump_stack(FILE *f, uint32 stackphys);
 };
 
 #endif /* __mapper_h__ */

@@ -7,11 +7,12 @@ SECTIONS {
  _gp = .;
  _copystart = SIZEOF(.text) + ADDR(.text) ;
  .data : AT ( SIZEOF(.text) + ADDR(.text) )
-	{ _data = . ; *(.data) *(.rdata) *(.mdebug) *(.reginfo) ; _edata = . ; }
- .sdata : AT ( SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) )
-	{ _sdata = . ; *(.sdata) *(.scommon) ; _esdata = . ; }
- _copyend = SIZEOF(.sdata) + SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) ;
- .bss : AT ( SIZEOF(.sdata) + SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) )
+    { _data = . ;
+      *(.data) *(.rdata) *(.rodata) *(.mdebug) *(.reginfo) ;
+      *(.sdata) *(.scommon) ;
+      _edata = . ; }
+ _copyend = SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) ;
+ .bss : AT ( SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) )
 	{ _bss = . ; *(.bss) *(.sbss) *(COMMON) ; _ebss = . ; }
  _end = . ;
 }

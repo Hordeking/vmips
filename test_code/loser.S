@@ -5,7 +5,7 @@
 	.text
 	.globl __start
 __start:
-a:	add $0, $0, $0
+a:	addu $0, $0, $0
 
 /* the next instruction just isn't here (bus error on inst fetch).
  * (that's why the makefile has an extra rule for this one -- it

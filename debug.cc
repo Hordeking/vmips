@@ -7,6 +7,7 @@
 #include "vmips.h"
 
 extern vmips *machine;
+extern int remotegdb_backend_error;
 
 Debug::Debug()
 {
@@ -14,7 +15,6 @@ Debug::Debug()
 	 * signal; so we set the current signal to the breakpoint signal.
 	 */
 	signo = exccode_to_signal(Bp);
-	debugger_shutdown = false;
 	cpu = NULL;
 	mem = NULL;
     listener = -1;
@@ -283,19 +283,12 @@ Debug::serverloop(void)
 	socklen_t clientaddrlen = sizeof(clientaddr);
 	extern int remote_desc;
 
-#ifdef BROKEN
-	/* FIXME: What to do here?? */
-	fprintf(stderr, "Setting signal handler.\n");
-	signal(SIGTERM, sig_handler);
-	signal(SIGINT, sig_handler);
-	signal(SIGHUP, sig_handler);
-#endif
-
-	while (! debugger_shutdown) {
+	while (! machine->halted) {
 		/* Block until a connection is received */
 		fprintf(stderr, "Waiting for connection from debugger.\n");
 		clientsock = accept(listener, (struct sockaddr *) &clientaddr,
 			&clientaddrlen);
+		fprintf(stderr, "Debugger connected.\n");
 
 		/* Set the client socket nonblocking */
 		set_nonblocking(clientsock);
@@ -310,16 +303,16 @@ Debug::serverloop(void)
 	return 0;
 }
 
-int
+void
 Debug::targetloop(void)
 {
 	int packetno = 0;
 	char buf[728];
 	char *result = NULL;
 
-	while (! debugger_shutdown) {
-		printf("Waiting for packet %d\n", packetno);
-		getpkt(buf, 1);
+	while (! machine->halted) {
+		/* printf("Waiting for packet %d\n", packetno); */
+		getpkt(buf, 1); if (remotegdb_backend_error) return;
 		switch(buf[0]) {
 			case 'g': result = target_read_registers(buf); break;
 			case 'G': result = target_write_registers(buf); break;
@@ -333,18 +326,18 @@ Debug::targetloop(void)
 			default:  result = target_unimplemented(buf); break;
 		}
 		packetno++;
-		putpkt(result);
+		putpkt(result); if (remotegdb_backend_error) return;
 		free(result);
 	}
-	return 0;
+	return;
 }
 
 char *
 Debug::target_kill(char *pkt)
 {
-	fprintf(stderr, "STUB: Kill\n");
+	/* fprintf(stderr, "STUB: Kill\n"); */
 
-	debugger_shutdown = true;
+	machine->halted = true;
 	return rawpacket("OK");
 }
 
@@ -355,8 +348,8 @@ Debug::target_set_thread(char *pkt)
 	long threadno;
 
 	threadno = strtol(&pkt[2], NULL, 0);
-	fprintf(stderr, "STUB: Set thread for %s to %ld\n",
-		(thread_for_step ? "step/continue" : "general ops"), threadno);
+	/* fprintf(stderr, "STUB: Set thread for %s to %ld\n",
+		(thread_for_step ? "step/continue" : "general ops"), threadno); */
 	if (thread_for_step) {
 		threadno_step = threadno;
 	} else {
@@ -368,7 +361,7 @@ Debug::target_set_thread(char *pkt)
 char *
 Debug::target_read_registers(char *pkt)
 {
-	fprintf(stderr, "STUB: Read registers\n");
+	/* fprintf(stderr, "STUB: Read registers\n"); */
 
 	return cpu->debug_registers_to_packet();
 }
@@ -386,7 +379,7 @@ Debug::rawpacket(char *str)
 char * 
 Debug::target_write_registers(char *pkt)
 {
-	fprintf(stderr, "STUB: Write registers [%s]\n", &pkt[1]);
+	/* fprintf(stderr, "STUB: Write registers [%s]\n", &pkt[1]); */
 	
 	cpu->debug_packet_to_registers(&pkt[1]);
 
@@ -418,13 +411,13 @@ Debug::target_read_memory(char *pkt)
 	char *packet;
 
 	if (! lenstr) {
-		fprintf(stderr, "STUB: Malformed read memory request (no ,) [%s]\n",
-			&pkt[1]);
+		/* fprintf(stderr, "STUB: Malformed read memory request (no ,) [%s]\n",
+			&pkt[1]); */
 		return error_packet(1);
 	}
 	lenstr[0] = 0;
 	lenstr++;
-	fprintf(stderr, "STUB: read memory addr=%s len=%s\n",addrstr,lenstr);
+	/* fprintf(stderr, "STUB: read memory addr=%s len=%s\n",addrstr,lenstr); */
 
 	addr = strtoul(addrstr, NULL, 16);
 	len = strtoul(lenstr, NULL, 16);
@@ -445,31 +438,31 @@ Debug::target_write_memory(char *pkt)
 	char *datastr = strchr(pkt, ':');
 	uint32 addr, len;
 	if (! lenstr) {
-		fprintf(stderr, "STUB: Malformed write memory request (no ,) [%s]\n",
-			&pkt[1]);
+		/* fprintf(stderr, "STUB: Malformed write memory request (no ,) [%s]\n",
+			&pkt[1]); */
 		return error_packet(1);
 	}
 	lenstr[0] = 0;
 	lenstr++;
 	if (! datastr) {
-		fprintf(stderr, "STUB: Malformed write memory request (no :) [%s]\n",
-			&pkt[1]);
+		/* fprintf(stderr, "STUB: Malformed write memory request (no :) [%s]\n",
+			&pkt[1]); */
 		return error_packet(1);
 	}
 	datastr[0] = 0;
 	datastr++;
-	fprintf(stderr, "STUB: write memory addr=%s len=%s data=%s\n",
-		addrstr, lenstr, datastr);
+	/* fprintf(stderr, "STUB: write memory addr=%s len=%s data=%s\n",
+		addrstr, lenstr, datastr); */
 
 	addr = strtoul(addrstr, NULL, 16);
 	len = strtoul(lenstr, NULL, 16);
 
 	if ((len == 4) && address_in_rom(addr) && is_breakpoint_insn(datastr)) {
-		fprintf(stderr, "ROM breakpoint SET at %lx\n", addr);
+		/* fprintf(stderr, "ROM breakpoint SET at %lx\n", addr); */
 		declare_rom_breakpoint(addr);
 	} else if ((len == 4) && address_in_rom(addr) &&
 	           rom_breakpoint_exists(addr) && !is_breakpoint_insn(datastr)) {
-		fprintf(stderr, "ROM breakpoint CLEARED at %lx\n", addr);
+		/* fprintf(stderr, "ROM breakpoint CLEARED at %lx\n", addr); */
 		remove_rom_breakpoint(addr);
 	} else {
 		cpu->debug_store_region(addr, len, datastr, this);
@@ -496,9 +489,9 @@ Debug::target_continue(char *pkt)
 	int exccode;
 
 	if (! addrstr[0]) {
-		fprintf(stderr, "STUB: continue from last addr\n");
+		/* fprintf(stderr, "STUB: continue from last addr\n"); */
 	} else {
-		fprintf(stderr, "STUB: continue from addr=%s\n", addrstr);
+		/* fprintf(stderr, "STUB: continue from addr=%s\n", addrstr); */
 		addr = strtoul(addrstr, NULL, 16);
 		cpu->debug_set_pc(addr);
 	}
@@ -515,9 +508,9 @@ Debug::target_step(char *pkt)
 	int exccode;
 
 	if (! addrstr[0]) {
-		fprintf(stderr, "STUB: step from last addr\n");
+		/* fprintf(stderr, "STUB: step from last addr\n"); */
 	} else {
-		fprintf(stderr, "STUB: step from addr=%s\n", addrstr);
+		/* fprintf(stderr, "STUB: step from addr=%s\n", addrstr); */
 		addr = strtoul(addrstr, NULL, 16);
 		cpu->debug_set_pc(addr);
 	}
@@ -536,7 +529,7 @@ Debug::target_last_signal(char *pkt)
 char * 
 Debug::target_unimplemented(char *pkt)
 {
-	fprintf(stderr, "STUB: unimplemented request [%s]\n", pkt);
+	/* fprintf(stderr, "STUB: unimplemented request [%s]\n", pkt); */
 	return rawpacket("");
 }
 

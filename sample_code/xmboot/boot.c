@@ -1,5 +1,5 @@
 /* vmips boot monitor
- * $Date: 2000/11/06 02:17:25 $
+ * $Date: 2001/07/14 05:54:40 $
  * by Brian R. Gaeke
  */
 
@@ -279,6 +279,8 @@ entry (void)
   char buf[80];
   struct parsed_command cmd;
 
+  /* You can turn this on to try out the microsecond clock. */
+  /* turn_on_clock_interrupts(); */
   halted = 0;
   term_enable(COOKED);
   puts ("\n\nVmips boot monitor");

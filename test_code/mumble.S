@@ -1,3 +1,6 @@
+/*  ../vmips -o haltjrra -o haltdumpcpu mumble.rom */
+/*  should end with:  all registers equal to their own numbers */
+/*  tests instructions: addiu */
 
 	.text
 	.globl __start

@@ -10,9 +10,8 @@ IntCtrl::IntCtrl()
 uint32 IntCtrl::calculateIP(void)
 {
 	uint32 IP = 0;
-	for (DeviceInt *d = devs; ; d = d->next) {
+	for (DeviceInt *d = devs; d != NULL; d = d->next) {
 		IP = IP | d->lines_asserted;
-		if (d == d->next) break;
 	}
 	return IP;
 }

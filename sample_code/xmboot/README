@@ -1,7 +1,4 @@
-This will some day become a serial-based boot loader.
-
-Distributed under the GNU General Public License -- see file COPYING for
-details.
+This is a serial-based boot loader.
 
 What's here:
 

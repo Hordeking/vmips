@@ -8,9 +8,11 @@
 #include "intctrl.h"
 #include "memorymodule.h"
 #include "options.h"
-#include "testdev.h"
+#include "clockdev.h"
 
 class SPIMConsole;
+
+long timediff(struct timeval *after, struct timeval *before);
 
 class vmips : public Periodic
 {
@@ -22,6 +24,7 @@ public:
 	Options *opt;
 	MemoryModule *memmod[NUM_MEMORY_MODULES];
 	bool host_bigendian;
+	bool halted;
 private:
 	bool dumpcpu, dumpcp0;
 #if TTY
@@ -29,9 +32,9 @@ private:
 	SPIMConsole *console;
 #endif
 	Debug *dbgr;
+	ClockDev *clockdev;
 	int32 test_code;
 	uint32 num_instrs;
-	bool halted;
 
 public:
 	vmips();
@@ -44,7 +47,6 @@ public:
 	int rangelist_selftest(void);
 	int host_endian_selftest(void);
 	int run_self_tests(void);
-	void time_diff(struct timeval *d, struct timeval *a, struct timeval *b);
 	void periodic(void);
 	int run(int argc, char **argv);
 };

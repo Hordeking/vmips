@@ -57,15 +57,49 @@ static Option nametable[] = {
 
 	{ "instdump", FLAG },
 	/** Controls whether every instruction executed will be disassembled
-		and printed. **/
+		and printed. DEFAULT GOES HERE. The output is in the following format:
+        @example
+        PC=0xbfc00000 [1fc00000]    24000000 li $zero,0
+        @end example
+        The first column contains the PC (program counter), followed by
+        the physical translation of that address in brackets. The third
+        column contains the machine instruction word at that address,
+        followed by the assembly language corresponding to that word.
+        All of the constants except for the assembly language are in
+        hexadecimal. **/
 
 	{ "dumpcpu", FLAG },
 	/** Controls whether the CPU registers will be dumped after every
-		instruction. **/
+		instruction. DEFAULT GOES HERE. The output is in the following format:
+        @example
+        Reg Dump:  PC=bfc00080 Last Instr=241f001f HI=00000000 LO=00000000
+          DELAY_STATE = NORMAL ; DELAY_PC=00000000 ; NEXT_EPC = bfc0007c
+         R00=00000000  R01=00000001  R02=00000002  R03=00000003  R04=00000004 
+         ...
+         R30=0000001e  R31=0000001f 
+        @end example
+        (Some values have been omitted for brevity.)
+        Here, PC is the program counter, Last Instr is the last instruction
+        executed, HI and LO are the multiplication/division result registers,
+        DELAY_STATE and DELAY_PC are used in delay slot processing, NEXT_EPC
+        is what the Exception PC would be if an exception were to occur, and
+        R00 ... R31 are the CPU general purpose registers. All values are in
+	    hexadecimal.  **/
 
 	{ "dumpcp0", FLAG },
 	/** Controls whether the system control coprocessor (CP0)
-		registers will be dumped after every instruction. **/
+		registers will be dumped after every instruction. 
+        DEFAULT GOES HERE.  The output is in the following format:
+        @example
+        CP0 Dump Registers:
+         R00=00000100  R01=00001f00  R02=06a5ee00  R03=00000000 
+         R04=7fffca10  R05=00000000  R06=00000000  R07=00000000 
+         R08=7fb7e0aa  R09=00000000  R10=6f6dd980  R11=00000000 
+         R12=00485e18  R13=30002110  R14=4c04a8af  R15=0000703b 
+        @end example
+        Each of the R00 .. R15 are coprocessor zero registers.
+        Their values are displayed in hexadecimal.
+        **/
 
 	{ "haltibe", FLAG },
 	/** If haltibe is set to TRUE, the virtual machine will halt
@@ -93,7 +127,13 @@ static Option nametable[] = {
 	/** Set instcounts to TRUE if you want to see instruction
 		counts, a rough estimate of total runtime, and execution
 		speed in instructions per second when the virtual
-		machine halts. **/
+		machine halts. DEFAULT GOES HERE.  The output is printed
+        at the end of the run, and is in the following format:
+        @example
+        733737 instructions executed in 5.81484 seconds
+        126183.545 instructions per second
+        @end example
+        **/
 
 	{ "romfile", STR },
 	/** This is the name of the file which will be initially
@@ -147,6 +187,25 @@ static Option nametable[] = {
 	    If debug is not set, then the machine will boot the ROM file
 	    without pausing. **/
 
+	{ "realtime", FLAG },
+	/** If realtime is set, then the clock device will cause simulated
+        time to run at some fraction of real time, determined by the
+        `timeratio' option. If realtime is not set, then simulated time
+        will run at the speed given by the `clockspeed' option.  **/
+
+    { "timeratio", NUM },
+    /** If the realtime option is set, this option gives the number of times
+        slower than real time at which simulated time will run. It has
+        no effect if realtime is not set. **/
+
+    { "clockspeed", NUM },
+    /** If the realtime option is not set, this option gives the speed of
+        simulated time in Hz.  It has no effect if realtime is set. **/
+
+    { "clockintr", NUM },
+    /** This option gives the frequency of clock interrupts, in nanoseconds
+        of simulated time. **/
+
 	{ NULL, 0 }
 };
 
@@ -157,7 +216,8 @@ static char *defaults_table[] = {
 	"haltibe", "nohaltjrra", "haltbreak", "romfile=romfile.rom",
 	"configfile=~/.vmipsrc", "loadaddr=0xbfc00000", "noinstcounts",
 	"memsize=0x100000", "nomemdump", "noreportirq", "usetty",
-	"ttydev=/dev/tty", "nodebug", NULL
+	"ttydev=/dev/tty", "nodebug", "norealtime", "timeratio=200",
+	"clockspeed=25000000", "clockintr=1000", NULL
 };
 
 #endif /* __optiontbl_h__ */

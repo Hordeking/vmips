@@ -143,7 +143,7 @@ ZSChip::rr(uint8 regno, ZSChannel chan)
 {
 	uint8 rr2a = readregs[2];
 	int32 chanbase;
-	uint8 status; /* XXX FIXME see p 5-14 */
+	uint8 status = 0; /* XXX FIXME see p 5-14 */
 
 	chanbase = (chan == A ? ZSRR_A_BASE : ZSRR_B_BASE);
 	switch (regno) {

@@ -95,9 +95,9 @@ CPZero::dump_tlb(FILE *f)
 	for (x=0;x<64;x++) {
 		TLBEntry e = tlb[x];
 		fprintf(f,"%08lx%08lx [V=%06lx A=%02lx P=%05lx %c%c%c%c]\n",
-			e.entryHi, e.entryLo, e.vpn(), e.asid(), e.pfn(),
-			e.noncacheable()?'N':'n', e.dirty()?'D':'d', e.valid()?'V':'v',
-			e.global()?'G':'g');
+			e.entryHi, e.entryLo, e.vpn(), (unsigned long) e.asid(), e.pfn(),
+			e.noncacheable()?'N':'n', e.dirty()?'D':'d',
+			e.valid()?'V':'v', e.global()?'G':'g');
 	}
 }
 
@@ -153,14 +153,11 @@ CPZero::load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match)
 		reg[EntryHi] = va & write_masks[EntryHi];
 }
 
-uint32
-CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
-	DeviceExc *client)
+TLBEntry *
+CPZero::find_matching_tlb_entry(uint32 vpn, uint32 asid)
 {
 	uint16 x;
 	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & VPNMASK;
-
 	for (x = 0; x < TLB_ENTRIES; x++) {
 		if (tlb[x].vpn() == vpn) {
 			if (tlb[x].global() || tlb[x].asid() == asid) {
@@ -169,6 +166,17 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 			}
 		}
 	}
+	return match;
+}
+
+uint32
+CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
+	DeviceExc *client)
+{
+	TLBEntry *match = NULL;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & VPNMASK;
+
+	match = find_matching_tlb_entry(vpn, asid);
 	tlb_miss_user = false;
 	if (match) {
 		if (!match->valid()) {
@@ -397,4 +405,38 @@ CPZero::write_debug_info(uint32 status, uint32 bad, uint32 cause)
 	reg[Status] = status;
 	reg[BadVAddr] = bad;
 	reg[Cause] = cause;
+}
+
+/* TLB translate VADDR without exceptions.  Returns true if a valid
+ * TLB mapping is found, false otherwise. If VADDR has no valid mapping,
+ * PADDR is written with 0xffffffff, otherwise it is written with the
+ * translation.
+ */
+bool
+CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
+{
+	TLBEntry *match = NULL;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & VPNMASK;
+	bool rv;
+
+	if ((!kernel_mode()) && (vaddr & KERNEL_SPACE_MASK)) {
+		*paddr = 0xffffffff;
+		rv = false;
+	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG0) {
+		*paddr = vaddr - KSEG0_CONST_TRANSLATION;
+		rv = true;
+	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG1) {
+		*paddr = vaddr - KSEG1_CONST_TRANSLATION;
+		rv = true;
+	} else {
+		match = find_matching_tlb_entry(vpn, asid);
+		if (!match || !match->valid()) {
+			*paddr = 0xffffffff;
+			rv = false;
+		} else {
+			*paddr = match->pfn() | (sp & ~VPNMASK);
+			rv = true;
+		}
+	}
+	return rv;
 }

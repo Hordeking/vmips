@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -10,7 +10,7 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# Makefile.in created from: $Id: Makefile.am,v 1.23 2001/04/06 08:56:20 brg Exp $
+# Makefile.in created from: $Id: Makefile.am,v 1.43 2001/08/10 07:51:47 brg Exp $
 
 
 SHELL = @SHELL@
@@ -67,46 +67,72 @@ CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 DLLTOOL = @DLLTOOL@
+ECHO = @ECHO@
 ENDIAN_FLAG = @ENDIAN_FLAG@
+EXEEXT = @EXEEXT@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SOLARIS_DL_HACK = @SOLARIS_DL_HACK@
+STRIP = @STRIP@
 VERSION = @VERSION@
 mipsbfdtarget = @mipsbfdtarget@
 mipsbin = @mipsbin@
+mipscpp = @mipscpp@
 mipsinclude = @mipsinclude@
 mipslib = @mipslib@
 mipstoolprefix = @mipstoolprefix@
 
-SUBDIRS = . test_code doc
-EXTRA_DIST = VERSION include/dis-asm.h package/vmips.spec.in
+SUBDIRS = . sample_code test_code doc 
+REDHAT_PKG_FILES = vmips.spec vmips.spec.in
+DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
+ debian/copyright debian/dirs debian/docs debian/info debian/rules
+
+EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh \
+ $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
+
 
 # What are we building here?
-bin_PROGRAMS = vmips
-
-# Other things to install.
-bin_SCRIPTS = vmipstool
+bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
-CXXFLAGS = -DCONFIG_PREFIX=\"$(prefix)\" -I$(top_srcdir)/include   -I$(mipsinclude) @CXXFLAGS@
+CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\" \
+  -I$(top_srcdir)/include -I$(mipsinclude) @CXXFLAGS@
 
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc   mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc   spimconsole.cc stub-dis.cc testdev.cc tlbentry.cc vmips.cc zschip.cc   deviceint.cc debug.cc remotegdb.cc   cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h   sysinclude.h testdev.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h   accesstypes.h deviceexc.h
+vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc \
+  mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc \
+  spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc zschip.cc \
+  deviceint.cc debug.cc remotegdb.cc clockdev.cc \
+  cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h \
+  devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
+  periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h \
+  sysinclude.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h \
+  accesstypes.h deviceexc.h clockdev.h
 
-vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la   $(mipslib)/libiberty.a
+vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la \
+  $(mipslib)/libiberty.a
 
 vmips_LDFLAGS = -static
+
+# Huh, huhuh, it says tool.
+vmipstool_SOURCES = vmipstool.cc
+vmipstool_CXXFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\"
+
+# Install a sample vmipsrc.
+sysconf_DATA = vmipsrc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  vmipstool
+CONFIG_CLEAN_FILES =  vmips.spec buildstat.sh
+bin_PROGRAMS =  vmips$(EXEEXT) vmipstool$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS)
 
 
@@ -114,14 +140,19 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-vmips_OBJECTS =  cache.o cacheline.o cpu.o cpzero.o devicemap.o mapper.o \
-memorymodule.o options.o range.o serialhost.o intctrl.o spimconsole.o \
-stub-dis.o testdev.o tlbentry.o vmips.o zschip.o deviceint.o debug.o \
-remotegdb.o
+vmips_OBJECTS =  cache.$(OBJEXT) cacheline.$(OBJEXT) cpu.$(OBJEXT) \
+cpzero.$(OBJEXT) devicemap.$(OBJEXT) mapper.$(OBJEXT) \
+memorymodule.$(OBJEXT) options.$(OBJEXT) range.$(OBJEXT) \
+serialhost.$(OBJEXT) intctrl.$(OBJEXT) spimconsole.$(OBJEXT) \
+stub-dis.$(OBJEXT) tlbentry.$(OBJEXT) vmips.$(OBJEXT) zschip.$(OBJEXT) \
+deviceint.$(OBJEXT) debug.$(OBJEXT) remotegdb.$(OBJEXT) \
+clockdev.$(OBJEXT)
 vmips_DEPENDENCIES =  $(mipslib)/libopcodes.la $(mipslib)/libbfd.la \
 $(mipslib)/libiberty.a
-SCRIPTS =  $(bin_SCRIPTS)
-
+vmipstool_OBJECTS =  vmipstool.$(OBJEXT)
+vmipstool_LDADD = $(LDADD)
+vmipstool_DEPENDENCIES = 
+vmipstool_LDFLAGS = 
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -131,22 +162,24 @@ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CF
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DATA =  $(sysconf_DATA)
+
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
 Makefile.am Makefile.in NEWS THANKS acconfig.h acinclude.m4 aclocal.m4 \
-config.guess config.h.in config.sub configure configure.in install-sh \
-ltconfig ltmain.sh missing mkinstalldirs vmipstool.in
+buildstat.sh.in config.guess config.h.in config.sub configure \
+configure.in install-sh ltmain.sh missing mkinstalldirs vmips.spec.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-SOURCES = $(vmips_SOURCES)
-OBJECTS = $(vmips_OBJECTS)
+SOURCES = $(vmips_SOURCES) $(vmipstool_SOURCES)
+OBJECTS = $(vmips_OBJECTS) $(vmipstool_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .cc .lo .o .s
+.SUFFIXES: .S .c .cc .lo .o .obj .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps Makefile
 
@@ -189,7 +222,9 @@ distclean-hdr:
 	-rm -f config.h
 
 maintainer-clean-hdr:
-vmipstool: $(top_builddir)/config.status vmipstool.in
+vmips.spec: $(top_builddir)/config.status vmips.spec.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+buildstat.sh: $(top_builddir)/config.status buildstat.sh.in
 	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-binPROGRAMS:
@@ -220,6 +255,11 @@ uninstall-binPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -228,6 +268,7 @@ uninstall-binPROGRAMS:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -255,32 +296,38 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-vmips: $(vmips_OBJECTS) $(vmips_DEPENDENCIES)
-	@rm -f vmips
+vmips$(EXEEXT): $(vmips_OBJECTS) $(vmips_DEPENDENCIES)
+	@rm -f vmips$(EXEEXT)
 	$(CXXLINK) $(vmips_LDFLAGS) $(vmips_OBJECTS) $(vmips_LDADD) $(LIBS)
 
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	@list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(INSTALL_SCRIPT) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
-	    $(INSTALL_SCRIPT) $$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
-	  else if test -f $(srcdir)/$$p; then \
-	    echo " $(INSTALL_SCRIPT) $(srcdir)/$$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`"; \
-	    $(INSTALL_SCRIPT) $(srcdir)/$$p $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
-	  else :; fi; fi; \
-	done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	list='$(bin_SCRIPTS)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed '$(transform)'`; \
-	done
+vmipstool$(EXEEXT): $(vmipstool_OBJECTS) $(vmipstool_DEPENDENCIES)
+	@rm -f vmipstool$(EXEEXT)
+	$(CXXLINK) $(vmipstool_LDFLAGS) $(vmipstool_OBJECTS) $(vmipstool_LDADD) $(LIBS)
 .cc.o:
 	$(CXXCOMPILE) -c $<
+.cc.obj:
+	$(CXXCOMPILE) -c `cygpath -w $<`
 .cc.lo:
 	$(LTCXXCOMPILE) -c $<
+
+install-sysconfDATA: $(sysconf_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)
+	@list='$(sysconf_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-sysconfDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(sysconf_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(sysconfdir)/$$p; \
+	done
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -318,7 +365,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -407,11 +454,11 @@ distdir: $(DISTFILES)
 	-rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
-	$(mkinstalldirs) $(distdir)/include $(distdir)/package
+	$(mkinstalldirs) $(distdir)/debian $(distdir)/include
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -440,7 +487,7 @@ installcheck: installcheck-recursive
 all-recursive-am: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS
+install-exec-am: install-binPROGRAMS install-sysconfDATA
 install-exec: install-exec-recursive
 
 install-data-am:
@@ -449,15 +496,15 @@ install-data: install-data-recursive
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-recursive
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS
+uninstall-am: uninstall-binPROGRAMS uninstall-sysconfDATA
 uninstall: uninstall-recursive
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) config.h
+all-am: Makefile $(PROGRAMS) $(DATA) config.h
 all-redirect: all-recursive-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(bindir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(sysconfdir)
 
 
 mostlyclean-generic:
@@ -505,8 +552,8 @@ mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile mostlyclean-libtool distclean-libtool \
-clean-libtool maintainer-clean-libtool uninstall-binSCRIPTS \
-install-binSCRIPTS install-data-recursive uninstall-data-recursive \
+clean-libtool maintainer-clean-libtool uninstall-sysconfDATA \
+install-sysconfDATA install-data-recursive uninstall-data-recursive \
 install-exec-recursive uninstall-exec-recursive installdirs-recursive \
 uninstalldirs-recursive all-recursive check-recursive \
 installcheck-recursive info-recursive dvi-recursive \
@@ -519,6 +566,8 @@ install uninstall-am uninstall all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+vmipstool.o: vmipstool.cc
+	$(CXXCOMPILE) $(vmipstool_CXXFLAGS) -c $<
 
 # Miscellaneous targets.
 tags: TAGS

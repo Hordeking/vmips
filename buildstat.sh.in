@@ -1,0 +1,40 @@
+#!/bin/sh
+
+echo "Date is:"
+date
+echo ""
+
+echo "System is:"
+uname -s
+uname -r
+uname -m
+uname -n
+./config.guess
+echo ""
+
+if [ -x ./vmips ]; then
+	echo "Congratulations, you have successfully compiled: "
+	./vmips --version
+else
+	echo "Your sources are version: "
+	cat VERSION
+fi
+echo ""
+
+echo "Host tools (g++) version: "
+@CXX@ -v
+echo ""
+
+echo "MIPS tools (gcc) version: "
+@mipstoolprefix@gcc -v
+echo ""
+
+echo "MIPS tools (binutils) version: "
+@mipstoolprefix@ld -v
+echo ""
+ 
+echo "MIPS BFD target: "
+echo "@mipsbfdtarget@"
+echo ""
+
+exit 0

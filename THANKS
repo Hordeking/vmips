@@ -10,3 +10,5 @@ Acknowledgements
  I looked to James Larus's SPIM simulator for examples of what to do
  (and sometimes, what not to do) when faced with certain tricky issues.
 
+ Galen Hancock <galen@csua.berkeley.edu> has provided some patches.
+ 

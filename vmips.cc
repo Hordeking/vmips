@@ -5,6 +5,7 @@
 #include "intctrl.h"
 #include "serialhost.h"
 #include "sysinclude.h"
+#include "clockdev.h"
 
 vmips *machine;
 
@@ -81,17 +82,6 @@ vmips::auto_size_rom(FILE *rom)
 }
 
 void
-vmips::time_diff(struct timeval *d, struct timeval *a, struct timeval *b)
-{
-	d->tv_sec = a->tv_sec - b->tv_sec;
-	d->tv_usec = a->tv_usec - b->tv_usec;
-	if (d->tv_usec < 0) {
-		d->tv_sec -= 1;
-		d->tv_usec += 1000000;
-	}
-}
-
-void
 vmips::periodic(void)
 {
 	/* Process instructions. */
@@ -99,13 +89,21 @@ vmips::periodic(void)
 #if TTY
 	if (usetty) console->periodic();
 #endif
+	clockdev->periodic();
 
 	/* If user requested it, dump registers from CPU and/or CP0. */
 	if (dumpcpu)
-		cpu->dump_regs(stderr);
+		cpu->dump_regs_and_stack(stderr);
 	if (dumpcp0)
-		cpzero->dump_regs(stderr);
+		cpzero->dump_regs_and_tlb(stderr);
 	num_instrs++;
+}
+
+long 
+timediff(struct timeval *after, struct timeval *before)
+{
+    return (after->tv_sec * 1000000 + after->tv_usec) -
+        (before->tv_sec * 1000000 + before->tv_usec);
 }
 
 int
@@ -118,13 +116,13 @@ vmips::run(int argc, char **argv)
 	bool haltdumpcpu, haltdumpcp0, bootmsg, instcounts, memdump, debug;
 	extern void setup_disassembler(FILE *stream);
 	/* For instruction counting: */
-	uint32 num_instrs = 0, memsize;
-	struct timeval diff, start, end;
+	uint32 memsize;
+	struct timeval start, end;
 	double elapsed;
 #if TTY
 	/* For serial emulation: */
 	char *ttydev;
-	int ttyfd;
+	int ttyfd = -1;
 	struct termios orig_ts, ts;
 	SerialHost *ttyhost;
 #endif
@@ -190,12 +188,13 @@ vmips::run(int argc, char **argv)
 	memmod[0] = new MemoryModule(memsize);
 	physmem->add_core_mapping(memmod[0]->addr,0,memmod[0]->len);
 
-	/* Test device at base phys addr 0x01000000 */
-	TestDev *testdev = new TestDev();
-	physmem->add_device_mapping(testdev, 0x01000000);
-
 	/* Direct the libopcodes disassembler output to stderr. */
 	setup_disassembler(stderr);
+
+	/* Microsecond Clock at base physaddr 0x01010000 */
+	clockdev = new ClockDev;
+	physmem->add_device_mapping(clockdev, 0x01010000);
+	intc->connectLine(IRQ7, clockdev);
 
 #if TTY
 	if (usetty) {
@@ -231,7 +230,7 @@ vmips::run(int argc, char **argv)
 		physmem->add_device_mapping(console, 0x02000000);
 		if (bootmsg) {
 			fprintf(stderr,
-				"Attached SPIMConsole [host=0x%lx] to phys addr 0x%lx\n",
+				"Attached SPIMConsole [host=0x%lx] to phys addr 0x%x\n",
 				(long) console, 0x02000000);
 			fprintf(stderr, "Connecting IRQ2-IRQ6 to console.\n");
 		}
@@ -245,7 +244,7 @@ vmips::run(int argc, char **argv)
 
 	if (bootmsg) {
 		fprintf(stderr,"Mapped (host=0x%lx) %ldk RAM at base phys addr 0\n",
-			memmod[0]->addr,memmod[0]->len / 1024);
+			(unsigned long) memmod[0]->addr,memmod[0]->len / 1024);
 
 		fprintf(stderr,"\n*************RESET*************\n\n");
 	}
@@ -282,13 +281,12 @@ vmips::run(int argc, char **argv)
 		if (haltdumpcpu)
 			cpu->dump_regs_and_stack(stderr);
 		if (haltdumpcp0)
-			cpzero->dump_regs(stderr);
+			cpzero->dump_regs_and_tlb(stderr);
 	}
 
 	if (instcounts) {
-		time_diff(&diff, &end, &start);
-		elapsed = diff.tv_sec + (diff.tv_usec / 1000000.0);
-		fprintf(stderr, "%lu instructions executed in %.3f seconds\n"
+		elapsed = (double) timediff(&end, &start) / 1000000.0;
+		fprintf(stderr, "%lu instructions executed in %.5f seconds\n"
 			"%.3f instructions per second\n", num_instrs, elapsed,
 			((double) num_instrs) / elapsed);
 	}

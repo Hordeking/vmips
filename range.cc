@@ -15,8 +15,9 @@ char *
 Range::descriptor_str(void)
 {
 	static char buff[80];
-	sprintf(buff,"(%lx)[b=%lx e=%lx a=%lx t=%ld p=%lx n=%lx]\n->",this,base,
-		extent,address,type,prev,next);
+	sprintf(buff, "(%lx)[b=%lx e=%lx a=%lx t=%ld p=%lx n=%lx]\n->",
+			(unsigned long) this, base, extent, (unsigned long) address,
+			type, (unsigned long) prev, (unsigned long) next);
 	return buff;
 }
 

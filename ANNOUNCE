@@ -1,20 +1,52 @@
 
-VMIPS 0.9 is a pre-release version.
-
-VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.0 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
 
-VMIPS is free software available under the GNU General Public
+   You can download VMIPS 1.0 from any of the following sites:
+
+* ftp://download.sourceforge.net/pub/sourceforge/vmips/
+* ftp://sartre.dgate.org/vmips/releases/vmips-1.0/
+* http://download.sourceforge.net/vmips/
+* https://github.com/Hordeking/vmips/releases/vmips-1.0/
+* http://vmips.sourceforge.net/releases/vmips-1.0/
+
+   VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
 instructions, please read "INSTALL". VMIPS was built by Brian Gaeke and
 others; for details, please see the files "AUTHORS" and "THANKS". New
 features since the last publically released version are detailed in
 "NEWS".
 
-The home page for VMIPS is "https://github.com/Hordeking/vmips". For bug
+   The home page for VMIPS is "https://github.com/Hordeking/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
+
+   User-visible changes in version 1.0 (since version 0.9):
+
+* A standard clock device has been added.
+* The "vmipstool" front end to compilation tools was added, and most of
+  the random scripts lying around have been consolidated into it.
+* The memory-mapped test device known as "TestDev" has been removed.
+* Debian and Red Hat packaging files have been added.
+* The installation procedure has been greatly improved.
+* The VMIPS manual has been completed.
+* Many, many bugs fixed as a result of a concerted attempt at testing
+  everything.  Doubtless, some bugs still remain.
+* Some portability fixes.
+* Dumping of the stack (when registers are dumped) now works.
+* Many strange messages the debugger backend used to print out have been
+  quelled. Also, killing the debugger connection should no longer cause
+  a crash.
+* vmips now supports --help, --version and --print-config command-line
+  options.
+* The SPIM-compatible console device now works better when the host
+  machine is byte-swapped with respect to the MIPS target.
+
+   We have also branched for bug fix releases (vmips-1.0.x).  To get
+the code from CVS as any bug fixes are added, checkout from branch
+"vmips-1_0-branch".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.
 
 -Brian Gaeke and the VMIPS developers <vmips@sartre.dgate.org>
+

@@ -1,104 +1,168 @@
-VMIPS Installation
-------------------
 
- The VMIPS build process assumes that you have a full set of MIPS
- cross-compilation tools installed, because you'll need them to do
- anything useful with VMIPS. For a concise summary of how to build
- the necessary MIPS cross tools, read "Building MIPS Cross Tools",
- below.
+These installation instructions are copied from the VMIPS Manual. For
+bug-reporting instructions, please see the README file in the source
+distribution, or read the VMIPS Manual.
 
- If you retrieved your sources from the CVS repository, you will
- need Automake version 1.4 or later, Autoconf version 2.13 or
- later, and libtool 1.2f or later. You will need perl 5 to build the
- documentation; this is a known bug.  Your distribution will be missing
- many important files, including "configure". To generate these, run
- "utils/bootstrap". To automatically run configure once it has been
- generated, you can run "utils/bootstrap -c CONFIGURE-ARGS".
+Installation
+************
 
- You will need to tell "configure" the configuration prefix you used
- to install the MIPS cross tools, by specifying it as the value to
- the "--with-mips" argument. For example, if your MIPS cross compiler
- is "/opt/mips/bin/mips-dec-ultrix4.3-gcc" and your MIPS-targeted
- libopcodes libtool library (which should have been installed by the
- binutils Makefile) is "/opt/mips/lib/libopcodes.la", then you
- should specify "--with-mips=/opt/mips" on the "configure" command line.
+   The VMIPS build process assumes that you have a full set of GNU MIPS
+cross compilation tools installed, because you'll need them to do
+anything useful with VMIPS. For a concise summary of how to build the
+necessary MIPS cross tools, read "Building MIPS Cross Tools", below.
 
+   VMIPS uses the GNU Autoconf/Automake system for configuration
+management.  This provides the familiar `configure' shell script
+interface for setting configuration variables. For more information
+about the special options that VMIPS `configure' accepts, read on, or
+give the `--help' option to `configure' for an abridged version.
+
+Building from CVS
+=================
+
+   If you retrieved your sources from the CVS repository, you will need
+Automake version 1.4 or later, Autoconf version 2.13 or later, and
+libtool 1.2f or later. You will need perl 5 to build the documentation.
+Your distribution will be missing many important files, including
+`configure'. To generate these, run `utils/bootstrap'. To automatically
+run configure once it has been generated, you can run `utils/bootstrap
+-c CONFIGURE-ARGS'.
+
+Options that configure supports
+===============================
+
+   You will need to tell `configure' the configuration prefix you used
+to install the MIPS cross tools, by specifying it as the value to the
+`--with-mips' argument. For example, if your MIPS cross compiler is
+`/opt/mips/bin/mips-dec-ultrix4.3-gcc' and your MIPS-targeted
+libopcodes libtool library (which should have been installed by the
+binutils Makefile) is `/opt/mips/lib/libopcodes.la', then you should
+specify `--with-mips=/opt/mips' on the `configure' command line.
+
+   Other options that "configure" supports are as follows:
+
+`--with-mips=MDIR'
+     Specify installation prefix of MIPS cross tools (default MDIR =
+     /opt/mips).
+
+`--with-mips-lib=DIR'
+     Specify path to MIPS cross tools' libraries (default MDIR/lib).
+
+`--with-mips-bin=DIR'
+     Specify path to MIPS cross tools' executables (default MDIR/bin).
+
+`--with-mips-include=DIR'
+     Specify path to MIPS cross tools' includes (default MDIR/include).
+
+`--with-mips-bfdtarget=TARG'
+     Specify MIPS cross tools BFD target name (defaults to the first
+     target listed in the output of objdump -i). Normally you can let
+     configure guess this, unless you built your MIPS tools for a
+     target (mips-ecoff or mips-elf, for example) which supports both
+     big-endian and little-endian data.
+
+`--with-mips-endianness=VAL'
+     Specify endianness of the VMIPS simulated machine, which must
+     match the MIPS cross tools target's endianness.  VAL may be
+     specified as `big' or `little'.  It is best to let configure guess
+     this (using objdump -i), unless you have reason to believe it is
+     guessing wrong, because if you get it wrong, vmipstool may compile
+     ROMs that do not run correctly under vmips.
+
+`--disable-debug'
+     Strip debugging symbols and turn on all the compiler optimizations.
+     The default is not to do this (i.e., leave in the debugging
+     symbols, and turn off all the compiler optimizations.)
+
+`--disable-tty'
+     Do not include (default=include) support for the emulated serial
+     interface.
 
 Building MIPS Cross Tools
--------------------------
+=========================
 
- First decide on an installation prefix. These examples will use the prefix
- "/usr/sww/lang/mips", which would be appropriate for the UC Berkeley
- Computer Science Division's Software Warehouse; you should choose whatever
- prefix is appropriate for installing massive packages on your own system.
- (Or, if you're accustomed to just dumping everything in /usr/local,
- that would work fine as a prefix, too.)
+   First decide on an installation prefix. The following examples will
+use the prefix "/opt/mips", as above.
 
- Then you need to get binutils. Here are some places you can get binutils:
-  ftp://ftp.varesearch.com/pub/support/hjl/binutils/ (Linux release versions)
-  ftp://sourceware.cygnus.com/pub/binutils/ (Official versions)
+   Download a copy of Binutils, from any GNU mirror, or from the URL:
+     <ftp://sources.redhat.com/pub/binutils/releases>
+   We recommend getting version 2.10.1. The file you will need would be
+named `binutils-2.10.1.tar.gz'.
 
- Build binutils by running something like:
-  ./configure --target=mips-dec-ultrix4.3 --prefix=/usr/sww/lang/mips
-  make
-  make install
+   Build binutils by running the following commands. We recommend
+`--disable-nls' because some recent versions do not build correctly with
+NLS (linking against `libopcodes.a' results in unresolved symbols.)
 
- Then you need to get a C compiler. Here are some places you can get the
- GNU Compiler Collection (gcc):
-  ftp://sourceware.cygnus.com/pub/egcs/releases/ (Official site)
-  ftp://go.cygnus.com/pub/sourceware.cygnus.com/pub/egcs/releases/
-   (West coast mirror, via CalREN2)
+     ./configure --target=mips-dec-ultrix4.3 --prefix=/opt/mips \
+      --disable-nls --enable-shared
+     make
+     make install
 
- You can read the documentation for building the compiler by pointing
- your World-Wide Web browser at http://egcs.cygnus.com and following
- the 'Documentation' link from there.
+   Save a copy of `include/dis-asm.h' from the Binutils source
+distribution.  You'll need to install it as `include/dis-asm.h' in the
+VMIPS source distribution, in order to ensure compatibility between the
+version of Binutils you used and VMIPS.
 
- This is a (greatly abridged) version for the impatient, assuming
- you've unpacked the gcc sources in the directory "/SOMEWHERE":
+   Download a copy of the GNU Compiler Collection (`gcc') from any GNU
+mirror, or from the URL:
+     <ftp://gcc.gnu.org/pub/gcc/releases>
+   We recommend version 2.95.2. Download the file `gcc-2.95.2.tar.gz'.
 
- 1. Create the build directory "/SOMEWHERE/mips".
- 2. Copy the following script to "/SOMEWHERE/mips/run-configure", replacing
- /SOMEWHERE with the full path to your copy of the sources:
-   #!/usr/bin/ksh -x
-   ../configure --target=mips-dec-ultrix4.3 \
-     --prefix=/usr/sww/lang/mips \
-     --with-gnu-as --with-gnu-ld \
-     --disable-threads --enable-version-specific-runtime-libs \
-     --with-headers=/SOMEWHERE/target/include \
-     --with-libs=/SOMEWHERE/target/lib
-   make -k cross
-   make LANGUAGES="c c++" install
+   You can read the documentation for building the compiler by pointing
+your World-Wide Web browser at <http://gcc.gnu.org/install>.  When you
+encounter difficulties, you should consider consulting the
+documentation for building the compiler, because it is more complete
+than the following summary.
 
- Now, you have to do some things differently based on whether you have
- MIPS-targeted C libraries or not -- even though they are NOT necessary
- for running VMIPS, the compiler build process likes to know about them
- if you have them.
-  * If you DO have MIPS-targeted C libraries, you can teach your
-    cross-compiler about them by following steps 3 & 4.
-  * If you DON'T have MIPS-targeted C libraries, get rid of the
-    --with-headers and --with-libs options in the run-configure script,
-    above.
+  1. Unpack the sources. Let's say you unpack them in `/usr/build',
+     creating the directory `/usr/build/gcc-2.95.2'.
 
- 3. Make a "target" directory in the top level distribution.
- 4. Make a "target/include" directory which contains all the .h files,
-    and make a "target/lib" directory which contains all the .a and .o files
-    (and shared objects if you have 'em). If you have a MIPS box you can
-    accomplish this using GNU find and cpio, by the following sequence
-    of commands:
+  2. Create the build directory `/usr/build/gcc-mips-build'.
 
-     volga# cd /usr/include
-     volga# find . -print | cpio -pdmuv /SOMEWHERE/target/include
-     volga# cd /usr/local/include
-     volga# find . -print | cpio -pdmuv /SOMEWHERE/target/include
-     volga# cd /usr/lib
-     volga# find . -name '*.[oa]' -print | cpio -pdmuv /SOMEWHERE/target/lib
-     volga# cd /usr/local/lib
-     volga# find . -name '*.[oa]' -print | cpio -pdmuv /SOMEWHERE/target/lib
+  3. First, add the directory `/opt/mips/bin' (where you just installed
+     Binutils) to your path, so that the compiler configuration process
+     can find your MIPS-targetted assembler and linker.
 
- 5. Change to the "/SOMEWHERE/mips" directory and run "./run-configure"
-    to build and install the compiler (be sure you have appropriate
-    permissions to install it.)
+  4. Configure the compiler. Change to the directory
+     `/usr/build/gcc-mips-build' and issue the following command. (The
+     back-slash characters represent the usual Unix shell convention of
+     continuing a command on the following line, and are inserted for
+     typesetting purposes.)
 
+          ../gcc-2.95.2/configure --target=mips-dec-ultrix4.3 \
+           --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
+           --disable-threads --disable-shared
+
+  5. If the configuration step fails, make sure you have a working
+     native compiler, and/or try a different version of gcc. Otherwise,
+     proceed to compile the compiler:
+
+          make -k MAKE='make -k TARGET_LIBGCC2_CFLAGS=-Dinhibit_libc' cross
+          make -k LANGUAGES=c install
+
+     The reason `make -k' is required is because some parts of the gcc
+     toolkit may fail to build, but the compiler itself may be OK.
+
+     The `-Dinhibit_libc' option is required when you are building the
+     compiler in the absence of a MIPS C library, as is often the case
+     with VMIPS users.
+
+     Do not be alarmed by errors in building or installing the compiler;
+     the cross compiler install interface is less than polished.
+
+  6. You should be able to use the newly-installed  compiler to compile
+     (but not link) a program that does not use any C library functions.
+     If this works, you should be able to use the cross tools you have
+     just built for VMIPS.
+
+     If you want to build a MIPS C library, you can also do that now,
+     but it is not strictly required for many useful VMIPS tasks. Some
+     persons have reported success using the "newlib" C library from
+     Cygnus. The GNU C Library (glibc) is fairly difficult to build.
+     Instructions for building a C library will appear here soon.
+
+The remainder of this file represents generic (i.e., not VMIPS-specific)
+instructions for using "configure".
 
 Basic Installation
 ==================

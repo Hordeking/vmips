@@ -43,7 +43,7 @@ private:
 	int setup_listener_socket(void);
 	int set_nonblocking(int fd);
 	void print_local_name(int s);
-	int targetloop(void);
+	void targetloop(void);
 	char *rawpacket(char *str);
 	char *error_packet(int error_code);
 	char *signal_packet(int signal);

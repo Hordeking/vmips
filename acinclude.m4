@@ -1,6 +1,25 @@
 dnl acinclude.m4 -- This file is part of VMIPS.
-dnl $Id: acinclude.m4,v 1.4 2000/05/09 08:14:33 brg Exp $
+dnl $Id: acinclude.m4,v 1.7 2001/06/10 00:31:39 brg Exp $
 dnl It is used to build the configure script. See configure.in for details.
+
+dnl Local macro: VMIPS_TYPE_SOCKLEN_T
+dnl #define socklen_t to int if socklen_t is not in sys/socket.h.
+
+AC_DEFUN(VMIPS_TYPE_SOCKLEN_T, [   
+AC_MSG_CHECKING(for socklen_t)
+AC_CACHE_VAL(ac_cv_type_socklen_t,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>],
+[socklen_t foo; foo = 1; return 0;],
+ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])dnl
+AC_MSG_RESULT($ac_cv_type_socklen_t)
+if test $ac_cv_type_socklen_t = no
+then
+  AC_DEFINE(socklen_t, int)
+fi
+])
 
 dnl Local macro: VMIPS_STATIC_GETPWNAM
 dnl Can libtool compile statically linked programs that call getpwnam()?

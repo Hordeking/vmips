@@ -1,42 +1,74 @@
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+
 VMIPSTOOL=../vmipstool
 MGCC=$(VMIPSTOOL) --compile
 MGCC_FLAGS=-g -I@top_srcdir@
 MAS=$(VMIPSTOOL) --assemble
 MLD=$(VMIPSTOOL) --link
-CPP=$(VMIPSTOOL) --preprocess -I@top_srcdir@
+CPP=$(VMIPSTOOL) --preprocess -I@top_srcdir@ -I@top_srcdir@/sample_code
 MOBJDUMP=@mipstoolprefix@objdump
 MOBJCOPY=@mipstoolprefix@objcopy
 DISASSEMBLE=$(MOBJDUMP) --disassemble-all --all-headers
-ROMS=tester.rom sort.rom bdexcp.rom exception.rom load.rom loser.rom \
-	mumble.rom emptymain.rom testdev.rom hello.rom echo.rom clocker.rom
+ROMS= addi.rom bgezal.rom bltzal.rom bc0.rom bdexcp.rom clocker.rom echo.rom \
+ emptymain.rom exception.rom hello.rom load.rom loser.rom mthi_lo.rom \
+ mumble.rom shift.rom sort.rom syscall.rom testdev.rom tester.rom xor.rom \
+ coproc.rom bltz.rom multu.rom ulw.rom tlbwr.rom sub.rom usw.rom
 RAWTEXTS=$(ROMS:.rom=.raw)
-RELOCS=$(ROMS:.rom=.fix)
-SETUP=setup.o
+RELOCS=$(ROMS:.rom=.exe)
+SETUP=../sample_code/setup.o
 OBJS=$(COBJS) $(AOBJS)
-SHELL = @SHELL@
-srcdir = @srcdir@
-top_srcdir = @top_srcdir@
-VPATH = @srcdir@
 #------
 CSRCS=tester.c sort.c random.c emptymain.c hello.c echo.c
-ASRCS=bdexcp.S clocker.S exception.S load.S loser.S mumble.S setup.S testdev.S
+ASRCS= addi.S bc0.S bdexcp.S bgezal.S bltzal.S clocker.S exception.S load.S \
+ loser.S mthi_lo.S mumble.S shift.S syscall.S testdev.S xor.S coproc.S bltz.S \
+ multu.S ulw.S tlbwr.S sub.S usw.S
 CPREP=$(CSRCS:.c=.i)
 CASM=$(CSRCS:.c=.s)
 COBJS=$(CSRCS:.c=.o)
-APREP=$(ASRCS:.S=.s)
-AOBJS=$(APREP:.s=.o)
+AOBJS=$(ASRCS:.S=.o)
 ODUMP=$(COBJS:.o=.dump) $(AOBJS:.o=.dump)
-CLEANFILES=$(CPREP) $(COBJS) $(APREP) $(AOBJS) $(ODUMP) $(CASM) $(RAWTEXTS) $(RELOCS)
+CLEANFILES=$(CPREP) $(COBJS) $(AOBJS) $(ODUMP) $(CASM) $(RAWTEXTS) $(RELOCS)
 CLOBBERFILES=$(ROMS)
-DISTFILES=Makefile.in asm_regnames.h ld.script.in $(ASRCS) $(CSRCS) README
+DISTFILES=Makefile.in $(ASRCS) $(CSRCS) README
 #------
 
-all: $(SETUP) $(ROMS)
+all: $(ROMS)
 
 dump: $(ODUMP)
 
 # Nothing to do here:
-dvi install check installcheck:
+dvi check installcheck install:
 
 clean:
 	-rm -f $(CLEANFILES)
@@ -49,32 +81,35 @@ maintainer-clean: distclean
 loser.rom: loser.raw
     dd if=$*.raw of=$@ bs=4c count=1
 
-%.rom: %.fix
-	$(VMIPSTOOL) --make-rom $*.fix $*.rom
+%.rom: %.exe
+	$(VMIPSTOOL) --make-rom $*.exe $*.rom
 
-%.raw: %.fix
+%.raw: %.exe
 	$(MOBJCOPY) -O binary $< $@
 
-hello.fix: $(SETUP) hello.o
+hello.exe: $(SETUP) hello.o
 	$(MLD) -o $@ $+
 
-echo.fix: $(SETUP) echo.o
+echo.exe: $(SETUP) echo.o
 	$(MLD) -o $@ $+
 
-sort.fix: $(SETUP) sort.o random.o
+sort.exe: $(SETUP) sort.o random.o
 	$(MLD) -o $@ $+
 
-emptymain.fix: $(SETUP) emptymain.o
+tlbwr.exe: $(SETUP) tlbwr.o
 	$(MLD) -o $@ $+
 
-tester.fix: $(SETUP) tester.o
+usw.exe: $(SETUP) usw.o
 	$(MLD) -o $@ $+
 
-%.fix: %.o
+emptymain.exe: $(SETUP) emptymain.o
 	$(MLD) -o $@ $+
 
-%.s: %.S
-	$(CPP) $< > $@
+tester.exe: $(SETUP) tester.o
+	$(MLD) -o $@ $+
+
+%.exe: %.o
+	$(MLD) -o $@ $+
 
 %.s: %.c
 	$(MGCC) $(MGCC_FLAGS) -S -c -o $@ $<
@@ -86,8 +121,7 @@ tester.fix: $(SETUP) tester.o
 	$(MAS) -o $@ $<
 
 %.o: %.S
-	@$(MAKE) $*.s
-	@$(MAKE) $*.o
+	$(VMIPSTOOL) --assemble -I@top_srcdir@ -I@top_srcdir@/sample_code -o $@ $<
 
 %.i: %.c
 	$(CPP) $< > $@

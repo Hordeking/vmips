@@ -14,7 +14,7 @@ MemoryModule::MemoryModule(size_t size)
 void
 MemoryModule::print(void)
 {
-	printf("([%lx] %lx)",addr,len);
+	printf("([%lx] %lx)",(unsigned long) addr,len);
 }
 
 MemoryModule::~MemoryModule()

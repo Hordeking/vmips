@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,7 +23,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <signal.h>
+#define _GNU_SOURCE
+#ifdef HAVE_GETOPT_H
+# include <getopt.h>
+#endif /* HAVE_GETOPT_H */
+#include <stdarg.h>
 
 /* We need this for mmap(2). */
 #if !defined(MAP_FAILED)

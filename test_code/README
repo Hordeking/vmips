@@ -64,7 +64,33 @@ Explanations of files in the test_code directory
  testdev.S - a program to copy words from the TestDev device at 0xa1000000;
  you can use the memdump option to vmips and od(1) to verify the results.
 
- tester.c - Euclidean algorithm gcd program; first C program run on vmips.
+ tester.c - This was the first C program run on vmips.  It is a
+ fixed-data, register implementation of the Euclidean Algorithm for
+ computing the greatest common divisor. Here is a list of the (ten)
+ calculations that it completes for a = 120,923,429 and b = 30,030:
 
-CVS: $Id: README,v 1.1 2000/11/16 09:20:14 brg Exp $
+   120923429 % 30030 = 22649
+       30030 % 22649 = 7381
+        22649 % 7381 = 506
+          7381 % 506 = 297
+           506 % 297 = 209
+           297 % 209 = 88
+            209 % 88 = 33
+             88 % 33 = 22
+             33 % 22 = 11
+             22 % 11 = 0
+
+ The key thing about this code is that it doesn't have any references
+ to memory, and doesn't call any procedures or do anything that needs
+ the stack.  Hence, it can operate without any loading or storing
+ beyond that which is required for instruction fetching from uncached,
+ non-TLB-mapped memory.
+
+ You can use this code to verify that branches happen the instruction
+ after they're executed (i.e., branch delay slot emulation is as
+ expected), and the "haltdumpcpu" option can be used to determine that
+ the program terminated correctly (whichever register corresponds to the
+ result will contain 0x0b).
+
+CVS: $Id: README,v 1.2 2001/05/13 20:47:51 brg Exp $
 

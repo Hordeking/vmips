@@ -1,4 +1,5 @@
 ok puts
+ok printf
 ok puts_nonl
 ok putchar
 ok getchar
@@ -8,3 +9,5 @@ ok gets
 ok isspace
 ok isdigit
 ok strtol
+ok strcpy
+ok memmove

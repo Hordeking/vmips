@@ -279,7 +279,7 @@ Options::process_options_from_file(char *filename)
 
 	buf = (char *) malloc(BUFSIZ);
 	if (!buf) {
-		fprintf(stderr, "Can't allocate %lu bytes for I/O buffer; aborting!\n",
+		fprintf(stderr, "Can't allocate %u bytes for I/O buffer; aborting!\n",
 			BUFSIZ);
 		abort();
 	}
@@ -313,11 +313,17 @@ Options::process_options_from_file(char *filename)
 void
 Options::usage(char *argv0)
 {
+	printf("usage:\n");
+	printf(" %s ", PACKAGE);
 #ifdef OPTIONS_DEBUG
-	fprintf(stderr,"Usage: %s [-D] [-o option_string] ... [rom_file]\n",argv0);
-#else
-	fprintf(stderr,"Usage: %s [-o option_string] ... [rom_file]\n",argv0);
+	printf("[-D] ");
 #endif
+	printf("[-o option_string] ... [rom_file]\n");
+	printf(" %s --version\n", PACKAGE);
+	printf(" %s --help\n", PACKAGE);
+	printf(" %s --print-config\n", PACKAGE);
+	printf("\n");
+	printf("Report bugs to <vmips@sartre.dgate.org>.\n");
 }
 
 void
@@ -374,6 +380,18 @@ Options::process_options(int argc, char **argv)
 		argc--;
 	}
 #endif
+	if (argc > 1 && strcmp(argv[1], "--version") == 0) {
+		print_package_version();
+		exit(0);
+	}
+	if (argc > 1 && strcmp(argv[1], "--help") == 0) {
+		usage(argv[0]);
+		exit(0);
+	}
+	if (argc > 1 && strcmp(argv[1], "--print-config") == 0) {
+		print_config_info();
+		exit(0);
+	}
 	/* Get options from defaults. */
 	process_defaults();
 	/* Get options from system configuration file */
@@ -488,3 +506,67 @@ Options::dump_options_table(Option *table)
 	}
 }
 #endif
+
+void
+Options::print_config_info(void)
+{
+#ifdef WORDS_BIGENDIAN
+    puts("Host processor big endian");
+#else
+    puts("Host processor little endian");
+#endif
+
+#ifdef TARGET_BIG_ENDIAN
+    puts("Emulated processor big endian");
+#else
+# if defined(TARGET_LITTLE_ENDIAN)
+    puts("Emulated processor little endian");
+# else
+    puts("Emulated processor endianness unknown");
+# endif
+#endif
+
+#ifdef BYTESWAPPED
+    puts("Host is byte-swapped with respect to target");
+#else
+    puts("Host is not byte-swapped with respect to target");
+#endif
+
+#ifdef TTY
+    puts("SPIM-compatible console device configured");
+#else
+    puts("SPIM-compatible console device not configured");
+#endif
+
+#ifdef INTENTIONAL_CONFUSION
+    puts("Registers initialized to random values instead of zero");
+#else
+    puts("Registers initialized to zero");
+#endif
+
+#ifdef OPTIONS_DEBUG
+    puts("Options debugging enabled");
+#else
+    puts("Options debugging disabled");
+#endif
+
+#ifdef HAVE_LONG_LONG
+    puts("Host compiler has native support for 8-byte integers");
+#else
+    puts("Host compiler does not natively support 8-byte integers");
+#endif
+}
+
+void
+Options::print_package_version(void)
+{
+	printf("%s %s\n", PACKAGE, VERSION);
+	printf("Copyright (C) 2001 Brian R. Gaeke.  %s comes with NO WARRANTY,\n",
+		PACKAGE);
+	printf("to the extent permitted by law.  You may redistribute copies\n");
+	printf("of %s under the terms of the GNU General Public License.\n",
+		PACKAGE);
+	printf("For more information about these matters, see the file named\n");
+	printf("COPYING in the %s source distribution.\n", PACKAGE);
+}
+

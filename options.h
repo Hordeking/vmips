@@ -3,11 +3,7 @@
 
 #include "sysinclude.h"
 
-#ifndef CONFIG_PREFIX
-#define CONFIG_PREFIX "/usr/local"
-#endif /* CONFIG_PREFIX */
-
-#define SYSTEM_CONFIG_FILE CONFIG_PREFIX"/etc/vmipsrc"
+#define SYSTEM_CONFIG_FILE SYSCONFDIR"/vmipsrc"
 
 /* This is currently only used in the self tests. */
 #define NUM_MEMORY_MODULES 16
@@ -68,6 +64,8 @@ private:
 #ifdef OPTIONS_DEBUG
 	void dump_options_table(Option *table);
 #endif
+	void print_package_version(void);
+	void print_config_info(void);
 public:
 	Options(int argc, char **argv);
 	union OptionValue *option(char *name);

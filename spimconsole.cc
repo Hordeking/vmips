@@ -6,6 +6,7 @@
 #include "mapper.h"
 #include "spimconsole.h"
 #include "spimconsreg.h"
+#include "vmips.h"
 
 char *
 SPIMConsole::descriptor_str(void)
@@ -164,13 +165,6 @@ void SPIMConsole::periodic(void)
 	}
 }
 
-long 
-SPIMConsoleDevice::timediff(struct timeval *after, struct timeval *before)
-{
-	return (after->tv_sec * 1000000 + after->tv_usec) -
-		(before->tv_sec * 1000000 + before->tv_usec);
-}
-
 SPIMConsoleDevice::SPIMConsoleDevice(int l, SPIMConsole *p)
 {
 	lineno = l;
@@ -208,6 +202,13 @@ SPIMConsoleDisplay::setData(uint8 newData)
 SPIMConsole::SPIMConsole(SerialHost *h0 = NULL, SerialHost *h1 = NULL)
 {
 	extent = 36; /* 9 words */
+	keyboard[0] = NULL;
+	keyboard[1] = NULL;
+	display[0] = NULL;
+	display[1] = NULL;
+	clockdev = NULL;
+	host[0] = NULL;
+	host[1] = NULL;
 	if (h0 || h1) attach(h0, h1);
 }
 
@@ -237,22 +238,31 @@ SPIMConsole::fetch_word(uint32 offset, int mode, DeviceExc *client)
 {
 	int type = UNKNOWN;
 	SPIMConsoleDevice *device = NULL;
+	uint32 rv = 0;
 
+	/* fprintf(stderr, "SPIMConsole::fetch_word(%08lx)\n", offset); */
 	get_type(offset, &type, &device);
 	if (type == CONTROL) {
-		uint32 rv = 0;
 		rv = (device->intEnable() ? CTL_IE : 0) |
 			   (device->ready() ? CTL_RDY : 0);
 		if (device == clockdev) {
 			clockdev->read();
 		}
-		return rv;
+		/* fprintf(stderr, "\treturns %08lx\n", rv); */
 	} else if (type == DATA)  {
-		return device->data();
+		rv = device->data();
+		/* fprintf(stderr, "\treturns %08lx\n", rv); */
+	} else {
+		fprintf(stderr, "Impossible SPIM console register access!\n"
+			"offset=0x%lx mode=0x%x client=0x%lx\n",offset,mode,
+			(unsigned long) client);
+		abort();
 	}
-	fprintf(stderr, "Impossible SPIM console register access!\n"
-		"offset=0x%lx mode=0x%lx client=0x%lx\n",offset,mode,client);
-	abort();
+#if defined(BYTESWAPPED)
+	return Mapper::swap_word(rv);
+#else
+	return rv;
+#endif
 }
 
 uint16
@@ -302,6 +312,10 @@ SPIMConsole::store_word(uint32 offset, uint32 data, DeviceExc *client)
 	int type = UNKNOWN;
 	SPIMConsoleDevice *device = NULL;
 
+	/* fprintf(stderr, "SPIMConsole::store_word(%08lx,%08lx)\n", offset,data); */
+#if defined(BYTESWAPPED)
+	data = Mapper::swap_word(data);
+#endif
 	get_type(offset, &type, &device);
 	if (type == CONTROL) {
 		device->setIntEnable(data & CTL_IE);
@@ -312,7 +326,8 @@ SPIMConsole::store_word(uint32 offset, uint32 data, DeviceExc *client)
 		return 0;
 	}
 	fprintf(stderr, "Impossible SPIM console register write!\n"
-		"offset=0x%lx data=0x%lx client=0x%lx\n",offset,data,client);
+		"offset=0x%lx data=0x%lx client=0x%lx\n",offset,data,
+		(unsigned long)client);
 	abort();
 }
 

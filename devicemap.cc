@@ -10,8 +10,8 @@ char *
 DeviceMap::descriptor_str(void)
 {
 	static char buff[80];
-	sprintf(buff,"(%lx)[b=%lx e=%lx t=dev n=%lx]\n->",this,getBase(),
-		getExtent(),getNext());
+	sprintf(buff,"(%lx)[b=%lx e=%lx t=dev n=%lx]\n->",(unsigned long)this,
+		getBase(), getExtent(),(unsigned long)getNext());
 	return buff;
 }
 

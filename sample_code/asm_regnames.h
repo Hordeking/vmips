@@ -2,40 +2,41 @@
 #define __asm_regnames_h__
 
 /* Special names */
-#define $zero $0	/* always zero */
-#define $at $1	/* assembler temporary */
-#define $v0 $2	/* function values */
-#define $v1 $3
-#define $a0 $4	/* function arguments */
-#define $a1 $5
-#define $a2 $6
-#define $a3 $7
-#define $t0 $8	/* temporary registers; not preserved across func calls */
-#define $t1 $9
-#define $t2 $10
-#define $t3 $11
-#define $t4 $12
-#define $t5 $13
-#define $t6 $14
-#define $t7 $15
-#define $s0 $16	/* "saved" regs - must preserve these if you use them */
-#define $s1 $17
-#define $s2 $18
-#define $s3 $19
-#define $s4 $20
-#define $s5 $21
-#define $s6 $22
-#define $s7 $23
-#define $t8 $24	/* more temporary regs */
-#define $t9 $25
-#define $k0 $26	/* kernel temporary variables */
-#define $kt0 $26
-#define $k1 $27
-#define $kt1 $27
-#define $gp $28	/* pointer to globals */
-#define $sp $29	/* stack pointer */
-#define $s8 $30	/* another "saved" reg */
-#define $ra $31	/* return address */
+#define zero $0	/* always zero */
+/*#define at $1	/* assembler temporary */
+/* this conflicts with the .set at assembler directive. just use $1 instead */
+#define v0 $2	/* function values */
+#define v1 $3
+#define a0 $4	/* function arguments */
+#define a1 $5
+#define a2 $6
+#define a3 $7
+#define t0 $8	/* temporary registers; not preserved across func calls */
+#define t1 $9
+#define t2 $10
+#define t3 $11
+#define t4 $12
+#define t5 $13
+#define t6 $14
+#define t7 $15
+#define s0 $16	/* "saved" regs - must preserve these if you use them */
+#define s1 $17
+#define s2 $18
+#define s3 $19
+#define s4 $20
+#define s5 $21
+#define s6 $22
+#define s7 $23
+#define t8 $24	/* more temporary regs */
+#define t9 $25
+#define k0 $26	/* kernel temporary variables */
+#define kt0 $26
+#define k1 $27
+#define kt1 $27
+#define gp $28	/* pointer to globals */
+#define sp $29	/* stack pointer */
+#define s8 $30	/* another "saved" reg */
+#define ra $31	/* return address */
 
 /* CP0 reg names - these pertain to address translation and
  * exception handling, and not all of them are implemented on the

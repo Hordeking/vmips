@@ -1,0 +1,10 @@
+vmips (1.0-1) unstable; urgency=low
+
+  * Initial Release.
+  * This is my first Debian package.
+
+ -- Brian Gaeke <vmips@sartre.dgate.org>  Sun, 14 Oct 2001 00:07:55 -0700
+
+Local variables:
+mode: debian-changelog
+End:

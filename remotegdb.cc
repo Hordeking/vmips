@@ -245,10 +245,12 @@ serial_write(int fd, const char *buf, int len)
 	return ((write(fd, buf, len) == len) ? 0 : -1);
 }
 static FILE *gdb_stdout = stderr;
+int remotegdb_backend_error = 0;
 static inline int gdb_flush(FILE *f) { return fflush(f); }
 static inline int max(int i, int j) { return ((i>j) ? i : j); }
 static inline void perror_with_name(char *str) {
   fprintf(gdb_stdout, "%s: %s\n", str, strerror(errno));
+  remotegdb_backend_error++;
 }
 static inline void puts_filtered(char *str) {
   fputs(str, gdb_stdout); fputc('\n', gdb_stdout);
@@ -271,15 +273,16 @@ static inline int printf_unfiltered(char *fmt, ...) {
   va_end(ap);
   return rv;
 }
-/* I don't know whether this should cause an abort or not... */
-static __attribute__((noreturn)) inline int error(char *fmt, ...) {
+/* This should not cause an abort, but it will cause a halt. */
+/* Someday we will try to support disconnect/reconnect. */
+static inline void error(char *fmt, ...) {
   va_list ap;
   int rv;
   va_start(ap, fmt);
   rv = vfprintf(gdb_stdout, fmt, ap);
   va_end(ap);
-  fprintf(gdb_stdout, "Error - Aborting\n");
-  abort();
+  fprintf(gdb_stdout, "Debugger halting simulation.\n");
+  remotegdb_backend_error++;
 }
 /* brg - end added glue */
 
@@ -318,8 +321,10 @@ int fromhex (int a)
     return a - 'a' + 10;
   else if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
-  else 
+  else {
     error ("Reply contains invalid hex digit %d", a);
+    return a;
+  }
 }
 
 /* Convert number NIB to a hex digit.  */
@@ -359,9 +364,11 @@ int readchar (int timeout)
   switch (ch)
     {
     case SERIAL_EOF:
-      error ("Remote connection closed");
+      error ("Debugger disconnected.\n");
+      return ch;
     case SERIAL_ERROR:
-      perror_with_name ("Remote communication error");
+      perror_with_name ("Debugger communication error");
+      return ch;
     case SERIAL_TIMEOUT:
       return ch;
     default:
@@ -437,6 +444,8 @@ int putpkt (char *buf)
 	    {
 	      switch (ch)
 		{
+	    case SERIAL_EOF:
+		return 0;
 		case '+':
 		case SERIAL_TIMEOUT:
 		case '$':
@@ -454,6 +463,8 @@ int putpkt (char *buf)
 	      if (remote_debug)
 		printf_unfiltered("Ack\n");
 	      return 1;
+	    case SERIAL_EOF:
+		return 0;
 	    case SERIAL_TIMEOUT:
 	      tcount ++;
 	      if (tcount > 3)

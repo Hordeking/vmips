@@ -131,7 +131,6 @@ public:
 	CPU(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL);
 	void attach(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL);
 	void dump_regs(FILE *f);
-	void dump_stack(FILE *f);
 	void dump_regs_and_stack(FILE *f);
 	void periodic(void);
 	char *const strexccode(const uint16 excCode);

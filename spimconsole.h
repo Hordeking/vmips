@@ -59,7 +59,6 @@ public:
 
 	virtual bool intEnable(void);
 	virtual void setIntEnable(bool newIntEnable);
-	long timediff(struct timeval *before, struct timeval *after);
 };
 
 class SPIMConsoleKeyboard : public SPIMConsoleDevice {

@@ -26,6 +26,7 @@ private:
 	void tlbp_emulate(uint32 instr, uint32 pc);
 	void rfe_emulate(uint32 instr, uint32 pc);
 	void load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match);
+	TLBEntry *find_matching_tlb_entry(uint32 asid, uint32 asid);
 	uint32 tlb_translate(uint32 seg, uint32 vaddr, int mode,
 		bool *cacheable, DeviceExc *client);
 
@@ -56,6 +57,7 @@ public:
 	bool interrupt_pending(void);
 	void read_debug_info(uint32 *status, uint32 *bad, uint32 *cause);
 	void write_debug_info(uint32 status, uint32 bad, uint32 cause);
+	bool debug_tlb_translate(uint32 vaddr, uint32 *paddr);
 };
 
 #endif /* __cpzero_h__ */
