@@ -1,5 +1,5 @@
 /* vmips boot monitor
- * $Date: 2003/11/29 21:11:02 $
+ * $Date: 2004/09/07 00:10:43 $
  * by Brian R. Gaeke
  */
 
@@ -55,6 +55,7 @@ int load_rom (int argc, char **argv);
 int do_printenv (int argc, char **argv);
 int do_setenv (int argc, char **argv);
 int do_unsetenv (int argc, char **argv);
+int do_call (int argc, char **argv);
 void entry (void);
 void set_bev (int yesOrNo);
 void set_interrupts (int yesOrNo);
@@ -77,6 +78,7 @@ struct command_table_entry command_table[] = {
   {"printenv", "Print the boot environment", do_printenv},
   {"setenv", "Set an environment variable", do_setenv},
   {"unsetenv", "Delete an environment variable", do_unsetenv},
+  {"call", "Call procedure at address", do_call},
   {0, 0}
 };
 
@@ -332,6 +334,21 @@ do_unsetenv (int argc, char **argv)
   varname = argv[1];
   unsetenv (varname);
   return 0;
+}
+
+int
+do_call (int argc, char **argv)
+{
+  unsigned long address;
+  if (argc < 2)
+    {
+      puts ("Usage: call addr [args...]");
+      return -1;
+    }
+  address = (unsigned long) strtol (argv[1], NULL, 0);
+  entry_type harry = (entry_type) address;
+  set_bev (0);
+  return harry(argc - 2, argv + 2);
 }
 
 int

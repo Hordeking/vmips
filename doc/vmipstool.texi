@@ -47,6 +47,7 @@ vmipstool [ --verbose ] [ --dry-run ] [ --ld-script=T ] --link
     [ FLAGS ] FILE1.o ... FILEn.o -o PROG
 vmipstool [ --verbose ] [ --dry-run ] --make-rom PROG PROG.rom
 vmipstool [ --verbose ] [ --dry-run ] --disassemble-rom PROG.rom
+vmipstool [ --verbose ] [ --dry-run ] --disassemble-word PC INSTR
 vmipstool [ --verbose ] [ --dry-run ] --disassemble PROG (or FILE.o)
 vmipstool [ --verbose ] [ --dry-run ] --swap-words INPUT OUTPUT
 vmipstool --help
@@ -100,6 +101,11 @@ Disassemble a relocatable object file (*.o file) or an executable.
 Disassemble arbitrary data, possibly including ROM files. (More
 information is available with --disassemble, but it only works on programs
 which have not been written into ROMs.)
+
+@item --disassemble-word
+Disassemble an instruction whose binary encoding is passed as a command-line
+argument. Because instructions can have PC-relative immediate arguments, the
+PC must also be specified.
 
 @item --swap-words
 Copy the input file to the output file, reversing the byte-order of each

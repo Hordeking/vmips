@@ -18,17 +18,9 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
 #include "deviceint.h"
 #include "intctrl.h"
-
-IntCtrl::IntCtrl() throw()
-{
-}
-
-IntCtrl::~IntCtrl() throw()
-{
-}
+#include <cassert>
 
 uint32 IntCtrl::calculateIP() throw()
 {

@@ -21,7 +21,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  * and ECC Check/Syndrome Status Register in the DEC 5000/200 (KN02).
  */
 
-#include "sysinclude.h"
 #include "deviceexc.h"
 #include "cpu.h"
 #include "decstat.h"

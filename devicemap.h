@@ -22,7 +22,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DEVICEMAP_H_
 #define _DEVICEMAP_H_
 
-#include "sysinclude.h"
 #include "range.h"
 
 /* Physical memory map for a device supporting memory-mapped I/O. This is

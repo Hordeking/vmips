@@ -20,9 +20,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _OPTIONS_H_
 #define _OPTIONS_H_
 
-#include "sysinclude.h"
-#include <string>
+#include "types.h"
 #include <map>
+#include <string>
 
 /* This defines the name of the system default configuration file. */
 #define SYSTEM_CONFIG_FILE SYSCONFDIR"/vmipsrc"

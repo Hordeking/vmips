@@ -22,7 +22,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 /* Routines implementing memory mappings for devices which support
  * memory-mapped I/O. */
 
-#include "sysinclude.h"
 #include "accesstypes.h"
 #include "range.h"
 #include "devicemap.h"

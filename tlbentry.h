@@ -27,8 +27,10 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  * merely a convenience, as the entryHi and entryLo fields are public.
  */
 
+#include "config.h"
 #include "cpzeroreg.h"
-#include "sysinclude.h"
+#include "types.h"
+#include <cstdlib>
 
 class TLBEntry {
 public:
@@ -43,10 +45,10 @@ public:
 	uint32 vpn() const { return (entryHi & EntryHi_VPN_MASK); }
 	uint16 asid() const { return (entryHi & EntryHi_ASID_MASK); }
 	uint32 pfn() const { return (entryLo & EntryLo_PFN_MASK); }
-	bool noncacheable() const { return (entryLo >> 11) & 0x01; }
-	bool dirty() const { return (entryLo >> 10) & 0x01; }
-	bool valid() const { return (entryLo >> 9) & 0x01; }
-	bool global() const { return (entryLo >> 8) & 0x01; }
+	bool noncacheable() const { return (entryLo & EntryLo_N_MASK); }
+	bool dirty() const { return (entryLo & EntryLo_D_MASK); }
+	bool valid() const { return (entryLo & EntryLo_V_MASK); }
+	bool global() const { return (entryLo & EntryLo_G_MASK); }
 };
 
 #endif /* _TLBENTRY_H_ */

@@ -19,6 +19,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 #include "rommodule.h"
 #include "vmips.h"
+#include "mmapglue.h"
+#include <cerrno>
 
 ROMModule::ROMModule (FILE *fp) : Range (0, 0, 0, MEM_READ) {
   extent = vmips::get_file_size (fp);

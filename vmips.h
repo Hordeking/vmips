@@ -21,10 +21,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _VMIPS_H_
 #define _VMIPS_H_
 
-#include "sysinclude.h"
+#include "types.h"
+#include <cstdio>
+#include <new>
 
 class Mapper;
-class CPZero;
 class CPU;
 class IntCtrl;
 class Options;
@@ -39,6 +40,7 @@ class DECRTCDevice;
 class DECCSRDevice;
 class DECStatDevice;
 class DECSerialDevice;
+class Disassembler;
 
 long timediff(struct timeval *after, struct timeval *before);
 
@@ -46,14 +48,15 @@ class vmips
 {
 public:
 	Mapper		*physmem;
-	CPZero		*cpzero;
 	CPU		*cpu;
 	IntCtrl		*intc;
 	Options		*opt;
 	MemoryModule	*memmod;
 	Debug	*dbgr;
+	Disassembler	*disasm;
 	bool		host_bigendian;
 	bool		halted;
+	DECCSRDevice	*deccsr_device;
 
 protected:
 	Clock		*clock;
@@ -61,7 +64,6 @@ protected:
 	HaltDevice	*halt_device;
 	SpimConsoleDevice	*spim_console;
 	DECRTCDevice	*decrtc_device;
-	DECCSRDevice	*deccsr_device;
 	DECStatDevice	*decstat_device;
 	DECSerialDevice	*decserial_device;
 
@@ -90,9 +92,10 @@ protected:
 	uint32		opt_memsize;
 	uint32		opt_timeratio;
 	char		*opt_image;
+	char		*opt_execname;
 	char		*opt_memdumpfile;
-	char			*opt_ttydev;
-	char			*opt_ttydev2;
+	char		*opt_ttydev;
+	char		*opt_ttydev2;
 
 private:
 	uint32	num_instrs;
@@ -125,6 +128,12 @@ protected:
 	virtual bool setup_decserial() throw( std::bad_alloc );
 
 	virtual bool setup_rom();
+
+	virtual bool setup_exe();
+
+	bool load_elf (FILE *fp);
+	bool load_ecoff (FILE *fp);
+	char *translate_to_host_ram_pointer (uint32 vaddr);
 
 	virtual bool setup_ram() throw (std::bad_alloc);
 

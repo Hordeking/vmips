@@ -201,7 +201,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* ... */
 
 /* brg - added glue */
-#include <stdarg.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/time.h>
 #include "remotegdb.h"
 int remote_debug = 0;
 int remote_desc;

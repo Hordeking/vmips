@@ -21,12 +21,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _CLOCKDEV_H_
 
 #include "clock.h"
-#include "devicemap.h"
 #include "deviceint.h"
+#include "devicemap.h"
+#include "devreg.h"
 #include "task.h"
-
 #include <new>
-
 
 /* High resolution clock device. */
 class ClockDevice : public DeviceMap, public DeviceInt

@@ -21,11 +21,10 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _CLOCK_H_
 
 #include "task.h"
-#include "devreg.h"
-#include "sysinclude.h"
-
+#include "types.h"
 #include <list>
 #include <sys/time.h>
+class Task;
 
 /* The Clock class manages virtual time. */
 class Clock

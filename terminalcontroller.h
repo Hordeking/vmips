@@ -20,19 +20,15 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _TERMINALCONTROLLER_H_
 #define _TERMINALCONTROLLER_H_
 
-#include "clock.h"
 #include "devreg.h"
 #include "task.h"
-
+#include <new>
 #include <sys/types.h>
 #include <termios.h>
-
-#include <new>
-
+class Clock;
 
 // XXX Maximum number of terminals the controller supports.
 #define	MAX_TERMINALS	16
-
 
 /* A keyboard can be in one of two states: READY or UNREADY. The state READY
    corresponds to when the keyboard has new data the simulated program hasn't
@@ -85,7 +81,7 @@ public:
 	virtual void remove_terminal( int line ) throw();
 
 	/* Return true if line LINE is connected, false otherwise. */
-	bool line_connected (int line) {
+	bool line_connected (const int line) const {
       return line >= 0 && line < MAX_TERMINALS && lines[line].tty_fd != -1;
     }
 
@@ -129,7 +125,6 @@ protected:
 	   for use as part of a simulated console device. Returns true if the
 	   preparation was sucessful, false otherwise. */
 	virtual bool prepare_tty( int line ) throw();
-
 
 protected:
 	class DisplayDelay : public CancelableTask
@@ -208,6 +203,5 @@ protected:
 
 	LineState	lines[ MAX_TERMINALS ];
 };
-
 
 #endif /* _TERMINALCONTROLLER_H_ */

@@ -22,15 +22,16 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   spimconsole.cc stub-dis.cc vmips.cc \
   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc \
-  decstat.cc decserial.cc rommodule.cc \
+  decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc \
   cpu.h cpzero.h cpzeroreg.h deviceint.h \
   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
   range.h spimconsole.h spimconsreg.h \
-  sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h \
+  tlbentry.h vmips.h debug.h remotegdb.h \
   accesstypes.h deviceexc.h clockdev.h excnames.h error.h \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
-  decstat.h decserial.h decserialreg.h rommodule.h
+  decstat.h decserial.h decserialreg.h rommodule.h gccattr.h mmapglue.h \
+  types.h endiantest.h fileutils.h
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # This library contains the subset of libbfd/libopcodes that we use.
@@ -39,8 +40,9 @@ libopcodes_mips/libopcodes_mips.a:
 	cd libopcodes_mips && $(MAKE) all
 
 # Huh, huhuh, it says tool.
-vmipstool_SOURCES = vmipstool.cc options.cc error.cc \
-  sysinclude.h options.h error.h
+vmipstool_SOURCES = vmipstool.cc options.cc error.cc stub-dis.cc \
+  fileutils.cc options.h error.h stub-dis.h endiantest.h fileutils.h
+vmipstool_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # Install a sample vmipsrc.
 sysconf_DATA = vmipsrc

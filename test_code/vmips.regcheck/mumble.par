@@ -1,4 +1,4 @@
-regcheck_set_options "-o haltjrra"
+regcheck_set_options "-o haltbreak"
 
 regcheck_set_results { \
 r0 00000000 \

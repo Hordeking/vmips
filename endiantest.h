@@ -1,6 +1,5 @@
-/* Interface to: Stub functions to interface to the GNU disassembler library
-    (libopcodes).
-   Copyright 2003 Brian R. Gaeke.
+/* Host endianness self-testing object.  -*- C++ -*-
+   Copyright 2004 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -18,23 +17,32 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef _STUB_DIS_H_
-#define _STUB_DIS_H_
+#ifndef _ENDIANTEST_H_
+#define _ENDIANTEST_H_
 
 #include "types.h"
-#include <cstdio>
-extern "C" {
-#include "bfd.h"
-#include "dis-asm.h"
-}
+#include <string>
 
-class Disassembler {
-  struct disassemble_info disasm_info;
-  int (*insn_printer_func) (unsigned long, struct disassemble_info *);
+class EndianSelfTester {
+  bool host_bigendian;
 public:
-  Disassembler (bool host_is_bigendian, FILE *stream);
-  ~Disassembler () { }
-  void disassemble (uint32 pc, uint32 instr); 
+  EndianSelfTester () {
+    uint32 x;
+    char *p = (char *) &x;
+    p[0] = 0;
+    p[1] = 1;
+    p[2] = 2;
+    p[3] = 3;
+    if (x == 0x03020100) {
+      host_bigendian = false;
+    } else if (x == 0x00010203) {
+      host_bigendian = true;
+    } else {
+      throw std::string ("Unknown processor endianness.");
+    }
+  }
+
+  bool host_is_big_endian () const { return host_bigendian; }
 };
 
-#endif /* _STUB_DIS_H_ */
+#endif // _ENDIANTEST_H_

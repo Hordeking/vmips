@@ -102,13 +102,14 @@ MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc   mapper.cc options.cc range.cc intctrl.cc   spimconsole.cc stub-dis.cc vmips.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc   decstat.cc decserial.cc rommodule.cc   cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   range.h spimconsole.h spimconsreg.h   sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h excnames.h error.h   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h   decstat.h decserial.h decserialreg.h rommodule.h
+vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc   mapper.cc options.cc range.cc intctrl.cc   spimconsole.cc stub-dis.cc vmips.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc   decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc   cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   range.h spimconsole.h spimconsreg.h   tlbentry.h vmips.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h excnames.h error.h   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h   decstat.h decserial.h decserialreg.h rommodule.h gccattr.h mmapglue.h   types.h endiantest.h fileutils.h
 
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # Huh, huhuh, it says tool.
-vmipstool_SOURCES = vmipstool.cc options.cc error.cc   sysinclude.h options.h error.h
+vmipstool_SOURCES = vmipstool.cc options.cc error.cc stub-dis.cc   fileutils.cc options.h error.h stub-dis.h endiantest.h fileutils.h
 
+vmipstool_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # Install a sample vmipsrc.
 sysconf_DATA = vmipsrc
@@ -126,12 +127,13 @@ LIBS = @LIBS@
 vmips_OBJECTS =  cpu.o cpzero.o devicemap.o mapper.o options.o range.o \
 intctrl.o spimconsole.o stub-dis.o vmips.o deviceint.o debug.o \
 remotegdb.o clockdev.o error.o clock.o terminalcontroller.o haltdev.o \
-decrtc.o deccsr.o decstat.o decserial.o rommodule.o
+decrtc.o deccsr.o decstat.o decserial.o rommodule.o fileutils.o \
+exeloader.o
 vmips_DEPENDENCIES =  libopcodes_mips/libopcodes_mips.a
 vmips_LDFLAGS = 
-vmipstool_OBJECTS =  vmipstool.o options.o error.o
-vmipstool_LDADD = $(LDADD)
-vmipstool_DEPENDENCIES = 
+vmipstool_OBJECTS =  vmipstool.o options.o error.o stub-dis.o \
+fileutils.o
+vmipstool_DEPENDENCIES =  libopcodes_mips/libopcodes_mips.a
 vmipstool_LDFLAGS = 
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
@@ -426,68 +428,74 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-clock.o: clock.cc clock.h task.h devreg.h sysinclude.h config.h error.h \
+clock.o: clock.cc clock.h task.h types.h config.h error.h gccattr.h \
 	wipe.h
-clockdev.o: clockdev.cc clockdev.h clock.h task.h devreg.h sysinclude.h \
-	config.h devicemap.h range.h accesstypes.h deviceint.h \
-	intctrl.h
-cpu.o: cpu.cc cpu.h sysinclude.h config.h deviceexc.h accesstypes.h \
-	mapper.h range.h cpzero.h tlbentry.h cpzeroreg.h debug.h \
-	vmips.h options.h excnames.h error.h remotegdb.h stub-dis.h
-cpzero.o: cpzero.cc cpzero.h tlbentry.h cpzeroreg.h sysinclude.h \
-	config.h mapper.h accesstypes.h range.h excnames.h cpu.h \
-	deviceexc.h debug.h intctrl.h error.h
-debug.o: debug.cc debug.h sysinclude.h config.h deviceexc.h \
-	accesstypes.h remotegdb.h cpu.h mapper.h range.h cpzero.h \
-	tlbentry.h cpzeroreg.h excnames.h vmips.h options.h
-deccsr.o: deccsr.cc sysinclude.h config.h deccsrreg.h deccsr.h \
-	devicemap.h range.h accesstypes.h
-decrtc.o: decrtc.cc sysinclude.h config.h devicemap.h range.h \
-	accesstypes.h clock.h task.h devreg.h decrtcreg.h decrtc.h \
-	deviceint.h intctrl.h
-decserial.o: decserial.cc sysinclude.h config.h deviceexc.h \
-	accesstypes.h deviceint.h intctrl.h cpu.h mapper.h range.h \
-	cpzero.h tlbentry.h cpzeroreg.h debug.h decserial.h devicemap.h \
-	terminalcontroller.h clock.h task.h devreg.h decserialreg.h \
-	vmips.h
-decstat.o: decstat.cc sysinclude.h config.h deviceexc.h accesstypes.h \
-	cpu.h mapper.h range.h cpzero.h tlbentry.h cpzeroreg.h debug.h \
-	decstat.h devicemap.h vmips.h
-deviceint.o: deviceint.cc sysinclude.h config.h deviceint.h intctrl.h \
-	options.h vmips.h
-devicemap.o: devicemap.cc sysinclude.h config.h accesstypes.h range.h \
-	devicemap.h
-error.o: error.cc error.h sysinclude.h config.h
-haltdev.o: haltdev.cc haltdev.h devicemap.h sysinclude.h config.h \
-	range.h accesstypes.h vmips.h
-intctrl.o: intctrl.cc sysinclude.h config.h deviceint.h intctrl.h
-mapper.o: mapper.cc sysinclude.h config.h excnames.h mapper.h \
-	accesstypes.h range.h cpu.h deviceexc.h cpzero.h tlbentry.h \
-	cpzeroreg.h debug.h devicemap.h error.h options.h vmips.h \
-	memorymodule.h
-options.o: options.cc options.h sysinclude.h config.h optiontbl.h \
-	error.h
-range.o: range.cc sysinclude.h config.h range.h accesstypes.h error.h
-remotegdb.o: remotegdb.cc remotegdb.h sysinclude.h config.h
-rommodule.o: rommodule.cc rommodule.h range.h sysinclude.h config.h \
-	accesstypes.h vmips.h
-spimconsole.o: spimconsole.cc spimconsole.h clock.h task.h devreg.h \
-	sysinclude.h config.h devicemap.h range.h accesstypes.h \
-	deviceint.h intctrl.h terminalcontroller.h spimconsreg.h \
-	mapper.h vmips.h
-stub-dis.o: stub-dis.cc sysinclude.h config.h vmips.h stub-dis.h \
+clockdev.o: clockdev.cc clockdev.h clock.h task.h types.h config.h \
+	deviceint.h intctrl.h devicemap.h range.h accesstypes.h \
+	devreg.h
+cpu.o: cpu.cc cpu.h deviceexc.h accesstypes.h types.h config.h cpzero.h \
+	tlbentry.h cpzeroreg.h debug.h mapper.h range.h vmips.h \
+	options.h excnames.h error.h gccattr.h remotegdb.h stub-dis.h \
 	libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
 	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h
-terminalcontroller.o: terminalcontroller.cc error.h sysinclude.h \
-	config.h terminalcontroller.h clock.h task.h devreg.h
-vmips.o: vmips.cc clock.h task.h devreg.h sysinclude.h config.h \
-	clockdev.h devicemap.h range.h accesstypes.h deviceint.h \
-	intctrl.h clockreg.h cpzeroreg.h error.h haltreg.h haltdev.h \
-	spimconsole.h terminalcontroller.h mapper.h memorymodule.h \
-	cpu.h deviceexc.h cpzero.h tlbentry.h debug.h spimconsreg.h \
-	vmips.h options.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
-	decstat.h decserial.h decserialreg.h stub-dis.h rommodule.h
-vmipstool.o: vmipstool.cc sysinclude.h config.h options.h error.h
+cpzero.o: cpzero.cc cpzero.h tlbentry.h config.h cpzeroreg.h types.h \
+	mapper.h range.h accesstypes.h excnames.h cpu.h deviceexc.h \
+	intctrl.h error.h gccattr.h
+debug.o: debug.cc debug.h deviceexc.h accesstypes.h types.h config.h \
+	remotegdb.h cpu.h mapper.h range.h excnames.h cpzeroreg.h \
+	vmips.h options.h
+deccsr.o: deccsr.cc deccsrreg.h deccsr.h devicemap.h range.h \
+	accesstypes.h types.h config.h deviceint.h intctrl.h
+decrtc.o: decrtc.cc devicemap.h range.h accesstypes.h types.h config.h \
+	clock.h task.h decrtcreg.h decrtc.h deviceint.h intctrl.h
+decserial.o: decserial.cc cpu.h deviceexc.h accesstypes.h types.h \
+	config.h deccsr.h devicemap.h range.h deviceint.h intctrl.h \
+	decserial.h decserialreg.h terminalcontroller.h devreg.h task.h \
+	mapper.h vmips.h
+decstat.o: decstat.cc deviceexc.h accesstypes.h types.h config.h cpu.h \
+	decstat.h devicemap.h range.h mapper.h vmips.h
+deviceint.o: deviceint.cc deviceint.h intctrl.h types.h config.h \
+	options.h vmips.h
+devicemap.o: devicemap.cc accesstypes.h range.h types.h config.h \
+	devicemap.h
+error.o: error.cc error.h gccattr.h config.h
+exeloader.o: exeloader.cc vmips.h types.h config.h cpzeroreg.h \
+	memorymodule.h range.h accesstypes.h error.h gccattr.h
+fileutils.o: fileutils.cc
+haltdev.o: haltdev.cc haltdev.h devicemap.h range.h accesstypes.h \
+	types.h config.h vmips.h
+intctrl.o: intctrl.cc deviceint.h intctrl.h types.h config.h
+mapper.o: mapper.cc cpu.h deviceexc.h accesstypes.h types.h config.h \
+	devicemap.h range.h error.h gccattr.h excnames.h mapper.h \
+	memorymodule.h options.h vmips.h
+options.o: options.cc error.h gccattr.h config.h fileutils.h options.h \
+	types.h optiontbl.h
+range.o: range.cc range.h accesstypes.h types.h config.h error.h \
+	gccattr.h
+remotegdb.o: remotegdb.cc remotegdb.h types.h config.h
+rommodule.o: rommodule.cc rommodule.h range.h accesstypes.h types.h \
+	config.h vmips.h mmapglue.h
+spimconsole.o: spimconsole.cc clock.h task.h types.h config.h mapper.h \
+	range.h accesstypes.h spimconsole.h deviceint.h intctrl.h \
+	devicemap.h terminalcontroller.h devreg.h spimconsreg.h vmips.h
+stub-dis.o: stub-dis.cc stub-dis.h types.h config.h \
+	libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h
+terminalcontroller.o: terminalcontroller.cc clock.h task.h types.h \
+	config.h error.h gccattr.h terminalcontroller.h devreg.h
+vmips.o: vmips.cc clock.h task.h types.h config.h clockdev.h deviceint.h \
+	intctrl.h devicemap.h range.h accesstypes.h devreg.h clockreg.h \
+	cpzeroreg.h debug.h deviceexc.h error.h gccattr.h endiantest.h \
+	haltreg.h haltdev.h spimconsole.h terminalcontroller.h mapper.h \
+	memorymodule.h cpu.h cpzero.h tlbentry.h spimconsreg.h vmips.h \
+	options.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h decstat.h \
+	decserial.h decserialreg.h stub-dis.h libopcodes_mips/bfd.h \
+	libopcodes_mips/ansidecl.h libopcodes_mips/symcat.h \
+	libopcodes_mips/dis-asm.h rommodule.h
+vmipstool.o: vmipstool.cc endiantest.h types.h config.h fileutils.h \
+	stub-dis.h libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h error.h \
+	gccattr.h options.h
 
 info-am:
 info: info-recursive

@@ -20,8 +20,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DEVICEEXC_H_
 #define _DEVICEEXC_H_
 
-#include "sysinclude.h"
 #include "accesstypes.h"
+#include "types.h"
 
 /* An abstract class which describes a device that can handle exceptions. */
 

@@ -13,6 +13,8 @@ loser.rom: loser.exe
 	dd if=loser.tmp bs=4 count=1 of=loser.rom >/dev/null 2>&1
 	rm loser.tmp
 
+# empty 
+
 # simple_asm bdexcp
 # multifile_asm -setup 0 bdexcp bdexcp.S
 bdexcp_SOURCES = bdexcp.S
@@ -56,6 +58,10 @@ unaligned_SOURCES = unaligned.S
 unaligned.rom: unaligned.exe
 	$(VMIPSTOOL) --make-rom unaligned.exe unaligned.rom
 
+# empty 
+
+# empty 
+
 # simple_c hello2
 # multifile_c hello2 hello2.c
 hello2_LDFLAGS = $(SETUP)
@@ -86,7 +92,7 @@ EXEEXT = .exe
 
 CLEANFILES =  loser.rom bdexcp.rom poke2.rom instcounts.rom exception.rom emptymain.rom simpledis.rom unaligned.rom hello2.rom hello.rom sb-print.rom
 
-EXTRA_DIST =  outcheck.exp  loser.par bdexcp.par poke2.par instcounts.par exception.par emptymain.par simpledis.par unaligned.par hello2.par hello.par sb-print.par
+EXTRA_DIST =  outcheck.exp  loser.par badargs.par bdexcp.par poke2.par instcounts.par exception.par emptymain.par simpledis.par unaligned.par nonexistent.par badoption.par hello2.par hello.par sb-print.par
 
 # 3 C testcases and 7 asm testcases.
-# 1 custom makefile fragment testcases.
+# 4 custom makefile fragment testcases.

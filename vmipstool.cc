@@ -25,11 +25,19 @@ or
 int getpagesize(void);
 */
 
-#include "sysinclude.h"
-#include <iostream>
-#include "options.h"
+#include "endiantest.h"
+#include "fileutils.h"
+#include "stub-dis.h"
 #include "error.h"
+#include "options.h"
+#include <cerrno>
+#include <cstdarg>
+#include <cstdio>
+#include <iostream>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <vector>
 
 const unsigned int MAXARGV = 500;
 const unsigned int TMPFNAMESIZE = 26;
@@ -188,14 +196,6 @@ int echo_and_run_lv(char *c, ...) {
 
 	maybe_echo(newargv);
 	return maybe_run(newargv);
-}
-
-bool can_read_file (char *filename) {
-	FILE *f = fopen (filename, "r");
-	if (!f)
-		return false;
-	fclose (f);
-	return true;
 }
 
 /* Search colon-separated PATH for file named TARGET. Copy found file's
@@ -400,6 +400,19 @@ int disassemble_rom (int argc, char **argv) {
                            endianflag, "-m", "mips", inputfile, NULL);
 }
 
+int disassemble_word (int argc, char **argv) {
+  EndianSelfTester est;
+  Disassembler d (est.host_is_big_endian(), stdout);
+  if (argc != 2) {
+    fprintf (stderr, "Error: must supply PC and INSTR\n");
+    return 1;
+  }
+  uint32 pc = strtoul(argv[0], NULL, 0);
+  uint32 instr = strtoul(argv[1], NULL, 0);
+  d.disassemble (pc, instr);
+  return 0;
+}
+
 int version (int argc, char **argv) {
 	printf("vmipstool (VMIPS) %s\n", VERSION);
 	return 0;
@@ -434,6 +447,7 @@ public:
             "  --link             [ FLAGS ] FILE1.o ... FILEn.o -o PROG\n"
             "  --make-rom         PROG PROG.rom\n"
             "  --disassemble-rom  PROG.rom\n"
+            "  --disassemble-word PC INSTR\n"
             "  --disassemble      PROG (or FILE.o)\n"
             "  --swap-words       INPUT OUTPUT\n"
             "\n"
@@ -528,6 +542,10 @@ public:
         else if (strcmp (argv[i], "--disassemble-rom") == 0)
           {
             handler = disassemble_rom;
+          }
+        else if (strcmp (argv[i], "--disassemble-word") == 0)
+          {
+            handler = disassemble_word;
           }
         else if (strcmp (argv[i], "--disassemble") == 0)
           {

@@ -21,6 +21,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define ROMMODULE_H
 
 #include "range.h"
+#include <cstdio>
 
 class ROMModule : public Range {
 public:

@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
 #include "deviceint.h"
 #include "options.h"
 #include "vmips.h"
@@ -131,13 +130,6 @@ void DeviceInt::deassertInt(uint32 line)
 	} else {
 		reportDeassertDisconnected(line);
 	}
-}
-
-/* Returns TRUE if this device has the interrupt line LINE asserted and
-   connected; FALSE otherwise. */
-bool DeviceInt::isAsserted(uint32 line)
-{
-	return (line & lines_connected) && (line & lines_asserted);
 }
 
 /* Constructor. */

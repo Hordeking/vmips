@@ -3,6 +3,42 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Release History
 ***************
 
+   vmips-1.3 was released on 8 October 2004.  User-visible changes in
+version 1.3 (since version 1.2.2):
+
+   * The VMIPS code base has been cleaned up substantially. The most
+     important visible effect of this is that VMIPS compiles much more
+     quickly now.
+
+   * A new, experimental executable-file loader has been integrated.
+     Presently it is only usable for loading ECOFF files into the
+     kernel segments (0x80000000-0xbfffffff). The ROM monitor has a new
+     `call' command you can use to take advantage of this.
+
+   * Vmipstool can now disassemble binary instructions from the command
+     line, e.g.  `vmipstool --disassemble-word <pc> <instr>'.
+
+   * The `excmsg' option used to report all exceptions, including
+     things like clock interrupts. This made using `excmsg' in any
+     nontrivial kernel code almost impossible. Now you must also specify
+     'reportirq' to get reports of interrupt exceptions.
+
+   * The `haltjrra' option has been removed.
+
+   * The DECstation 5000/200-compatible CSR device now supports delivery
+     of interrupts from devices attached to CSR interrupt lines, such
+     as the DZ11 serial device.
+
+   * The DZ11 serial device now supports interrupt-driven I/O properly.
+     It previously only worked correctly if polling was used.
+
+   * The documentation has received the usual slight adjustments. In
+     addition, the test-suite documentation has been extensively
+     revised and integrated into the programmer's manual.
+
+   * The options-processing code has been revised slightly to print a
+     better error message when an invalid option is specified.
+
    vmips-1.2.2 was released on 23 August 2004.  User-visible changes in
 version 1.2.2 (since version 1.2.1):
 
@@ -14,7 +50,7 @@ version 1.2.2 (since version 1.2.1):
      where the register file would be sent to gdb incorrectly. Thanks!
 
    * VMIPS will no longer abort and dump core when bad command-line
-     arguments are passed to it.  Instead, it will print an error
+     rguments are passed to it.  Instead, it will print an error
      message and exit with a non-zero exit code.
 
    * A bug in the command-line option processor was fixed, where using a

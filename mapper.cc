@@ -17,25 +17,16 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
-#include "excnames.h"
-#include "mapper.h"
 #include "cpu.h"
-#include "range.h"
 #include "devicemap.h"
 #include "error.h"
-#include "options.h"
-#include "vmips.h"
+#include "excnames.h"
+#include "mapper.h"
 #include "memorymodule.h"
-
-/* Set the associated CPU of this Mapper object to M, if it is
- * non-NULL.
- */
-void
-Mapper::attach(CPU *m)
-{
-	if (m) cpu = m;
-}
+#include "options.h"
+#include "range.h"
+#include "vmips.h"
+#include <cassert>
 
 Mapper::Mapper () :
 	last_used_mapping (NULL)

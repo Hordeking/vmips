@@ -1,6 +1,5 @@
-/* Stub functions to interface to the GNU disassembler library
-    (libopcodes).
-   Copyright 2001, 2003 Brian R. Gaeke.
+/* C++ interface to the GNU disassembler library (libopcodes).
+   Copyright 2001, 2003, 2004 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -18,40 +17,24 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
-#include "vmips.h"
 #include "stub-dis.h"
 
-extern "C" { 
-
-#include "bfd.h"
-#include "dis-asm.h"
-
+Disassembler::Disassembler (bool host_is_bigendian, FILE *stream) {
+  if (host_is_bigendian) {
+    insn_printer_func = print_insn_big_mips;
+  } else {
+    insn_printer_func = print_insn_little_mips;
+  }
+  INIT_DISASSEMBLE_INFO(disasm_info, stream, fprintf);
+  disasm_info.buffer_length = 4;
 }
 
-static struct disassemble_info disasm_info;
+void Disassembler::disassemble (uint32 pc, uint32 instr) {
+  // Point libopcodes at the instruction.
+  disasm_info.buffer_vma = pc;
+  disasm_info.buffer = (bfd_byte *) &instr;
 
-bool
-setup_disassembler (FILE *stream)
-{
-	/* Set up for libopcodes. */
-	INIT_DISASSEMBLE_INFO(disasm_info, stream, fprintf);
-	disasm_info.buffer_length = 4;
-	return true; /* success */
-}
-
-void
-call_disassembler(uint32 pc, uint32 instr)
-{
-	/* Point libopcodes at the instruction... */
-	disasm_info.buffer_vma = pc;
-	disasm_info.buffer = (bfd_byte *) &instr;
-
-	/* Disassemble the instruction, which is in *host* byte order. */
-	if (machine->host_bigendian) {
-		print_insn_big_mips(pc, &disasm_info);
-	} else {
-		print_insn_little_mips(pc, &disasm_info);
-	}
-	putc('\n', (FILE *)disasm_info.stream);   /* End the line. */
+  // Disassemble the instruction, which is in *host* byte order.
+  insn_printer_func(pc, &disasm_info);
+  putc('\n', (FILE *)disasm_info.stream);   // End the line.
 }

@@ -72,7 +72,8 @@ static Option nametable[] = {
         short explanation of the exception code, its priority,
         the delay slot state of the virtual CPU, and states
         what type of memory access the exception was caused by,
-        if applicable. Interrupt exceptions also have Cause
+        if applicable. Interrupt exceptions are only printed if
+        @option{reportirq} is also set; when they occur, they also have Cause
         and Status register information printed. **/
 
     { "bootmsg", FLAG },
@@ -151,16 +152,6 @@ static Option nametable[] = {
         exception handler.  It is important to note that the machine
         halts after the exception is processed. **/
 
-    { "haltjrra", FLAG },
-    /** If @option{haltjrra} is set to TRUE, the virtual machine will halt
-        when the instruction "jr $31" (also written "jr $ra")
-        is encountered.  Since this is the instruction for a
-        procedure call to return, this is useful if you have
-        a simple procedure to run and you want execution to
-        terminate when it finishes. It is important to note that the
-        machine halts after the jump instruction is processed, but
-        before the instruction in the jump's delay slot is processed. **/
-
     { "haltbreak", FLAG },
     /** If @option{haltbreak} is set to TRUE, the virtual machine will halt
         when a breakpoint exception is encountered (exception
@@ -215,7 +206,9 @@ static Option nametable[] = {
 
     { "reportirq", FLAG },
     /** If @option{reportirq} is set, then any change in the interrupt
-        inputs from a device will be reported on stderr. **/
+        inputs from a device will be reported on stderr. Also, any
+        Interrupt exception will be reported, if @option{excmsg} is also
+        set. **/
 
     { "spimconsole", FLAG },
     /** When set, configure the SPIM-compatible console device.
@@ -252,14 +245,20 @@ static Option nametable[] = {
         run. It has no effect if @option{realtime} is not set. **/
 
     { "clockspeed", NUM },
-    /** If the @option{realtime} option is not set, this option gives
-        the speed of the simulated system clock in Hz, such that
-        one instruction is retired every 1.0e9/@option{clockspeed}
-        nanoseconds. It has no effect if @option{realtime} is set. **/
+    /** If the @option{realtime} option is not set, you should set this
+        option to the average speed in MIPS instructions per second at which
+        your system runs VMIPS. You can get suitable values from turning
+        on the @option{instcounts} option and running some of your favorite
+        programs. If you increase the value of @option{clockspeed}, time will
+        appear to pass more slowly for the simulated machine; if you decrease
+        it, time will pass more quickly. (To be precise, one instruction is
+        assumed to take 1.0e9/@option{clockspeed} nanoseconds.) This option
+        has no effect if @option{realtime} is set. **/
 
     { "clockintr", NUM },
     /** This option gives the frequency of clock interrupts, in nanoseconds
-        of simulated time. **/
+        of simulated time, for the clock device. It does not affect the
+        DECstation-compatible realtime clock. **/
 
     { "clockdeviceirq", NUM },
     /** This option gives the interrupt line to which the clock device is
@@ -328,6 +327,13 @@ static Option nametable[] = {
         system-wide VMIPS configuration file (vmipsrc) by the "configure"
         script; the compiled-in default is designed to cause an error. **/
 
+    { "execname", STR },
+    /** Name of executable to be loaded by automatic kernel loader. This
+        is an experimental feature. The option value must be the name of
+        a MIPS ECOFF executable file, or 'none' to disable the option.
+        The executable's headers must specify load addresses in KSEG0
+        or KSEG1 (0x80000000 through 0xbfffffff).  **/
+
     { NULL, 0 }
 };
 
@@ -335,7 +341,7 @@ static Option nametable[] = {
 static char *defaults_table[] = {
     "nohaltdumpcpu", "nohaltdumpcp0", "noexcpriomsg",
     "noexcmsg", "bootmsg", "noinstdump", "nodumpcpu", "nodumpcp0",
-    "haltibe", "nohaltjrra", "haltbreak", "haltdevice", "romfile=romfile.rom",
+    "haltibe", "haltbreak", "haltdevice", "romfile=romfile.rom",
     "loadaddr=0xbfc00000", "noinstcounts",
     "memsize=0x100000", "nomemdump", "memdumpfile=memdump.bin",
     "noreportirq", "ttydev=/dev/tty", "ttydev2=off",
@@ -345,6 +351,7 @@ static char *defaults_table[] = {
     "spimconsole", "notracing", "tracesize=100000", "nobigendian",
     "tracestartpc=0", "traceendpc=0",
     "mipstoolprefix=/nonexistent/mips/bin/mipsel-ecoff-",
+    "execname=none",
     NULL
 };
 

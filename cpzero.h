@@ -21,28 +21,27 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _CPZERO_H_
 
 #include "tlbentry.h"
-
+#include <cstdio>
+class CPU;
 class DeviceExc;
 class IntCtrl;
-class CPU; /* avoid circular dependency */
 
 #define TLB_ENTRIES 64
 
 class CPZero
 {
-private:
 	TLBEntry tlb[TLB_ENTRIES];
 	uint32 reg[32];
 	CPU *cpu;
 	IntCtrl *intc;
 
+	// Return TRUE if interrupts are enabled, FALSE otherwise.
+	bool interrupts_enabled(void) const;
 
-	/* Return TRUE if interrupts are enabled, FALSE otherwise. */
-	bool interrupts_enabled(void);
+	// Return TRUE if the cpu is running in kernel mode, FALSE otherwise.
+	bool kernel_mode(void) const;
 
-	/* Return TRUE if the cpu is running in kernel mode, FALSE otherwise */
-	bool kernel_mode(void);
-
+	// Return the currently pending interrupts.
 	uint32 getIP(void);
 
 	void mfc0_emulate(uint32 instr, uint32 pc);
@@ -54,21 +53,30 @@ private:
 	void tlbp_emulate(uint32 instr, uint32 pc);
 	void rfe_emulate(uint32 instr, uint32 pc);
 	void load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match);
-	TLBEntry *find_matching_tlb_entry(uint32 asid, uint32 asid);
+	int find_matching_tlb_entry(uint32 asid, uint32 asid);
 	uint32 tlb_translate(uint32 seg, uint32 vaddr, int mode,
 		bool *cacheable, DeviceExc *client);
 
 public:
 	bool tlb_miss_user;
 
+	// Write TLB entry number INDEX with the contents of the EntryHi
+	// and EntryLo registers.
+	void tlb_write(unsigned index);
+
+    // Return the contents of the readable bits of register REG.
+	uint32 read_reg(uint32 reg);
+
+    // Change the contents of the writable bits of register REG to DATA.
+	void write_reg(uint32 reg, uint32 data);
+
 	/* Convention says that CP0's condition is TRUE if the memory
 	   write-back buffer is empty. Because memory writes are fast as far
 	   as the emulation is concerned, the write buffer is always empty
 	   for CP0. */
-	static const bool cpCond = true;
+	bool cpCond() { return true; }
 
-	CPZero(CPU *m = NULL, IntCtrl *i = NULL);
-	void attach(CPU *m = NULL, IntCtrl *i = NULL);
+	CPZero(CPU *m, IntCtrl *i) : cpu (m), intc (i) { }
 	void reset(void);
 
 	/* Request to translate virtual address VADDR, while the processor is
@@ -93,13 +101,13 @@ public:
 	bool cop_usable (int coprocno);
 	void cpzero_emulate(uint32 instr, uint32 pc);
 
-	/* Write the state of the CP0 registers to file F. */
+	// Write the state of the CP0 registers to stream F.
 	void dump_regs(FILE *f);
 
-	/* Write the state of the TLB to file F. */
+	// Write the state of the TLB to stream F.
 	void dump_tlb(FILE *f);
 
-	/* Write the state of the CP0 registers and the TLB to file F. */
+	// Write the state of the CP0 registers and the TLB to stream F.
 	void dump_regs_and_tlb(FILE *f);
 
 	/* Change the CP0 random register after an instruction step. */

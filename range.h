@@ -20,10 +20,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _RANGE_H_
 #define _RANGE_H_
 
-#include "sysinclude.h"
 #include "accesstypes.h"
-
-class CPU;
+#include "types.h"
+#include <sys/types.h>
 class DeviceExc;
 
 /* Base class for managing a range of mapped memory. Memory-mapped

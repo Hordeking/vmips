@@ -13,15 +13,12 @@ coff_analyze (char *buf, struct coff_info *header)
   struct coff_section_header *section = NULL;
 
   memcpy (&header->file_header, buf, sizeof (struct coff_file_header));
-
+  if (!((header->file_header.magic == MIPSEBMAGIC)
+        || (header->file_header.magic == MIPSELMAGIC)))
+    return -1;
   section = ((struct coff_section_header *) &buf[76]);
-  for (i = 0; i < header->file_header.no_sections; i++)
-    {
+  for (i = 0; i < header->file_header.no_sections; i++) {
       if (strlen(section->section_name) != 0)  {
-	/* if (section->section_phys_addr != section->section_virt_addr)  {
-	  puts("bad relocation");
-          return -1;
-	  } */
         if (strcmp(section->section_name, ".text") == 0) {
           header->text_addr = section->section_virt_addr;
           header->text_offset = section->section_file_loc;
@@ -44,13 +41,10 @@ void
 print_coff_header (struct coff_info *header)
 {
   if (header->file_header.magic == MIPSEBMAGIC)
-    {
-      puts ("Big-Endian mips coff binary");
-    }
+    puts ("Big-Endian mips coff binary");
   else if (header->file_header.magic == MIPSELMAGIC)
-    {
-      puts ("Little-Endian mips coff binary");
-    }
+    puts ("Little-Endian mips coff binary");
+
   printf
     ("size: text %lx data %lx bss %lx entry %lx\n"
      "base: text %lx data %lx bss %lx\n" "gp: %lx\n",

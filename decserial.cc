@@ -18,37 +18,29 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* DZ11 serial device as implemented the DECstation 5000/200
- * This version does not support interrupts (CSR's RIE and TIE bits). In
- * order for Linux to fully boot, we will need to support interrupts.
- * This version does not support multiple serial lines. An actual DZ11
+ * 
+ * This version has not been tested with multiple serial lines. An actual DZ11
  * supports 4 lines (on the 5000/200, these are the keyboard, mouse, modem,
- * and printer ports.)
+ * and printer ports.) 
  *
- * More To-Do items:
- * CSR<TRDY> should depend on TCR<LNENBX>. 
- * CSR<TLINEB:TLINEA> should be set when CSR<TRDY> is set.
- * CSR<MAINT> (loopback) should be implemented.
+ * This version does not support the CSR<MAINT> (loopback enable) bit.
  * 
  */
 
-#include "sysinclude.h"
-#include "deviceexc.h"
-#include "deviceint.h"
 #include "cpu.h"
+#include "deccsr.h"
 #include "decserial.h"
+#include "deviceexc.h"
 #include "mapper.h"
 #include "vmips.h"
 
-DECSerialDevice::DECSerialDevice (Clock *clock) throw()
+DECSerialDevice::DECSerialDevice (Clock *clock, uint8 deccsr_irq_) throw()
   : TerminalController (clock, KEYBOARD_POLL_NS, KEYBOARD_REPOLL_NS,
-                        DISPLAY_READY_DELAY_NS)
+                        DISPLAY_READY_DELAY_NS),
+    deccsr_irq (deccsr_irq_)
 {
   extent = 0x80000;
   master_clear ();
-}
-
-DECSerialDevice::~DECSerialDevice() throw ()
-{
 }
 
 void
@@ -85,6 +77,15 @@ RBUF_RLINE (unsigned int Line)
   return (((Line) & 0x03) << 8);
 }
 
+bool DECSerialDevice::receiver_done (const int line) const {
+  return (line_connected (line) && (lines[line].keyboard_state == READY));
+}
+
+bool DECSerialDevice::transmitter_ready (const int line) const {
+  return (line_connected (line) && (lines[line].display_state == READY)
+          && TCR_LINE_ENABLED(tcr, line));
+}
+
 uint32
 DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
 {
@@ -92,25 +93,22 @@ DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
   switch (offset & 0x18) {
   case DZ_CSR:
     csr &= ~(DZ_CSR_RDONE | DZ_CSR_TRDY | DZ_CSR_TLINE);
-    for (int line = 0; line < 4; ++line) {
-      if (line_connected (line)) {
-        if ((csr & DZ_CSR_MSE)
-            && lines[line].keyboard_state == READY)
+    if (csr & DZ_CSR_MSE)
+      // Scan for lines with data.
+      for (int line = 0; line < 4; ++line) {
+        if (receiver_done (line))
           csr |= DZ_CSR_RDONE;
-        if ((csr & DZ_CSR_MSE)
-            && TCR_LINE_ENABLED(tcr, line)
-            && (lines[line].display_state == READY)) {
+        if (transmitter_ready (line)) {
           csr |= DZ_CSR_TRDY;
           csr |= CSR_TLINE(line);
         }
       }
-    }
 	rv = csr;
     break;
   case DZ_RBUF:
     rbuf &= ~DZ_RBUF_DVAL;
     for (int line = 0; line < 4; ++line) {
-      if (line_connected (line) && lines[line].keyboard_state == READY) {
+      if (receiver_done (line)) {
         unready_keyboard (line);
         rbuf = lines[line].keyboard_char | DZ_RBUF_DVAL;
         rbuf |= RBUF_RLINE(line);
@@ -121,21 +119,31 @@ DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
     break;
   case DZ_TCR:
     rv = tcr;
-    fprintf (stderr, "DZ11 TCR read as 0x%x\n", rv);
+    /* fprintf (stderr, "DZ11 TCR read as 0x%x\n", rv); */
     break;
   case DZ_MSR:
     rv = msr;
     fprintf (stderr, "DZ11 MSR read as 0x%x\n", rv);
     break;
   }
-  return rv;
+  return machine->physmem->mips_to_host_word(rv);
+}
+
+bool
+DECSerialDevice::keyboardInterruptReadyForLine (const int line) const {
+  return keyboard_interrupt_enable && receiver_done (line);
+}
+
+bool
+DECSerialDevice::displayInterruptReadyForLine (const int line) const {
+  return display_interrupt_enable && transmitter_ready (line);
 }
 
 void
 DECSerialDevice::store_word (uint32 offset, uint32 data, DeviceExc *client)
 {
+  data = machine->physmem->host_to_mips_word(data);
   uint16 data16 = data & 0x0ffff;
-  bool any_enable_is_on = false, any_source_is_ready = false; // see FIXME
   switch (offset & 0x18) {
     case DZ_CSR:
       fprintf (stderr, "DZ11 write CSR as %x\n", data16);
@@ -149,65 +157,83 @@ DECSerialDevice::store_word (uint32 offset, uint32 data, DeviceExc *client)
                keyboard_interrupt_enable ? "on" : "off",
                display_interrupt_enable ? "on" : "off",
                GET_CURRENT_CSR_TLINE (csr));
-      any_enable_is_on = (csr & (DZ_CSR_RIE | DZ_CSR_TIE));
-      for (int line = 0; line < 4; ++line) {
-        any_source_is_ready |= (line_connected (line)
-                                && display_interrupt_enable
-                                && lines[line].display_state == READY
-                                && TCR_LINE_ENABLED (tcr, line));
-        any_source_is_ready |= (line_connected (line)
-                                && keyboard_interrupt_enable
-                                && lines[line].keyboard_state == READY);
-      }
-      if (!any_enable_is_on)
-        deassertInt (IRQ2);
-      else if (any_enable_is_on && any_source_is_ready)
-        assertInt (IRQ2);
       break;
     case DZ_LPR:
       fprintf (stderr, "DZ11 write LPR as %x\n", data16);
       lpr = data16;
       break;
     case DZ_TCR:
-      fprintf (stderr, "DZ11 write TCR as %x\n", data16);
+      /* fprintf (stderr, "DZ11 write TCR as %x\n", data16); */
       tcr = data16;
       break;
     case DZ_TDR: {
-      int line = 3; // GET_CURRENT_CSR_TLINE (csr);
+      int line = 3; // FIXME: should be GET_CURRENT_CSR_TLINE (csr);
       if (line_connected (line))
         unready_display (line, data16 & 0xff);
       break;
     }
   }
+
+  // Check whether we have to assert or deassert the CSR IRQ now because
+  // flags changed.
+  bool any_enable_is_on = (csr & (DZ_CSR_RIE | DZ_CSR_TIE));
+  if (!any_enable_is_on) {
+    // They turned all the interrupt enable bits off. So cancel any pending
+    // interrupt and just return.
+    deassertCSRInt();
+    return;
+  }
+  // There is an interrupt enable on. Check for a source which has been
+  // ready to trigger an interrupt.
+  bool any_source_is_ready = false;
+  for (int line = 0; line < 4; ++line)
+    any_source_is_ready = any_source_is_ready
+                          || (displayInterruptReadyForLine (line)
+                              || keyboardInterruptReadyForLine (line));
+  if (any_source_is_ready) {
+    assertCSRInt();
+  } else {
+    deassertCSRInt();
+  }
+}
+
+void
+DECSerialDevice::assertCSRInt () {
+  machine->deccsr_device->assertInt (deccsr_irq);
+}
+
+void
+DECSerialDevice::deassertCSRInt () {
+  machine->deccsr_device->deassertInt (deccsr_irq);
 }
 
 void
 DECSerialDevice::unready_display (int line, char data) throw(std::bad_alloc)
 {
   TerminalController::unready_display (line, data);
-  deassertInt (IRQ2);
+  deassertCSRInt();
 }
 
 void
 DECSerialDevice::ready_display (int line) throw()
 {
   TerminalController::ready_display (line);
-  if (display_interrupt_enable)
-    assertInt (IRQ2);
+  if (displayInterruptReadyForLine(line))
+    assertCSRInt();
 }
 
 void
 DECSerialDevice::unready_keyboard (int line) throw()
 {
   TerminalController::unready_keyboard (line);
-  deassertInt (IRQ2);
+  deassertCSRInt();
 }
 
 void
 DECSerialDevice::ready_keyboard (int line) throw()
 {
   TerminalController::ready_keyboard (line);
-  if (keyboard_interrupt_enable)
-    assertInt (IRQ2);
+  if (keyboardInterruptReadyForLine(line))
+    assertCSRInt();
 }
 

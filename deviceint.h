@@ -21,7 +21,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DEVICEINT_H_
 #define _DEVICEINT_H_
 
-#include "sysinclude.h"
 #include "intctrl.h"
 
 /* Interrupt lines that DeviceInts can use.
@@ -68,10 +67,6 @@ protected:
 	   necessarily mean that the interrupt line will go to zero;
 	   another device may be sharing the same interrupt line. */
 	void deassertInt(uint32 line);
-
-	/* Returns TRUE if this device has the interrupt line LINE
-	   asserted and connected; FALSE otherwise. */
-	bool isAsserted(uint32 line);
 
 	/* This method, in derived classes, should return a string describing
 	   the device. */

@@ -5,8 +5,8 @@ START-INFO-DIR-ENTRY
 * VMIPS: (vmips).                A MIPS R3000 simulator.
 END-INFO-DIR-ENTRY
 
-   This is the VMIPS Programmer's Manual, Third Edition, for version
-1.2.
+   This is the VMIPS Programmer's Manual, Fourth Edition, for version
+1.3.
 
    Copyright (C) 2001, 2002, 2004 Brian R. Gaeke.
 
@@ -15,8 +15,8 @@ File: vmips.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 
 
-   This is the VMIPS Programmer's Manual, Third Edition, for version
-1.2.
+   This is the VMIPS Programmer's Manual, Fourth Edition, for version
+1.3.
 
    Copyright (C) 2001, 2002, 2004 Brian R. Gaeke.  For information
 about copying, modifying or distributing this manual, please see the
@@ -36,6 +36,7 @@ chapter called `Copying'.
 * Debugging::             VMIPS supports debugging with GDB.
 * Devices::               Virtual hardware supported by VMIPS.
 * Extending::             Writing new functionality for VMIPS.
+* Test Suite::            Making sure VMIPS works as designed on your platform.
 
 * Installation::          Getting VMIPS ready to boot on your machine.
 * Reporting Bugs::        What to do when vmips dumps core, or worse.
@@ -630,7 +631,8 @@ FALSE.
 The message gives the exception code, a short explanation of the
 exception code, its priority, the delay slot state of the virtual CPU,
 and states what type of memory access the exception was caused by, if
-applicable. Interrupt exceptions also have Cause and Status register
+applicable. Interrupt exceptions are only printed if `reportirq' is
+also set; when they occur, they also have Cause and Status register
 information printed.  The default value is FALSE.
 
    `bootmsg' (type: Boolean)
@@ -708,17 +710,6 @@ nonexistent addresses in memory, and you want it to stop instead of
 calling the exception handler.  It is important to note that the machine
 halts after the exception is processed.  The default value is TRUE.
 
-   `haltjrra' (type: Boolean)
-
-   If `haltjrra' is set to TRUE, the virtual machine will halt when the
-instruction "jr $31" (also written "jr $ra") is encountered.  Since
-this is the instruction for a procedure call to return, this is useful
-if you have a simple procedure to run and you want execution to
-terminate when it finishes. It is important to note that the machine
-halts after the jump instruction is processed, but before the
-instruction in the jump's delay slot is processed.  The default value
-is FALSE.
-
    `haltbreak' (type: Boolean)
 
    If `haltbreak' is set to TRUE, the virtual machine will halt when a
@@ -778,7 +769,8 @@ the end of the simulation run.  The default value is "memdump.bin".
    `reportirq' (type: Boolean)
 
    If `reportirq' is set, then any change in the interrupt inputs from
-a device will be reported on stderr.  The default value is FALSE.
+a device will be reported on stderr. Also, any Interrupt exception will
+be reported, if `excmsg' is also set.  The default value is FALSE.
 
    `spimconsole' (type: Boolean)
 
@@ -823,15 +815,21 @@ effect if `realtime' is not set.  The default value is 1.
 
    `clockspeed' (type: number)
 
-   If the `realtime' option is not set, this option gives the speed of
-the simulated system clock in Hz, such that one instruction is retired
-every 1.0e9/`clockspeed' nanoseconds. It has no effect if `realtime' is
-set.  The default value is 250000.
+   If the `realtime' option is not set, you should set this option to
+the average speed in MIPS instructions per second at which your system
+runs VMIPS. You can get suitable values from turning on the
+`instcounts' option and running some of your favorite programs. If you
+increase the value of `clockspeed', time will appear to pass more
+slowly for the simulated machine; if you decrease it, time will pass
+more quickly. (To be precise, one instruction is assumed to take
+1.0e9/`clockspeed' nanoseconds.) This option has no effect if
+`realtime' is set.  The default value is 250000.
 
    `clockintr' (type: number)
 
    This option gives the frequency of clock interrupts, in nanoseconds
-of simulated time.  The default value is 200000000.
+of simulated time, for the clock device. It does not affect the
+DECstation-compatible realtime clock.  The default value is 200000000.
 
    `clockdeviceirq' (type: number)
 
@@ -918,6 +916,14 @@ file (vmipsrc) by the "configure" script; the compiled-in default is
 designed to cause an error.  The default value is
 "/nonexistent/mips/bin/mipsel-ecoff-".
 
+   `execname' (type: string)
+
+   Name of executable to be loaded by automatic kernel loader. This is
+an experimental feature. The option value must be the name of a MIPS
+ECOFF executable file, or 'none' to disable the option.  The
+executable's headers must specify load addresses in KSEG0 or KSEG1
+(0x80000000 through 0xbfffffff).   The default value is "none".
+
 
 File: vmips.info,  Node: Invoking vmipstool,  Next: Programming,  Prev: Customizing,  Up: Top
 
@@ -943,6 +949,7 @@ have handy.
          [ FLAGS ] FILE1.o ... FILEn.o -o PROG
      vmipstool [ --verbose ] [ --dry-run ] --make-rom PROG PROG.rom
      vmipstool [ --verbose ] [ --dry-run ] --disassemble-rom PROG.rom
+     vmipstool [ --verbose ] [ --dry-run ] --disassemble-word PC INSTR
      vmipstool [ --verbose ] [ --dry-run ] --disassemble PROG (or FILE.o)
      vmipstool [ --verbose ] [ --dry-run ] --swap-words INPUT OUTPUT
      vmipstool --help
@@ -993,6 +1000,11 @@ have handy.
      Disassemble arbitrary data, possibly including ROM files. (More
      information is available with -disassemble, but it only works on
      programs which have not been written into ROMs.)
+
+`--disassemble-word'
+     Disassemble an instruction whose binary encoding is passed as a
+     command-line argument. Because instructions can have PC-relative
+     immediate arguments, the PC must also be specified.
 
 `--swap-words'
      Copy the input file to the output file, reversing the byte-order
@@ -1543,7 +1555,7 @@ more thoroughly, and document them more completely in this manual.
 doing a web search.
 
 
-File: vmips.info,  Node: Extending,  Next: Installation,  Prev: Devices,  Up: Top
+File: vmips.info,  Node: Extending,  Next: Test Suite,  Prev: Devices,  Up: Top
 
 Extending
 *********
@@ -1933,7 +1945,128 @@ always TRUE, i.e., applications that look for the writebuffer will find
 that it is always empty.
 
 
-File: vmips.info,  Node: Installation,  Next: Reporting Bugs,  Prev: Extending,  Up: Top
+File: vmips.info,  Node: Test Suite,  Next: Installation,  Prev: Extending,  Up: Top
+
+Test Suite
+**********
+
+   VMIPS has a test suite with a small number of regression tests.  It
+uses the DejaGNU test framework, which is written in the Expect
+language.  Expect was written by Don Libes, and is a dialect of Tcl,
+the Tool Command Language by Ousterhout et al.
+
+How to run the test suite
+-------------------------
+
+   In order to run the test suite or add tests to it, you will need to
+have Expect and DejaGNU installed.  Any version of DejaGNU later than
+1.3 should work fine. We have mostly used Expect version 5.32 or later.
+
+   The next step is to configure and build VMIPS from source. This is
+important, because currently, you can only run tests on a freshly built
+copy of VMIPS; no provision exists for testing a previously installed
+copy of VMIPS.  Simply run `./configure' and `make' from the top level
+source directory to build VMIPS. See the "Installation" section of the
+manual for more details.
+
+   To run the test suite, run `make check' from the top level source
+directory.  This will invoke the DejaGNU `runtest' command.  It will
+take a minute or so, and then you will get a count of tests that passed
+and failed.  If you want to see a more comprehensive listing from
+`runtest', pass it the appropriate options through the Makefile, by
+typing, for example: `make RUNTESTFLAGS=--verbose check'.
+
+   You can also run the test suite by changing into the `test_code'
+directory in the source tree and running `runtest --tool vmips'.
+
+   As a general rule, no tests should fail in a released version of
+VMIPS; however, CVS builds may have test failures from time to time.
+
+Test suite frameworks
+---------------------
+
+   VMIPS has two comprehensive testing frameworks: the `regcheck'
+framework, whose tests live in the `vmips.regcheck' directory, and the
+`outcheck' framework, whose tests live in the `vmips.outcheck'
+directory. The former looks at the final values of registers after a
+test case is run, and the latter looks at the output that VMIPS prints
+out when a test case is run.
+
+   Each of these main testing frameworks has its own `.exp' file that
+runs it.  You can easily run the subset of the test suite controlled by
+a given `.exp' file, by passing its name on the `runtest' command line.
+For example, if you want to run all the `regcheck' tests, you would
+type: `runtest --tool vmips regcheck.exp'.
+
+   There are a few test cases that do not use either of these
+frameworks, because they have special requirements of some kind or are
+otherwise unique in some inconvenient way. These test cases have their
+own Expect drivers (`.exp' files) and live in the `vmips.misc-tests'
+directory.
+
+   In addition, each test case is defined by a `.par' file that
+contains the parameters of the test.  If you only want to run a single
+test from among the `regcheck' tests, specify its `.par' file after an
+equal sign. For example, you might type: `runtest --tool vmips
+regcheck.exp=mumble.par' to run only the `mumble.par' `regcheck' test.
+
+How to add a test to the test suite
+-----------------------------------
+
+   To write a new test case, first decide whether it is easier to have
+your test case print out something or to look at the `haltdumpcpu'
+option's output to verify it. This will tell you whether it should be
+an `outcheck' test (if it prints out something) or a `regcheck' case
+(if you look at the register values).  Then write up a `.par' file for
+the test case -- the best way to learn how to do this, for the time
+being, is to examine the examples in the `test_code' directory. Then
+move the `.par' file and the test code (assembly or C) to the
+appropriate subdirectory for the framework you chose, `vmips.regcheck'
+or `vmips.outcheck'. Now you can try to make sure that it passes (or
+fails, as the case may be), by running `runtest --tool vmips' on it.
+
+   Also, note that you shouldn't add another test to `vmips.misc-tests'
+unless you can't find a way to fit it into any of the existing testing
+frameworks. Adding a test to `vmips.misc-tests' is tricky - you may be
+able to make progress by looking at the other `.exp' files in that
+directory.
+
+Common problems
+---------------
+
+   You can get screenfuls of `endian_option was not set' errors if you
+run `runtest' without first making a DejaGNU `site.exp' configuration
+file first.  To make a `site.exp' file, just run `make site.exp' in the
+`test_code' directory.
+
+Additional test cases needed
+----------------------------
+
+   Test cases should probably be added for the following categories of
+VMIPS behaviors. (This list is from 2002; it is probably a good start,
+but it may be out of date in the sense that it is unlikely to be
+exhaustive.)
+
+   * Vmipstool.
+
+   * The debugger interface.
+
+   * Exceptions: exception prioritizing, non-boot-time exception
+     vectors, all the TLB exceptions, Unimplemented Coprocessor
+     exceptions, Reserved Instruction exceptions, and exceptions due to
+     PC address translation.
+
+   * Check that the TLB does the right thing when you have a dirty entry
+     vs. a non-dirty one.
+
+   * dumpcpu, dumpcp0, haltdumpcp0, bootmsg options.
+
+   * tilde_expand() where it's not your own home directory.
+
+   * Address translations in KSEG0 or KSEG2 or KUSEG or User mode.
+
+
+File: vmips.info,  Node: Installation,  Next: Reporting Bugs,  Prev: Test Suite,  Up: Top
 
 Installation
 ************
@@ -2304,16 +2437,16 @@ Please get in touch with us if you think you would be willing to help.
 
    * Cache and DMA support in the memory subsystem.
 
-   * Improve packaging so that MIPS cross gcc, gdb, and binutils are
-     easy to install along with vmips.
-
    * A just-in-time translator from MIPS machine code to the host's
      machine code. X86 and PowerPC would probably be the first hosts to
      target.
 
-   * Replace .vmipsrc, options.cc and vmips.cc with a Tcl/Tk front end.
-     There should be some provision for refreshing option values if the
-     configuration language changes them.
+   * Add meaningful bindings to an extension language such as Tcl/Tk.
+     In particular, it should be possible to read or write option
+     values, modify the configuration of the machine (by attaching or
+     removing devices, for example), and type commands interactively to
+     VMIPS.  There should be some provision for refreshing cached
+     option values if the extension language changes them.
 
    * Modularize the CPU, memory mapper, and devices using a
      shared-library pluggable module interface.
@@ -2359,6 +2492,42 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Release History
 ***************
 
+   vmips-1.3 was released on 8 October 2004.  User-visible changes in
+version 1.3 (since version 1.2.2):
+
+   * The VMIPS code base has been cleaned up substantially. The most
+     important visible effect of this is that VMIPS compiles much more
+     quickly now.
+
+   * A new, experimental executable-file loader has been integrated.
+     Presently it is only usable for loading ECOFF files into the
+     kernel segments (0x80000000-0xbfffffff). The ROM monitor has a new
+     `call' command you can use to take advantage of this.
+
+   * Vmipstool can now disassemble binary instructions from the command
+     line, e.g.  `vmipstool --disassemble-word <pc> <instr>'.
+
+   * The `excmsg' option used to report all exceptions, including
+     things like clock interrupts. This made using `excmsg' in any
+     nontrivial kernel code almost impossible. Now you must also specify
+     'reportirq' to get reports of interrupt exceptions.
+
+   * The `haltjrra' option has been removed.
+
+   * The DECstation 5000/200-compatible CSR device now supports delivery
+     of interrupts from devices attached to CSR interrupt lines, such
+     as the DZ11 serial device.
+
+   * The DZ11 serial device now supports interrupt-driven I/O properly.
+     It previously only worked correctly if polling was used.
+
+   * The documentation has received the usual slight adjustments. In
+     addition, the test-suite documentation has been extensively
+     revised and integrated into the programmer's manual.
+
+   * The options-processing code has been revised slightly to print a
+     better error message when an invalid option is specified.
+
    vmips-1.2.2 was released on 23 August 2004.  User-visible changes in
 version 1.2.2 (since version 1.2.1):
 
@@ -2370,7 +2539,7 @@ version 1.2.2 (since version 1.2.1):
      where the register file would be sent to gdb incorrectly. Thanks!
 
    * VMIPS will no longer abort and dump core when bad command-line
-     arguments are passed to it.  Instead, it will print an error
+     rguments are passed to it.  Instead, it will print an error
      message and exit with a non-zero exit code.
 
    * A bug in the command-line option processor was fixed, where using a
@@ -2921,24 +3090,25 @@ Index
 
 
 Tag Table:
-Node: Top324
-Node: Overview1764
-Node: Getting Started3584
-Node: An Example5493
-Node: Building Programs6706
-Node: Invoking vmips20653
-Node: Customizing22073
-Node: Invoking vmipstool37186
-Node: Programming40416
-Node: Debugging42249
-Node: Devices49525
-Node: Extending61149
-Node: Installation79200
-Node: Reporting Bugs93954
-Node: Future Directions94627
-Node: Release History96786
-Node: References111606
-Node: Copying115073
-Node: Index116507
+Node: Top325
+Node: Overview1846
+Node: Getting Started3666
+Node: An Example5575
+Node: Building Programs6788
+Node: Invoking vmips20735
+Node: Customizing22155
+Node: Invoking vmipstool37670
+Node: Programming41189
+Node: Debugging43022
+Node: Devices50298
+Node: Extending61922
+Node: Test Suite79971
+Node: Installation85257
+Node: Reporting Bugs100012
+Node: Future Directions100685
+Node: Release History102952
+Node: References119386
+Node: Copying122853
+Node: Index124287
 
 End Tag Table

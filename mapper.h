@@ -20,13 +20,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _MAPPER_H_
 #define _MAPPER_H_
 
-#include <vector>
-#include "accesstypes.h"
 #include "range.h"
-
-class CPU;
-class Range;
-class DeviceMap;
+#include <cstdio>
+#include <vector>
 class DeviceExc;
 
 class Mapper {
@@ -53,9 +49,6 @@ private:
 
 	/* A list of all currently mapped ranges. */
 	Ranges ranges;
-
-	/* A pointer to the currently associated CPU object. */
-	CPU *cpu;
 
 	bool opt_bigendian;
 	bool byteswapped;
@@ -93,7 +86,6 @@ public:
 	void store_byte(uint32 addr, uint8 data, bool cacheable,
 		DeviceExc *client);
 	Range *find_mapping_range(uint32 p) throw();
-	void attach(CPU *m = NULL);
 	void dump_stack(FILE *f, uint32 stackphys);
 	void get_last_berr_info (BusErrorInfo &info) { info = last_berr_info; }
 };

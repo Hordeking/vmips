@@ -20,10 +20,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DECSERIAL_H_
 #define _DECSERIAL_H_
 
-class Clock;
+#include "decserialreg.h"
+#include "deviceint.h"
 #include "devicemap.h"
 #include "terminalcontroller.h"
-#include "decserialreg.h"
+class Clock;
 
 class DECSerialDevice : public DeviceMap, public DeviceInt,
                         public TerminalController {
@@ -32,11 +33,18 @@ class DECSerialDevice : public DeviceMap, public DeviceInt,
   static const int DISPLAY_READY_DELAY_NS = 100;
   void master_clear ();
   uint32 csr, rbuf, lpr, tcr, msr;
+  uint8 deccsr_irq;
   bool keyboard_interrupt_enable;
   bool display_interrupt_enable;
+  void assertCSRInt ();
+  void deassertCSRInt ();
+  bool receiver_done (const int line) const;
+  bool transmitter_ready (const int line) const;
+  bool keyboardInterruptReadyForLine (const int line) const;
+  bool displayInterruptReadyForLine (const int line) const;
  public:
-  DECSerialDevice (Clock *clock) throw ();
-  virtual ~DECSerialDevice() throw ();
+  DECSerialDevice (Clock *clock, uint8 deccsr_irq_) throw ();
+  virtual ~DECSerialDevice() throw() { }
   uint32 fetch_word (uint32 offset, int mode, DeviceExc *client);
   void store_word (uint32 offset, uint32 data, DeviceExc *client);
   const char *descriptor_str () const { return "DECstation 5000/200 DZ11 Serial"; }

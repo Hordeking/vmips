@@ -24,18 +24,30 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DECCSR_H_
 #define _DECCSR_H_
 
-#include "sysinclude.h"
 #include "devicemap.h"
+#include "deviceint.h"
 
-class DECCSRDevice : public DeviceMap {
+static const unsigned char TURBOchannelSlot0CSRInt = (1 << 0);
+static const unsigned char TURBOchannelSlot1CSRInt = (1 << 1);
+static const unsigned char TURBOchannelSlot2CSRInt = (1 << 2);
+static const unsigned char Reserved0CSRInt         = (1 << 3);
+static const unsigned char Reserved1CSRInt         = (1 << 4);
+static const unsigned char SCSIInterfaceCSRInt     = (1 << 5);
+static const unsigned char EthernetInterfaceCSRInt = (1 << 6);
+static const unsigned char SystemInterfaceCSRInt   = (1 << 7);
+
+class DECCSRDevice : public DeviceMap, public DeviceInt {
 	uint32 robits;
 	uint32 rwbits;
-	uint32 ioint;
+	uint8 ioint;
 	uint32 leds;
+	uint32 irq;
 	uint32 update_status_reg();
 	void update_control_reg(uint32 data);
 public:
-	DECCSRDevice ();
+    void assertInt (uint8 line);
+    void deassertInt (uint8 line);
+    DECCSRDevice (uint32 irq_) : irq (irq_) { extent = 0x80000; }
 	uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
 	void store_word(uint32 offset, uint32 data, DeviceExc *client);
 	const char *descriptor_str() const { return "DECstation 5000/200 CSR"; }

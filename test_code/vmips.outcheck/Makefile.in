@@ -95,6 +95,8 @@ SETUP = ../../sample_code/setup.o
 # makefile_fragment loser
 loser_SOURCES = loser.S
 
+# empty 
+
 # simple_asm bdexcp
 # multifile_asm -setup 0 bdexcp bdexcp.S
 bdexcp_SOURCES = bdexcp.S
@@ -124,6 +126,10 @@ simpledis_SOURCES = simpledis.S
 # multifile_asm -setup 0 unaligned unaligned.S
 unaligned_SOURCES = unaligned.S
 
+# empty 
+
+# empty 
+
 # simple_c hello2
 # multifile_c hello2 hello2.c
 hello2_LDFLAGS = $(SETUP)
@@ -148,7 +154,7 @@ EXEEXT = .exe
 
 CLEANFILES = loser.rom bdexcp.rom poke2.rom instcounts.rom exception.rom emptymain.rom simpledis.rom unaligned.rom hello2.rom hello.rom sb-print.rom
 
-EXTRA_DIST = outcheck.exp  loser.par bdexcp.par poke2.par instcounts.par exception.par emptymain.par simpledis.par unaligned.par hello2.par hello.par sb-print.par
+EXTRA_DIST = outcheck.exp  loser.par badargs.par bdexcp.par poke2.par instcounts.par exception.par emptymain.par simpledis.par unaligned.par nonexistent.par badoption.par hello2.par hello.par sb-print.par
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -441,7 +447,7 @@ sb-print.rom: sb-print.exe
 	$(VMIPSTOOL) --make-rom sb-print.exe sb-print.rom
 
 # 3 C testcases and 7 asm testcases.
-# 1 custom makefile fragment testcases.
+# 4 custom makefile fragment testcases.
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

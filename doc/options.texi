@@ -25,7 +25,8 @@ to be printed. The message gives the exception code, a
 short explanation of the exception code, its priority,
 the delay slot state of the virtual CPU, and states
 what type of memory access the exception was caused by,
-if applicable. Interrupt exceptions also have Cause
+if applicable. Interrupt exceptions are only printed if
+@option{reportirq} is also set; when they occur, they also have Cause
 and Status register information printed.  The default value is FALSE.
 
 @option{bootmsg} (type: Boolean)
@@ -109,17 +110,6 @@ memory, and you want it to stop instead of calling the
 exception handler.  It is important to note that the machine
 halts after the exception is processed.  The default value is TRUE.
 
-@option{haltjrra} (type: Boolean)
-
- If @option{haltjrra} is set to TRUE, the virtual machine will halt
-when the instruction "jr $31" (also written "jr $ra")
-is encountered.  Since this is the instruction for a
-procedure call to return, this is useful if you have
-a simple procedure to run and you want execution to
-terminate when it finishes. It is important to note that the
-machine halts after the jump instruction is processed, but
-before the instruction in the jump's delay slot is processed.  The default value is FALSE.
-
 @option{haltbreak} (type: Boolean)
 
  If @option{haltbreak} is set to TRUE, the virtual machine will halt
@@ -183,7 +173,9 @@ written at the end of the simulation run.  The default value is "memdump.bin".
 @option{reportirq} (type: Boolean)
 
  If @option{reportirq} is set, then any change in the interrupt
-inputs from a device will be reported on stderr.  The default value is FALSE.
+inputs from a device will be reported on stderr. Also, any
+Interrupt exception will be reported, if @option{excmsg} is also
+set.  The default value is FALSE.
 
 @option{spimconsole} (type: Boolean)
 
@@ -227,15 +219,21 @@ run. It has no effect if @option{realtime} is not set.  The default value is 1.
 
 @option{clockspeed} (type: number)
 
- If the @option{realtime} option is not set, this option gives
-the speed of the simulated system clock in Hz, such that
-one instruction is retired every 1.0e9/@option{clockspeed}
-nanoseconds. It has no effect if @option{realtime} is set.  The default value is 250000.
+ If the @option{realtime} option is not set, you should set this
+option to the average speed in MIPS instructions per second at which
+your system runs VMIPS. You can get suitable values from turning
+on the @option{instcounts} option and running some of your favorite
+programs. If you increase the value of @option{clockspeed}, time will
+appear to pass more slowly for the simulated machine; if you decrease
+it, time will pass more quickly. (To be precise, one instruction is
+assumed to take 1.0e9/@option{clockspeed} nanoseconds.) This option
+has no effect if @option{realtime} is set.  The default value is 250000.
 
 @option{clockintr} (type: number)
 
  This option gives the frequency of clock interrupts, in nanoseconds
-of simulated time.  The default value is 200000000.
+of simulated time, for the clock device. It does not affect the
+DECstation-compatible realtime clock.  The default value is 200000000.
 
 @option{clockdeviceirq} (type: number)
 
@@ -316,4 +314,12 @@ the "gcc", "ld", "objcopy" and "objdump" programs starting with
 this prefix. This option should be set in your installed
 system-wide VMIPS configuration file (vmipsrc) by the "configure"
 script; the compiled-in default is designed to cause an error.  The default value is "/nonexistent/mips/bin/mipsel-ecoff-".
+
+@option{execname} (type: string)
+
+ Name of executable to be loaded by automatic kernel loader. This
+is an experimental feature. The option value must be the name of
+a MIPS ECOFF executable file, or 'none' to disable the option.
+The executable's headers must specify load addresses in KSEG0
+or KSEG1 (0x80000000 through 0xbfffffff).   The default value is "none".
 

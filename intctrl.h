@@ -21,8 +21,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _INTCTRL_H_
 #define _INTCTRL_H_
 
-#include "sysinclude.h"
-
+#include "types.h"
+#include <vector>
 class DeviceInt;
 
 class IntCtrl {
@@ -31,8 +31,8 @@ private:
 	Devices devs;
 
 public:
-	IntCtrl() throw();
-	virtual ~IntCtrl() throw();
+	IntCtrl() throw() { }
+	virtual ~IntCtrl() throw() { }
 
 	/* Return the mask of all asserted interrupts for connected devices. */
 	virtual uint32 calculateIP() throw();

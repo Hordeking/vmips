@@ -20,20 +20,14 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _CPU_H_
 #define _CPU_H_
 
-#include "sysinclude.h"
 #include "deviceexc.h"
-#include "mapper.h"
-#include "cpzero.h"
-#include "debug.h"
-#include <map>
+#include <cstdio>
 #include <deque>
-
-class vmips;
-
-/* Delay states -- see CPU::step() for details. */
-#define NORMAL 0
-#define DELAYING 1
-#define DELAYSLOT 2
+#include <map>
+#include <vector>
+class CPZero;
+class Mapper;
+class IntCtrl;
 
 /* Exception priority information -- see exception_priority(). */
 struct excPriority {
@@ -145,7 +139,6 @@ private:
 	/* Other components of the VMIPS machine. */
 	Mapper *mem;
 	CPZero *cpzero;
-	vmips *machine;
 
     /* Delay slot handling. */
 	int delay_state;
@@ -153,6 +146,7 @@ private:
 
 	/* Options used: */
 	bool opt_excmsg;
+	bool opt_reportirq;
 	bool opt_excpriomsg;
 	bool opt_haltbreak;
 	bool opt_haltibe;
@@ -258,10 +252,10 @@ public:
 	uint32 jumptarg(const uint32 instr) const;
 	int16 s_immed(const uint32 instr) const;
 
-	CPU(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL);
-	void attach(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL);
+	CPU (Mapper &m, IntCtrl &i);
 	void dump_regs(FILE *f);
 	void dump_regs_and_stack(FILE *f);
+	void cpzero_dump_regs_and_tlb(FILE *f);
 	void step();
 	char *const strexccode(const uint16 excCode);
 	char *const strdelaystate(const int state);

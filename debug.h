@@ -20,15 +20,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#include "sysinclude.h"
 #include "deviceexc.h"
-
-/* Instructions that gdb uses to set breakpoints. 
- * These are taken from gdb/mips-tdep.c, without modification.
- */
-#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
-#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
-
+#include <set>
 class CPU;
 class Mapper;
 
@@ -48,8 +41,8 @@ private:
 	bool opt_bigendian;
 
 public:
-	Debug();
-	virtual ~Debug();
+	Debug (CPU &c_, Mapper &m_);
+	virtual ~Debug () { }
 	bool got_interrupt;
 
 	uint32 packet_pop_word(char **packet);
@@ -57,7 +50,6 @@ public:
 
 	int setup(uint32 baseaddr, uint32 nwords);
 	int serverloop(void);
-	void attach(CPU *c, Mapper *m);
     void exception(uint16 excCode, int mode, int coprocno);
 
 private:

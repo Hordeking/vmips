@@ -20,13 +20,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _SPIMCONSOLE_H_
 #define _SPIMCONSOLE_H_
 
-#include "clock.h"
-#include "devicemap.h"
 #include "deviceint.h"
-#include "intctrl.h"
+#include "devicemap.h"
 #include "task.h"
 #include "terminalcontroller.h"
 #include <new>
+class Clock;
 
 /* SPIM-compatible console device. */
 class SpimConsoleDevice : public TerminalController, public DeviceMap,

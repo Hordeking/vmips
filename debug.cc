@@ -25,28 +25,23 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpzeroreg.h"
 #include "vmips.h"
 #include "options.h"
+#include <csignal>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
 
 extern int remotegdb_backend_error;
 
-Debug::Debug()
-{
+Debug::Debug (CPU &cpu_, Mapper &mem_)
+  : cpu (&cpu_), mem (&mem_), listener (-1), threadno_step (-1),
+    threadno_gen (-1), rom_baseaddr (0), rom_nwords (0), got_interrupt (false) {
 	/* Upon connecting to our socket, gdb will ask for the current
 	 * signal; so we set the current signal to the breakpoint signal.
 	 */
 	signo = exccode_to_signal(Bp);
-	cpu = NULL;
-	mem = NULL;
-	listener = -1;
-	threadno_step = -1;
-	threadno_gen = -1;
-	rom_baseaddr = 0;
-	rom_nwords = 0;
-	got_interrupt = false;
 	opt_bigendian = machine->opt->option("bigendian")->flag;
-}
-
-Debug::~Debug()
-{
 }
 
 void
@@ -56,13 +51,6 @@ Debug::exception(uint16 excCode, int mode, int coprocno)
 	 * their subroutines) can catch errors and pass them back to GDB.
 	 */
 	exception_pending = true;
-}
-
-void
-Debug::attach(CPU *c, Mapper *m)
-{
-	if (c) cpu = c;
-	if (m) mem = m;
 }
 
 void
@@ -132,6 +120,12 @@ Debug::address_in_rom(uint32 addr)
 {
 	return !((addr < rom_baseaddr) || (addr > (rom_baseaddr + 4*rom_nwords)));
 }
+
+/* Instructions that gdb uses to set breakpoints.
+ * These are taken from gdb/mips-tdep.c, without modification.
+ */
+#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
+#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
 
 /* Determine whether the packet pointer passed in points to a (serial-encoded)
  * GDB break instruction, and return true if this is the case.

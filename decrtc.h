@@ -24,12 +24,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DECRTC_H_
 #define _DECRTC_H_
 
-#include "sysinclude.h"
-#include "devicemap.h"
 #include "deviceint.h"
-
-class DeviceExc;
+#include "devicemap.h"
+#include "task.h"
 class Clock;
+class DeviceExc;
 
 class DECRTCDevice : public DeviceMap, public DeviceInt {
 protected:

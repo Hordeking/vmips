@@ -1,22 +1,17 @@
 VMIPS hacking guide
 
 CONTENTS:
-        Things to do after the release
+        Things to do for the next release
 
 
-Things to do after the release
-==============================
-
-Add 'How to add test cases' section to the documentation. Generate
-test_code/README based on that section, a la INSTALL.
-
-Nuke sysinclude.h; I think it'd be better to just include system headers
-wherever they are needed, because it will reduce the amount of #including
-overall. In the cases where actual fixes need to be inserted, we can have
-a compatibility library instead of a header file. 
+Things to do for the next release
+=================================
 
 Fix the bugs in the DECstation-compatible serial emulation, and make a
 MIPS Linux demo ROM.
+
+Note: because we don't implement isolated or swapped caches, the NetBSD/pmax
+kernel goes into an infinite loop in r3k_size_caches().
 
 Clean out the sample_code directory. The setup code should probably be moved
 into the test_code directory.
@@ -39,15 +34,6 @@ unnecessary instruction parsing in the coprocessor code.
    class, and have a sane way of attaching cpzero as well as an fpu. Then
    the special case handling of the no-fpu case in cpone_emulate() can go
    away, by means of a minimal "nofpu" fpu implementation.
-
-Make attaching devices systematic and sane, instead of the attach()
-ad-hockery we have all over the place now.
- * Idea: everything can attach itself by calling
-   "machine->attach(this)", which gets dealt with by virtual function
-   dispatch.
- * Idea 2 (a little Chris Lattner theory): each class registers
-   itself using a static constructor, and then the user can specify a
-   list of modules to attach.
 
 Build a better debugger interface, especially for exception handling reasons.
  * We want to be able to make vmips stop without throwing an exception
@@ -80,13 +66,3 @@ Build a better debugger interface, especially for exception handling reasons.
    running any more than a small amount of code with interrupts on and
    the debugger attached is tiresome because you have to tell GDB to
    "continue" all the time.
-
-Look at the lh/lb/sh/sb <--> lw/sw conversion code for device drivers
-and make sure that it is correct for all possible situations. Rewrite
-it so that it uses reinterpret_cast<> to do its dirty work.
-
-Rework the vmips.cc stuff into a sort of "Model-View-Controller" pattern.
-That is, most of the devices (+ mapper, CPU, etc.) we have now constitute
-a "Model"; vmips.cc is a "Controller" with a sort of implicit "View".
-This is a good idea for implementing GUIs and other interfaces to vmips.
-

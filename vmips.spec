@@ -1,12 +1,12 @@
 # vmips RPM spec file.
 Name: vmips
 Summary: A MIPS-based virtual machine simulator.
-Version: 1.2.2
+Version: 1.3
 Release: 1
 Copyright: GPL
 Group: Emulators
 URL: http://www.dgate.org/vmips/
-Source: ftp://ftp.dgate.org/pub/vmips/snapshots/vmips-1.2.2.tar.gz
+Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-1.3/vmips-1.3.tar.gz
 Packager: VMIPS Maintainers <vmips@dgate.org>
 BuildRoot: %{_tmppath}/vmips-buildroot
 
@@ -25,16 +25,20 @@ make
 
 %files
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS VERSION
-/usr/bin/vmips
-/usr/bin/vmipstool
-/usr/info/vmips.info.gz
-/usr/share/man/man1/vmips.1.gz
-/usr/share/man/man1/vmipstool.1.gz
-/usr/include/vmips/asm_regnames.h
-/usr/share/vmips/ld.script
+%{_bindir}/vmips
+%{_bindir}/vmipstool
+%{_infodir}/vmips.info.gz
+%{_mandir}/man1/vmips.1.gz
+%{_mandir}/man1/vmipstool.1.gz
+%{_includedir}/vmips/asm_regnames.h
+%{_datadir}/vmips/ld.script
 %config /etc/vmipsrc
 
 %changelog
+* Fri Oct 08 2004 VMIPS Maintainers <vmips@dgate.org>
+- Use _variables instead of hardcoded paths in files section
+- Fix source url
+
 * Mon Jun 21 2004 VMIPS Maintainers <vmips@dgate.org>
 - Use a buildroot and standard 'configure' and 'makeinstall' macros.
 - Get rid of mipsel-ecoff configuration flags.

@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define _REMOTEGDB_H_
 
 /* brg - added glue code */
-#include "sysinclude.h"
+#include "types.h"
 #define ULONGEST uint64
 #if defined(PARAMS)
 # undef PARAMS
@@ -82,5 +82,11 @@ extern int serial_readchar PARAMS ((serial_t scb, int timeout));
 extern int serial_write PARAMS ((serial_t scb, const char *str, int len));
 
 #define SERIAL_WRITE(SERIAL_T, STRING,LEN)  serial_write (SERIAL_T, STRING, LEN)
+
+/* brg - added glue code */
+#if defined(PARAMS)
+# undef PARAMS
+#endif
+/* brg - end added glue code */
 
 #endif /* _REMOTEGDB_H_ */

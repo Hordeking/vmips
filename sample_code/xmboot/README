@@ -15,7 +15,7 @@ coff.c - procedures to interpret mips coff headers
 coff.h - data structures representing mips coff file & section headers
 lib.c - the "little C library"
 lib.h - public interface to lib.c
-serial.c, serial.h - interface betwene lib.c and serial device
+serial.c, serial.h - interface between lib.c and serial device
 xmrcv.c - XMODEM receive code
 xmrcv.h - public interface to xmrcv.c
 panic.c - routine to catch exceptions and print a message

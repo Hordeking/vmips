@@ -1,4 +1,3 @@
-/*  ../vmips -o haltjrra -o haltdumpcpu mumble.rom */
 /*  should end with:  all registers equal to their own numbers */
 /*  tests instructions: addiu */
 
@@ -39,5 +38,5 @@ __start:
 	addiu $29, $0, 29
 	addiu $30, $0, 30
 	addiu $31, $0, 31
-	jr $31 /* it's good to set HALT_ON_JR_RA for this */
+	break
 

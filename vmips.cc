@@ -22,7 +22,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "clockdev.h"
 #include "clockreg.h"
 #include "cpzeroreg.h"
+#include "debug.h"
 #include "error.h"
+#include "endiantest.h"
 #include "haltreg.h"
 #include "haltdev.h"
 #include "intctrl.h"
@@ -33,7 +35,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpu.h"
 #include "cpzero.h"
 #include "spimconsreg.h"
-#include "sysinclude.h"
 #include "vmips.h"
 #include "options.h"
 #include "decrtc.h"
@@ -44,6 +45,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "decserial.h"
 #include "stub-dis.h"
 #include "rommodule.h"
+#include <fcntl.h>
+#include <cerrno>
+#include <cassert>
+#include <csignal>
+#include <cstdarg>
+#include <string>
 #include <exception>
 
 vmips *machine;
@@ -75,6 +82,7 @@ vmips::refresh_options(void)
  
 	opt_memdumpfile = opt->option("memdumpfile")->str;
 	opt_image = opt->option("romfile")->str;
+	opt_execname = opt->option("execname")->str;
 	opt_ttydev = opt->option("ttydev")->str;
 	opt_ttydev2 = opt->option("ttydev2")->str;
 	opt_spimconsole = opt->option("spimconsole")->flag;
@@ -110,20 +118,15 @@ vmips::setup_machine(void)
 {
 	/* Construct the various vmips components. */
 	intc = new IntCtrl;
-	cpu = new CPU;
 	physmem = new Mapper;
-	cpzero = new CPZero;
-
-	/* Attach the components to one another. */
-	cpzero->attach(cpu, intc);
-	physmem->attach(cpu);
-	cpu->attach(this, physmem, cpzero);
+	cpu = new CPU (*physmem, *intc);
 
 	/* Set up the debugger interface, if applicable. */
-	if (opt_debug) {
-		dbgr = new Debug;
-		dbgr->attach(cpu,physmem);
-	}
+	if (opt_debug)
+		dbgr = new Debug (*cpu, *physmem);
+
+    /* Direct the libopcodes disassembler output to stderr. */
+    disasm = new Disassembler (host_bigendian, stderr);
 }
 
 /* Connect the file or device named NAME to line number L of
@@ -231,10 +234,16 @@ bool vmips::setup_deccsr() throw( std::bad_alloc )
 		return true;
 
 	/* DECstation 5000/200 Control/Status Reg at base physaddr DECCSR_BASE */
-	deccsr_device = new DECCSRDevice ();
+    /* Connected to IRQ2 */
+    static const uint32 DECCSR_MIPS_IRQ = DeviceInt::num2irq (2);
+	deccsr_device = new DECCSRDevice (DECCSR_MIPS_IRQ);
 	physmem->map_at_physical_address (deccsr_device, DECCSR_BASE);
 	boot_msg ("Mapping %s to physical address 0x%08x\n",
 		  deccsr_device->descriptor_str(), DECCSR_BASE);
+
+	intc->connectLine (DECCSR_MIPS_IRQ, deccsr_device);
+    boot_msg("Connected %s to the %s\n", DeviceInt::strlineno(DECCSR_MIPS_IRQ),
+             deccsr_device->descriptor_str());
 
 	return true;
 }
@@ -259,13 +268,11 @@ bool vmips::setup_decserial() throw( std::bad_alloc )
 		return true;
 
 	/* DECstation 5000/200 DZ11 serial at base physaddr DECSERIAL_BASE */
-	decserial_device = new DECSerialDevice (clock);
+	/* Uses CSR interrupt SystemInterfaceCSRInt */
+	decserial_device = new DECSerialDevice (clock, SystemInterfaceCSRInt);
 	physmem->map_at_physical_address (decserial_device, DECSERIAL_BASE );
 	boot_msg ("Mapping %s to physical address 0x%08x\n",
 		  decserial_device->descriptor_str (), DECSERIAL_BASE );
-
-	intc->connectLine (IRQ2, decserial_device);
-	boot_msg ("Connected IRQ2 to %s\n", decserial_device->descriptor_str ());
 
 	// Use printer line for console.
 	setup_console_line (3, opt_ttydev, decserial_device,
@@ -302,25 +309,19 @@ void vmips::boot_msg( const char *msg, ... ) throw()
 int
 vmips::host_endian_selftest(void)
 {
-	uint32 x;
-	char *p = (char *) &x;
-
-	p[0] = 0;
-	p[1] = 1;
-	p[2] = 2;
-	p[3] = 3;
-	if (x == 0x03020100) {
-		machine->host_bigendian = false;
-		boot_msg( "Little-Endian host processor detected.\n" );
-		return 0;
-	} else if (x == 0x00010203) {
-		machine->host_bigendian = true;
-		boot_msg( "Big-Endian host processor detected.\n" );
-		return 0;
-	} else {
-		boot_msg( "Unknown processor type.\n" );
-		return x;
-	}
+  try {
+    EndianSelfTester est;
+    machine->host_bigendian = est.host_is_big_endian();
+    if (!machine->host_bigendian) {
+      boot_msg ("Little-Endian host processor detected.\n");
+    } else {
+      boot_msg ("Big-Endian host processor detected.\n");
+    }
+    return 0;
+  } catch (std::string &err) {
+    boot_msg (err.c_str ());
+    return -1;
+  }
 }
 
 void
@@ -361,7 +362,7 @@ vmips::step(void)
 	if (opt_dumpcpu)
 		cpu->dump_regs_and_stack(stderr);
 	if (opt_dumpcp0)
-		cpzero->dump_regs_and_tlb(stderr);
+		cpu->cpzero_dump_regs_and_tlb(stderr);
 	num_instrs++;
 }
 
@@ -388,7 +389,7 @@ vmips::setup_rom ()
     rm = new ROMModule (rom);
   } catch (int errcode) {
     error ("mmap failed for %s: %s", opt_image, strerror (errcode));
-    return true;
+    return false;
   }
   // Map the ROM image to the virtual physical memory.
   physmem->map_at_physical_address (rm, opt_loadaddr);
@@ -404,10 +405,9 @@ vmips::setup_rom ()
 bool
 vmips::setup_ram () throw( std::bad_alloc )
 {
-  /* Install RAM at base physical address 0 */
+  // Make a new RAM module and install it at base physical address 0.
   memmod = new MemoryModule(opt_memsize);
-  uint32 memphysaddr = 0;
-  physmem->map_at_physical_address(memmod, memphysaddr);
+  physmem->map_at_physical_address(memmod, 0);
   boot_msg( "Mapping RAM module (host=%p, %uKB) to physical address 0x%x\n",
 	    memmod->getAddress (), memmod->getExtent () / 1024, memmod->getBase ());
   return true;
@@ -449,10 +449,6 @@ vmips::run()
 	if (!setup_ram ())
 	  return 1;
 
-	/* Direct the libopcodes disassembler output to stderr. */
-	if (!setup_disassembler (stderr))
-	  return 1;
-
 	if (!setup_haltdevice ())
 	  return 1;
 
@@ -483,6 +479,9 @@ vmips::run()
 	boot_msg( "\n*************RESET*************\n\n" );
 	cpu->reset();
 
+	if (!setup_exe ())
+	  return 1;
+
 	timeval start;
 	if (opt_instcounts)
 		gettimeofday(&start, NULL);
@@ -510,7 +509,7 @@ vmips::run()
 		if (opt_haltdumpcpu)
 			cpu->dump_regs_and_stack(stderr);
 		if (opt_haltdumpcp0)
-			cpzero->dump_regs_and_tlb(stderr);
+			cpu->cpzero_dump_regs_and_tlb(stderr);
 	}
 
 	if (opt_instcounts) {

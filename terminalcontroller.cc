@@ -17,11 +17,12 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "clock.h"
 #include "error.h"
 #include "terminalcontroller.h"
-
-#include <sys/time.h>
+#include <cassert>
 #include <errno.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 TerminalController::TerminalController( Clock *clock, long keyboard_poll_ns,

@@ -21,11 +21,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  * as a memory-mapped device in the DEC 5000/200 (KN02).
  */
 
-#include "sysinclude.h"
 #include "devicemap.h"
 #include "clock.h"
 #include "decrtcreg.h"
 #include "decrtc.h"
+#include <cstdio>
+#include <cassert>
 
 static const uint32 int_freqs [16] = {
   0, 3906250, 7812500, 122070, 244141, 488281, 976562, 1953125,
@@ -81,8 +82,6 @@ DECRTCDevice::fetch_word(uint32 offset, int mode, DeviceExc *client)
     update_host_time ();
   if (reg_no < 64)
     rv = rtc_reg[reg_no];
-  /*fprintf (stderr, "RTC %s (%u) read as 0x%x\n",
-	reg_names[(reg_no > 14) ?  14 : reg_no], reg_no, rv); */
   if (reg_no == RTC_REGC)
     unready_clock ();
   return rv;

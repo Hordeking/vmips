@@ -18,6 +18,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "cpu.h"
+#include "cpzero.h"
+#include "debug.h"
+#include "mapper.h"
 #include "vmips.h"
 #include "options.h"
 #include "excnames.h"
@@ -25,6 +28,13 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "error.h"
 #include "remotegdb.h"
 #include "stub-dis.h"
+
+/* states of the delay-slot state machine -- see CPU::step() */
+enum {
+  NORMAL,
+  DELAYING,
+  DELAYSLOT
+};
 
 /* certain fixed register numbers which are handy to know */
 static const int reg_zero = 0;  /* always zero */
@@ -42,32 +52,22 @@ CPU::strdelaystate(const int state)
 	return statestr[state];
 }
 
-CPU::CPU (vmips *mch, Mapper *m, CPZero *cp0) :
-	tracing (false), last_epc (0), last_prio (0), delay_state (NORMAL)
+CPU::CPU (Mapper &m, IntCtrl &i)
+  : tracing (false), last_epc (0), last_prio (0), mem (&m),
+    cpzero (new CPZero (this, &i)), delay_state (NORMAL)
 {
 	reg[reg_zero] = 0;
-	attach(mch,m,cp0);
-}
-
-void
-CPU::attach(vmips *mch, Mapper *m, CPZero *cp0)
-{
-	if (mch) {
-		machine = mch;
-		opt_excmsg = machine->opt->option("excmsg")->flag;
-		opt_excpriomsg = machine->opt->option("excpriomsg")->flag;
-		opt_haltbreak = machine->opt->option("haltbreak")->flag,
-		opt_haltibe = machine->opt->option("haltibe")->flag;
-		opt_haltjrra = machine->opt->option("haltjrra")->flag;
-		opt_instdump = machine->opt->option("instdump")->flag;
-		opt_tracing = machine->opt->option("tracing")->flag;
-		opt_tracesize = machine->opt->option("tracesize")->num;
-		opt_tracestartpc = machine->opt->option("tracestartpc")->num;
-		opt_traceendpc = machine->opt->option("traceendpc")->num;
-		opt_bigendian = machine->opt->option("bigendian")->flag;
-	}
-	if (m) mem = m;
-	if (cp0) cpzero = cp0;
+	opt_excmsg = machine->opt->option("excmsg")->flag;
+	opt_reportirq = machine->opt->option("reportirq")->flag;
+	opt_excpriomsg = machine->opt->option("excpriomsg")->flag;
+	opt_haltbreak = machine->opt->option("haltbreak")->flag,
+	opt_haltibe = machine->opt->option("haltibe")->flag;
+	opt_instdump = machine->opt->option("instdump")->flag;
+	opt_tracing = machine->opt->option("tracing")->flag;
+	opt_tracesize = machine->opt->option("tracesize")->num;
+	opt_tracestartpc = machine->opt->option("tracestartpc")->num;
+	opt_traceendpc = machine->opt->option("traceendpc")->num;
+	opt_bigendian = machine->opt->option("bigendian")->flag;
 }
 
 void
@@ -114,6 +114,12 @@ CPU::dump_regs_and_stack(FILE *f)
 	} else {
 		fprintf(f, "Stack: (not mapped in TLB)\n");
 	}
+}
+
+void
+CPU::cpzero_dump_regs_and_tlb(FILE *f)
+{
+	cpzero->dump_regs_and_tlb(f);
 }
 
 /* Instruction decoding */
@@ -340,7 +346,7 @@ CPU::exception(uint16 excCode, int mode /* = ANY */, int coprocno /* = -1 */)
 		vector = 0x080;
 	}
 
-	if (opt_excmsg) {
+	if (opt_excmsg && (excCode != Int || opt_reportirq)) {
 		fprintf(stderr,"Exception %d (%s) triggered, EPC=%08x\n", excCode, 
 			strexccode(excCode), epc);
 		fprintf(stderr,
@@ -383,7 +389,7 @@ CPU::cop_unimpl (int coprocno, uint32 instr, uint32 pc)
 		 * can do is print an error message. */
 		fprintf (stderr, "CP%d instruction %x not implemented at pc=0x%x:\n",
 				 coprocno, instr, pc);
-		call_disassembler (pc, instr);
+		machine->disasm->disassemble (pc, instr);
 		exception (CpU, ANY, coprocno);
 	} else {
 		/* It's fair game to just throw an exception, if they
@@ -1118,13 +1124,6 @@ CPU::srav_emulate(uint32 instr, uint32 pc)
 void
 CPU::jr_emulate(uint32 instr, uint32 pc)
 {
-	if (opt_haltjrra) {
-		if (rs(instr) == reg_ra) {
-			fprintf(stderr,
-				"** Procedure call return instr reached -- HALTING **\n");
-			machine->halt();
-		}
-	}
 	if (reg[rd(instr)] != 0) {
 		exception(RI);
 		return;
@@ -1818,7 +1817,7 @@ CPU::step()
 	/* diagnostic output - display disassembly of instr */
 	if (opt_instdump) {
 		fprintf(stderr,"PC=0x%08x [%08x]\t%08x ",pc,real_pc,instr);
-		call_disassembler(pc,instr);
+		machine->disasm->disassemble(pc,instr);
 	}
 
 	/* first half of trace recording for this instruction */

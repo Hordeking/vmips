@@ -1,6 +1,5 @@
-/* Interface to: Stub functions to interface to the GNU disassembler library
-    (libopcodes).
-   Copyright 2003 Brian R. Gaeke.
+/* GCC attributes.
+   Copyright 2004 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -18,23 +17,23 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef _STUB_DIS_H_
-#define _STUB_DIS_H_
+#ifndef _GCCATTR_H_
+#define _GCCATTR_H_
 
-#include "types.h"
-#include <cstdio>
-extern "C" {
-#include "bfd.h"
-#include "dis-asm.h"
-}
+/* First of all, pull in answers from autoconfiguration system. */
+#include "config.h"
 
-class Disassembler {
-  struct disassemble_info disasm_info;
-  int (*insn_printer_func) (unsigned long, struct disassemble_info *);
-public:
-  Disassembler (bool host_is_bigendian, FILE *stream);
-  ~Disassembler () { }
-  void disassemble (uint32 pc, uint32 instr); 
-};
+/* Check whether we can use __attribute__. */
+#if HAVE_ATTRIBUTE_FORMAT
+# define __ATTRIBUTE_FORMAT__(archetype, string_index, first_to_check) \
+    __attribute__((format(archetype, string_index, first_to_check)))
+#else
+# define __ATTRIBUTE_FORMAT__(archetype, string_index, first_to_check)
+#endif
+#if HAVE_ATTRIBUTE_NORETURN
+# define __ATTRIBUTE_NORETURN__ __attribute__((noreturn))
+#else
+# define __ATTRIBUTE_NORETURN__
+#endif
 
-#endif /* _STUB_DIS_H_ */
+#endif /* _GCCATTR_H_ */

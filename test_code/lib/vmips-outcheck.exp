@@ -3,6 +3,7 @@ proc outcheck_read_params_file {file} {
 	global options
 	global expected_output
 	global grep_pattern
+	global inhibit_build
 	set chan [open $file]
 	set outputstart 0
 	set expected_output ""
@@ -25,6 +26,9 @@ proc outcheck_read_params_file {file} {
 			}
 			if [regexp "^GREP: (.*)$" $data dummy gp] {
 				set grep_pattern $gp
+			}
+			if [regexp "^BUILD RULES: .*testcase_empty.*$" $data] {
+				set inhibit_build 1
 			}
 			if [regexp "^EXPECTED OUTPUT FOLLOWS: *$" $data] {
 				incr outputstart
@@ -84,10 +88,14 @@ proc outcheck_check_output {} {
 
 proc outcheck_run_one_test {paramsfile} {
 	global options
+	global inhibit_build
 	clear_xfail
+	set inhibit_build 0
 	outcheck_read_params_file $paramsfile
 	set romfile [vmips_get_romfile_name $paramsfile]
-	vmips_build_romfile $romfile
+	if {!$inhibit_build} {
+		vmips_build_romfile $romfile
+	}
 	vmips_start "$options $romfile"
 
 	if {[outcheck_check_output] == 0} {

@@ -12,7 +12,7 @@
 @end direntry
 
 @ifinfo
-This is the VMIPS Programmer's Manual, Third Edition, for version 1.2.
+This is the VMIPS Programmer's Manual, Fourth Edition, for version 1.3.
 
 Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
 @end ifinfo
@@ -25,7 +25,7 @@ Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
 
 @node Top, Overview, , (dir)
 @top
-This is the VMIPS Programmer's Manual, Third Edition, for version 1.2.
+This is the VMIPS Programmer's Manual, Fourth Edition, for version 1.3.
 
 Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
 For information about copying, modifying or distributing this manual,
@@ -44,6 +44,7 @@ please see the chapter called `Copying'.
 * Debugging::             VMIPS supports debugging with GDB.
 * Devices::               Virtual hardware supported by VMIPS.
 * Extending::             Writing new functionality for VMIPS.
+* Test Suite::            Making sure VMIPS works as designed on your platform.
 
 * Installation::          Getting VMIPS ready to boot on your machine.
 * Reporting Bugs::        What to do when vmips dumps core, or worse.
@@ -1107,7 +1108,7 @@ The devices are documented thoroughly in the document: "DECstation 5000/200
 KN02 System Module Functional Specification", published August 1990 by Digital
 Equipment Corporation. You may be able to find it by doing a web search.
 
-@node Extending, Installation, Devices, Top
+@node Extending, Test Suite, Devices, Top
 @chapter Extending
 
 This chapter is intended to be a hacker's guide to adding or modifying
@@ -1508,7 +1509,113 @@ buffer, VMIPS emulates the case where the CpCond bit for CP0 is always
 TRUE, i.e., applications that look for the writebuffer will find that
 it is always empty.
 
-@node Installation, Reporting Bugs, Extending, Top
+@node Test Suite, Installation, Extending, Top
+@chapter Test Suite
+
+VMIPS has a test suite with a small number of regression tests.  It uses the
+DejaGNU test framework, which is written in the Expect language.  Expect was
+written by Don Libes, and is a dialect of Tcl, the Tool Command Language by
+Ousterhout et al.
+
+@subsection How to run the test suite
+
+In order to run the test suite or add tests to it, you will need to have
+Expect and DejaGNU installed.  Any version of DejaGNU later than 1.3 should
+work fine. We have mostly used Expect version 5.32 or later.
+
+The next step is to configure and build VMIPS from source. This is important,
+because currently, you can only run tests on a freshly built copy of VMIPS; no
+provision exists for testing a previously installed copy of VMIPS.  Simply run
+@samp{./configure} and @samp{make} from the top level source directory to
+build VMIPS. See the ``Installation'' section of the manual for more details.
+
+To run the test suite, run @samp{make check} from the top level source
+directory.  This will invoke the DejaGNU @command{runtest} command.
+It will take a minute or so, and then you will get a count of tests that
+passed and failed.  If you want to see a more comprehensive listing from
+@command{runtest}, pass it the appropriate options through the Makefile,
+by typing, for example: @samp{make RUNTESTFLAGS=--verbose check}.
+
+You can also run the test suite by changing into the @file{test_code}
+directory in the source tree and running @samp{runtest --tool vmips}.
+
+As a general rule, no tests should fail in a released version of VMIPS;
+however, CVS builds may have test failures from time to time.
+
+@subsection Test suite frameworks
+
+VMIPS has two comprehensive testing frameworks: the @file{regcheck}
+framework, whose tests live in the @file{vmips.regcheck} directory, and the
+@file{outcheck} framework, whose tests live in the @file{vmips.outcheck}
+directory. The former looks at the final values of registers after a test
+case is run, and the latter looks at the output that VMIPS prints out when
+a test case is run.
+
+Each of these main testing frameworks has its own @file{.exp} file that runs it.
+You can easily run the subset of the test suite controlled by a given
+@file{.exp} file, by passing its name on the @command{runtest} command line.
+For example, if you want to run all the @file{regcheck} tests, you would type:
+@samp{runtest --tool vmips regcheck.exp}.
+
+There are a few test cases that do not use either of these frameworks,
+because they have special requirements of some kind or are otherwise
+unique in some inconvenient way. These test cases have their own Expect
+drivers (@file{.exp} files) and live in the @file{vmips.misc-tests}
+directory.
+
+In addition, each test case is defined by a @file{.par} file that contains the
+parameters of the test.  If you only want to run a single test from among the
+@file{regcheck} tests, specify its @file{.par} file after an equal sign. For
+example, you might type: @samp{runtest --tool vmips regcheck.exp=mumble.par}
+to run only the @file{mumble.par} @file{regcheck} test.
+
+@subsection How to add a test to the test suite
+
+To write a new test case, first decide whether it is easier to have your test
+case print out something or to look at the @option{haltdumpcpu} option's output
+to verify it. This will tell you whether it should be an @file{outcheck} test
+(if it prints out something) or a @file{regcheck} case (if you look at the
+register values).  Then write up a @file{.par} file for the test case ---
+the best way to learn how to do this, for the time being, is to examine the
+examples in the @file{test_code} directory. Then move the @file{.par} file
+and the test code (assembly or C) to the appropriate subdirectory for the
+framework you chose, @file{vmips.regcheck} or @file{vmips.outcheck}. Now
+you can try to make sure that it passes (or fails, as the case may be),
+by running @samp{runtest --tool vmips} on it.
+
+Also, note that you shouldn't add another test to @file{vmips.misc-tests}
+unless you can't find a way to fit it into any of the existing testing
+frameworks. Adding a test to @file{vmips.misc-tests} is tricky -- you may be
+able to make progress by looking at the other @file{.exp} files in that
+directory.
+
+@subsection Common problems
+
+You can get screenfuls of @samp{endian_option was not set} errors if you run
+@command{runtest} without first making a DejaGNU @file{site.exp} configuration
+file first.  To make a @file{site.exp} file, just run @samp{make site.exp}
+in the @file{test_code} directory.
+
+@subsection Additional test cases needed
+
+Test cases should probably be added for the following categories of VMIPS
+behaviors. (This list is from 2002; it is probably a good start, but it
+may be out of date in the sense that it is unlikely to be exhaustive.)
+
+@itemize
+@item Vmipstool.
+@item The debugger interface.
+@item Exceptions: exception prioritizing, non-boot-time exception vectors,
+all the TLB exceptions, Unimplemented Coprocessor exceptions, Reserved
+Instruction exceptions, and exceptions due to PC address translation.
+@item Check that the TLB does the right thing when you have a dirty entry
+vs. a non-dirty one.
+@item dumpcpu, dumpcp0, haltdumpcp0, bootmsg options.
+@item tilde_expand() where it's not your own home directory.
+@item Address translations in KSEG0 or KSEG2 or KUSEG or User mode.
+@end itemize
+
+@node Installation, Reporting Bugs, Test Suite, Top
 @appendix Installation
 
 VMIPS uses the GNU Autoconf/Automake system for configuration management.
@@ -1876,15 +1983,15 @@ touch with us if you think you would be willing to help.
 @itemize @bullet
 @item Cache and DMA support in the memory subsystem.
 
-@item Improve packaging so that MIPS cross gcc, gdb, and binutils are easy
-to install along with vmips.
-
 @item A just-in-time translator from MIPS machine code to the host's
 machine code. X86 and PowerPC would probably be the first hosts to target.
 
-@item Replace .vmipsrc, options.cc and vmips.cc with a Tcl/Tk front end.
-There should be some provision for refreshing option values if the
-configuration language changes them.
+@item Add meaningful bindings to an extension language such as Tcl/Tk.
+In particular, it should be possible to read or write option values,
+modify the configuration of the machine (by attaching or removing devices,
+for example), and type commands interactively to VMIPS.  There should
+be some provision for refreshing cached option values if the extension
+language changes them.
 
 @item Modularize the CPU, memory mapper, and devices using a shared-library
 pluggable module interface.
@@ -1926,6 +2033,43 @@ constants.
 @node Release History, References, Future Directions, Top
 @appendix Release History
 
+vmips-1.3 was released on 8 October 2004.
+User-visible changes in version 1.3 (since version 1.2.2):
+
+@itemize
+@item The VMIPS code base has been cleaned up substantially. The most
+important visible effect of this is that VMIPS compiles much more quickly now.
+
+@item A new, experimental executable-file loader has been integrated. Presently
+it is only usable for loading ECOFF files into the kernel segments
+(0x80000000-0xbfffffff). The ROM monitor has a new @command{call} command you
+can use to take advantage of this.
+
+@item Vmipstool can now disassemble binary instructions from the command
+line, e.g.  @samp{vmipstool --disassemble-word <pc> <instr>}.
+
+@item The @option{excmsg} option used to report all exceptions, including
+things like clock interrupts. This made using @option{excmsg} in any
+nontrivial kernel code almost impossible. Now you must also specify
+'reportirq' to get reports of interrupt exceptions.
+
+@item The @option{haltjrra} option has been removed.
+
+@item The DECstation 5000/200-compatible CSR device now supports delivery
+of interrupts from devices attached to CSR interrupt lines, such as the DZ11
+serial device.
+
+@item The DZ11 serial device now supports interrupt-driven I/O properly. It
+previously only worked correctly if polling was used.
+
+@item The documentation has received the usual slight adjustments. In
+addition, the test-suite documentation has been extensively revised and
+integrated into the programmer's manual.
+
+@item The options-processing code has been revised slightly to print a better
+error message when an invalid option is specified.
+@end itemize
+
 vmips-1.2.2 was released on 23 August 2004.
 User-visible changes in version 1.2.2 (since version 1.2.1):
 
@@ -1937,7 +2081,8 @@ compilation tools (using @option{--with-mips}).
 @item Vladimir Machulsky found and fixed a bug in the debugger interface,
 where the register file would be sent to gdb incorrectly. Thanks!
 
-@item VMIPS will no longer abort and dump core when bad command-line arguments
+@item VMIPS will no longer abort and dump core when bad command-line
+rguments
 are passed to it.  Instead, it will print an error message and exit with
 a non-zero exit code.
 

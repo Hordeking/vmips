@@ -17,11 +17,18 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "error.h"
+#include "fileutils.h"
 #include "options.h"
 #include "optiontbl.h"
-#include "error.h"
+#include <cassert>
+#include <cctype>
+#include <cerrno>
+#include <cstdio>
+#include <pwd.h>
 #include <string>
-#include <map>
+#include <unistd.h>
+#include <vector>
 
 #define OPTBUFSIZ 1024
 
@@ -83,45 +90,42 @@ Options::process_defaults(void)
 void
 Options::set_str_option(char *key, char *value)
 {
-	Option *o = optstruct(key, true);
+    int type = STR;
 
-	if (find_option_type(key) != STR) {
-		error("unknown string variable %s has string value", key);
-		return;
-	}
+	assert (find_option_type(key) == type &&
+		    "unknown string variable in set_str_option");
+	Option *o = optstruct(key, true);
 	assert (o);
 	o->name = strdup(key);
-	o->type = STR;
+	o->type = type;
 	o->value.str = strdup(value);
 }
 
 void
 Options::set_num_option(char *key, uint32 value)
 {
-	Option *o = optstruct(key, true);
+    int type = NUM;
 
-	if (find_option_type(key) != NUM) {
-		error("unknown numeric variable %s has numeric value", key);
-		return;
-	}
+	assert (find_option_type(key) == type
+            && "unknown numeric variable in set_num_option");
+	Option *o = optstruct(key, true);
 	assert (o);
 	o->name = strdup(key);
-	o->type = NUM;
+	o->type = type;
 	o->value.num = value;
 }
 
 void
 Options::set_flag_option(char *key, bool value)
 {
-	Option *o = optstruct(key, true);
+    int type = FLAG;
 
-	if (find_option_type(key) != FLAG) {
-		error("unknown Boolean variable %s has Boolean value", key);
-		return;
-	}
+	assert (find_option_type(key) == type
+            && "unknown Boolean variable in set_flag_option");
+	Option *o = optstruct(key, true);
 	assert (o);
 	o->name = strdup(key);
-	o->type = FLAG;
+	o->type = type;
 	o->value.flag = value;
 }
 
@@ -142,11 +146,9 @@ Options::find_option_type(char *option)
 {
 	Option *o;
 
-	for (o = nametable; o->type; o++) {
-		if (strcmp(option, o->name) == 0) {
+	for (o = nametable; o->type; o++)
+		if (strcmp(option, o->name) == 0)
 			return o->type;
-		}
-	}
 	return 0;
 }
 
@@ -158,16 +160,29 @@ Options::process_one_option(const char *const option)
 
 	if ((equals = strchr(copy, '=')) == NULL) {
 		/* FLAG option */
+        char *name;
+		bool value;
 		if ((trailer = strprefix(copy, "no")) == NULL) {
 			/* FLAG set to TRUE */
-			set_flag_option(copy, true);
+			name = copy;
+			value = true;
 		} else {
 			/* FLAG set to FALSE */
-			set_flag_option(trailer, false);
+			name = trailer;
+			value = false;
 		}
+        if (find_option_type(name) == FLAG)
+			set_flag_option(name, value);
+		else
+			error("Unknown option: %s\n", name);
 	} else {
 		/* STR or NUM option */
 		*equals++ = '\0';
+                if (*equals == '\0') {
+                    error ("Option value missing for %s", copy);
+                    free(copy);
+                    return;
+                }
 		switch(find_option_type(copy)) {
 			case STR:
 				set_str_option(copy, equals);
@@ -200,7 +215,7 @@ Options::process_one_option(const char *const option)
 				break;
 			default:
 				*--equals = '=';
-				fprintf(stderr, "Unknown option: %s\n", copy);
+				error("Unknown option: %s\n", copy);
 				break;
 		}
 	}
@@ -271,31 +286,26 @@ Options::process_first_option(char **bufptr, int lineno, char *filename)
 int
 Options::process_options_from_file(char *filename)
 {
-	FILE *f;
-	char *buf, *p;
-	int rc, lineno;
-
-	buf = new char[OPTBUFSIZ];
+	char *buf = new char[OPTBUFSIZ];
 	if (!buf) {
 		fatal_error("Can't allocate %u bytes for I/O buffer; aborting!\n",
-			OPTBUFSIZ);
+		            OPTBUFSIZ);
 	}
-
-	f = fopen(filename, "r");
+	FILE *f = fopen(filename, "r");
 	if (!f) {
 		if (errno != ENOENT) {
-			fprintf(stderr, "Can't open config file %s: %s\n",
-				filename, strerror(errno));
+		    error ("Can't open config file '%s': %s\n", filename,
+		           strerror(errno));
 		}
 		return -1;
 	}
-	p = buf;
-	lineno = 1;
+	char *p = buf;
+	int rc, lineno = 1;
     for (char *ptr = fgets(buf, OPTBUFSIZ, f); ptr;
          ++lineno, p = buf, ptr = fgets(buf, OPTBUFSIZ, f))
-      do
-          rc = process_first_option(&p, lineno, filename);
-      while (rc == 1);
+		do
+			rc = process_first_option(&p, lineno, filename);
+		while (rc == 1);
 	fclose(f);
 	delete [] buf;
 	return 0;
@@ -347,22 +357,26 @@ Options::process_options(int argc, char **argv)
 		} else if (strcmp (argv[i], "-o") == 0) {
 			if (argc <= i + 1)
 				error_exit ("The -o flag requires an argument. Try %s --help",
-                             argv[0]);
+                            argv[0]);
 			command_line_options.push_back (argv[i + 1]);
 			++i;
 		} else if (strcmp (argv[i], "-F") == 0) {
 			if (argc <= i + 1)
 				error_exit ("The -F flag requires an argument. Try %s --help",
-                             argv[0]);
+                            argv[0]);
 			strcpy (user_config_filename, argv[i + 1]);
 			++i;
 		} else if (strcmp (argv[i], "-n") == 0) {
 			read_system_config_file = false;
 		} else if (i == argc - 1) {
+            if (!can_read_file (argv[i]) && argv[i][0] == '-') {
+			    error_exit ("Unrecognized option %s. Try %s --help", argv[i],
+                            argv[0]);
+            }
 			set_str_option("romfile", argv[i]);
 		} else {
 			error_exit ("Unrecognized option %s. Try %s --help", argv[i],
-                         argv[0]);
+                        argv[0]);
 		}
 	}
 	
@@ -402,6 +416,7 @@ Options::option(char *name)
 
 	if (o)
 		return &o->value;
+    fatal_error ("Attempt to get the value of unknown option '%s'", name);
 	return NULL;
 }
 

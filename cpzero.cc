@@ -49,12 +49,6 @@ static uint32 write_masks[] = {
 	CacheErr_MASK, TagLo_MASK, TagHi_MASK, ErrorEPC_MASK, 0
 };
 
-/* Initialization */
-CPZero::CPZero(CPU *m, IntCtrl *i)
-{
-	attach(m, i);
-}
-
 /* Reset (warm or cold) */
 void
 CPZero::reset(void)
@@ -80,18 +74,9 @@ CPZero::reset(void)
 	reg[PRId] = 0x00000230; /* MIPS R3000A */
 }
 
-/* We have been presented with a CPU and/or interrupt controller to
- * associate with. */
-void
-CPZero::attach(CPU *m, IntCtrl *i)
-{
-	if (m) cpu = m;
-	if (i) intc = i;
-}
-
 /* Yow!! Are we in KERNEL MODE yet?? ...Read the Status register. */
 bool
-CPZero::kernel_mode(void)
+CPZero::kernel_mode(void) const
 {
 	return !(reg[Status] & Status_KUc_MASK);
 }
@@ -173,39 +158,26 @@ CPZero::load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match)
 	reg[EntryHi] = (va & EntryHi_VPN_MASK) | (reg[EntryHi] & ~EntryHi_VPN_MASK);
 }
 
-TLBEntry *
+int
 CPZero::find_matching_tlb_entry(uint32 vpn, uint32 asid)
 {
-	uint16 x;
-	TLBEntry *match = NULL;
-	for (x = 0; x < TLB_ENTRIES; x++) {
-		if (tlb[x].vpn() == vpn) {
-			if (tlb[x].global() || tlb[x].asid() == asid) {
-				match = &tlb[x];
-				break;
-			}
-		}
-	}
-	return match;
+	for (uint16 x = 0; x < TLB_ENTRIES; x++)
+		if (tlb[x].vpn() == vpn && (tlb[x].global() || tlb[x].asid() == asid))
+			return x;
+	return -1;
 }
 
 uint32
 CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 	DeviceExc *client)
 {
-	TLBEntry *match = NULL;
 	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
 	uint32 vpn = vaddr & EntryHi_VPN_MASK;
-
-	match = find_matching_tlb_entry(vpn, asid);
+    int index = find_matching_tlb_entry(vpn, asid);
+	TLBEntry *match = (index == -1) ? 0 : &tlb[index];
 	tlb_miss_user = false;
-	if (match) {
-		if (!match->valid()) {
-			/* TLB Invalid exception */
-			load_addr_trans_excp_info(vaddr,vpn,match);
-			client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
-			return 0xffffffff;
-		} else if ((!match->dirty()) && (mode == DATASTORE)) {
+	if (match && match->valid()) {
+		if (mode == DATASTORE && !match->dirty()) {
 			/* TLB Mod exception - write to page not marked "dirty" */
 			load_addr_trans_excp_info(vaddr,vpn,match);
 			client->exception(Mod, DATASTORE);
@@ -215,44 +187,38 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 			*cacheable = !match->noncacheable();
 			return match->pfn() | (vaddr & ~EntryHi_VPN_MASK);
 		}
-	} else /* No matching TLB entry */ {
-		if (seg == KUSEG) {
-			/* User TLB Miss exception */
-			load_addr_trans_excp_info(vaddr,vpn,match);
-			tlb_miss_user = true;
-			client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
-			return 0xffffffff;
-		} else {
-			/* TLB Miss exception */
-			load_addr_trans_excp_info(vaddr,vpn,match);
-			client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
-			return 0xffffffff;
-		}
 	}
+    // If we got here, then there was no matching tlb entry, or it wasn't valid.
+    // Use special refill handler vector for user TLB miss.
+	tlb_miss_user = (seg == KUSEG && !match);
+	load_addr_trans_excp_info(vaddr,vpn,match);
+	client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
+	return 0xffffffff;
+}
+
+uint32 CPZero::read_reg(uint32 r) {
+    return reg[r] & read_masks[r];
+}
+
+void CPZero::write_reg(uint32 r, uint32 data) {
+	// This preserves the bits which are readable but not writable, and writes
+	// the bits which are writable with new data, thus making it suitable
+	// for mtc0-type operations.  If you want to write all the bits which
+	// are _connected_, use: reg[r] = new_data & write_masks[r]; .
+	reg[r] = (reg[r] & (read_masks[r] & ~write_masks[r]))
+	         | (data & write_masks[r]);
 }
 
 void
 CPZero::mfc0_emulate(uint32 instr, uint32 pc)
 {
-	cpu->reg[cpu->rt(instr)] =
-		(reg[cpu->rd(instr)] & read_masks[cpu->rd(instr)]);
+	cpu->reg[cpu->rt(instr)] = read_reg(cpu->rd(instr));
 }
 
 void
 CPZero::mtc0_emulate(uint32 instr, uint32 pc)
 {
-	int regno = cpu->rd(instr);
-	uint32 new_data = cpu->reg[cpu->rt(instr)];
-
-	/* DO AS I SAY, NOT AS I DO...
-	 * This preserves the bits which are readable but not writable,
-	 * and writes the bits which are writable with new data, thus
-	 * making it suitable for mtc0-type operations.
-	 * If you want to write all the bits which are _connected_,
-	 * use reg[regno] = new_data & write_masks[regno]; .
-	 */
-	reg[regno] = (reg[regno] & (read_masks[regno] & ~write_masks[regno]))
-		| (new_data & write_masks[regno]);
+    write_reg(cpu->rd(instr), cpu->reg[cpu->rt(instr)]);
 }
 
 void
@@ -260,8 +226,8 @@ CPZero::bc0x_emulate(uint32 instr, uint32 pc)
 {
 	uint16 condition = cpu->rt(instr);
 	switch(condition) {
-	case 0: /* bc0f */ if (! cpCond) { cpu->branch(instr, pc); } break;
-	case 1: /* bc0t */ if (cpCond) { cpu->branch(instr, pc); } break;
+	case 0: /* bc0f */ if (! cpCond()) { cpu->branch(instr, pc); } break;
+	case 1: /* bc0t */ if (cpCond()) { cpu->branch(instr, pc); } break;
 	case 2: /* bc0fl - not valid, but not reserved(A-17, H&K) - no-op. */ ;
 	case 3: /* bc0tl - not valid, but not reserved(A-21, H&K) - no-op. */ ;
 	default: cpu->exception(RI); break; /* reserved */
@@ -278,40 +244,34 @@ CPZero::tlbr_emulate(uint32 instr, uint32 pc)
 }
 
 void
+CPZero::tlb_write(unsigned index)
+{
+	tlb[index].entryHi = read_reg(EntryHi);
+	tlb[index].entryLo = read_reg(EntryLo);
+}
+
+void
 CPZero::tlbwi_emulate(uint32 instr, uint32 pc)
 {
-	tlb[(reg[Index] & Index_Index_MASK) >> 8].entryHi =
-		reg[EntryHi] & read_masks[EntryHi];
-	tlb[(reg[Index] & Index_Index_MASK) >> 8].entryLo =
-		reg[EntryLo] & read_masks[EntryLo];
+    tlb_write ((reg[Index] & Index_Index_MASK) >> 8);
 }
 
 void
 CPZero::tlbwr_emulate(uint32 instr, uint32 pc)
 {
-	tlb[(reg[Random] & Random_Random_MASK) >> 8].entryHi = 
-		reg[EntryHi] & read_masks[EntryHi];
-	tlb[(reg[Random] & Random_Random_MASK) >> 8].entryLo =
-		reg[EntryLo] & read_masks[EntryLo];
+    tlb_write ((reg[Random] & Random_Random_MASK) >> 8);
 }
 
 void
 CPZero::tlbp_emulate(uint32 instr, uint32 pc)
 {
-	int x;
-	uint32 vpn, asid;
-
-	reg[Index] = (1 << 31);
-	vpn = reg[EntryHi] & EntryHi_VPN_MASK;
-	asid = reg[EntryHi] & EntryHi_ASID_MASK;
-	for (x = 0; x < TLB_ENTRIES; x++) {
-		if (tlb[x].vpn() == vpn) {
-			if (tlb[x].global() || tlb[x].asid() == asid) {
-				reg[Index] = (x << 8);
-				return;
-			}
-		}
-	}
+	uint32 vpn = reg[EntryHi] & EntryHi_VPN_MASK;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
+    int idx = find_matching_tlb_entry (vpn, asid);
+    if (idx != -1)
+      reg[Index] = (idx << 8);
+    else
+      reg[Index] = (1 << 31);
 }
 
 void
@@ -423,7 +383,7 @@ CPZero::cop_usable(int coprocno)
 }
 
 bool
-CPZero::interrupts_enabled(void)
+CPZero::interrupts_enabled(void) const
 {
 	return (reg[Status] & Status_IEc_MASK);
 }
@@ -461,28 +421,25 @@ CPZero::write_debug_info(uint32 status, uint32 bad, uint32 cause)
 bool
 CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 {
-	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
-	uint32 vpn = vaddr & EntryHi_VPN_MASK;
-	bool rv;
+	bool rv = true;
 
 	if ((!kernel_mode()) && (vaddr & KERNEL_SPACE_MASK)) {
 		*paddr = 0xffffffff;
 		rv = false;
 	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG0) {
 		*paddr = vaddr - KSEG0_CONST_TRANSLATION;
-		rv = true;
 	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG1) {
 		*paddr = vaddr - KSEG1_CONST_TRANSLATION;
-		rv = true;
 	} else /* KUSEG */ {
-		match = find_matching_tlb_entry(vpn, asid);
+	    uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
+    	uint32 vpn = vaddr & EntryHi_VPN_MASK;
+        int index = find_matching_tlb_entry (vpn, asid);
+	    TLBEntry *match = (index == -1) ? 0 : &tlb[index];
 		if (!match || !match->valid()) {
 			*paddr = 0xffffffff;
 			rv = false;
 		} else {
 			*paddr = match->pfn() | (vaddr & ~EntryHi_VPN_MASK);
-			rv = true;
 		}
 	}
 	return rv;

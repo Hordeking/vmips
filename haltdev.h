@@ -21,7 +21,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define _HALTDEV_H_
 
 #include "devicemap.h"
-
 class vmips;
 
 class HaltDevice : public DeviceMap
