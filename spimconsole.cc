@@ -1,5 +1,5 @@
-/* SPIM-compatible console device.
-   Copyright 2001 Brian R. Gaeke.
+/* Implementation of SPIM compatible console device.
+   Copyright 2002 Paul Twohey.
 
 This file is part of VMIPS.
 
@@ -17,367 +17,209 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
-#include "devicemap.h"
-#include "cpu.h"
-#include "mapper.h"
 #include "spimconsole.h"
 #include "spimconsreg.h"
-#include "vmips.h"
+#include "mapper.h"
+#include <cassert>
 
-char *
-SPIMConsole::descriptor_str(void)
+SpimConsoleDevice::SpimConsoleDevice( Clock *clock ) throw( std::bad_alloc )
+	: TerminalController( clock,
+			      KEYBOARD_POLL_NS,
+			      KEYBOARD_REPOLL_NS, 
+			      DISPLAY_READY_DELAY_NS ),
+	trigger(0), clock_interrupt(false), clock_state(UNREADY)
 {
-	static char buff[60];
-	sprintf(buff, "SPIMConsole(0x%lx,0x%lx)@0x%lx", (unsigned long)host[0],
-		(unsigned long)host[1], (unsigned long)this);
-	return buff;
+	// FIXME: hack until ranges are done right
+	extent = 36;
+
+	display_interrupt[0] = display_interrupt[1] = false;
+	keyboard_interrupt[0] = keyboard_interrupt[1] = false;
+
+	trigger = new ClockTrigger( this );
+	clock->add_deferred_task( trigger, CLOCK_TRIGGER_NS );
 }
 
-SPIMConsoleDevice::~SPIMConsoleDevice ()
-{				/* nothing to do here */
-}
-
-bool SPIMConsoleDevice::intEnable (void)
+SpimConsoleDevice::~SpimConsoleDevice() throw()
 {
-  return ie;
+	assert( trigger );
+
+	trigger->cancel();
 }
 
-void SPIMConsoleDevice::setIntEnable (bool newIntEnable)
+void SpimConsoleDevice::unready_display( int line, char data )
+	throw( std::bad_alloc )
 {
-  ie = newIntEnable;
+	TerminalController::unready_display( line, data );
+	deassertInt( line == 0 ? IRQ4 : IRQ6 );	
 }
 
-SPIMConsoleKeyboard::SPIMConsoleKeyboard (int l, SPIMConsole *p)
-	: SPIMConsoleDevice(l,p)
+void SpimConsoleDevice::ready_display( int line ) throw()
 {
-	rdy = false;
-	databyte = 0;
+	TerminalController::ready_display( line );
+	if( display_interrupt[line] )
+		assertInt( line == 0 ? IRQ4 : IRQ6 );
 }
 
-void SPIMConsoleKeyboard::setData (uint8 newData)
-{				/* ignores writes */
-}
-
-SPIMConsoleDisplay::SPIMConsoleDisplay (int l, SPIMConsole *p) :
-	SPIMConsoleDevice (l, p)
+void SpimConsoleDevice::unready_keyboard( int line ) throw()
 {
-	rdy = false;
+	TerminalController::unready_keyboard( line );
+	deassertInt( line == 0 ? IRQ3 : IRQ5 );
 }
 
-uint8 SPIMConsoleDisplay::data (void)
-{				/* reads as zero */
-  return 0;
-}
-
-SPIMConsoleClock::SPIMConsoleClock (int l, SPIMConsole *p) :
-	SPIMConsoleDevice (l, p)
+void SpimConsoleDevice::ready_keyboard( int line ) throw()
 {
-	rdy = false;
+	TerminalController::ready_keyboard( line );
+	if( keyboard_interrupt[line] )
+		assertInt( line == 0 ? IRQ3 : IRQ5 );
 }
 
-void SPIMConsoleClock::setData (uint8 newData)
-{				/* ignores writes */
-}
-
-uint8 SPIMConsoleClock::data (void)
-{				/* reads as zero */
-  return 0;
-}
-
-void SPIMConsoleClock::read (void)
+void SpimConsoleDevice::unready_clock() throw()
 {
-	rdy = false;
+	clock_state = UNREADY;
+	deassertInt( IRQ2 );
 }
 
-void SPIMConsoleClock::check(void)
+void SpimConsoleDevice::ready_clock() throw( std::bad_alloc )
 {
-	struct timeval now_time;
+	clock_state = READY;
 
-	gettimeofday(&now_time, NULL);
-	if ((timer.tv_sec == 0) ||
-        (timediff(&now_time, &timer) > CLOCK_GRANULARITY)) {
-		rdy = true;
-		gettimeofday(&timer, NULL);
-	}
+	trigger = new ClockTrigger( this );
+	clock->add_deferred_task( trigger, CLOCK_TRIGGER_NS );
+
+	if( clock_interrupt )
+		assertInt( IRQ2 );
 }
 
-bool SPIMConsoleClock::ready(void)
+uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
+				      DeviceExc *client)
 {
-	check();
-	return rdy;
-}
-
-void SPIMConsoleKeyboard::check(void)
-{
-	bool new_rdy;
-	struct timeval now_time;
-
-	if (parent->host[lineno] && parent->host[lineno]->dataAvailable()) {
-		new_rdy = true;
-		gettimeofday(&now_time, NULL);
-		if ((new_rdy != rdy) ||
-		    (timediff(&now_time, &timer) >= IOSPEED)) {
-			parent->host[lineno]->read_byte(1, &databyte);
-			gettimeofday(&timer, NULL);
+	uint32 word = 0;
+	
+	switch( offset / 4 ) {
+	case 0:		// keyboard 1 control
+		word = keyboard_interrupt[0] ? CTL_IE : 0;
+		if( line_connected(0) )
+			word |= lines[0].keyboard_state;
+		break;
+	case 1:		// keyboard 1 data
+		if( line_connected(0) ) {
+			unready_keyboard( 0 );
+			word = lines[0].keyboard_char;
 		}
-		rdy = new_rdy;
-	}
-}
-
-bool SPIMConsoleKeyboard::ready(void)
-{
-	check();
-	return rdy;
-}
-
-uint8 SPIMConsoleKeyboard::data(void)
-{
-	rdy = false;
-	return databyte;
-}
-
-void SPIMConsole::periodic(void)
-{
-	if (host[0]) {
-		if (keyboard[0]->intEnable() && keyboard[0]->ready()) {
-			/* keyboard #1 interrupt is wired to interrupt line 3 */
-			assertInt(IRQ3);
-		} else {
-			deassertInt(IRQ3);
+		break;
+	case 2:		// display 1 control
+		word = display_interrupt[0] ? CTL_IE : 0;
+		if( line_connected(0) )
+			word |= lines[0].display_state;
+		else
+			word |= CTL_RDY;
+		break;
+	case 3:		// display 1 data
+		break;
+	case 4:		// keyboard 2 control
+		word = keyboard_interrupt[1] ? CTL_IE : 0;
+		if( line_connected(1) )
+			word |= lines[1].keyboard_state;
+		break;
+	case 5:		// keyboard 2 data
+		if( line_connected(1) ) {
+			unready_keyboard( 1 );
+			word = lines[1].keyboard_char;
 		}
-		if (display[0]->intEnable() && display[0]->ready()) {	
-			/* display #1 interrupt is wired to interrupt line 4 */
-			assertInt(IRQ4);
-		} else {
-			deassertInt(IRQ4);
-		}
+		break;
+	case 6:		// display 2 control
+		word = display_interrupt[1] ? CTL_IE : 0;
+		if( line_connected(1) )
+			word |= lines[1].display_state;
+		else
+			word |= CTL_RDY;
+		break;
+	case 7:		// display 2 data
+		break;
+	case 8:		// clock control
+		word = clock_interrupt ? CTL_IE : 0;
+		word |= clock_state;
+		unready_clock();
+		break;
+	default:
+		assert( ! "reached" );
 	}
-	if (host[1]) {
-		if (keyboard[1]->intEnable() && keyboard[1]->ready()) {
-			/* keyboard #2 interrupt is wired to interrupt line 5 */
-			assertInt(IRQ5);
-		} else {
-			deassertInt(IRQ5);
-		}
-		if (display[1]->intEnable() && display[1]->ready()) {
-			/* display #2 interrupt is wired to interrupt line 6 */
-			assertInt(IRQ6);
-		} else {
-			deassertInt(IRQ6);
-		}
-	}
-	if (clockdev->intEnable() && clockdev->ready()) {
-		/* clock interrupt is wired to interrupt line 2 */
-		assertInt(IRQ2);
-	} else {
-		deassertInt(IRQ2);
-	}
+
+	// FIXME: this is the broken spim byte swaping thing
+	return Mapper::mips_to_host_word(word);
 }
 
-SPIMConsoleDevice::SPIMConsoleDevice(int l, SPIMConsole *p)
+void SpimConsoleDevice::store_word( uint32 offset, uint32 data,
+				    DeviceExc *client )
 {
-	lineno = l;
-	parent = p;
-    ie = false;
-    timer.tv_sec = timer.tv_usec = 0;
-}
+	// FIXME: this is the broken spim byte swapping thing
+	data = Mapper::host_to_mips_word(data);
 
-bool
-SPIMConsoleDisplay::ready(void)
-{
-	struct timeval now;
-	struct timezone zone;
-
-	if (rdy) return true;
-	gettimeofday(&now, &zone);
-	if ((timer.tv_sec == 0) || (timediff(&now, &timer) >= 40000)) { 
-		rdy = true;
-		return true;
-	}
-	return false;
-}
-
-void
-SPIMConsoleDisplay::setData(uint8 newData)
-{
-	struct timezone zone;
-
-	if (!rdy) return;
-	rdy = false;
-	gettimeofday(&timer, &zone);
-	if (parent->host[lineno])
-		parent->host[lineno]->write_byte(newData);
-}
-
-SPIMConsole::SPIMConsole(SerialHost *h0 = NULL, SerialHost *h1 = NULL)
-{
-	extent = 36; /* 9 words */
-	keyboard[0] = NULL;
-	keyboard[1] = NULL;
-	display[0] = NULL;
-	display[1] = NULL;
-	clockdev = NULL;
-	host[0] = NULL;
-	host[1] = NULL;
-	if (h0 || h1) attach(h0, h1);
-}
-
-void
-SPIMConsole::attach(SerialHost *h0, SerialHost *h1)
-{
-	if (h0) {
-		host[0] = h0;
-		if (!keyboard[0]) { keyboard[0] = new SPIMConsoleKeyboard(0, this); }
-		if (!display[0]) { display[0] = new SPIMConsoleDisplay(0, this); }
-	}
-	if (h1) {
-		host[1] = h1;
-		if (!keyboard[1]) { keyboard[1] = new SPIMConsoleKeyboard(1, this); }
-		if (!display[1]) { display[1] = new SPIMConsoleDisplay(1, this); }
-	}
-	if (!clockdev) { clockdev = new SPIMConsoleClock(0, this); }
-}
-
-SPIMConsole::~SPIMConsole()
-{
-	if (keyboard[0]) { delete keyboard[0]; }
-	if (keyboard[1]) { delete keyboard[1]; }
-	if (display[0]) { delete display[0]; }
-	if (display[1]) { delete display[1]; }
-	if (clockdev) { delete clockdev; }
-}
-
-uint32
-SPIMConsole::fetch_word(uint32 offset, int mode, DeviceExc *client)
-{
-	int type = UNKNOWN;
-	SPIMConsoleDevice *device = NULL;
-	uint32 rv = 0;
-
-	get_type(offset, &type, &device);
-	if (!device) {
-		/* A display which is not connected is always ready
-		 * and ignores writes. A keyboard which is not connected
-		 * is never ready and reads as zero.
-		 */
-		switch (offset) {
-			case DISPLAY_1_CONTROL:
-			case DISPLAY_2_CONTROL:
-				rv = CTL_RDY;
-				break;
-			default:
-				rv = 0;
-				break;
-		}
-	} else if (type == CONTROL) {
-		rv = (device->intEnable() ? CTL_IE : 0) |
-			   (device->ready() ? CTL_RDY : 0);
-		if (device == clockdev) {
-			clockdev->read();
-		}
-	} else if (type == DATA) {
-		rv = device->data();
-	} else {
-		fprintf(stderr, "Impossible SPIM console register access!\n"
-			"offset=0x%lx mode=0x%x client=0x%lx\n",offset,mode,
-			(unsigned long) client);
-		abort();
-	}
-#if defined(BYTESWAPPED)
-	return Mapper::swap_word(rv);
-#else
-	return rv;
-#endif
-}
-
-uint16
-SPIMConsole::fetch_halfword(uint32 offset, DeviceExc *client)
-{
-	uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-	return ((uint16 *) &wd)[(offset & 0x03) >> 1];
-}
-
-uint8
-SPIMConsole::fetch_byte(uint32 offset, DeviceExc *client)
-{
-	uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-	return ((uint8 *) &wd)[offset & 0x03];
-}
-
-void
-SPIMConsole::get_type(uint32 offset, int *type, SPIMConsoleDevice **device)
-{
-	switch (offset) {
-		case KEYBOARD_1_CONTROL:
-			*type = CONTROL; *device = keyboard[0]; break;
-		case KEYBOARD_1_DATA:
-			*type = DATA; *device = keyboard[0]; break;
-		case DISPLAY_1_CONTROL:
-			*type = CONTROL; *device = display[0]; break;
-		case DISPLAY_1_DATA:
-			*type = DATA; *device = display[0]; break;
-		case KEYBOARD_2_CONTROL:
-			*type = CONTROL; *device = keyboard[1]; break;
-		case KEYBOARD_2_DATA:
-			*type = DATA; *device = keyboard[1]; break;
-		case DISPLAY_2_CONTROL:
-			*type = CONTROL; *device = display[1]; break;
-		case DISPLAY_2_DATA:
-			*type = DATA; *device = display[1]; break;
-		case CLOCK_CONTROL:
-			*type = CONTROL; *device = clockdev; break;
-		default:
-			*type = UNKNOWN; *device = NULL; break;
+	switch( offset / 4 ) {
+	case 0:		// keyboard 1 control
+		keyboard_interrupt[0] = data & CTL_IE;
+		if( line_connected(0) && keyboard_interrupt[0]
+		    && lines[0].display_state == READY )
+			assertInt( IRQ3 );
+		break;
+	case 1:		// keyboard 1 data
+		break;
+	case 2:		// display 1 control
+		display_interrupt[0] = data & CTL_IE;
+		if( line_connected(0) && display_interrupt[0]
+		    && lines[0].display_state == READY )
+			assertInt( IRQ4 );
+		break;
+	case 3:		// display 1 data
+		if( line_connected(0) )
+			unready_display( 0, data );
+		break;
+	case 4:		// keyboard 2 control
+		keyboard_interrupt[1] = data & CTL_IE;
+		if( line_connected(1) && keyboard_interrupt[1] &&
+		    lines[1].keyboard_state == READY )
+			assertInt( IRQ5 );
+		break;
+	case 5:		// keyboard 2 data
+		break;
+	case 6:		// display 2 control
+		display_interrupt[1] = data & CTL_IE;
+		if( line_connected(1) && display_interrupt[1] &&
+		    lines[1].display_state == READY )
+			assertInt( IRQ6 );
+		break;
+	case 7:		// display 2 data
+		if( line_connected(1) )
+			unready_display( 1, data );
+		break;
+	case 8:		// clock control
+		clock_interrupt = data & CTL_IE;
+		if( clock_interrupt && clock_state == READY )
+			assertInt( IRQ2 );
+		break;
+	default:
+		assert( ! "reached" );
 	}
 }
 
-uint32
-SPIMConsole::store_word(uint32 offset, uint32 data, DeviceExc *client)
+char *SpimConsoleDevice::descriptor_str()
 {
-	int type = UNKNOWN;
-	SPIMConsoleDevice *device = NULL;
-
-#if defined(BYTESWAPPED)
-	data = Mapper::swap_word(data);
-#endif
-	get_type(offset, &type, &device);
-	if (!device) {
-		/* A non-connected device ignores writes. */
-		return 0;
-	}
-	if (type == CONTROL) {
-		device->setIntEnable(data & CTL_IE);
-		/* Ready is read-only. */
-		return 0;
-	} else if (type == DATA) {
-		device->setData(data & 0x0ff);
-		return 0;
-	}
-	fprintf(stderr, "Impossible SPIM console register write!\n"
-		"offset=0x%lx data=0x%lx client=0x%lx\n",offset,data,
-		(unsigned long)client);
-	abort();
+	return "SPIM console";
 }
 
-uint16
-SPIMConsole::store_halfword(uint32 offset, uint16 data, DeviceExc *client)
-{
-	const uint32 word_offset = offset & 0xfffffffc;
-	const uint32 halfword_offset_in_word = (offset & 0x02) >> 1;
-	uint32 word_data = 0;
 
-	((uint16 *) &word_data)[halfword_offset_in_word] = data;
-	return store_word(word_offset, word_data, client);
+SpimConsoleDevice::ClockTrigger::ClockTrigger( SpimConsoleDevice *console )
+	throw()
+	: console( console )
+{
+	assert( console );
 }
 
-uint8
-SPIMConsole::store_byte(uint32 offset, uint8 data, DeviceExc *client)
+SpimConsoleDevice::ClockTrigger::~ClockTrigger() throw()
 {
-	const uint32 word_offset = offset & 0xfffffffc;
-	const uint32 byte_offset_in_word = (offset & 0x03);
-	uint32 word_data;
+}
 
-	((uint8 *) &word_data)[byte_offset_in_word] = data;
-	return store_word(word_offset, word_data, client);
+void SpimConsoleDevice::ClockTrigger::real_task()
+{
+	console->ready_clock();
 }

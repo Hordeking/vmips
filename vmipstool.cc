@@ -1,4 +1,21 @@
-/* A sensible interface to MIPS cross compilation tools. */
+/* A sensible interface to MIPS cross compilation tools.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* For later: ways to get page size:
 long sysconf(_SC_PAGE_SIZE);
@@ -50,7 +67,7 @@ void usage(void)
 	puts(" --ld-script=T  Use T as ld script (instead of default script);");
 	puts("                use with --link.");
 	puts("");
-	puts("Report bugs to <vmips@sartre.dgate.org>.");
+	puts("Report bugs to <vmips@dgate.org>.");
 }
 
 void maybe_echo(char **newargv)
@@ -184,7 +201,7 @@ int find_ldscript(void)
 	const char ldscript_name[] = "ld.script";
 
 	ldscript_search_path =
-		(char *) malloc(strlen(rest_of_path) + strlen(pkgdatadir) + 2);
+		new char[strlen(rest_of_path) + strlen(pkgdatadir) + 2];
 	strcpy(ldscript_search_path, pkgdatadir);
 	strcat(ldscript_search_path, rest_of_path);
 
@@ -195,7 +212,7 @@ int find_ldscript(void)
 
 int copy_with_padded_blocks(char *in, char *out, long size)
 {
-	char *buff = (char *) malloc(size);
+	char *buff = new char[size];
 	FILE *f = fopen(in, "rb");
 	if (!f)
 	{
@@ -240,6 +257,7 @@ int copy_with_padded_blocks(char *in, char *out, long size)
 	}
 	fclose(f);
 	fclose(g);
+	delete [] buff;
 	return 0;
 }
 

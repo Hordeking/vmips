@@ -17,7 +17,6 @@ the "Reporting Bugs" appendix of the Info manual.
 @c man begin AUTHOR
 vmipstool was written by Brian Gaeke.
 @c man end
-@ignore
 @c man begin COPYRIGHT
 Copyright @copyright{} 2001 Brian R. Gaeke.
 

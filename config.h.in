@@ -1,4 +1,4 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if on AIX 3.
    System headers sometimes define this.
@@ -51,10 +51,10 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
-/* Define if the MIPS cross target is Big-Endian. */
+/* Define to 1 if the MIPS cross target is Big-Endian, 0 otherwise. */
 #undef TARGET_BIG_ENDIAN
 
-/* Define if the MIPS cross target is Little-Endian. */
+/* Define to 1 if the MIPS cross target is Little-Endian, 0 otherwise. */
 #undef TARGET_LITTLE_ENDIAN
 
 /* Define if the SPIM-compatible console device is to be compiled in. */
@@ -143,11 +143,20 @@
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
+
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
+
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
@@ -157,4 +166,18 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define if __attribute__((noreturn)) syntax can be used to specify
+   that a function will never return. */
+#undef HAVE_ATTRIBUTE_NORETURN
+
+/* True if __attribute__((format (...))) syntax can be used to specify
+   that a function takes printf-style arguments. */
+#undef HAVE_ATTRIBUTE_FORMAT
+
+/* Currently not used. */
+#undef ASFLAGS
+
+/* Currently not used. */
+#undef AS
 

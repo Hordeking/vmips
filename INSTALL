@@ -6,27 +6,41 @@ distribution, or read the VMIPS Manual.
 Installation
 ************
 
-   The VMIPS build process assumes that you have a full set of GNU MIPS
-cross compilation tools installed, because you'll need them to do
-anything useful with VMIPS. For a concise summary of how to build the
-necessary MIPS cross tools, read "Building MIPS Cross Tools", below.
-
    VMIPS uses the GNU Autoconf/Automake system for configuration
 management.  This provides the familiar `configure' shell script
 interface for setting configuration variables. For more information
 about the special options that VMIPS `configure' accepts, read on, or
 give the `--help' option to `configure' for an abridged version.
 
+   The VMIPS build process assumes that you have a C++ compiler
+installed on the host machine which can deal correctly with template
+functions.  In particular, using GCC 2.91.66, also known as EGCS 1.1.2
+(the system compiler on Red Hat Linux 6.x systems)--or, we suspect, any
+older compiler--is not possible, because the compiler will crash,
+giving an "internal compiler error" message when trying to compile
+various VMIPS subsystems.  For that reason, `configure' checks for the
+bug in question and will print an error message ("your C++ compiler's
+template function handling is buggy") if you attempt to use a deficient
+compiler.
+
+   The VMIPS build process assumes that you have a full set of GNU MIPS
+cross compilation tools installed, because you'll need them to do
+anything useful with VMIPS. For a concise summary of how to build the
+necessary MIPS cross tools, read "Building MIPS Cross Tools", below.
+Note that you must provide the same `--target' option to VMIPS
+`configure' that you provided to GNU Binutils `configure'.
+
 Building from CVS
 =================
 
    If you retrieved your sources from the CVS repository, you will need
 Automake version 1.4 or later, Autoconf version 2.13 or later, and
-libtool 1.2f or later. You will need perl 5 to build the documentation.
-Your distribution will be missing many important files, including
-`configure'. To generate these, run `utils/bootstrap'. To automatically
-run configure once it has been generated, you can run `utils/bootstrap
--c CONFIGURE-ARGS'.
+libtool 1.2f or later. Newer versions of Autoconf (2.52f, 2.53) have
+been tested, and should also work.  You will need perl 5 to build the
+documentation.  Your distribution will be missing many important files,
+including `configure'. To generate these, run `utils/bootstrap'. To
+automatically run configure once it has been generated, you can run
+`utils/bootstrap -c CONFIGURE-ARGS'.
 
 Options that configure supports
 ===============================
@@ -38,8 +52,17 @@ to install the MIPS cross tools, by specifying it as the value to the
 libopcodes libtool library (which should have been installed by the
 binutils Makefile) is `/opt/mips/lib/libopcodes.la', then you should
 specify `--with-mips=/opt/mips' on the `configure' command line.
+Additionally, you will also need to tell `configure' the target you
+used to configure the MIPS cross tools, by specifying it as the value
+to the `--target' argument (see below).
 
-   Other options that "configure" supports are as follows:
+   Some of the interesting options that `configure' supports are as
+follows:
+
+`--target=T'
+     Specify the target used to configure your MIPS cross tools. `T'
+     must match the `--target' option provided to GNU Binutils
+     `configure'.
 
 `--with-mips=MDIR'
      Specify installation prefix of MIPS cross tools (default MDIR =
@@ -82,21 +105,21 @@ Building MIPS Cross Tools
 =========================
 
    First decide on an installation prefix. The following examples will
-use the prefix "/opt/mips", as above.
+use the prefix `/opt/mips', as above.
 
    Download a copy of Binutils, from any GNU mirror, or from the URL:
      <ftp://sources.redhat.com/pub/binutils/releases>
-   We recommend getting version 2.10.1. The file you will need would be
-named `binutils-2.10.1.tar.gz'.
+   We recommend getting version 2.11.2. The file you will need would be
+named `binutils-2.11.2.tar.gz'.
 
    Build binutils by running the following commands. We recommend
 `--disable-nls' because some recent versions do not build correctly with
 NLS (linking against `libopcodes.a' results in unresolved symbols.)
 
-     ./configure --target=mips-dec-ultrix4.3 --prefix=/opt/mips \
+     ./configure --target=mipsel-ecoff --prefix=/opt/mips \
       --disable-nls --enable-shared
      make
-     make install
+     make install install-info
 
    Save a copy of `include/dis-asm.h' from the Binutils source
 distribution.  You'll need to install it as `include/dis-asm.h' in the
@@ -106,7 +129,7 @@ version of Binutils you used and VMIPS.
    Download a copy of the GNU Compiler Collection (`gcc') from any GNU
 mirror, or from the URL:
      <ftp://gcc.gnu.org/pub/gcc/releases>
-   We recommend version 2.95.2. Download the file `gcc-2.95.2.tar.gz'.
+   We recommend version 3.0.2. Download the file `gcc-3.0.2.tar.gz'.
 
    You can read the documentation for building the compiler by pointing
 your World-Wide Web browser at <http://gcc.gnu.org/install>.  When you
@@ -115,7 +138,7 @@ documentation for building the compiler, because it is more complete
 than the following summary.
 
   1. Unpack the sources. Let's say you unpack them in `/usr/build',
-     creating the directory `/usr/build/gcc-2.95.2'.
+     creating the directory `/usr/build/gcc-3.0.2'.
 
   2. Create the build directory `/usr/build/gcc-mips-build'.
 
@@ -129,7 +152,7 @@ than the following summary.
      continuing a command on the following line, and are inserted for
      typesetting purposes.)
 
-          ../gcc-2.95.2/configure --target=mips-dec-ultrix4.3 \
+          ../gcc-3.0.2/configure --target=mipsel-ecoff \
            --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
            --disable-threads --disable-shared
 
@@ -155,11 +178,32 @@ than the following summary.
      If this works, you should be able to use the cross tools you have
      just built for VMIPS.
 
-     If you want to build a MIPS C library, you can also do that now,
+  7. If you want to use the GNU debugger (GDB) to debug MIPS programs
+     running on VMIPS, you can build that now.
+
+       1. Download a copy of the GNU debugger from any GNU mirror, or
+          from the URL:
+               <ftp://ftp.gnu.org/pub/gnu/gdb/>
+          We recommend version 5.0. Download the file `gdb-5.0.tar.gz'.
+
+       2. Unpack the file and change to the directory `gdb-5.0'.
+
+       3. Type the following commands to configure and build GDB:
+               ./configure --prefix=/opt/mips --target=mipsel-ecoff
+               make
+               make install install-info
+
+       4. You can now use the newly installed `mipsel-ecoff-gdb' to
+          debug programs with VMIPS, as described in the "Debugging"
+          section of the manual.
+
+  8. If you want to build a MIPS C library, you can also do that now,
      but it is not strictly required for many useful VMIPS tasks. Some
      persons have reported success using the "newlib" C library from
-     Cygnus. The GNU C Library (glibc) is fairly difficult to build.
-     Instructions for building a C library will appear here soon.
+     Red Hat. The GNU C Library (glibc) is, as of this writing, fairly
+     difficult to build without modifications to gcc and/or binutils.
+     Instructions for building a C library will appear here when they
+     solidify.
 
 The remainder of this file represents generic (i.e., not VMIPS-specific)
 instructions for using "configure".

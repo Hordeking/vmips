@@ -1,21 +1,20 @@
-/* remotegdb.cc - gdb glue for vmips debugging interface
- * 
- * This file consists almost entirely of code taken from the GNU debugger
- * (gdb), in file gdb-4.17/gdb/remote.c, where it had the copyright notice
- * reproduced below. Additions by me (brg) have been tagged with my initials.
- */
+/* remotegdb.cc - GNU Debugger glue for VMIPS remote debugger interface.
+    Based on
+   gdb/remote.c - Remote target communications for serial-line targets
+     in custom GDB protocol.
 
-/* Remote target communications for serial-line targets in custom GDB protocol
-   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free Software
+     Foundation, Inc.
+   Copyright 2001 Brian R. Gaeke.
 
-This file is part of GDB.
+This file is part of GDB and VMIPS.
 
-This program is free software; you can redistribute it and/or modify
+VMIPS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+VMIPS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -24,7 +23,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Remote communication protocol.
+/* This file consists almost entirely of code taken from the GNU debugger
+   (gdb) version 4.17, from file gdb/remote.c.  Additions by me (brg) have
+   been tagged with my initials.
+
+   See the GDB User Guide for the definitive details of the GDB remote
+   protocol.  The following notes correspond to the protocol for GDB
+   version 4.17.
+
+   Remote communication protocol.
 
    A debug packet whose contents are <data>
    is encapsulated for transmission in the form:
@@ -300,14 +307,6 @@ extern int remote_timeout;
    starts.  */
 /* brg - This is specified by the backend now; use an extern variable. */
 extern int remote_desc;
-
-/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
-   and i386-stub.c.  Normally, no one would notice because it only matters
-   for writing large chunks of memory (e.g. in downloads).  Also, this needs
-   to be more than 400 if required to hold the registers (see below, where
-   we round it up based on REGISTER_BYTES).  */
-/* brg - adjusted this to be 8 * 91 (90 regs in gdb) */
-#define	PBUFSIZ	728
 
 /* ... */
 

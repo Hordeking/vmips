@@ -1,20 +1,39 @@
+/* Memory module wrapper class.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "sysinclude.h"
 #include "memorymodule.h"
+#include "error.h"
 
 MemoryModule::MemoryModule(size_t size)
 {
 	len = size;
 	addr = (caddr_t) calloc(len/4, 4);
 	if (!addr) {
-		cerr << "Abort: out of memory allocating " << len/4 << " bytes" << endl;
-		abort();
+		fatal_error("Out of memory allocating %u bytes\n", len/4);
 	}
 }
 
 void
 MemoryModule::print(void)
 {
-	printf("([%lx] %lx)",(unsigned long) addr,len);
+	printf("([%lx] %x)",(unsigned long) addr,len);
 }
 
 MemoryModule::~MemoryModule()

@@ -1,17 +1,29 @@
-#ifndef __options_h__
-#define __options_h__
+/* Definitions to support options processing.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _OPTIONS_H_
+#define _OPTIONS_H_
 
 #include "sysinclude.h"
 
+/* This defines the name of the system default configuration file. */
 #define SYSTEM_CONFIG_FILE SYSCONFDIR"/vmipsrc"
-
-/* This is currently only used in the self tests. */
-#define NUM_MEMORY_MODULES 16
-
-/* reset vector minus KSEG1_CONST_TRANSLATION */
-#define ROM_BASE_ADDRESS 0x1fc00000
-
-#define DUMP_FILE_NAME "memdump.bin" /* eventually this should be an option */
 
 /* option types */
 enum {
@@ -71,4 +83,4 @@ public:
 	union OptionValue *option(char *name);
 };
 
-#endif /* __options_h__ */
+#endif /* _OPTIONS_H_ */

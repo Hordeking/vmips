@@ -1,5 +1,24 @@
-#ifndef __cpzero_h__
-#define __cpzero_h__
+/* Definitions to support the system control coprocessor.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _CPZERO_H_
+#define _CPZERO_H_
 
 #include "tlbentry.h"
 
@@ -57,7 +76,12 @@ public:
 	bool interrupt_pending(void);
 	void read_debug_info(uint32 *status, uint32 *bad, uint32 *cause);
 	void write_debug_info(uint32 status, uint32 bad, uint32 cause);
+	/* TLB translate VADDR without exceptions.  Returns true if a valid
+	 * TLB mapping is found, false otherwise. If VADDR has no valid mapping,
+	 * PADDR is written with 0xffffffff, otherwise it is written with the
+	 * translation.
+	 */
 	bool debug_tlb_translate(uint32 vaddr, uint32 *paddr);
 };
 
-#endif /* __cpzero_h__ */
+#endif /* _CPZERO_H_ */

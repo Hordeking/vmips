@@ -1,8 +1,8 @@
 
-/* Define if the MIPS cross target is Big-Endian. */
+/* Define to 1 if the MIPS cross target is Big-Endian, 0 otherwise. */
 #undef TARGET_BIG_ENDIAN
 
-/* Define if the MIPS cross target is Little-Endian. */
+/* Define to 1 if the MIPS cross target is Little-Endian, 0 otherwise. */
 #undef TARGET_LITTLE_ENDIAN
 
 /* Define if the SPIM-compatible console device is to be compiled in. */

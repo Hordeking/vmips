@@ -1,6 +1,6 @@
-dnl aclocal.m4 generated automatically by aclocal 1.4-p4
+dnl aclocal.m4 generated automatically by aclocal 1.4-p5
 
-dnl Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+dnl Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -11,36 +11,120 @@ dnl even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 dnl PARTICULAR PURPOSE.
 
 dnl acinclude.m4 -- This file is part of VMIPS.
-dnl $Id: acinclude.m4,v 1.7 2001/06/10 00:31:39 brg Exp $
 dnl It is used to build the configure script. See configure.in for details.
+
+dnl Local macro: VMIPS_CXX_ATTRIBUTE_NORETURN
+dnl Check for availability of __attribute__((noreturn)) syntax for specifying
+dnl that a function will never return. Defines HAVE_ATTRIBUTE_NORETURN if it
+dnl works. We assume that if the attribute-adorned function compiles without
+dnl giving a warning, then it is supported.
+
+AC_DEFUN(VMIPS_CXX_ATTRIBUTE_NORETURN,
+[AC_CACHE_CHECK([whether specifying that a function will never return works],
+[vmips_cv_cxx_attribute_noreturn],
+[if test "x$GXX" = "xyes" 
+ then
+   (CXXFLAGS="-Werror $CXXFLAGS"
+    AC_LANG_CPLUSPLUS
+    AC_TRY_COMPILE([#include <cstdlib>
+      __attribute__((noreturn)) void die(void) { abort(); }],
+      [],exit 0,exit 1))
+   if test $? -eq 0
+   then
+     vmips_cv_cxx_attribute_noreturn=yes
+   else
+     vmips_cv_cxx_attribute_noreturn=no
+   fi
+ else
+   vmips_cv_cxx_attribute_noreturn=no
+ fi])
+if test "$vmips_cv_cxx_attribute_noreturn" = yes
+then
+  AC_DEFINE(HAVE_ATTRIBUTE_NORETURN, 1,
+  [Define if __attribute__((noreturn)) syntax can be used to specify
+   that a function will never return.])
+fi])
+
+dnl Local macro: VMIPS_CXX_ATTRIBUTE_FORMAT
+dnl Check for availability of __attribute__((format (...))) syntax for
+dnl specifying that a function takes printf-style arguments. Defines
+dnl HAVE_ATTRIBUTE_PRINTF if it works. As with VMIPS_CXX_ATTRIBUTE_NORETURN,
+dnl we assume that if the attribute-adorned function compiles without giving
+dnl a warning, then it is supported.
+
+AC_DEFUN(VMIPS_CXX_ATTRIBUTE_FORMAT,
+[AC_CACHE_CHECK([whether specifying that a function takes printf-style arguments works], [vmips_cv_cxx_attribute_format],
+[if test "x$GXX" = "xyes"
+then
+  (CXXFLAGS="-Werror $CXXFLAGS"
+   AC_LANG_CPLUSPLUS
+   AC_TRY_COMPILE([#include <cstdlib>
+     __attribute__((format(printf, 1, 2)))
+     void myprintf(char *fmt, ...) { abort(); }],[],exit 0,exit 1))
+  if test $? -eq 0
+  then
+    vmips_cv_cxx_attribute_format=yes
+  else
+    vmips_cv_cxx_attribute_format=no
+  fi
+else
+  vmips_cv_cxx_attribute_format=no
+fi])
+if test "x$vmips_cv_cxx_attribute_format" = "xyes"
+then
+  AC_DEFINE(HAVE_ATTRIBUTE_FORMAT, 1,
+  [True if __attribute__((format (...))) syntax can be used to specify
+   that a function takes printf-style arguments.])
+fi])
+
+dnl Local macro: VMIPS_CXX_TEMPLATE_FUNCTIONS
+dnl Check for template function handling bug in, for example, pre-2.95 g++.
+dnl Abort with a configuration-time error if the test program doesn't compile.
+
+AC_DEFUN(VMIPS_CXX_TEMPLATE_FUNCTIONS,
+[AC_CACHE_CHECK([whether you can pass a template function to a function whose return type is the same as the type of its parameter],
+[vmips_cv_cxx_template_functions],
+[(AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([
+    template<class F> F x(F f) { }
+    template<class T> void y(T t) { }
+    void z(void) { x(y<int>); }
+  ],[],exit 0,exit 1))
+if test $? -eq 0
+then
+  vmips_cv_cxx_template_functions=yes
+else
+  vmips_cv_cxx_template_functions=no
+fi])
+if test "x$vmips_cv_cxx_template_functions" = "xno"
+then
+  AC_MSG_ERROR([your C++ compiler's template function handling is buggy; see INSTALL])
+fi])
 
 dnl Local macro: VMIPS_TYPE_SOCKLEN_T
 dnl #define socklen_t to int if socklen_t is not in sys/socket.h.
 
-AC_DEFUN(VMIPS_TYPE_SOCKLEN_T, [   
-AC_MSG_CHECKING(for socklen_t)
-AC_CACHE_VAL(ac_cv_type_socklen_t,
+AC_DEFUN(VMIPS_TYPE_SOCKLEN_T,
+[AC_CACHE_CHECK([for socklen_t], [vmips_cv_type_socklen_t],
 [AC_TRY_COMPILE(
 [#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>],
 [socklen_t foo; foo = 1; return 0;],
-ac_cv_type_socklen_t=yes, ac_cv_type_socklen_t=no)])dnl
-AC_MSG_RESULT($ac_cv_type_socklen_t)
-if test $ac_cv_type_socklen_t = no
+vmips_cv_type_socklen_t=yes, vmips_cv_type_socklen_t=no)])
+if test "x$vmips_cv_type_socklen_t" = "xno"
 then
   AC_DEFINE(socklen_t, int)
-fi
-])
+fi])
 
-dnl Local macro: VMIPS_STATIC_GETPWNAM
+dnl Local macro: VMIPS_LINK_STATIC_GETPWNAM
 dnl Can libtool compile statically linked programs that call getpwnam()?
 dnl On Solaris the answer is no, and we must dynamically link with libdl.
 dnl Based on AC_TRY_LINK from acgeneral.m4.
 
-AC_DEFUN(VMIPS_STATIC_GETPWNAM,
+AC_DEFUN(VMIPS_LINK_STATIC_GETPWNAM,
 [AC_CACHE_CHECK([whether programs calling getpwnam can be statically linked],
-[vmips_cv_static_getpwnam],[cat > conftest.$ac_ext <<EOF
+[vmips_cv_link_static_getpwnam],[cat > conftest.$ac_ext <<EOF
 [#]line __oline__ "configure"
 #include "confdefs.h"
 #include <stdio.h>
@@ -51,15 +135,15 @@ p = getpwnam("root");
 printf("%s\n", p->pw_name);
 return 0; }
 EOF
-vmips_cv_static_getpwnam=no
+vmips_cv_link_static_getpwnam=no
 if AC_TRY_COMMAND(./libtool --mode=compile $CXX $CXXFLAGS -c -o conftest.o conftest.$ac_ext 2>&AC_FD_CC 1>&AC_FD_CC)
 then
-	if AC_TRY_COMMAND(./libtool --mode=link $CXX $CXXFLAGS -all-static -o conftest${ac_exeext} conftest.o 2>&AC_FD_CC 1>&AC_FD_CC)
-	then
-		vmips_cv_static_getpwnam=yes
-	fi
+  if AC_TRY_COMMAND(./libtool --mode=link $CXX $CXXFLAGS -all-static -o conftest${ac_exeext} conftest.o 2>&AC_FD_CC 1>&AC_FD_CC)
+  then
+    vmips_cv_link_static_getpwnam=yes
+  fi
 fi
-if test "x$vmips_cv_static_getpwnam" = "xyes"
+if test "x$vmips_cv_link_static_getpwnam" = "xyes"
 then
   true
 else
@@ -67,7 +151,7 @@ else
   cat conftest.$ac_ext >&AC_FD_CC
 fi
 rm -rf conftest*])
-if test "x$vmips_cv_static_getpwnam" = "xyes"
+if test "x$vmips_cv_link_static_getpwnam" = "xyes"
 then
   SOLARIS_DL_HACK=""
 else
@@ -85,7 +169,7 @@ AC_SUBST(SOLARIS_DL_HACK)])
 dnl Usage:
 dnl AM_INIT_AUTOMAKE(package,version, [no-define])
 
-AC_DEFUN(AM_INIT_AUTOMAKE,
+AC_DEFUN([AM_INIT_AUTOMAKE],
 [AC_REQUIRE([AC_PROG_INSTALL])
 PACKAGE=[$1]
 AC_SUBST(PACKAGE)
@@ -113,7 +197,7 @@ AC_REQUIRE([AC_PROG_MAKE_SET])])
 # Check to make sure that the build environment is sane.
 #
 
-AC_DEFUN(AM_SANITY_CHECK,
+AC_DEFUN([AM_SANITY_CHECK],
 [AC_MSG_CHECKING([whether build environment is sane])
 # Just in case
 sleep 1
@@ -154,7 +238,7 @@ AC_MSG_RESULT(yes)])
 
 dnl AM_MISSING_PROG(NAME, PROGRAM, DIRECTORY)
 dnl The program must properly implement --version.
-AC_DEFUN(AM_MISSING_PROG,
+AC_DEFUN([AM_MISSING_PROG],
 [AC_MSG_CHECKING(for working $2)
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
@@ -170,7 +254,7 @@ AC_SUBST($1)])
 
 # Like AC_CONFIG_HEADER, but automatically create stamp file.
 
-AC_DEFUN(AM_CONFIG_HEADER,
+AC_DEFUN([AM_CONFIG_HEADER],
 [AC_PREREQ([2.12])
 AC_CONFIG_HEADER([$1])
 dnl When config.status generates a header, we must update the stamp-h file.
@@ -191,7 +275,14 @@ for am_file in <<$1>>; do
 done<<>>dnl>>)
 changequote([,]))])
 
-#serial 1
+# isc-posix.m4 serial 1 (gettext-0.10.40)
+dnl Copyright (C) 1995-2002 Free Software Foundation, Inc.
+dnl This file is free software, distributed under the terms of the GNU
+dnl General Public License.  As a special exception to the GNU General
+dnl Public License, this file may be distributed as part of a program
+dnl that contains a configuration script generated by Autoconf, under
+dnl the same distribution terms as the rest of that program.
+
 # This test replaces the one in autoconf.
 # Currently this macro should have the same name as the autoconf macro
 # because gettext's gettext.m4 (distributed in the automake package)
@@ -405,7 +496,7 @@ hpux*) # Its linker distinguishes data from code symbols
   lt_cv_global_symbol_to_cdecl="sed -n -e 's/^T .* \(.*\)$/extern char \1();/p' -e 's/^$symcode* .* \(.*\)$/extern char \1;/p'"
   lt_cv_global_symbol_to_c_name_address="sed -n -e 's/^: \([[^ ]]*\) $/  {\\\"\1\\\", (lt_ptr) 0},/p' -e 's/^$symcode* \([[^ ]]*\) \([[^ ]]*\)$/  {\"\2\", (lt_ptr) \&\2},/p'"
   ;;
-irix* | nonstopux*)
+irix*)
   symcode='[[BCDEGRST]]'
   ;;
 solaris* | sysv5*)
@@ -1048,7 +1139,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
       # like `-m68040'.
       lt_cv_prog_cc_pic='-m68020 -resident32 -malways-restore-a4'
       ;;
-    beos* | irix5* | irix6* | nonstopux* | osf3* | osf4* | osf5*)
+    beos* | irix5* | irix6* | osf3* | osf4* | osf5*)
       # PIC is the default for these OSes.
       ;;
     darwin* | rhapsody*)
@@ -1091,7 +1182,7 @@ AC_CACHE_VAL(lt_cv_prog_cc_pic,
       lt_cv_prog_cc_pic='+Z'
       ;;
 
-    irix5* | irix6* | nonstopux*)
+    irix5* | irix6*)
       lt_cv_prog_cc_wl='-Wl,'
       lt_cv_prog_cc_static='-non_shared'
       # PIC (with -KPIC) is the default.
@@ -1742,9 +1833,8 @@ else
     esac
     # FIXME: Relying on posixy $() will cause problems for
     #        cross-compilation, but unfortunately the echo tests do not
-    #        yet detect zsh echo's removal of \ escapes.  Also zsh mangles
-    #	     `"' quotes if we put them in here... so don't!
-    archive_cmds='$nonopt $(test .$module = .yes && echo -bundle || echo -dynamiclib) $allow_undefined_flag -o $lib $libobjs $deplibs$linker_flags -install_name $rpath/$soname $verstring'
+    #        yet detect zsh echo's removal of \ escapes.
+    archive_cmds='$nonopt $(test "x$module" = xyes && echo -bundle || echo -dynamiclib) $allow_undefined_flag -o $lib $libobjs $deplibs$linker_flags -install_name $rpath/$soname $verstring'
     # We need to add '_' to the symbols in $export_symbols first
     #archive_expsym_cmds="$archive_cmds"' && strip -s $export_symbols'
     hardcode_direct=yes
@@ -1796,7 +1886,7 @@ else
     export_dynamic_flag_spec='${wl}-E'
     ;;
 
-  irix5* | irix6* | nonstopux*)
+  irix5* | irix6*)
     if test "$GCC" = yes; then
       archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && echo ${wl}-set_version ${wl}$verstring` ${wl}-update_registry ${wl}${output_objdir}/so_locations -o $lib'
     else
@@ -2267,17 +2357,14 @@ hpux9* | hpux10* | hpux11*)
   postinstall_cmds='chmod 555 $lib'
   ;;
 
-irix5* | irix6* | nonstopux*)
-  case $host_os in
-    nonstopux*) version_type=nonstopux ;;
-    *)          version_type=irix ;;
-  esac
+irix5* | irix6*)
+  version_type=irix
   need_lib_prefix=no
   need_version=no
   soname_spec='${libname}${release}.so$major'
   library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major ${libname}${release}.so $libname.so'
   case $host_os in
-  irix5* | nonstopux*)
+  irix5*)
     libsuff= shlibsuff=
     ;;
   *)
@@ -2381,7 +2468,6 @@ os2*)
 osf3* | osf4* | osf5*)
   version_type=osf
   need_version=no
-  need_lib_prefix=no
   soname_spec='${libname}${release}.so'
   library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so $libname.so'
   shlibpath_var=LD_LIBRARY_PATH
@@ -3482,9 +3568,9 @@ hpux10.20*|hpux11*)
   lt_cv_file_magic_test_file=/usr/lib/libc.sl
   ;;
 
-irix5* | irix6* | nonstopux*)
+irix5* | irix6*)
   case $host_os in
-  irix5* | nonstopux*)
+  irix5*)
     # this will be overridden with pass_all, but let us keep it just in case
     lt_cv_deplibs_check_method="file_magic ELF 32-bit MSB dynamic lib MIPS - version 1"
     ;;
@@ -3505,7 +3591,13 @@ irix5* | irix6* | nonstopux*)
 
 # This must be Linux ELF.
 linux-gnu*)
-  lt_cv_deplibs_check_method=pass_all
+  case $host_cpu in
+  alpha* | hppa* | i*86 | powerpc* | sparc* | ia64* | s390* )
+    lt_cv_deplibs_check_method=pass_all ;;
+  *)
+    # glibc up to 2.1.1 does not perform some relocations on ARM
+    lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[LM]]SB (shared object|dynamic lib )' ;;
+  esac
   lt_cv_file_magic_test_file=`echo /lib/libc.so* /lib/libc-*.so`
   ;;
 
@@ -3636,12 +3728,12 @@ esac
 ])
 
 # AC_LIBLTDL_CONVENIENCE[(dir)] - sets LIBLTDL to the link flags for
-# the libltdl convenience library and LTDLINCL to the include flags for
+# the libltdl convenience library and INCLTDL to the include flags for
 # the libltdl header and adds --enable-ltdl-convenience to the
-# configure arguments.  Note that LIBLTDL and LTDLINCL are not
+# configure arguments.  Note that LIBLTDL and INCLTDL are not
 # AC_SUBSTed, nor is AC_CONFIG_SUBDIRS called.  If DIR is not
 # provided, it is assumed to be `libltdl'.  LIBLTDL will be prefixed
-# with '${top_builddir}/' and LTDLINCL will be prefixed with
+# with '${top_builddir}/' and INCLTDL will be prefixed with
 # '${top_srcdir}/' (note the single quotes!).  If your package is not
 # flat and you're not using automake, define top_builddir and
 # top_srcdir appropriately in the Makefiles.
@@ -3653,18 +3745,16 @@ AC_DEFUN([AC_LIBLTDL_CONVENIENCE],
       ac_configure_args="$ac_configure_args --enable-ltdl-convenience" ;;
   esac
   LIBLTDL='${top_builddir}/'ifelse($#,1,[$1],['libltdl'])/libltdlc.la
-  LTDLINCL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
-  # For backwards non-gettext consistent compatibility...
-  INCLTDL="$LTDLINCL"
+  INCLTDL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
 ])
 
 # AC_LIBLTDL_INSTALLABLE[(dir)] - sets LIBLTDL to the link flags for
-# the libltdl installable library and LTDLINCL to the include flags for
+# the libltdl installable library and INCLTDL to the include flags for
 # the libltdl header and adds --enable-ltdl-install to the configure
-# arguments.  Note that LIBLTDL and LTDLINCL are not AC_SUBSTed, nor is
+# arguments.  Note that LIBLTDL and INCLTDL are not AC_SUBSTed, nor is
 # AC_CONFIG_SUBDIRS called.  If DIR is not provided and an installed
 # libltdl is not found, it is assumed to be `libltdl'.  LIBLTDL will
-# be prefixed with '${top_builddir}/' and LTDLINCL will be prefixed
+# be prefixed with '${top_builddir}/' and INCLTDL will be prefixed
 # with '${top_srcdir}/' (note the single quotes!).  If your package is
 # not flat and you're not using automake, define top_builddir and
 # top_srcdir appropriately in the Makefiles.
@@ -3682,14 +3772,12 @@ AC_DEFUN([AC_LIBLTDL_INSTALLABLE],
   if test x"$enable_ltdl_install" = x"yes"; then
     ac_configure_args="$ac_configure_args --enable-ltdl-install"
     LIBLTDL='${top_builddir}/'ifelse($#,1,[$1],['libltdl'])/libltdl.la
-    LTDLINCL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
+    INCLTDL='-I${top_srcdir}/'ifelse($#,1,[$1],['libltdl'])
   else
     ac_configure_args="$ac_configure_args --enable-ltdl-install=no"
     LIBLTDL="-lltdl"
-    LTDLINCL=
+    INCLTDL=
   fi
-  # For backwards non-gettext consistent compatibility...
-  INCLTDL="$LTDLINCL"
 ])
 
 # old names

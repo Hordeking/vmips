@@ -1,5 +1,24 @@
-#ifndef __debug_h__
-#define __debug_h__
+/* Defintions to support the remote debugging interface.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _DEBUG_H_
+#define _DEBUG_H_
 
 #include "sysinclude.h"
 #include "deviceexc.h"
@@ -59,7 +78,7 @@ private:
 	char *target_last_signal(char *pkt);
 	char *target_unimplemented(char *pkt);
 	int exccode_to_signal(int exccode);
-	/* ROM breakpoint support */
+	/* ROM breakpoint support methods. */
 	bool rom_breakpoint_exists(uint32 addr);
 	void declare_rom_breakpoint(uint32 addr);
 	void remove_rom_breakpoint(uint32 addr);
@@ -68,4 +87,4 @@ private:
 	bool is_breakpoint_insn(char *packetptr);
 };
 
-#endif /* __debug_h__ */
+#endif /* _DEBUG_H_ */

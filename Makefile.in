@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -9,8 +9,6 @@
 # but WITHOUT ANY WARRANTY, to the extent permitted by law; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
-
-# Makefile.in created from: $Id: Makefile.am,v 1.43 2001/08/10 07:51:47 brg Exp $
 
 
 SHELL = @SHELL@
@@ -59,9 +57,14 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
 host_alias = @host_alias@
 host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
 AS = @AS@
+ASFLAGS = @ASFLAGS@
 AWK = @AWK@
 CC = @CC@
 CPP = @CPP@
@@ -83,31 +86,44 @@ VERSION = @VERSION@
 mipsbfdtarget = @mipsbfdtarget@
 mipsbin = @mipsbin@
 mipscpp = @mipscpp@
-mipsinclude = @mipsinclude@
-mipslib = @mipslib@
+mipsincdirs = @mipsincdirs@
+mipslibdirs = @mipslibdirs@
 mipstoolprefix = @mipstoolprefix@
 
 SUBDIRS = . sample_code test_code doc 
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
-DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control  debian/copyright debian/dirs debian/docs debian/info debian/rules
+DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
+ debian/copyright debian/dirs debian/docs debian/info debian/rules
 
-EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh  $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
+EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh \
+ $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
 
 
 # What are we building here?
 bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
-CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\"   -I$(top_srcdir)/include -I$(mipsinclude) @CXXFLAGS@
+CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\" \
+  $(mipsincdirs) -I$(top_srcdir)/include @CXXFLAGS@
 
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc   mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc   spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc zschip.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc   cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h   sysinclude.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h
+vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
+  mapper.cc memorymodule.cc options.cc range.cc intctrl.cc \
+  spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc \
+  deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
+  clock.cc task.cc terminalcontroller.cc haltdev.cc \
+  cpu.h cpzero.h cpzeroreg.h deviceint.h \
+  devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
+  range.h regnames.h spimconsole.h spimconsreg.h \
+  sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h \
+  accesstypes.h deviceexc.h clockdev.h excnames.h error.h \
+  clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
+  haltreg.h wipe.h
 
-vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la   $(mipslib)/libiberty.a
-
+vmips_LDADD = $(mipslibdirs) -lopcodes -lbfd -liberty
 vmips_LDFLAGS = -static
 
 # Huh, huhuh, it says tool.
@@ -119,7 +135,7 @@ sysconf_DATA = vmipsrc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =  vmips.spec buildstat.sh
+CONFIG_CLEAN_FILES =  buildstat.sh vmips.spec
 bin_PROGRAMS =  vmips$(EXEEXT) vmipstool$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS)
 
@@ -128,15 +144,14 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-vmips_OBJECTS =  cache.$(OBJEXT) cacheline.$(OBJEXT) cpu.$(OBJEXT) \
-cpzero.$(OBJEXT) devicemap.$(OBJEXT) mapper.$(OBJEXT) \
-memorymodule.$(OBJEXT) options.$(OBJEXT) range.$(OBJEXT) \
-serialhost.$(OBJEXT) intctrl.$(OBJEXT) spimconsole.$(OBJEXT) \
-stub-dis.$(OBJEXT) tlbentry.$(OBJEXT) vmips.$(OBJEXT) zschip.$(OBJEXT) \
+vmips_OBJECTS =  cpu.$(OBJEXT) cpzero.$(OBJEXT) devicemap.$(OBJEXT) \
+mapper.$(OBJEXT) memorymodule.$(OBJEXT) options.$(OBJEXT) \
+range.$(OBJEXT) intctrl.$(OBJEXT) spimconsole.$(OBJEXT) \
+stub-dis.$(OBJEXT) tlbentry.$(OBJEXT) vmips.$(OBJEXT) \
 deviceint.$(OBJEXT) debug.$(OBJEXT) remotegdb.$(OBJEXT) \
-clockdev.$(OBJEXT)
-vmips_DEPENDENCIES =  $(mipslib)/libopcodes.la $(mipslib)/libbfd.la \
-$(mipslib)/libiberty.a
+clockdev.$(OBJEXT) error.$(OBJEXT) clock.$(OBJEXT) task.$(OBJEXT) \
+terminalcontroller.$(OBJEXT) haltdev.$(OBJEXT)
+vmips_DEPENDENCIES = 
 vmipstool_OBJECTS =  vmipstool.$(OBJEXT)
 vmipstool_LDADD = $(LDADD)
 vmipstool_DEPENDENCIES = 
@@ -160,7 +175,7 @@ configure.in install-sh ltmain.sh missing mkinstalldirs vmips.spec.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(vmips_SOURCES) $(vmipstool_SOURCES)
 OBJECTS = $(vmips_OBJECTS) $(vmipstool_OBJECTS)
@@ -178,7 +193,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4):  configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -210,9 +225,9 @@ distclean-hdr:
 	-rm -f config.h
 
 maintainer-clean-hdr:
-vmips.spec: $(top_builddir)/config.status vmips.spec.in
-	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 buildstat.sh: $(top_builddir)/config.status buildstat.sh.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+vmips.spec: $(top_builddir)/config.status vmips.spec.in
 	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-binPROGRAMS:
@@ -353,7 +368,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

@@ -1,15 +1,15 @@
 
-   VMIPS 1.0.4 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.1 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
-This is a minor bug-fix release.
+This is a release with significant enhancements over the VMIPS 1.0 series.
 
-   You can download VMIPS 1.0.4 from any of the following sites:
+   You can download VMIPS 1.1 from any of the following sites:
 
 * ftp://download.sourceforge.net/pub/sourceforge/vmips/
-* ftp://sartre.dgate.org/vmips/releases/vmips-1.0.4/
+* ftp://ftp.dgate.org/vmips/releases/vmips-1.1/
 * http://download.sourceforge.net/vmips/
-* https://github.com/Hordeking/vmips/releases/vmips-1.0.4/
-* http://vmips.sourceforge.net/releases/vmips-1.0.4/
+* http://www.dgate.org/vmips/releases/vmips-1.1/
+* http://vmips.sourceforge.net/releases/vmips-1.1/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -18,30 +18,42 @@ others; for details, please see the files "AUTHORS" and "THANKS". New
 features since the last publically released version are detailed in
 "NEWS".
 
-   The home page for VMIPS is "https://github.com/Hordeking/vmips". For bug
+   The home page for VMIPS is "http://www.dgate.org/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.0.4 (since version 1.0.3):
+   User-visible changes in version 1.1 (since version 1.0.4):
 
-* Fixed bug where the first instruction of an interrupt handler would be
-  executed twice in a row. Thanks to Paul Twohey.
-* Workaround some problems in the way casts are used in VMIPS by specifying
-  -fno-strict-aliasing to gcc in configure; this should help avoid
-  miscompilations for now, until the code can be rewritten for cast-safety.
-* Fix bug where vmips would dereference a NULL pointer when trying to use a
-  SPIMConsole device with a non-attached serial host. Thanks to Paul Twohey.
-* Reorder some tests in the SPIMConsole code for a slight speedup when
-  interrupts are turned off.
-* Fix bug where virtual page numbers were being incorrectly interpreted
-  by the system control coprocessor, resulting in excess TLB misses being
-  generated. Thanks to Sanjeev Datla.
+* If you are using g++ to compile VMIPS, you must use g++ version 2.95
+  or later. Also, you must specify the --target option to `configure',
+  with an argument that matches the --target option to binutils
+  `configure'. See `INSTALL'.
+* VMIPS now supports GNU standard --help and --version options.
+* The manual now includes improved documentation for using gdb and
+  Insight to control VMIPS, a section on the differences between SPIM's
+  console and the SPIM-compatible console device, a section on proper
+  error reporting from VMIPS extensions, and many other minor
+  revisions.
+* Using gdb to control VMIPS is now much more robust in the face of
+  errors and exceptions.
+* VMIPS 1.1 makes it possible to use the 2nd display/keyboard channel
+  of the SPIM-compatible console device, using the `ttydev2' option.
+* VMIPS now includes a halt device, which can be used to halt the
+  simulator without using a special instruction.
+* VMIPS 1.1 is much faster than VMIPS 1.0.4. This is due in large part
+  to the efforts of Paul Twohey, who reimplemented the clock and
+  SPIM-compatible console devices, and cleaned up the code a bit.
+* The VMIPS distribution now includes a regression test suite, based on
+  DejaGNU (replaces the old test_code directory). In order to support
+  this, the formats of lots of random messages that VMIPS prints out
+  have changed.
+* We now support 64-bit hosts (e.g., Alpha). 
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_0-branch". VMIPS 1.0.4 itself can be checked out using the tag
-"release-1-0-4".
+"vmips-1_1-branch". VMIPS 1.1 itself can be checked out using the tag
+"release-1-1".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.
 
--Brian Gaeke and the VMIPS developers <vmips@sartre.dgate.org>
+-Brian Gaeke and the VMIPS developers <vmips@dgate.org>
 

@@ -1,3 +1,9 @@
+vmips (1.1-1) unstable; urgency=low
+
+  * Updated package to version 1.1.
+
+ -- Brian Gaeke <vmips@sartre.dgate.org>  Fri, 10 May 2002 02:32:51 -0700
+
 vmips (1.0-1) unstable; urgency=low
 
   * Initial Release.

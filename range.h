@@ -1,57 +1,73 @@
-#ifndef __range_h__
-#define __range_h__
+/* Definitions to support mapping ranges.
+   Copyright 2001 Brian R. Gaeke.
 
-/* Mapping types */
-#define UNUSED 0    /* Not in use, maps no addrs. */
-#define MALLOC 1    /* Malloc'd memory */
-#define MMAP 2      /* Mmapped file */
-#define DEVICE 3    /* See devicemap.h */
-#define PROXY 4     /* This ProxyRange points to another Range object */
-#define OTHER 5     /* Something else? */
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _RANGE_H_
+#define _RANGE_H_
 
 class CPU;
 class DeviceExc;
 
-/* A doubly linked sorted list of memory mappings. */
+/* Types of mappings. In the future this can go away and be
+ * replaced by subclasses of Range.
+ */
+typedef enum range_type {
+	MALLOC = 1,	/* malloc()'d memory */
+	MMAP = 2,	/* mmap()'d memory */
+	DEVICE = 3,	/* A device is in this range. See devicemap.h */
+	PROXY = 4,	/* A ProxyRange. Points to another Range object */
+} range_type;
+
+/* Base class for managing a range of mapped memory. Memory-mapped
+ * devices (class DeviceMap) derive from this, as do ProxyRanges.
+ */
 class Range { 
 protected:
-	uint32 base;	/* beginning virt.machine addr represented by the Range */
-	uint32 extent;	/* size of virt.machine address space */
-	caddr_t address;  /* host machine's pointer to beginning of memory */
-	Range *next;	/* next Range in list */
-	Range *prev;	/* previous Range in list */
-	int32 type;		/* See above for "Mapping types" */
-	int perms;      /* MEM_READ, MEM_WRITE, etc. in accesstypes.h */
+	uint32 base;		/* first physical address represented */
+	uint32 extent;		/* number of memory words provided */
+	caddr_t address;	/* host machine pointer to start of memory */
+	range_type type;	/* See above for "Mapping types" */
+	int perms;		/* MEM_READ, MEM_WRITE, ... in accesstypes.h */
 
 public:
-	Range(uint32 b, uint32 e, caddr_t a, int32 t, int p, Range *n = NULL);
+	Range(uint32 b, uint32 e, caddr_t a, range_type t, int p) throw();
 	virtual ~Range();
-	virtual Range *insert(Range *newrange);
-	virtual bool incorporates(uint32 addr);
-	virtual char *descriptor_str(void);
-	virtual void print(void);
+	
+	virtual bool incorporates(uint32 addr) throw();
+	virtual bool overlaps(Range *r) throw();
 
-	virtual uint32 getBase(void);
-	virtual uint32 getExtent(void);
-	virtual caddr_t getAddress(void);
-	virtual int32 getType(void);
-	virtual Range *getPrev(void);
-	virtual void setPrev(Range *newPrev);
-	virtual Range *getNext(void);
-	virtual void setNext(Range *newNext);
+	virtual uint32 getBase() throw();
+	virtual uint32 getExtent() throw();
+	virtual caddr_t getAddress() throw();
+	virtual int32 getType() throw();
+	virtual int getPerms() throw();
 
-	virtual int getPerms(void);
-	virtual void setPerms(int newPerms);
-	virtual bool canRead(uint32 offset);
-	virtual bool canWrite(uint32 offset);
+	virtual void setPerms(int newPerms) throw();
+	virtual bool canRead(uint32 offset) throw();
+	virtual bool canWrite(uint32 offset) throw();
 
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
 	virtual uint16 fetch_halfword(uint32 offset, DeviceExc *client);
 	virtual uint8 fetch_byte(uint32 offset, DeviceExc *client);
-	virtual uint32 store_word(uint32 offset, uint32 data, DeviceExc *client);
-	virtual uint16 store_halfword(uint32 offset, uint16 data,
+	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
+	virtual void store_halfword(uint32 offset, uint16 data,
 		DeviceExc *client);
-	virtual uint8 store_byte(uint32 offset, uint8 data, DeviceExc *client);
+	virtual void store_byte(uint32 offset, uint8 data, DeviceExc *client);
 };
 
 class ProxyRange: public Range
@@ -59,22 +75,22 @@ class ProxyRange: public Range
 private:
 	Range *realRange;
 public:
-	ProxyRange(Range *r, uint32 b, Range *n = NULL);
+	ProxyRange(Range *r, uint32 b);
 
-	virtual Range *getRealRange(void);
+	virtual Range *getRealRange(void) throw();
 
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
 	virtual uint16 fetch_halfword(uint32 offset, DeviceExc *client);
 	virtual uint8 fetch_byte(uint32 offset, DeviceExc *client);
-	virtual uint32 store_word(uint32 offset, uint32 data, DeviceExc *client);
-	virtual uint16 store_halfword(uint32 offset, uint16 data,
+	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
+	virtual void store_halfword(uint32 offset, uint16 data,
 		DeviceExc *client);
-	virtual uint8 store_byte(uint32 offset, uint8 data, DeviceExc *client);
+	virtual void store_byte(uint32 offset, uint8 data, DeviceExc *client);
 
-	virtual int getPerms(void);
-	virtual void setPerms(int newPerms);
-	virtual bool canRead(uint32 offset);
-	virtual bool canWrite(uint32 offset);
+	virtual int getPerms(void) throw();
+	virtual void setPerms(int newPerms) throw();
+	virtual bool canRead(uint32 offset) throw();
+	virtual bool canWrite(uint32 offset) throw();
 };
 
-#endif /* __range_h__ */
+#endif /* _RANGE_H_ */

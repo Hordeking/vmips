@@ -1,8 +1,33 @@
+/* MIPS R3000 CPU emulation.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "cpu.h"
 #include "vmips.h"
 #include "options.h"
 #include "regnames.h"
+#include "excnames.h"
 #include "cpzeroreg.h"
+#include "error.h"
+#include "remotegdb.h"
+
+/* pointer to CPU method returning void and taking two uint32's */
+typedef void (CPU::*emulate_funptr)(uint32, uint32);
 
 char *const
 CPU::strdelaystate(const int state)
@@ -12,17 +37,25 @@ CPU::strdelaystate(const int state)
 	return statestr[state];
 }
 
-CPU::CPU(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL)
+CPU::CPU(vmips *mch, Mapper *m, CPZero *cp0)
 {
 	delay_state = NORMAL;
+	reg[REG_ZERO] = 0;
 	attach(mch,m,cp0);
 }
 
 void
-CPU::attach(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL)
+CPU::attach(vmips *mch, Mapper *m, CPZero *cp0)
 {
-	reg[zero] = 0;
-	if (mch) machine = mch;
+	if (mch) {
+		machine = mch;
+		opt_excmsg = machine->opt->option("excmsg")->flag;
+		opt_excpriomsg = machine->opt->option("excpriomsg")->flag;
+		opt_haltbreak = machine->opt->option("haltbreak")->flag,
+		opt_haltibe = machine->opt->option("haltibe")->flag;
+		opt_haltjrra = machine->opt->option("haltjrra")->flag;
+		opt_instdump = machine->opt->option("instdump")->flag;
+	}
 	if (m) mem = m;
 	if (cp0) cpzero = cp0;
 }
@@ -36,7 +69,7 @@ CPU::reset(void)
 		reg[r] = random();
 	}
 #endif /* INTENTIONAL_CONFUSION */
-	reg[zero] = 0;
+	reg[REG_ZERO] = 0;
 	pc = 0xbfc00000;
 	cpzero->reset();
 }
@@ -46,14 +79,16 @@ CPU::dump_regs(FILE *f)
 {
 	int i;
 
-	fprintf(f,"Reg Dump:  PC=%08lx Last Instr=%08lx HI=%08lx LO=%08lx\n",
+	fprintf(f,"Reg Dump: [ PC=%08x  LastInstr=%08x  HI=%08x  LO=%08x\n",
 		pc,instr,hi,lo);
-	fprintf(f,"  DELAY_STATE = %s ; DELAY_PC=%08lx ; NEXT_EPC = %08lx\n",
+	fprintf(f,"            DelayState=%s  DelayPC=%08x  NextEPC=%08x\n",
 		strdelaystate(delay_state), delay_pc, next_epc);
 	for (i = 0; i < 32; i++) {
-		fprintf(f," R%02d=%08lx ",i,reg[i]);
-		if (i % 5 == 4 || i == 31) {
+		fprintf(f," R%02d=%08x ",i,reg[i]);
+		if (i % 5 == 4) {
 			fputc('\n',f);
+		} else if (i == 31) {
+			fprintf(f, " ]\n");
 		}
 	}
 }
@@ -64,10 +99,10 @@ CPU::dump_regs_and_stack(FILE *f)
 	uint32 stackphys;
 
 	dump_regs(f);
-	if (cpzero->debug_tlb_translate(reg[sp], &stackphys)) {
+	if (cpzero->debug_tlb_translate(reg[REG_SP], &stackphys)) {
 		mem->dump_stack(f, stackphys);
 	} else {
-		fprintf(f, "(stack not mapped in TLB)\n");
+		fprintf(f, "Stack: (not mapped in TLB)\n");
 	}
 }
 
@@ -203,18 +238,17 @@ CPU::exception_priority(uint16 excCode, int mode)
 		{9, Int, ANY},
 		{0, ANY, ANY} /* catch-all */
 	};
-	bool excpriomsg = machine->opt->option("excpriomsg")->flag;
 
 	for (p = prio; p->priority != 0; p++) {
 		if (excCode == p->excCode || p->excCode == ANY) {
 			if (mode == p->mode || p->mode == ANY) {
 				return p->priority;
-			} else if (excpriomsg) {
+			} else if (opt_excpriomsg) {
 				fprintf(stderr,
 					"exception code matches but mode %d != table %d\n",
 					mode,p->mode);
 			}
-		} else if (excpriomsg) {
+		} else if (opt_excpriomsg) {
 			fprintf(stderr, "exception code %d != table %d\n", excCode,
 				p->excCode);
 		}
@@ -223,32 +257,28 @@ CPU::exception_priority(uint16 excCode, int mode)
 }
 
 void
-CPU::exception(uint16 excCode, int mode = ANY, int coprocno = -1)
+CPU::exception(uint16 excCode, int mode, int coprocno)
 {
 	static uint32 last_epc = 0;
 	static int last_prio = 0;
 	int prio;
 	uint32 base, vector, epc;
 	bool delaying = (delay_state == DELAYSLOT);
-	bool haltbreak = machine->opt->option("haltbreak")->flag,
-		haltibe = machine->opt->option("haltibe")->flag,
-		excpriomsg = machine->opt->option("excpriomsg")->flag,
-		excmsg = machine->opt->option("excmsg")->flag;
 
-	if (haltbreak) {
+	if (opt_haltbreak) {
 		if (excCode == Bp) {
 			fprintf(stderr,"* BREAK instruction reached -- HALTING *\n");
 			machine->halt();
 		}
 	}
-	if (haltibe) {
+	if (opt_haltibe) {
 		if (excCode == IBE) {
 			fprintf(stderr,"* Instruction bus error occurred -- HALTING *\n");
 			machine->halt();
 		}
 	}
 
-	/* periodic() ensures that next_epc will always contain the correct
+	/* step() ensures that next_epc will always contain the correct
 	 * EPC whenever exception() is called.
 	 */
 	epc = next_epc;
@@ -261,12 +291,12 @@ CPU::exception(uint16 excCode, int mode = ANY, int coprocno = -1)
 	 * applies IFF the previous exception was caught during the current
 	 * _execution_ of the instruction at this EPC, so we check that
 	 * EXCEPTION_PENDING is true before aborting exception handling.
-	 * (This flag is reset by each call to periodic().)
+	 * (This flag is reset by each call to step().)
 	 */
 	prio = exception_priority(excCode, mode);
 	if (epc == last_epc) {
 		if (prio <= last_prio && exception_pending) {
-			if (excpriomsg) {
+			if (opt_excpriomsg) {
 				fprintf(stderr,
 					"(Ignoring additional lower priority exception...)\n");
 			}
@@ -302,8 +332,8 @@ CPU::exception(uint16 excCode, int mode = ANY, int coprocno = -1)
 		vector = 0x080;
 	}
 
-	if (excmsg) {
-		fprintf(stderr,"Exception %d (%s) triggered, EPC=%lx\n", excCode, 
+	if (opt_excmsg) {
+		fprintf(stderr,"Exception %d (%s) triggered, EPC=%08x\n", excCode, 
 			strexccode(excCode), epc);
 		fprintf(stderr,
 			" Priority is %d; delay state is %s; mem access mode is %s\n",
@@ -323,7 +353,7 @@ CPU::cpzero_emulate(uint32 instr, uint32 pc)
 void
 CPU::cpone_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %lx not implemented at pc=0x%lx\n",
+	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x\n",
 		instr,pc);
 	exception(CpU,ANY,1);
 }
@@ -331,7 +361,7 @@ CPU::cpone_emulate(uint32 instr, uint32 pc)
 void
 CPU::cptwo_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %lx not implemented at pc=0x%lx\n",
+	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x\n",
 		instr,pc);
 	exception(CpU,ANY,2);
 }
@@ -339,7 +369,7 @@ CPU::cptwo_emulate(uint32 instr, uint32 pc)
 void
 CPU::cpthree_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %lx not implemented at pc=0x%lx\n",
+	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x\n",
 		instr,pc);
 	exception(CpU,ANY,3);
 }
@@ -369,7 +399,7 @@ CPU::jal_emulate(uint32 instr, uint32 pc)
 	delay_state = DELAYING;
 	delay_pc = calc_jump_target(instr, pc);
 	/* RA gets addr of instr after delay slot (2 words after this one). */
-	reg[ra] = pc + 8;
+	reg[REG_RA] = pc + 8;
 }
 
 /* Take the PC-relative branch for which the offset is specified by
@@ -563,7 +593,7 @@ CPU::lh_emulate(uint32 instr, uint32 pc)
  */
 uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 {
-#if defined(TARGET_BIG_ENDIAN)
+	if (TARGET_BIG_ENDIAN) {
 		switch (offset)
 		{
 			case 0: return (regval & 0xffffff00) |
@@ -574,7 +604,7 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 						((unsigned)(memval & 0xffffff00) >> 8);
 			case 3: return memval;
 		}
-#elif defined(TARGET_LITTLE_ENDIAN)
+	} else if (TARGET_LITTLE_ENDIAN) {
 		switch (offset)
 		{
 			/* The SPIM source claims that "The description of the
@@ -592,14 +622,13 @@ uint32 lwr(uint32 regval, uint32 memval, uint8 offset)
 			case 3: /* 2 in book */
 				return (regval & 0xffffff00) | ((memval & 0xff000000) >> 24);
 		}
-#endif
-	fprintf(stderr, "Invalid offset %x passed to lwr\n", offset);
-	abort();
+	}
+	fatal_error("Invalid offset %x passed to lwr\n", offset);
 }
 
 uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 {
-#if defined(TARGET_BIG_ENDIAN)
+	if (TARGET_BIG_ENDIAN) {
 		switch (offset)
 		{
 			case 0: return memval;
@@ -607,7 +636,7 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 			case 2: return (memval & 0xffff) << 16 | (regval & 0xffff);
 			case 3: return (memval & 0xff) << 24 | (regval & 0xffffff);
 		}
-#elif defined(TARGET_LITTLE_ENDIAN)
+	} else if (TARGET_LITTLE_ENDIAN) {
 		switch (offset)
 		{
 			case 0: return (memval & 0xff) << 24 | (regval & 0xffffff);
@@ -615,9 +644,8 @@ uint32 lwl(uint32 regval, uint32 memval, uint8 offset)
 			case 2: return (memval & 0xffffff) << 8 | (regval & 0xff);
 			case 3: return memval;
 		}
-#endif
-	fprintf(stderr, "Invalid offset %x passed to lwl\n", offset);
-	abort();
+	}
+	fatal_error("Invalid offset %x passed to lwl\n", offset);
 }
 
 void
@@ -816,44 +844,42 @@ CPU::sh_emulate(uint32 instr, uint32 pc)
 
 uint32 swl(uint32 regval, uint32 memval, uint8 offset)
 {
-#if defined(TARGET_BIG_ENDIAN)
+	if (TARGET_BIG_ENDIAN) {
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return (memval & 0xff000000) | (regval >> 8 & 0xffffff); 
 			case 2: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
 			case 3: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 		}
-#elif defined(TARGET_LITTLE_ENDIAN)
+	} else if (TARGET_LITTLE_ENDIAN) {
 		switch (offset) {
 			case 0: return (memval & 0xffffff00) | (regval >> 24 & 0xff); 
 			case 1: return (memval & 0xffff0000) | (regval >> 16 & 0xffff); 
 			case 2: return (memval & 0xff000000) | (regval >> 8 & 0xffffff); 
 			case 3: return regval; 
 		}
-#endif
-	fprintf(stderr, "Invalid offset %x passed to swl\n", offset);
-	abort();
+	}
+	fatal_error("Invalid offset %x passed to swl\n", offset);
 }
 
 uint32 swr(uint32 regval, uint32 memval, uint8 offset)
 {
-#if defined(TARGET_BIG_ENDIAN)
+	if (TARGET_BIG_ENDIAN) {
 		switch (offset) {
 			case 0: return ((regval << 24) & 0xff000000) | (memval & 0xffffff); 
 			case 1: return ((regval << 16) & 0xffff0000) | (memval & 0xffff); 
 			case 2: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
 			case 3: return regval; 
 		}
-#elif defined(TARGET_LITTLE_ENDIAN)
+	} else if (TARGET_LITTLE_ENDIAN) {
 		switch (offset) {
 			case 0: return regval; 
 			case 1: return ((regval << 8) & 0xffffff00) | (memval & 0xff); 
 			case 2: return ((regval << 16) & 0xffff0000) | (memval & 0xffff); 
 			case 3: return ((regval << 24) & 0xff000000) | (memval & 0xffffff); 
 		}
-#endif
-	fprintf(stderr, "Invalid offset %x passed to swr\n", offset);
-	abort();
+	}
+	fatal_error("Invalid offset %x passed to swr\n", offset);
 }
 
 void
@@ -950,42 +976,42 @@ CPU::swr_emulate(uint32 instr, uint32 pc)
 void
 CPU::lwc1_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,1);
 }
 
 void
 CPU::lwc2_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,2);
 }
 
 void
 CPU::lwc3_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,3);
 }
 
 void
 CPU::swc1_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,1);
 }
 
 void
 CPU::swc2_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,2);
 }
 
 void
 CPU::swc3_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %lx not implemented at pc=0x%lx",instr,pc);
+	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x",instr,pc);
 	exception(CpU,ANY,3);
 }
 
@@ -1040,14 +1066,11 @@ CPU::srav_emulate(uint32 instr, uint32 pc)
 void
 CPU::jr_emulate(uint32 instr, uint32 pc)
 {
-	bool haltjrra = machine->opt->option("haltjrra")->flag;
-
-	if (haltjrra) {
-		if (rs(instr) == ra) {
+	if (opt_haltjrra) {
+		if (rs(instr) == REG_RA) {
 			fprintf(stderr,
 				"** Procedure call return instr reached -- HALTING **\n");
 			machine->halt();
-			return;
 		}
 	}
 	if (reg[rd(instr)] != 0) {
@@ -1340,7 +1363,7 @@ CPU::bgez_emulate(uint32 instr, uint32 pc)
 void
 CPU::bltzal_emulate(uint32 instr, uint32 pc)
 {
-	reg[ra] = pc + 8;
+	reg[REG_RA] = pc + 8;
 	if ((int32)reg[rs(instr)] < 0) {
 		branch(instr, pc);
 	}
@@ -1349,21 +1372,60 @@ CPU::bltzal_emulate(uint32 instr, uint32 pc)
 void
 CPU::bgezal_emulate(uint32 instr, uint32 pc)
 {
-	reg[ra] = pc + 8;
+	reg[REG_RA] = pc + 8;
 	if ((int32)reg[rs(instr)] >= 0) {
 		branch(instr, pc);
 	}
+}
+
+/* reserved instruction */
+void
+CPU::RI_emulate(uint32 instr, uint32 pc){
+	exception(RI);
 }
 
 extern void call_disassembler(uint32 pc, uint32 instr);
 
 /* dispatching */
 void
-CPU::periodic(void)
+CPU::step()
 {
 	uint32 real_pc;
-	bool cacheable, instdump = machine->opt->option("instdump")->flag,
-		excmsg = machine->opt->option("excmsg")->flag;
+	bool cacheable;
+	static const emulate_funptr opcodeJumpTable[] = {
+		&CPU::funct_emulate, &CPU::regimm_emulate,
+		&CPU::j_emulate,     &CPU::jal_emulate,
+		&CPU::beq_emulate,   &CPU::bne_emulate,
+		&CPU::blez_emulate,  &CPU::bgtz_emulate,
+		&CPU::addi_emulate,  &CPU::addiu_emulate,
+		&CPU::slti_emulate,  &CPU::sltiu_emulate,
+		&CPU::andi_emulate,  &CPU::ori_emulate,
+		&CPU::xori_emulate,  &CPU::lui_emulate,
+		&CPU::cpzero_emulate,&CPU::cpone_emulate,
+		&CPU::cptwo_emulate, &CPU::cpthree_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::lb_emulate,    &CPU::lh_emulate,
+		&CPU::lwl_emulate,   &CPU::lw_emulate,
+		&CPU::lbu_emulate,   &CPU::lhu_emulate,
+		&CPU::lwr_emulate,   &CPU::RI_emulate,
+		&CPU::sb_emulate,    &CPU::sh_emulate,
+		&CPU::swl_emulate,   &CPU::sw_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::swr_emulate,   &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::lwc1_emulate,
+		&CPU::lwc2_emulate,  &CPU::lwc3_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::swc1_emulate,
+		&CPU::swc2_emulate,  &CPU::swc3_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate,
+		&CPU::RI_emulate,    &CPU::RI_emulate
+	};
 
 	/* Clear exception_pending flag if it was set by a
 	 * prior instruction. */
@@ -1380,7 +1442,7 @@ CPU::periodic(void)
 	/* get physical address of next instruction */
 	real_pc = cpzero->address_trans(pc,INSTFETCH,&cacheable, this);
 	if (real_pc == 0xffffffff && exception_pending) {
-		if (excmsg) {
+		if (opt_excmsg) {
 			fprintf(stderr,
 				"** PC address translation caused the exception! **\n");
 		}
@@ -1390,75 +1452,28 @@ CPU::periodic(void)
 	/* get next instruction */
 	instr = mem->fetch_word(real_pc,INSTFETCH,cacheable, this);
 	if (instr == 0xffffffff && exception_pending) {
-		if (excmsg) {
+		if (opt_excmsg) {
 			fprintf(stderr, "** Instruction fetch caused the exception! **\n");
 		}
 		return;
 	}
 
 	/* diagnostic output - display disassembly of instr */
-	if (instdump) {
-		fprintf(stderr,"PC=0x%08lx [%08lx]\t%08lx ",pc,real_pc,instr);
+	if (opt_instdump) {
+		fprintf(stderr,"PC=0x%08x [%08x]\t%08x ",pc,real_pc,instr);
 		call_disassembler(pc,instr);
 	}
 
-	/* jump to appropriate emulation function
-	 * 
-	 * this is really bad. how do you declare a value
-	 * of type "pointer to method returning void and taking two uint32's"?
-	 */
-	switch(opcode(instr))
-	{
-		case 0: funct_emulate(instr, pc); break;
-		case 1: regimm_emulate(instr, pc); break;
-		case 2: j_emulate(instr, pc); break;
-		case 3: jal_emulate(instr, pc); break;
-		case 4: beq_emulate(instr, pc); break;
-		case 5: bne_emulate(instr, pc); break;
-		case 6: blez_emulate(instr, pc); break;
-		case 7: bgtz_emulate(instr, pc); break;
-		case 8: addi_emulate(instr, pc); break;
-		case 9: addiu_emulate(instr, pc); break;
-		case 10: slti_emulate(instr, pc); break;
-		case 11: sltiu_emulate(instr, pc); break;
-		case 12: andi_emulate(instr, pc); break;
-		case 13: ori_emulate(instr, pc); break;
-		case 14: xori_emulate(instr, pc); break;
-		case 15: lui_emulate(instr, pc); break;
-		case 16: cpzero_emulate(instr, pc); break;
-		case 17: cpone_emulate(instr, pc); break;
-		case 18: cptwo_emulate(instr, pc); break;
-		case 19: cpthree_emulate(instr, pc); break;
-		case 32: lb_emulate(instr, pc); break;
-		case 33: lh_emulate(instr, pc); break;
-		case 34: lwl_emulate(instr, pc); break;
-		case 35: lw_emulate(instr, pc); break;
-		case 36: lbu_emulate(instr, pc); break;
-		case 37: lhu_emulate(instr, pc); break;
-		case 38: lwr_emulate(instr, pc); break;
-		case 40: sb_emulate(instr, pc); break;
-		case 41: sh_emulate(instr, pc); break;
-		case 42: swl_emulate(instr, pc); break;
-		case 43: sw_emulate(instr, pc); break;
-		case 46: swr_emulate(instr, pc); break;
-		case 49: lwc1_emulate(instr, pc); break;
-		case 50: lwc2_emulate(instr, pc); break;
-		case 51: lwc3_emulate(instr, pc); break;
-		case 57: swc1_emulate(instr, pc); break;
-		case 58: swc2_emulate(instr, pc); break;
-		case 59: swc3_emulate(instr, pc); break;
-		default: exception(RI); break; /* reserved instruction */
-	}
+	/* Jump to the appropriate emulation function. */
+	(this->*opcodeJumpTable[opcode(instr)])(instr, pc);
 
-	/* register zero must always be zero;
-	 * this instruction forces this.
-	 */
-	reg[0] = 0;
- 
- 	/* Check for a (hardware or software) interrupt. */
- 	if (cpzero->interrupt_pending()) {
- 		exception(Int);
- 	}
+	/* Register zero must always be zero; this instruction forces this. */
+	reg[REG_ZERO] = 0;
+
+	/* Check for a (hardware or software) interrupt. */
+	if (cpzero->interrupt_pending()) {
+		exception(Int);
+	}
 
 	/* If there is an exception pending, we return now, so that we don't
 	 * clobber the exception vector.
@@ -1497,38 +1512,41 @@ CPU::periodic(void)
 void
 CPU::funct_emulate(uint32 instr, uint32 pc)
 {
-	switch(funct(instr))
-	{
-		case 0: sll_emulate(instr, pc); break;
-		case 2: srl_emulate(instr, pc); break;
-		case 3: sra_emulate(instr, pc); break;
-		case 4: sllv_emulate(instr, pc); break;
-		case 6: srlv_emulate(instr, pc); break;
-		case 7: srav_emulate(instr, pc); break;
-		case 8: jr_emulate(instr, pc); break;
-		case 9: jalr_emulate(instr, pc); break;
-		case 12: syscall_emulate(instr, pc); break;
-		case 13: break_emulate(instr, pc); break;
-		case 16: mfhi_emulate(instr, pc); break;
-		case 17: mthi_emulate(instr, pc); break;
-		case 18: mflo_emulate(instr, pc); break;
-		case 19: mtlo_emulate(instr, pc); break;
-		case 24: mult_emulate(instr, pc); break;
-		case 25: multu_emulate(instr, pc); break;
-		case 26: div_emulate(instr, pc); break;
-		case 27: divu_emulate(instr, pc); break;
-		case 32: add_emulate(instr, pc); break;
-		case 33: addu_emulate(instr, pc); break;
-		case 34: sub_emulate(instr, pc); break;
-		case 35: subu_emulate(instr, pc); break;
-		case 36: and_emulate(instr, pc); break;
-		case 37: or_emulate(instr, pc); break;
-		case 38: xor_emulate(instr, pc); break;
-		case 39: nor_emulate(instr, pc); break;
-		case 42: slt_emulate(instr, pc); break;
-		case 43: sltu_emulate(instr, pc); break;
-		default: exception(RI); break; /* reserved instruction */
-	}
+	static const emulate_funptr functJumpTable[] = {
+		&CPU::sll_emulate,     &CPU::RI_emulate,
+		&CPU::srl_emulate,     &CPU::sra_emulate,
+		&CPU::sllv_emulate,    &CPU::RI_emulate,
+		&CPU::srlv_emulate,    &CPU::srav_emulate,
+		&CPU::jr_emulate,      &CPU::jalr_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::syscall_emulate, &CPU::break_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::mfhi_emulate,    &CPU::mthi_emulate,
+		&CPU::mflo_emulate,    &CPU::mtlo_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::mult_emulate,    &CPU::multu_emulate,
+		&CPU::div_emulate,     &CPU::divu_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::add_emulate,     &CPU::addu_emulate,
+		&CPU::sub_emulate,     &CPU::subu_emulate,
+		&CPU::and_emulate,     &CPU::or_emulate,
+		&CPU::xor_emulate,     &CPU::nor_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::slt_emulate,     &CPU::sltu_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate,
+		&CPU::RI_emulate,      &CPU::RI_emulate
+	};
+	(this->*functJumpTable[funct(instr)])(instr, pc);
 }
 
 void
@@ -1556,7 +1574,7 @@ CPU::regimm_emulate(uint32 instr, uint32 pc)
 char *
 CPU::debug_registers_to_packet(void)
 {
-	char *packet = (char *) malloc(728 * sizeof(char));
+	char *packet = new char [PBUFSIZ];
 	int i, r;
 
 	/* order of regs:  (gleaned from gdb/gdb/config/mips/tm-mips.h)
@@ -1638,7 +1656,12 @@ CPU::debug_get_pc(void)
 	return pc;
 }
 
-/* XXX -- these functions need to do error checking! */
+/* Fetch LEN bytes starting from virtual address ADDR into the packet
+ * PACKET, sending exceptions (if any) to CLIENT. Returns -1 if an exception
+ * was encountered, 0 otherwise.  If an exception was encountered, the
+ * contents of PACKET are undefined, and CLIENT->exception() will have
+ * been called.
+ */
 int
 CPU::debug_fetch_region(uint32 addr, uint32 len, char *packet,
 	DeviceExc *client)
@@ -1649,12 +1672,30 @@ CPU::debug_fetch_region(uint32 addr, uint32 len, char *packet,
 
 	for (; len; addr++, len--) {
 		real_addr = cpzero->address_trans(addr, DATALOAD, &cacheable, client);
+		/* Stop now and return an error code if translation
+		 * caused an exception.
+		 */
+		if (real_addr == 0xffffffff && client->exception_pending) {
+			return -1;
+		}
 		byte = mem->fetch_byte(real_addr, true, client);
+		/* Stop now and return an error code if the fetch
+		 * caused an exception.
+		 */
+		if (byte == 0xff && client->exception_pending) {
+			return -1;
+		}
 		Debug::packet_push_byte(packet, byte);
 	}
-	return 0; /* or -1 */
+	return 0;
 }
 
+/* Store LEN bytes starting from virtual address ADDR from data in the packet
+ * PACKET, sending exceptions (if any) to CLIENT. Returns -1 if an exception
+ * was encountered, 0 otherwise.  If an exception was encountered, the
+ * contents of the region of virtual memory from ADDR to ADDR+LEN are undefined,
+ * and CLIENT->exception() will have been called.
+ */
 int
 CPU::debug_store_region(uint32 addr, uint32 len, char *packet,
 	DeviceExc *client)
@@ -1666,7 +1707,13 @@ CPU::debug_store_region(uint32 addr, uint32 len, char *packet,
 	for (; len; addr++, len--) {
 		byte = Debug::packet_pop_byte(&packet);
 		real_addr = cpzero->address_trans(addr, DATALOAD, &cacheable, client);
+		if (real_addr == 0xffffffff && client->exception_pending) {
+			return -1;
+		}
 		mem->store_byte(real_addr, byte, true, client);
+		if (client->exception_pending) {
+			return -1;
+		}
 	}
-	return 0; /* or -1 */
+	return 0;
 }

@@ -1,5 +1,4 @@
 ## Process this file with automake to produce Makefile.in.
-# Makefile.in created from: $Id: Makefile.am,v 1.43 2001/08/10 07:51:47 brg Exp $
 
 SUBDIRS = . sample_code test_code doc 
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
@@ -13,22 +12,24 @@ bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
 CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\" \
-  -I$(top_srcdir)/include -I$(mipsinclude) @CXXFLAGS@
+  $(mipsincdirs) -I$(top_srcdir)/include @CXXFLAGS@
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc \
-  mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc \
-  spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc zschip.cc \
-  deviceint.cc debug.cc remotegdb.cc clockdev.cc \
-  cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h \
+vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
+  mapper.cc memorymodule.cc options.cc range.cc intctrl.cc \
+  spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc \
+  deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
+  clock.cc task.cc terminalcontroller.cc haltdev.cc \
+  cpu.h cpzero.h cpzeroreg.h deviceint.h \
   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
-  periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h \
-  sysinclude.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h \
-  accesstypes.h deviceexc.h clockdev.h
-vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la \
-  $(mipslib)/libiberty.a
+  range.h regnames.h spimconsole.h spimconsreg.h \
+  sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h \
+  accesstypes.h deviceexc.h clockdev.h excnames.h error.h \
+  clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
+  haltreg.h wipe.h
+vmips_LDADD = $(mipslibdirs) -lopcodes -lbfd -liberty
 vmips_LDFLAGS = -static
 
 # Huh, huhuh, it says tool.

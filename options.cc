@@ -1,5 +1,25 @@
+/* Command-line and preferences-file options processing.
+   Copyright 2001, 2003 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "options.h"
 #include "optiontbl.h"
+#include "error.h"
 
 Options::Options(int argc, char **argv)
 {
@@ -80,9 +100,7 @@ Options::set_str_option(char *key, char *value)
 		fprintf(stderr, "STR option <%s,%s>\n",key,value);
 #endif
 	if (find_option_type(key) != STR) {
-		fprintf(stderr,
-		  "Error: %s has a string value, but isn't a known string variable.\n",
-			key);
+		error("unknown string variable %s has string value", key);
 		return;
 	}
 	if (!o) {
@@ -102,17 +120,15 @@ Options::set_num_option(char *key, uint32 value)
 
 #ifdef OPTIONS_DEBUG
 	if (options_debug)
-		fprintf(stderr, "NUM option <%s,%lu[0x%lx]>\n",key,value,value);
+		fprintf(stderr, "NUM option <%s,%u[0x%x]>\n",key,value,value);
 #endif
 	if (find_option_type(key) != NUM) {
-	  fprintf(stderr,
-		"Error: %s has a numeric value, but isn't a known numeric variable.\n",
-		key);
-	  return;
+		error("unknown numeric variable %s has numeric value", key);
+		return;
 	}
 	if (!o) {
 		fprintf(stderr,
-			"Bug: Option table filled up trying to set <%s,%lu[0x%lx]>!\n",
+			"Bug: Option table filled up trying to set <%s,%u[0x%x]>!\n",
 			key,value,value);
 		return;
 	}
@@ -131,10 +147,8 @@ Options::set_flag_option(char *key, bool value)
 		fprintf(stderr, "FLAG option <%s,%s>\n",key,value ? "TRUE" : "FALSE");
 #endif
 	if (find_option_type(key) != FLAG) {
-	  fprintf(stderr,
-		"Error: %s has a Boolean value, but isn't a known Boolean variable.\n",
-		key);
-	  return;
+		error("unknown Boolean variable %s has Boolean value", key);
+		return;
 	}
 	if (!o) {
 		fprintf(stderr,
@@ -156,7 +170,7 @@ char *
 Options::strprefix(char *crack_smoker, char *crack)
 {
 	while (*crack_smoker++ == *crack++);
-	return (*--crack ? (char *)NULL : --crack_smoker);
+	return (*--crack ? NULL : --crack_smoker);
 }
 
 int
@@ -216,8 +230,7 @@ Options::process_one_option(char *option)
  * be replaced with a Lex rule-set or something...
  */
 int
-Options::process_first_option(char **bufptr, int lineno = 0,
-	char *filename = NULL)
+Options::process_first_option(char **bufptr, int lineno, char *filename)
 {
 	char *out, *in, copybuf[BUFSIZ], char_seen;
 	bool quoting, quotenext, done, string_done;
@@ -278,15 +291,14 @@ int
 Options::process_options_from_file(char *filename)
 {
 	FILE *f;
-	char *buf = NULL, *p;
+	char *buf, *p;
 	bool done = false;
 	int rc, lineno;
 
-	buf = (char *) malloc(BUFSIZ);
+	buf = new char[BUFSIZ];
 	if (!buf) {
-		fprintf(stderr, "Can't allocate %u bytes for I/O buffer; aborting!\n",
+		fatal_error("Can't allocate %u bytes for I/O buffer; aborting!\n",
 			BUFSIZ);
-		abort();
 	}
 
 	f = fopen(filename, "r");
@@ -312,23 +324,29 @@ Options::process_options_from_file(char *filename)
 	} while (!done);
 
 	fclose(f);
+	delete [] buf;
 	return 0;
 }
 
 void
 Options::usage(char *argv0)
 {
-	printf("usage:\n");
-	printf(" %s ", PACKAGE);
-#ifdef OPTIONS_DEBUG
-	printf("[-D] ");
-#endif
-	printf("[-o option_string] ... [rom_file]\n");
-	printf(" %s --version\n", PACKAGE);
-	printf(" %s --help\n", PACKAGE);
-	printf(" %s --print-config\n", PACKAGE);
-	printf("\n");
-	printf("Report bugs to <vmips@sartre.dgate.org>.\n");
+	printf(
+"Usage: %s [OPTION]... [ROM-FILE]\n"
+"Start the %s virtual machine, using the ROM-FILE as the boot ROM.\n"
+"\n"
+"  -o ARG                     behave as if ARG were specified in .vmipsrc\n"
+"                               (see manual for details)\n"
+"  -D                         turn on debugging of configuration file parsing\n"
+"                               (must be configured at compile time)\n"
+"  --version                  display version information and exit\n"
+"  --help                     display this help message and exit\n"
+"  --print-config             display compile-time variables and exit\n"
+"\n"
+"By default, `romfile.rom' is used if no ROM-FILE is specified.\n"
+"\n"
+"Report bugs to <vmips@dgate.org>.\n",
+	PACKAGE, PACKAGE);
 }
 
 void
@@ -412,7 +430,7 @@ Options::process_options(int argc, char **argv)
 			newargv[x] = NULL;
 		}
 		newargv[newargc++] = argv[0]; /* copy program name or getopt barfs */
-		while ((argptr = strtok((first++ == 0) ? extra_args : (char *)NULL,
+		while ((argptr = strtok((first++ == 0) ? extra_args : NULL,
 			" \t\r\n")) != NULL) {
 			newargv[newargc++] = argptr;
 		}
@@ -442,7 +460,7 @@ Options::hash(char *name)
 }
 
 Option *
-Options::optstruct(char *name, bool install = false)
+Options::optstruct(char *name, bool install)
 {
 	int x, y;
 
@@ -501,7 +519,7 @@ Options::dump_options_table(Option *table)
 				fprintf(stderr,", \"%s\"",table[x].value.str);
 				break;
 			case NUM:
-				fprintf(stderr,", 0x%lx",table[x].value.num);
+				fprintf(stderr,", 0x%x",table[x].value.num);
 				break;
 		}
 		fputc('\t', stderr);
@@ -515,21 +533,19 @@ Options::dump_options_table(Option *table)
 void
 Options::print_config_info(void)
 {
-#ifdef WORDS_BIGENDIAN
-    puts("Host processor big endian");
-#else
-    puts("Host processor little endian");
-#endif
+	if (WORDS_BIGENDIAN) {
+		puts("Host processor big endian");
+	} else {
+		puts("Host processor little endian");
+	}
 
-#ifdef TARGET_BIG_ENDIAN
-    puts("Emulated processor big endian");
-#else
-# if defined(TARGET_LITTLE_ENDIAN)
-    puts("Emulated processor little endian");
-# else
-    puts("Emulated processor endianness unknown");
-# endif
-#endif
+	if (TARGET_BIG_ENDIAN) {
+		puts("Emulated processor big endian");
+	} else if (TARGET_LITTLE_ENDIAN) {
+		puts("Emulated processor little endian");
+	} else {
+		puts("Emulated processor endianness unknown");
+	}
 
 #ifdef BYTESWAPPED
     puts("Host is byte-swapped with respect to target");
@@ -565,13 +581,25 @@ Options::print_config_info(void)
 void
 Options::print_package_version(void)
 {
-	printf("%s %s\n", PACKAGE, VERSION);
-	printf("Copyright (C) 2001 Brian R. Gaeke.  %s comes with NO WARRANTY,\n",
-		PACKAGE);
-	printf("to the extent permitted by law.  You may redistribute copies\n");
-	printf("of %s under the terms of the GNU General Public License.\n",
-		PACKAGE);
-	printf("For more information about these matters, see the file named\n");
-	printf("COPYING in the %s source distribution.\n", PACKAGE);
+	printf(
+"%s %s\n"
+"Copyright (C) 2001, 2002, 2003 by Brian R. Gaeke and others.\n"
+"(See the files `AUTHORS' and `THANKS' in the %s source distribution\n"
+"for a complete list.)\n"
+"\n"
+"%s is free software; you can redistribute it and/or modify it\n"
+"under the terms of the GNU General Public License as published by the\n"
+"Free Software Foundation; either version 2 of the License, or (at your\n"
+"option) any later version.\n"
+"\n"
+"%s is distributed in the hope that it will be useful, but\n"
+"WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\n"
+"or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License\n"
+"for more details.\n"
+"\n"
+"You should have received a copy of the GNU General Public License along\n"
+"with %s; if not, write to the Free Software Foundation, Inc.,\n"
+"59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.\n",
+	PACKAGE, VERSION, PACKAGE, PACKAGE, PACKAGE, PACKAGE);
 }
 

@@ -1,39 +1,92 @@
-#include "sysinclude.h"
+/* Declarations to support the VMIPS clock device.
+   Copyright 2002 Paul Twohey.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _CLOCKDEV_H_
+#define _CLOCKDEV_H_
+
+#include "clock.h"
 #include "devicemap.h"
 #include "deviceint.h"
-#include "periodic.h"
-#include "intctrl.h"
-#include "range.h"
+#include "task.h"
 
-#ifndef __clockdev_h__
-#define __clockdev_h__
+#include <new>
 
-#define CDC_SIM_HZ (25*1000000)
-#define CDC_INTERRUPTS_ENABLED 0x00000001
 
-class ClockDev : public DeviceMap, public DeviceInt, public Periodic {
-private:
-	uint32 sim_internal_ns;
-	uint32 control;
-	uint32 clock_speed;
-	uint32 clock_interrupt_freq;
-	uint32 time_ratio;
-	struct timeval sim, real;
-	bool time_to_do_interrupt;
-	bool did_interrupt;
-	bool real_time_is_sim_time;
+/* High resolution clock device. */
+class ClockDevice : public DeviceMap, public DeviceInt
+{
 public:
-	ClockDev();
-	virtual ~ClockDev();
-	virtual void update_times(void);
-	virtual char *descriptor_str(void);
-	virtual void periodic(void);
+	/* Create a new clock device that uses CLOCK as its time source and
+	   which reports interrupts on irq IRQ at the regular interval
+	   FREQUENCY_NS nanoseconds. */
+	ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
+		throw( std::bad_alloc );
+
+	/* Destroy the clock device and cancel any tasks it may have
+	   waiting to execute on CLOCK. */
+	virtual ~ClockDevice() throw();
+
+	/* Utility function called to trigger a clock interrupt, transitions
+	   the clock to the READY state and asserts an interrupt if they
+	   are enabled. Used in conjunction with class ClockTrigger to make
+	   clock interrupts. */
+	virtual void ready_clock() throw( std::bad_alloc );
+
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
-	virtual uint16 fetch_halfword(uint32 offset, DeviceExc *client);
-	virtual uint8 fetch_byte(uint32 offset, DeviceExc *client);
-	virtual uint32 store_word(uint32 offset, uint32 data, DeviceExc *client);
-	virtual uint16 store_halfword(uint32 offset, uint16 data, DeviceExc *client);
-	virtual uint8 store_byte(uint32 offset, uint8 data, DeviceExc *client);
+	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
+
+	/* Return a description of this device. */
+	virtual char *descriptor_str();
+
+protected:
+	/* Transition the clock into the UNREADY state and deassert the
+	   clock interrupt. */
+	virtual void unready_clock() throw();
+
+protected:
+	/* Utility class to trigger interrupts to the clock device. */
+	class ClockTrigger : public CancelableTask
+	{
+	public:
+		ClockTrigger( ClockDevice *clock_device ) throw();
+		virtual ~ClockTrigger() throw();
+
+	protected:
+		virtual void real_task();
+
+	protected:
+		ClockDevice	*clock_device;
+	};
+
+protected:
+	const uint32	irq;
+	const long	frequency_ns;
+
+	enum State {
+		UNREADY	= 0,
+		READY	= CTL_RDY
+	};
+
+	Clock		*clock;
+	ClockTrigger	*clock_trigger;
+	State		clock_state;
+	bool		interrupt_enabled;
 };
 
-#endif /* __clockdev_h__ */
+#endif /* _CLOCKDEV_H_ */

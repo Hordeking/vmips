@@ -1,5 +1,24 @@
-#ifndef __sysinclude_h__
-#define __sysinclude_h__
+/* System include files and glue.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _SYSINCLUDE_H_
+#define _SYSINCLUDE_H_
 
 /* First of all, pull in answers from autoconfiguration system. */
 #include "config.h"
@@ -8,7 +27,6 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/wait.h>
-#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,61 +41,58 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #ifdef HAVE_GETOPT_H
 # include <getopt.h>
 #endif /* HAVE_GETOPT_H */
 #include <stdarg.h>
+#include <cassert>
+#include <vector>
+#include <new>
+#include <exception>
 
 /* We need this for mmap(2). */
 #if !defined(MAP_FAILED)
 # define MAP_FAILED ((caddr_t)-1L)
 #endif
 
-/* Random OS-specific wart-massaging. */
-#if defined(__ultrix__)
-extern "C" {
-# include <sys/ioctl.h>
-	extern void bzero(char *b1, int length);
-	extern int getopt(int argc, char **argv, char *optstring);
-	extern char *optarg;
-	extern int optind, opterr, optopt;
-	extern char *strdup(const char *s);
-	extern int getpagesize(void);
-	extern int gettimeofday(struct timeval *tp, struct timezone *tzp);
-	int ioctl(int d, int request, void *argp);
-	extern caddr_t mmap(caddr_t addr, size_t len, int prot, int flags, int fd,
-		off_t off);
-	extern caddr_t munmap(caddr_t addr, size_t len);
-	extern long random(void);
-	extern int select(int nfds, fd_set *readfds, fd_set *writefds,
-		fd_set *exceptfds, struct timeval *timeout);
-	extern int strcasecmp(char *s1, char *s2);
-}
+/* Check whether we can use __attribute__. */
+#if HAVE_ATTRIBUTE_FORMAT
+# define __ATTRIBUTE_FORMAT__(archetype, string_index, first_to_check) \
+    __attribute__((format(archetype, string_index, first_to_check)))
+#else
+# define __ATTRIBUTE_FORMAT__(archetype, string_index, first_to_check)
+#endif
+#if HAVE_ATTRIBUTE_NORETURN
+# define __ATTRIBUTE_NORETURN__ __attribute__((noreturn))
+#else
+# define __ATTRIBUTE_NORETURN__
 #endif
 
 /* Find me a 64-bit type (the only one that's not strictly necessary.....) */
-#if SIZEOF_LONG_LONG == 8
-typedef unsigned long long uint64;
-typedef long long int64;
+#if SIZEOF_INT == 8
+typedef unsigned int uint64;
+typedef int int64;
 #define HAVE_LONG_LONG 1
 #elif SIZEOF_LONG == 8
 typedef unsigned long uint64;
 typedef long int64;
 #define HAVE_LONG_LONG 1
-#elif SIZEOF_INT == 8
-typedef unsigned int uint64;
-typedef int int64;
+#elif SIZEOF_LONG_LONG == 8
+typedef unsigned long long uint64;
+typedef long long int64;
 #define HAVE_LONG_LONG 1
 #endif
 
 /* Normal-sized types. */
-#if SIZEOF_LONG == 4
-typedef unsigned long uint32;
-typedef long int32;
-#elif SIZEOF_INT == 4
+#if SIZEOF_INT == 4
 typedef unsigned int uint32;
 typedef int int32;
+#elif SIZEOF_LONG == 4
+typedef unsigned long uint32;
+typedef long int32;
 #else
 #error "Can't find a 32-bit type, and I need one."
 #endif
@@ -99,11 +114,11 @@ typedef char int8;
 /* Define BYTESWAPPED if the MIPS target is byte-swapped with respect to
  * the host processor.
  */
-#if defined(TARGET_BIG_ENDIAN)
+#if TARGET_BIG_ENDIAN
 #if !defined(WORDS_BIGENDIAN)
 #define BYTESWAPPED
 #endif
-#elif defined(TARGET_LITTLE_ENDIAN)
+#elif TARGET_LITTLE_ENDIAN
 #if defined(WORDS_BIGENDIAN)
 #define BYTESWAPPED
 #endif
@@ -111,4 +126,11 @@ typedef char int8;
 #error "MIPS cross tools are neither big nor little endian - unsupported"
 #endif
 
-#endif /* __sysinclude_h__ */
+#if WORDS_BIGENDIAN
+# undef WORDS_BIGENDIAN
+# define WORDS_BIGENDIAN 1
+#else
+# define WORDS_BIGENDIAN 0
+#endif
+
+#endif /* _SYSINCLUDE_H_ */

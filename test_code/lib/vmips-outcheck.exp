@@ -1,0 +1,77 @@
+
+proc outcheck_read_params_file {file} {
+	global options
+	global expected_output
+	set chan [open $file]
+	set outputstart 0
+	set expected_output ""
+	while ![eof $chan] {
+		set nbytes [gets $chan data]
+		if {$nbytes == -1} {
+			break
+		}
+		if {$outputstart} {
+			set expected_output "$expected_output$data\n"
+		} else {
+			if [regexp "^OPTIONS: (.*)$" $data dummy ops] {
+				set options $ops
+			}
+			if [regexp "^XFAIL: (.*)$" $data dummy xfail] {
+				setup_xfail $xfail
+			}
+			if [regexp "^EXPECTED OUTPUT FOLLOWS: *$" $data] {
+				incr outputstart
+			}
+		}
+	}
+	close $chan
+}
+
+proc outcheck_get_diffs {} {
+	global expected_output
+	global comp_output
+	set pid [pid]
+	set tempfilename1 "/tmp/expected$pid"
+	set tempfilename2 "/tmp/output$pid"
+	set tempfile1 [open $tempfilename1 "w"]
+	set tempfile2 [open $tempfilename2 "w"]
+	puts $tempfile1 "$expected_output"
+	puts $tempfile2 "$comp_output"
+	close $tempfile1
+	close $tempfile2
+	set diffs [exec sh -c "diff -c $tempfilename1 $tempfilename2 2>&1; exit 0"]
+	file delete $tempfilename1
+	file delete $tempfilename2
+	return $diffs
+}
+
+proc outcheck_check_output {} {
+	global expected_output
+	global comp_output
+	if {$expected_output == $comp_output} {
+		verbose "*** Output is the same; test passes"
+		return 0
+	} else {
+		verbose "*** Output differs"
+		set diffs [outcheck_get_diffs]
+		verbose "*** Differences are as follows:"
+		verbose "$diffs"
+		return -1
+	}
+}
+
+proc outcheck_run_one_test {paramsfile} {
+	global options
+	clear_xfail
+	outcheck_read_params_file $paramsfile
+	set romfile [vmips_get_romfile_name $paramsfile]
+	vmips_build_romfile $romfile
+	vmips_start "$options $romfile"
+
+	if {[outcheck_check_output] == 0} {
+		pass $paramsfile
+	} else {
+		fail $paramsfile
+	}
+}
+

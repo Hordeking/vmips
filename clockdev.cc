@@ -1,154 +1,152 @@
+/* Implementation of VMIPS clock device.
+   Copyright 2002 Paul Twohey.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "clockdev.h"
-#include "accesstypes.h"
-#include "vmips.h"
+#include "devreg.h"
 
-ClockDev::ClockDev()
+#include <cassert>
+
+ClockDevice::ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
+	throw( std::bad_alloc )
+	: irq(irq), frequency_ns(frequency_ns),
+	  clock(clock), clock_trigger(0), clock_state(UNREADY),
+	  interrupt_enabled(false)
 {
+	assert( clock );
+	assert( frequency_ns > 0 );
+	assert( irq != IRQ0 && irq != IRQ1 );
+
+	/* FIXME: hack to until we get working ranges. */
 	extent = 20;
-	gettimeofday(&real, NULL);
-	sim = real;
-	time_to_do_interrupt = false;
-	did_interrupt = false;
-	real_time_is_sim_time = machine->opt->option("realtime")->flag;
-	time_ratio = machine->opt->option("timeratio")->num;
-	clock_speed = machine->opt->option("clockspeed")->num;
-	clock_interrupt_freq = machine->opt->option("clockintr")->num;
+
+	clock_trigger = new ClockTrigger(this);
+	clock->add_deferred_task( clock_trigger, frequency_ns );
 }
 
-ClockDev::~ClockDev()
+ClockDevice::~ClockDevice() throw()
 {
+	assert( clock_trigger );
+	
+	clock_trigger->cancel();
+	clock_trigger = NULL;
 }
 
-char *
-ClockDev::descriptor_str(void)
+void ClockDevice::ready_clock() throw( std::bad_alloc )
+{
+	clock_state = READY;
+ 	
+	if( interrupt_enabled )
+		assertInt( irq );
+	
+	clock_trigger = new ClockTrigger( this );
+	clock->add_deferred_task( clock_trigger, frequency_ns );
+}
+
+void ClockDevice::unready_clock() throw()
+{
+	clock_state = UNREADY;
+	deassertInt( irq );
+}
+
+uint32 ClockDevice::fetch_word( uint32 offset, int mode, DeviceExc *client )
+{
+	switch( offset / 4 ) {
+	case 0:		// real time - seconds
+		timeval real_time;
+		gettimeofday( &real_time, NULL );
+		return real_time.tv_sec;
+		break;
+	case 1:		// real time - microseconds
+		gettimeofday( &real_time, NULL );
+		return real_time.tv_usec;
+		break;
+	case 2:		// simulated time - seconds
+		return clock->get_time().tv_sec;
+		break;
+	case 3:		// simulated time - microseconds
+		return clock->get_time().tv_nsec / 1000;
+		break;
+	case 4:		// control word
+	{
+		uint32 word = interrupt_enabled ? CTL_RDY : 0;
+		word |= clock_state;
+		unready_clock();
+		return word;
+		break;
+	}
+	default:
+		assert( ! "reached" );
+		return 0;
+	}
+}
+
+void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
+{
+	switch( offset / 4 ) {
+	case 0:		// real time - seconds
+	case 1:		// real time - micro seconds
+		return;
+	case 2:		// simulated time - seconds
+	{
+		if( (long)data < 0 )
+			return;
+
+		timespec time = { data, clock->get_time().tv_nsec };
+		clock->set_time( time );
+		return;
+	}
+	case 3:		// simulated time - micro seconds
+	{
+		if( (long)data < 0 )
+			return;
+
+		timespec time =  { clock->get_time().tv_sec, data };
+		clock->set_time( time );
+		return;
+	}
+	case 4:		// control word
+		interrupt_enabled = data & CTL_IE;
+		if( interrupt_enabled && clock_state == READY )
+			assertInt( irq );
+		return;
+	default:
+		assert( ! "reached" );
+	}
+}
+
+char *ClockDevice::descriptor_str()
 {
 	return "Clock device";
 }
 
-void 
-ClockDev::update_times(void)
+
+ClockDevice::ClockTrigger::ClockTrigger( ClockDevice *clock_device ) throw()
+	: clock_device( clock_device )
 {
-    if (real_time_is_sim_time) {
-		gettimeofday(&real, NULL);
-		sim_internal_ns += (timediff(&real, &sim) * 1000) / time_ratio;
-	} else {
-		sim_internal_ns += (1000000000/clock_speed);
-	}
-	if (sim_internal_ns > clock_interrupt_freq)  {
-		time_to_do_interrupt = true;
-		sim.tv_usec += (sim_internal_ns/1000);
-		sim_internal_ns = (sim_internal_ns%1000);
-	} else {
-		time_to_do_interrupt = false;
-	}
-	if (sim.tv_usec>1000000) {
-		sim.tv_usec -= 1000000;
-		sim.tv_sec += 1;
-	}
+	assert( clock_device );
 }
 
-void 
-ClockDev::periodic(void)
+ClockDevice::ClockTrigger::~ClockTrigger() throw()
 {
-	update_times();
-	if (control & CDC_INTERRUPTS_ENABLED) {
-		if (did_interrupt) {
-			deassertInt(IRQ7);
-			did_interrupt = false;
-		} else if (time_to_do_interrupt) {
-			assertInt(IRQ7);
-			did_interrupt = true;
-		}
-	} else {
-		if (did_interrupt) {
-			deassertInt(IRQ7);
-			did_interrupt = false;
-		}
-	}
 }
 
-uint32 
-ClockDev::fetch_word(uint32 offset, int mode, DeviceExc *client)
+void ClockDevice::ClockTrigger::real_task()
 {
-	uint32 rv = 0;
-
-	switch(offset/4) {
-		case 0:
-			rv = sim.tv_sec;
-			break;
-		case 1:
-			rv = sim.tv_usec;
-			break;
-		case 2:
-			gettimeofday(&real, NULL);
-			rv = real.tv_sec;
-			break;
-		case 3:
-			gettimeofday(&real, NULL);
-			rv = real.tv_usec;
-			break;
-		case 4:
-			rv = control;
-			break;
-	}
-#if defined(BYTESWAPPED)
-    return Mapper::swap_word(rv);
-#else
-    return rv;
-#endif
-}
-
-uint16
-ClockDev::fetch_halfword(uint32 offset, DeviceExc *client)
-{
-	uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-	return ((uint16 *) &wd)[(offset & 0x03) >> 1];
-}
-
-uint8
-ClockDev::fetch_byte(uint32 offset, DeviceExc *client)
-{
-	uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-	return ((uint8 *) &wd)[offset & 0x03];
-}
-
-uint32
-ClockDev::store_word(uint32 offset, uint32 data, DeviceExc *client)
-{
-#if defined(BYTESWAPPED)
-    data = Mapper::swap_word(data);
-#endif
-	switch(offset/4) {
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-			return 0;
-		case 4:
-			control = data;
-			return control;
-	}
-	return 0;
-}
-
-uint16
-ClockDev::store_halfword(uint32 offset, uint16 data, DeviceExc *client)
-{
-	const uint32 word_offset = offset & 0xfffffffc;
-	const uint32 halfword_offset_in_word = (offset & 0x02) >> 1;
-	uint32 word_data = 0;
-
-	((uint16 *) &word_data)[halfword_offset_in_word] = data;
-	return store_word(word_offset, word_data, client);
-}
-
-uint8
-ClockDev::store_byte(uint32 offset, uint8 data, DeviceExc *client)
-{
-	const uint32 word_offset = offset & 0xfffffffc;
-	const uint32 byte_offset_in_word = (offset & 0x03);
-	uint32 word_data;
-
-	((uint8 *) &word_data)[byte_offset_in_word] = data;
-	return store_word(word_offset, word_data, client);
+	clock_device->ready_clock();
 }

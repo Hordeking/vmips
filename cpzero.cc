@@ -1,3 +1,22 @@
+/* R3000 system control coprocessor emulation ("coprocessor zero").
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 /* Code to implement MIPS coprocessor zero (the "system control
  * coprocessor"), which provides for address translation and
  * exception handling.
@@ -5,7 +24,7 @@
 
 #include "cpzero.h"
 #include "mapper.h"
-#include "regnames.h"
+#include "excnames.h"
 #include "cpu.h"
 #include "cpzeroreg.h"
 #include "intctrl.h"
@@ -30,7 +49,7 @@ static uint32 write_masks[] = {
 };
 
 /* Initialization */
-CPZero::CPZero(CPU *m = NULL, IntCtrl *i = NULL)
+CPZero::CPZero(CPU *m, IntCtrl *i)
 {
 	attach(m, i);
 }
@@ -77,13 +96,14 @@ CPZero::dump_regs(FILE *f)
 {
 	int x;
 
-	fprintf(f, "CP0 Dump Registers:\n");
+	fprintf(f, "CP0 Dump Registers: [       ");
 	for (x = 0; x < 16; x++) {
-		fprintf(f," R%02d=%08lx ",x,reg[x]);
-		if (x % 4 == 3) {
+		fprintf(f," R%02d=%08x ",x,reg[x]);
+		if (x % 4 == 1) {
 			fputc('\n',f);
 		}
 	}
+	fprintf(f, "]\n");
 }
 
 void
@@ -91,14 +111,15 @@ CPZero::dump_tlb(FILE *f)
 {
 	int x;
 
-	fprintf(f, "Dump TLB:\n");
+	fprintf(f, "Dump TLB: [\n");
 	for (x=0;x<64;x++) {
 		TLBEntry e = tlb[x];
-		fprintf(f,"%08lx%08lx [V=%06lx A=%02lx P=%05lx %c%c%c%c]\n",
-			e.entryHi, e.entryLo, e.vpn(), (unsigned long) e.asid(), e.pfn(),
+		fprintf(f,"Entry %02d: (%08x%08x) V=%05x A=%02x P=%05x %c%c%c%c\n", x,
+			e.entryHi, e.entryLo, e.vpn()>>12, e.asid()>>6, e.pfn()>>12,
 			e.noncacheable()?'N':'n', e.dirty()?'D':'d',
 			e.valid()?'V':'v', e.global()?'G':'g');
 	}
+	fprintf(f, "]\n");
 }
 
 void

@@ -1,21 +1,18 @@
-/* remotegdb2.cc - gdb glue for vmips debugging interface
- * 
- * This file consists almost entirely of code taken from the GNU debugger
- * (gdb), in file gdb-4.17/gdb/serial.h, where it had the copyright notice
- * reproduced below. Additions by me (brg) have been tagged with my initials.
- */
-
-/* Remote serial support interface definitions for GDB, the GNU Debugger.
+/* remotegdb.h - GNU Debugger glue for the VMIPS external debugger
+    interface, based on
+   gdb/serial.h - Remote serial support interface definitions for GDB,
+    the GNU Debugger.
+   Copyright 2001 Brian R. Gaeke.
    Copyright 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of GDB.
+This file is part of GDB and VMIPS.
 
-This program is free software; you can redistribute it and/or modify
+VMIPS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+VMIPS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -24,8 +21,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef __remotegdb_h__
-#define __remotegdb_h__
+/* (brg) This file consists almost entirely of code taken from the GNU
+ * debugger (gdb) version 4.17, from file gdb/serial.h.  Additions by me
+ * (brg) have been tagged with my initials.
+ */
+
+#ifndef _REMOTEGDB_H_
+#define _REMOTEGDB_H_
 
 /* brg - added glue code */
 #include "sysinclude.h"
@@ -47,6 +49,15 @@ int putpkt (char *buf);
 int read_frame (char *buf);
 void getpkt (char *buf, int forever);
 /* brg - end added prototypes */
+
+/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
+   and i386-stub.c.  Normally, no one would notice because it only matters
+   for writing large chunks of memory (e.g. in downloads).  Also, this needs
+   to be more than 400 if required to hold the registers (see below, where
+   we round it up based on REGISTER_BYTES).  */
+/* brg - adjusted this to be 8 * 91 (90 regs in gdb) and moved it from
+   remotegdb.cc to here */
+#define PBUFSIZ 728
 
 /* ... */
 
@@ -72,4 +83,4 @@ extern int serial_write PARAMS ((serial_t scb, const char *str, int len));
 
 #define SERIAL_WRITE(SERIAL_T, STRING,LEN)  serial_write (SERIAL_T, STRING, LEN)
 
-#endif /* __remotegdb_h__ */
+#endif /* _REMOTEGDB_H_ */

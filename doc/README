@@ -1,7 +1,18 @@
 VMIPS hacking guide
 
 CONTENTS:
+        Things yet to be done
         Notes on cross-compiling glibc
+
+
+Things yet to be done
+---------------------
+
+Version 1.0 was released 27 Oct 2001.
+Version 1.1 will be the next feature release.
+
+For the future enhancements that used to be here, see the "Future Directions"
+section of the manual.
 
 Notes on cross-compiling glibc
 ------------------------------

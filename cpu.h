@@ -1,17 +1,34 @@
-#ifndef __cpu_h__
-#define __cpu_h__
+/* Definitions and declarations to support the MIPS R3000 emulation.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _CPU_H_
+#define _CPU_H_
 
 #include "sysinclude.h"
-#include "periodic.h"
 #include "deviceexc.h"
 #include "mapper.h"
 #include "cpzero.h"
 #include "debug.h"
 
 class vmips;
-class Cache;
 
-/* Delay states -- see periodic() for details. */
+/* Delay states -- see CPU::step() for details. */
 #define NORMAL 0
 #define DELAYING 1
 #define DELAYSLOT 2
@@ -23,7 +40,7 @@ struct excPriority {
 	int mode;
 };
 
-class CPU : public Periodic, public DeviceExc {
+class CPU : public DeviceExc {
 	friend class CPZero;
 
 private:
@@ -38,7 +55,14 @@ private:
 	int delay_state;
 	uint32 delay_pc;
 	uint32 next_epc;
-	bool exception_pending;
+
+	/* Options used: */
+	bool opt_excmsg;
+	bool opt_excpriomsg;
+	bool opt_haltbreak;
+	bool opt_haltibe;
+	bool opt_haltjrra;
+	bool opt_instdump;
 
 	int exception_priority(uint16 excCode, int mode);
 	uint32 calc_jump_target(uint32 instr, uint32 pc);
@@ -116,6 +140,7 @@ private:
 	void bgez_emulate(uint32 instr, uint32 pc);
 	void bltzal_emulate(uint32 instr, uint32 pc);
 	void bgezal_emulate(uint32 instr, uint32 pc);
+	void RI_emulate(uint32 instr, uint32 pc);
 
 public:
 	uint16 opcode(const uint32 instr) const;
@@ -132,7 +157,7 @@ public:
 	void attach(vmips *mch = NULL, Mapper *m = NULL, CPZero *cp0 = NULL);
 	void dump_regs(FILE *f);
 	void dump_regs_and_stack(FILE *f);
-	void periodic(void);
+	void step();
 	char *const strexccode(const uint16 excCode);
 	char *const strdelaystate(const int state);
 	char *const strmemmode(const int memmode);
@@ -151,4 +176,4 @@ public:
 		DeviceExc *client);
 };
 
-#endif /* __cpu_h__ */
+#endif /* _CPU_H_ */

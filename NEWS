@@ -1,3 +1,30 @@
+User-visible changes in version 1.1 (since version 1.0.4):
+
+* If you are using g++ to compile VMIPS, you must use g++ version 2.95
+  or later. Also, you must specify the --target option to `configure',
+  with an argument that matches the --target option to binutils
+  `configure'. See `INSTALL'.
+* VMIPS now supports GNU standard --help and --version options.
+* The manual now includes improved documentation for using gdb and
+  Insight to control VMIPS, a section on the differences between SPIM's
+  console and the SPIM-compatible console device, a section on proper
+  error reporting from VMIPS extensions, and many other minor
+  revisions.
+* Using gdb to control VMIPS is now much more robust in the face of
+  errors and exceptions.
+* VMIPS 1.1 makes it possible to use the 2nd display/keyboard channel
+  of the SPIM-compatible console device, using the `ttydev2' option.
+* VMIPS now includes a halt device, which can be used to halt the
+  simulator without using a special instruction.
+* VMIPS 1.1 is much faster than VMIPS 1.0.4. This is due in large part
+  to the efforts of Paul Twohey, who reimplemented the clock and
+  SPIM-compatible console devices, and cleaned up the code a bit.
+* The VMIPS distribution now includes a regression test suite, based on
+  DejaGNU (replaces the old test_code directory). In order to support
+  this, the formats of lots of random messages that VMIPS prints out
+  have changed.
+* We now support 64-bit hosts (e.g., Alpha). 
+
 User-visible changes in version 1.0.4 (since version 1.0.3):
 
 * Fixed bug where the first instruction of an interrupt handler would be

@@ -38,15 +38,16 @@ OPTDOC = options.texi
 OPTIONTBLH = $(top_srcdir)/optiontbl.h
 # This is less than optimal. We could consolidate CHAPTERS and DISTFILES
 # more than they are currently.
-CHAPTERS = $(srcdir)/linux-cross
+CHAPTERS = $(srcdir)/to-do \
+ $(srcdir)/linux-cross
 CLEANFILES = vmips.log vmips.aux vmips.cp vmips.fn vmips.vr \
- vmips.tp vmips.ky vmips.pg vmips.toc vmips.cps vmips.fns vmips.pgs invoke.pod
+ vmips.tp vmips.ky vmips.pg vmips.toc vmips.cps vmips.fns vmips.pgs vmips.pod
 DISTCLEANFILES = 
 USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.dvi vmips.info vmips.html vmips.ps \
  vmips.pdf $(MANPAGES)
-MAINTAINERCLEANFILES = $(USERDOCS) invoke.pod vmipstool.pod
-DISTFILES = Makefile.in linux-cross vmips.texi invoke.texi \
- $(USERDOCS) options.texi vmipstool.texi
+MAINTAINERCLEANFILES = $(USERDOCS) vmips.pod vmipstool.pod
+DISTFILES = Makefile.in linux-cross to-do vmips.texi invoke.texi \
+ $(USERDOCS) options.texi vmipstool.texi texinfo.tex
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 MANSECT = 1
 vmips_MANPAGE = vmips.$(MANSECT)
@@ -58,7 +59,7 @@ all: $(DOC) dvi info html ps man pdf
 # Nothing to do here (yet):
 check installcheck:
 
-install: vmips.info $(MANPAGE)
+install: vmips.info $(MANPAGES)
 	$(mkinstalldirs) $(DESTDIR)$(infodir)
 	$(INSTALL_DATA) $(srcdir)/vmips.info $(DESTDIR)$(infodir)/`echo vmips.info|sed '$(transform)'`
 	-$(mkinstalldirs) $(DESTDIR)$(mandir)
@@ -68,15 +69,15 @@ install: vmips.info $(MANPAGE)
 
 pdf: vmips.pdf
 
-vmips.pdf: $(srcdir)/vmips.texi $(OPTDOC)
+vmips.pdf: $(srcdir)/vmips.texi $(OPTDOC) texinfo.tex
 	cd $(srcdir) && texi2dvi -p vmips.texi
 
 man: $(MANPAGES)
 
 $(vmips_MANPAGE): invoke.texi options.texi
-	perl $(srcdir)/texi2pod.pl $< > invoke.pod
+	perl $(srcdir)/texi2pod.pl $< > vmips.pod
 	pod2man --release="vmips "`cat $(top_srcdir)/VERSION` \
-		--center="VMIPS Programmer's Manual" invoke.pod > $@
+		--center="VMIPS Programmer's Manual" vmips.pod > $@
 
 $(vmipstool_MANPAGE): vmipstool.texi
 	perl $(srcdir)/texi2pod.pl $< > vmipstool.pod
@@ -90,7 +91,7 @@ vmips.ps: vmips.dvi
 
 dvi: vmips.dvi
 
-vmips.dvi: $(srcdir)/vmips.texi $(OPTDOC)
+vmips.dvi: $(srcdir)/vmips.texi $(OPTDOC) texinfo.tex
 	cd $(srcdir) && texi2dvi vmips.texi
 
 info: vmips.info

@@ -1,101 +1,101 @@
-/* Prototypes for: a SPIM-compatible console device. */
+/* Declarations to support the SPIM-compatible console device.
+   Copyright 2002 Paul Twohey.
 
-#ifndef __spimconsole_h__
-#define __spimconsole_h__
+This file is part of VMIPS.
 
-#include "serialhost.h"
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifndef _SPIMCONSOLE_H_
+#define _SPIMCONSOLE_H_
+
+#include "clock.h"
+#include "devicemap.h"
 #include "deviceint.h"
+#include "intctrl.h"
+#include "task.h"
+#include "terminalcontroller.h"
 
-/* kinds of register to access */
-#define DATA                 0
-#define CONTROL              1
-#define UNKNOWN              2
+#include <new>
 
-/* controls how fast things are */
-#define IOSPEED				40000   /* usec */
-#define CLOCK_GRANULARITY	1000000 /* usec */
 
-class SPIMConsoleKeyboard;
-class SPIMConsoleDisplay;
-class SPIMConsoleClock;
-class SPIMConsoleDevice;
-
-class SPIMConsole : public DeviceMap, public DeviceInt, public Periodic {
-private:
-	SPIMConsoleKeyboard *keyboard[2];
-	SPIMConsoleDisplay *display[2];
-	SPIMConsoleClock *clockdev;
+/* SPIM-compatible console device. */
+class SpimConsoleDevice : public TerminalController, public DeviceMap,
+			  public DeviceInt
+{
 public:
-	SerialHost *host[2];
+	/* Create a new SPIM-compatible console device with CLOCK as the time
+	   source for the device. */
+	SpimConsoleDevice( Clock *clock ) throw( std::bad_alloc );
 
-	SPIMConsole(SerialHost *h1 = NULL, SerialHost *h2 = NULL);
-	~SPIMConsole();
-	char *descriptor_str(void);
-	void attach(SerialHost *h1, SerialHost *h2);
-	uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
-	uint16 fetch_halfword(uint32 offset, DeviceExc *client);
-	uint8 fetch_byte(uint32 offset, DeviceExc *client);
-	uint32 store_word(uint32 offset, uint32 data, DeviceExc *client);
-	uint16 store_halfword(uint32 offset, uint16 data, DeviceExc
-		*client);
-	uint8 store_byte(uint32 offset, uint8 data, DeviceExc *client);
-	void get_type(uint32 offset, int *type, SPIMConsoleDevice **device);
-	void periodic(void);
-};
+	/* Destroy the device and cancel the clock trigger. */
+	virtual ~SpimConsoleDevice() throw();
 
-class SPIMConsoleDevice {
+	/* Call the routines in TerminalController and then assert or
+	   deassert the appropriate interrupt. */
+	virtual void ready_display( int line ) throw();
+	virtual void unready_display( int line, char data )
+		throw( std::bad_alloc );
+	virtual void unready_keyboard( int line ) throw();
 protected:
-	bool ie;
-	struct timeval timer;
-	int lineno;
-	SPIMConsole *parent;
+	virtual void ready_keyboard( int line ) throw();
+
 public:
-	SPIMConsoleDevice(int l, SPIMConsole *p);
-	virtual ~SPIMConsoleDevice();
 
-	virtual bool ready(void) = 0;
-	virtual uint8 data(void) = 0;
-	virtual void setData(uint8 newData) = 0;
+	/* Transition the clock component fom either the READY or UNREADY
+	   states into the READY state, asserting IRQ2 if clock interrupts
+	   are enabled. Called by ClockTrigger to allow the SPIM console to
+	   mark the passage of time. */
+	virtual void ready_clock() throw( std::bad_alloc );
 
-	virtual bool intEnable(void);
-	virtual void setIntEnable(bool newIntEnable);
+	/* Transition the clock component from either the READY or UNREADY
+	   states into the UNREADY state. */
+	virtual void unready_clock() throw();
+
+	/* Fetch and store console control words. */
+	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
+	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
+
+	/* Return a description of this device. */
+	virtual char *descriptor_str();
+
+protected:
+	class ClockTrigger : public CancelableTask
+	{
+	public:
+		ClockTrigger( SpimConsoleDevice *console ) throw();
+		virtual ~ClockTrigger() throw();
+
+	protected:
+		virtual void real_task();
+
+	protected:
+		SpimConsoleDevice	*console;
+	};
+
+protected:
+	static const long KEYBOARD_POLL_NS	= 400 * 1000;		//400us
+	static const long KEYBOARD_REPOLL_NS	= 40 * 1000 * 1000;	// 40ms
+	static const long DISPLAY_READY_DELAY_NS= 40 * 1000 * 1000;	// 40ms
+	static const long CLOCK_TRIGGER_NS	= 1000 * 1000 *1000;	// 1s
+
+protected:
+	ClockTrigger	*trigger;
+	bool		display_interrupt[2];
+	bool		keyboard_interrupt[2];
+	bool		clock_interrupt;
+	State		clock_state;
 };
 
-class SPIMConsoleKeyboard : public SPIMConsoleDevice {
-private:
-	bool rdy;
-	uint8 databyte;
-public:
-	virtual bool ready(void);
-	virtual uint8 data(void);
-
-	virtual void check(void);
-	SPIMConsoleKeyboard(int l, SPIMConsole *p);
-	virtual void setData(uint8 newData);
-};
-
-class SPIMConsoleDisplay : public SPIMConsoleDevice {
-private:
-	bool rdy;
-public:
-	virtual bool ready(void);
-	virtual void setData(uint8 newData);
-
-	SPIMConsoleDisplay(int l, SPIMConsole *p);
-	virtual uint8 data(void);
-};
-
-class SPIMConsoleClock : public SPIMConsoleDevice {
-private:
-	bool rdy;
-public:
-	virtual bool ready(void);
-
-	virtual void check(void);
-	SPIMConsoleClock(int l, SPIMConsole *p);
-	virtual void setData(uint8 newData);
-	virtual uint8 data(void);
-	virtual void read(void);
-};
-
-#endif /* __spimconsole_h__ */
+#endif /* _SPIMCONSOLE_H_ */

@@ -1,8 +1,27 @@
+/* Interface to an external GNU debugger over TCP/IP.
+   Copyright 2001 Brian R. Gaeke.
+
+This file is part of VMIPS.
+
+VMIPS is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+VMIPS is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with VMIPS; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "debug.h"
 #include "remotegdb.h"
 #include "cpu.h"
 #include "mapper.h"
-#include "regnames.h"
+#include "excnames.h"
 #include "cpzeroreg.h"
 #include "vmips.h"
 
@@ -28,9 +47,10 @@ Debug::Debug()
 void
 Debug::exception(uint16 excCode, int mode, int coprocno)
 {
-	/* not implemented yet */
-	fprintf(stderr, "Debug::exception(%u, %d, %d)\n", excCode, mode,
-		coprocno);
+	/* Set the exception_pending flag so that target commands (or
+	 * their subroutines) can catch errors and pass them back to GDB.
+	 */
+	exception_pending = true;
 }
 
 void
@@ -122,7 +142,7 @@ Debug::get_breakpoint_bitmap_entry(uint32 addr, uint8 *&entry, uint8 &bitno)
 	uint32 wordno;
 
 	if (! address_in_rom(addr)) {
-		fprintf(stderr, "That doesn't look like a ROM address to me: %lx\n",
+		fprintf(stderr, "That doesn't look like a ROM address to me: %08x\n",
 			addr);
 		entry = NULL;
 		return;
@@ -140,9 +160,9 @@ bool
 Debug::is_breakpoint_insn(char *packetptr)
 {
 	int posn = 0;
-#if defined(TARGET_BIG_ENDIAN)
+#if TARGET_BIG_ENDIAN
 	char break_insn[] = BIG_BREAKPOINT;
-#elif defined(TARGET_LITTLE_ENDIAN)
+#elif TARGET_LITTLE_ENDIAN
 	char break_insn[] = LITTLE_BREAKPOINT;
 #endif
 	int bytes = sizeof(break_insn);
@@ -159,10 +179,10 @@ Debug::packet_push_word(char *packet, uint32 n)
 {
 	char packetpiece[10];
 
-#if defined(TARGET_LITTLE_ENDIAN)
-	n = Mapper::swap_word(n);
-#endif
-	sprintf(packetpiece, "%08lx", n);
+	if (TARGET_LITTLE_ENDIAN) {
+		n = Mapper::swap_word(n);
+	}
+	sprintf(packetpiece, "%08x", n);
 	strcat(packet, packetpiece);
 } 
 
@@ -190,9 +210,9 @@ Debug::packet_pop_word(char **packet)
 	}
 	*q++ = '\0';
 	val = strtoul(valstr, NULL, 16);
-#if defined(TARGET_LITTLE_ENDIAN)
-	val = Mapper::swap_word(val);
-#endif
+	if (TARGET_LITTLE_ENDIAN) {
+		val = Mapper::swap_word(val);
+	}
     *packet = p;
 	return val;
 }
@@ -307,11 +327,15 @@ void
 Debug::targetloop(void)
 {
 	int packetno = 0;
-	char buf[728];
+	char buf[PBUFSIZ];
 	char *result = NULL;
 
 	while (! machine->halted) {
-		/* printf("Waiting for packet %d\n", packetno); */
+		exception_pending = false;
+		/* Wait for a packet, and when we get it, store it in
+		 * BUF. If we get an error trying to receive a packet,
+		 * give up.
+		 */
 		getpkt(buf, 1); if (remotegdb_backend_error) return;
 		switch(buf[0]) {
 			case 'g': result = target_read_registers(buf); break;
@@ -335,8 +359,9 @@ Debug::targetloop(void)
 char *
 Debug::target_kill(char *pkt)
 {
-	/* fprintf(stderr, "STUB: Kill\n"); */
-
+	/* This is a request from GDB to kill the process being
+	 * debugged. We interpret it as a request to halt the machine.
+	 */
 	machine->halted = true;
 	return rawpacket("OK");
 }
@@ -348,8 +373,12 @@ Debug::target_set_thread(char *pkt)
 	long threadno;
 
 	threadno = strtol(&pkt[2], NULL, 0);
-	/* fprintf(stderr, "STUB: Set thread for %s to %ld\n",
-		(thread_for_step ? "step/continue" : "general ops"), threadno); */
+	/* This is a request from GDB to change threads. We don't really
+	 * have anything to do here, but it needs to be handled without an
+	 * error for things to work.  If THREAD_FOR_STEP is true, this is
+	 * used to control step and continue operations. Otherwise, it is
+	 * used to control general operations.
+	 */
 	if (thread_for_step) {
 		threadno_step = threadno;
 	} else {
@@ -369,9 +398,8 @@ Debug::target_read_registers(char *pkt)
 char *
 Debug::rawpacket(char *str)
 {
-	char *packet;
+	char *packet = new char[1 + strlen(str)];
 
-	packet = (char *) malloc((1 + strlen(str)) * sizeof(char));
 	strcpy(packet, str);
 	return packet;
 }
@@ -411,23 +439,33 @@ Debug::target_read_memory(char *pkt)
 	char *packet;
 
 	if (! lenstr) {
-		/* fprintf(stderr, "STUB: Malformed read memory request (no ,) [%s]\n",
-			&pkt[1]); */
+		/* This read memory request is malformed, because it
+		 * does not contain a comma. Send back an error.
+		 */
 		return error_packet(1);
 	}
 	lenstr[0] = 0;
 	lenstr++;
-	/* fprintf(stderr, "STUB: read memory addr=%s len=%s\n",addrstr,lenstr); */
 
 	addr = strtoul(addrstr, NULL, 16);
 	len = strtoul(lenstr, NULL, 16);
-	
-	packet = (char *) malloc((2 * len + 1) * sizeof(char));
+
+	/* Read memory starting from ADDR w/ length LEN and return
+	 * it in a packet.
+	 */
+	packet = new char[2 * len + 1];
 	packet[0] = '\0';
 	
-	cpu->debug_fetch_region(addr, len, packet, this);
-
-	return packet;
+	if (cpu->debug_fetch_region(addr, len, packet, this) < 0) {
+		/* There was an error fetching memory. We could try to
+		 * return a real error code, but GDB will just ignore it
+		 * anyway.
+		 */
+		delete [] packet;
+		return error_packet(1);
+	} else {
+		return packet;
+	}
 }
 
 char * 
@@ -465,7 +503,9 @@ Debug::target_write_memory(char *pkt)
 		/* fprintf(stderr, "ROM breakpoint CLEARED at %lx\n", addr); */
 		remove_rom_breakpoint(addr);
 	} else {
-		cpu->debug_store_region(addr, len, datastr, this);
+		if (cpu->debug_store_region(addr, len, datastr, this) < 0) {
+			return error_packet(1);
+		}
 	}
 
 	return rawpacket("OK");
@@ -477,7 +517,7 @@ Debug::single_step(void)
 	if (rom_breakpoint_exists(cpu->debug_get_pc())) {
 		return Bp; /* Simulate hitting the breakpoint. */
 	}
-	machine->periodic();
+	machine->step();
 	return cpu->pending_exception();
 }
 
