@@ -165,7 +165,8 @@ available to the virtual machine. The default value is TRUE.
 
 This pathname will be used as the device from which reads
 from the console device will take their data, and to which writes
-to the console device will send their data. The default value is "/dev/tty".
+to the console device will send their data. If the OS supports
+ttyname(3), that call will be used to guess the default pathname. The default value is "/dev/tty".
 
 @option{debug} (type: Boolean)
 

@@ -3,17 +3,17 @@ typedef unsigned long ulong_t;
 #ifdef TESTING
 # include <stdio.h>
 # include <assert.h>
-#else TESTING
+#else /* TESTING */
 # define ARRAYBASE 0xa0000000
 # define ARRAYSIZE 128
-#endif TESTING
+#endif /* TESTING */
 
 void insertion_sort(ulong_t *array, ulong_t size);
 void insert(ulong_t *array, ulong_t size, ulong_t x);
 #ifdef TESTING
 void parray(ulong_t *array, ulong_t size);
 int main(int argc, char **argv);
-#endif TESTING
+#endif /* TESTING */
 
 void insertion_sort(ulong_t *array, ulong_t size)
 {
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
  return 0;
 }
 
-#else TESTING
+#else /* TESTING */
 
 # ifdef USING_RANDOM_REGISTER
 volatile ulong_t random(void)
@@ -82,9 +82,9 @@ volatile ulong_t random(void)
  __asm__("\tmfc0 %0, $1\n" : "=r" (randomval)); /* CP0 Random register */
  return randomval;
 }
-# else USING_RANDOM_REGISTER
+# else /* USING_RANDOM_REGISTER */
 extern long random();
-# endif USING_RANDOM_REGISTER
+# endif /* USING_RANDOM_REGISTER */
 
 void entry(void)
 {
@@ -97,4 +97,4 @@ void entry(void)
  insertion_sort(x,ARRAYSIZE);
 }
 
-#endif TESTING
+#endif /* TESTING */

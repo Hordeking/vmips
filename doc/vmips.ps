@@ -8,7 +8,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips -o vmips.ps vmips.dvi
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2001.11.27:0009
+%DVIPSSource:  TeX output 2001.12.14:2135
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -2572,44 +2572,46 @@ eop
 13 14 bop 150 -116 a Fm(Chapter)30 b(6:)41 b(Customizing)2547
 b(13)275 299 y(This)27 b(pathname)i(will)e(b)s(e)h(used)g(as)i(the)f
 (device)g(from)g(whic)m(h)f(reads)h(from)g(the)g(console)h(device)f
-(will)150 408 y(tak)m(e)i(their)d(data,)i(and)e(to)i(whic)m(h)e(writes)
-g(to)h(the)h(console)f(device)g(will)d(send)i(their)g(data.)41
-b(The)29 b(default)150 518 y(v)-5 b(alue)30 b(is)f Fk(")p
-Fm(/dev/tt)m(y)p Fk(")p Fm(.)275 653 y(`)p Fk(debug)p
-Fm(')g(\(t)m(yp)s(e:)41 b(Bo)s(olean\))275 787 y(If)i(debug)g(is)g
-(set,)49 b(then)43 b(the)i(gdb)e(remote)i(serial)e(proto)s(col)h(bac)m
-(k)m(end)g(will)e(b)s(e)h(enabled)g(in)g(the)150 897
-y(virtual)38 b(mac)m(hine.)70 b(This)38 b(will)f(cause)k(the)f(mac)m
-(hine)g(to)h(w)m(ait)f(for)g(gdb)f(to)i(attac)m(h)h(and)d
-Fk(")p Fm(con)m(tin)m(ue)p Fk(")150 1006 y Fm(b)s(efore)30
-b(b)s(o)s(oting)g(the)g(R)m(OM)h(\014le.)40 b(If)30 b(debug)g(is)g(not)
-h(set,)g(then)f(the)h(mac)m(hine)f(will)e(b)s(o)s(ot)i(the)h(R)m(OM)g
-(\014le)150 1116 y(without)e(pausing.)40 b(The)29 b(default)h(v)-5
-b(alue)30 b(is)f(F)-10 b(ALSE.)275 1250 y(`)p Fk(realtime)p
-Fm(')28 b(\(t)m(yp)s(e:)41 b(Bo)s(olean\))275 1385 y(If)26
-b(realtime)h(is)f(set,)i(then)f(the)g(clo)s(c)m(k)g(device)g(will)e
-(cause)i(sim)m(ulated)f(time)h(to)g(run)f(at)i(some)f(fraction)150
-1494 y(of)37 b(real)g(time,)i(determined)d(b)m(y)h(the)g(`timeratio')h
-(option.)61 b(If)36 b(realtime)h(is)f(not)i(set,)h(then)e(sim)m(ulated)
-150 1604 y(time)30 b(will)e(run)h(at)i(the)f(sp)s(eed)g(giv)m(en)g(b)m
-(y)h(the)f(`clo)s(c)m(ksp)s(eed')h(option.)40 b(The)30
-b(default)f(v)-5 b(alue)30 b(is)f(F)-10 b(ALSE.)275 1738
-y(`)p Fk(timeratio)p Fm(')28 b(\(t)m(yp)s(e:)41 b(n)m(um)m(b)s(er\))275
-1873 y(If)28 b(the)h(realtime)f(option)h(is)f(set,)i(this)d(option)i
-(giv)m(es)g(the)g(n)m(um)m(b)s(er)f(of)h(times)f(slo)m(w)m(er)h(than)g
-(real)f(time)150 1983 y(at)33 b(whic)m(h)e(sim)m(ulated)h(time)g(will)e
-(run.)45 b(It)33 b(has)f(no)h(e\013ect)h(if)d(realtime)h(is)f(not)i
-(set.)48 b(The)32 b(default)f(v)-5 b(alue)150 2092 y(is)29
-b(200.)275 2227 y(`)p Fk(clockspeed)p Fm(')f(\(t)m(yp)s(e:)41
-b(n)m(um)m(b)s(er\))275 2361 y(If)30 b(the)h(realtime)f(option)h(is)f
-(not)h(set,)h(this)d(option)i(giv)m(es)g(the)g(sp)s(eed)f(of)h(sim)m
-(ulated)f(time)g(in)g(Hz.)43 b(It)150 2471 y(has)30 b(no)g(e\013ect)i
-(if)e(realtime)f(is)h(set.)41 b(The)30 b(default)g(v)-5
-b(alue)29 b(is)h(25000000.)275 2605 y(`)p Fk(clockintr)p
-Fm(')e(\(t)m(yp)s(e:)41 b(n)m(um)m(b)s(er\))275 2740
-y(This)34 b(option)h(giv)m(es)h(the)g(frequency)g(of)g(clo)s(c)m(k)g
-(in)m(terrupts,)g(in)f(nanoseconds)g(of)h(sim)m(ulated)f(time.)150
-2849 y(The)30 b(default)f(v)-5 b(alue)30 b(is)g(1000.)p
+(will)150 408 y(tak)m(e)36 b(their)d(data,)j(and)d(to)i(whic)m(h)e
+(writes)g(to)i(the)g(console)f(device)g(will)e(send)h(their)g(data.)53
+b(If)33 b(the)i(OS)150 518 y(supp)s(orts)i(tt)m(yname\(3\),)43
+b(that)d(call)e(will)e(b)s(e)i(used)g(to)h(guess)g(the)g(default)f
+(pathname.)66 b(The)38 b(default)150 628 y(v)-5 b(alue)30
+b(is)f Fk(")p Fm(/dev/tt)m(y)p Fk(")p Fm(.)275 762 y(`)p
+Fk(debug)p Fm(')g(\(t)m(yp)s(e:)41 b(Bo)s(olean\))275
+897 y(If)i(debug)g(is)g(set,)49 b(then)43 b(the)i(gdb)e(remote)i
+(serial)e(proto)s(col)h(bac)m(k)m(end)g(will)e(b)s(e)h(enabled)g(in)g
+(the)150 1006 y(virtual)38 b(mac)m(hine.)70 b(This)38
+b(will)f(cause)k(the)f(mac)m(hine)g(to)h(w)m(ait)f(for)g(gdb)f(to)i
+(attac)m(h)h(and)d Fk(")p Fm(con)m(tin)m(ue)p Fk(")150
+1116 y Fm(b)s(efore)30 b(b)s(o)s(oting)g(the)g(R)m(OM)h(\014le.)40
+b(If)30 b(debug)g(is)g(not)h(set,)g(then)f(the)h(mac)m(hine)f(will)e(b)
+s(o)s(ot)i(the)h(R)m(OM)g(\014le)150 1225 y(without)e(pausing.)40
+b(The)29 b(default)h(v)-5 b(alue)30 b(is)f(F)-10 b(ALSE.)275
+1360 y(`)p Fk(realtime)p Fm(')28 b(\(t)m(yp)s(e:)41 b(Bo)s(olean\))275
+1494 y(If)26 b(realtime)h(is)f(set,)i(then)f(the)g(clo)s(c)m(k)g
+(device)g(will)e(cause)i(sim)m(ulated)f(time)h(to)g(run)f(at)i(some)f
+(fraction)150 1604 y(of)37 b(real)g(time,)i(determined)d(b)m(y)h(the)g
+(`timeratio')h(option.)61 b(If)36 b(realtime)h(is)f(not)i(set,)h(then)e
+(sim)m(ulated)150 1714 y(time)30 b(will)e(run)h(at)i(the)f(sp)s(eed)g
+(giv)m(en)g(b)m(y)h(the)f(`clo)s(c)m(ksp)s(eed')h(option.)40
+b(The)30 b(default)f(v)-5 b(alue)30 b(is)f(F)-10 b(ALSE.)275
+1848 y(`)p Fk(timeratio)p Fm(')28 b(\(t)m(yp)s(e:)41
+b(n)m(um)m(b)s(er\))275 1983 y(If)28 b(the)h(realtime)f(option)h(is)f
+(set,)i(this)d(option)i(giv)m(es)g(the)g(n)m(um)m(b)s(er)f(of)h(times)f
+(slo)m(w)m(er)h(than)g(real)f(time)150 2092 y(at)33 b(whic)m(h)e(sim)m
+(ulated)h(time)g(will)e(run.)45 b(It)33 b(has)f(no)h(e\013ect)h(if)d
+(realtime)h(is)f(not)i(set.)48 b(The)32 b(default)f(v)-5
+b(alue)150 2202 y(is)29 b(200.)275 2336 y(`)p Fk(clockspeed)p
+Fm(')f(\(t)m(yp)s(e:)41 b(n)m(um)m(b)s(er\))275 2471
+y(If)30 b(the)h(realtime)f(option)h(is)f(not)h(set,)h(this)d(option)i
+(giv)m(es)g(the)g(sp)s(eed)f(of)h(sim)m(ulated)f(time)g(in)g(Hz.)43
+b(It)150 2580 y(has)30 b(no)g(e\013ect)i(if)e(realtime)f(is)h(set.)41
+b(The)30 b(default)g(v)-5 b(alue)29 b(is)h(25000000.)275
+2715 y(`)p Fk(clockintr)p Fm(')e(\(t)m(yp)s(e:)41 b(n)m(um)m(b)s(er\))
+275 2849 y(This)34 b(option)h(giv)m(es)h(the)g(frequency)g(of)g(clo)s
+(c)m(k)g(in)m(terrupts,)g(in)f(nanoseconds)g(of)h(sim)m(ulated)f(time.)
+150 2959 y(The)30 b(default)f(v)-5 b(alue)30 b(is)g(1000.)p
 eop
 %%Page: 14 16
 14 15 bop 150 -116 a Fm(Chapter)30 b(7:)41 b(In)m(v)m(oking)30

@@ -35,6 +35,8 @@ private:
 	ClockDev *clockdev;
 	int32 test_code;
 	uint32 num_instrs;
+	/* Cached versions of options: */
+	bool opt_bootmsg;
 
 public:
 	vmips();

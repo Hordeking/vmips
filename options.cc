@@ -55,6 +55,11 @@ Options::process_defaults(void)
 	for (opt = defaults_table; *opt; opt++) {
 		process_one_option(*opt);
 	}
+	/* ttydev gets a special default, if the OS understands ttyname(0). */
+	char *ttydev_default = ttyname(0);
+	if (ttydev_default != NULL) {
+		set_str_option("ttydev", ttydev_default);
+	}
 #ifdef OPTIONS_DEBUG
 	for (Option *o = nametable; o->type; o++) {
 		if (option(o->name) == NULL) {

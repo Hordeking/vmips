@@ -26,6 +26,6 @@ int main(int argc, char **argv)
 	tester();
 	return 0;
 }
-#else TESTING
+#else /* TESTING */
 
 #endif

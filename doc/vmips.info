@@ -713,7 +713,9 @@ to the virtual machine. The default value is TRUE.
 
    This pathname will be used as the device from which reads from the
 console device will take their data, and to which writes to the console
-device will send their data. The default value is "/dev/tty".
+device will send their data. If the OS supports ttyname(3), that call
+will be used to guess the default pathname. The default value is
+"/dev/tty".
 
    `debug' (type: Boolean)
 
@@ -2465,16 +2467,16 @@ Node: An Example5256
 Node: Building Programs6237
 Node: Invoking vmips18465
 Node: Customizing19964
-Node: Invoking vmipstool29443
-Node: Programming31776
-Node: Debugging33609
-Node: Devices38906
-Node: Extending45189
-Node: Installation60800
-Node: Reporting Bugs67756
-Node: Future Directions68436
-Node: References74418
-Node: Copying77870
-Node: Index98045
+Node: Invoking vmipstool29528
+Node: Programming31861
+Node: Debugging33694
+Node: Devices38991
+Node: Extending45274
+Node: Installation60885
+Node: Reporting Bugs67841
+Node: Future Directions68521
+Node: References74503
+Node: Copying77955
+Node: Index98130
 
 End Tag Table

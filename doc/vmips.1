@@ -93,7 +93,7 @@
 .nr % 0
 .rr F
 .\}
-.TH INVOKE 1 "vmips 1.0.1" "27/Nov/2001" "VMIPS Programmer's Manual"
+.TH INVOKE 1 "vmips 1.0.2" "14/Dec/2001" "VMIPS Programmer's Manual"
 .UC
 .if n .hy 0
 .if n .na
@@ -431,7 +431,8 @@ available to the virtual machine. The default value is \s-1TRUE\s0.
 .PP
 This pathname will be used as the device from which reads
 from the console device will take their data, and to which writes
-to the console device will send their data. The default value is \*(L"/dev/tty\*(R".
+to the console device will send their data. If the \s-1OS\s0 supports
+\fIttyname\fR\|(3), that call will be used to guess the default pathname. The default value is \*(L"/dev/tty\*(R".
 .PP
 \fBdebug\fR (type: Boolean)
 .PP
@@ -468,8 +469,15 @@ For instructions on reporting bugs, see
 the \*(L"Reporting Bugs\*(R" appendix of the Info manual.
 .SH "SEE ALSO"
 \fIas\fR\|(1), \fIld\fR\|(1), \fIgdb\fR\|(1), 
-and the Info entries for \fIgcc\fR, \fIas\fR,
+and the Info entries for \fIvmips\fR, \fIgcc\fR, \fIas\fR,
 \fIld\fR, \fIbinutils\fR and \fIgdb\fR.
+.PP
+Important: The information in this man page is an extract from the full
+documentation of the VMIPS simulator, and is limited to the meaning of
+the command-line options. If you didn't find what you were looking for here,
+or you want more information, please refer to the Info file \fIvmips\fR
+or the VMIPS Programmer's Manual.  Both are made from the Texinfo source
+file vmips.texi.
 .SH "AUTHOR"
 VMIPS was written by Brian Gaeke.
 .SH "COPYRIGHT"

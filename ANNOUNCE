@@ -1,15 +1,15 @@
 
-   VMIPS 1.0.1 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.0.2 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
 This is a minor bug-fix release.
 
-   You can download VMIPS 1.0.1 from any of the following sites:
+   You can download VMIPS 1.0.2 from any of the following sites:
 
 * ftp://download.sourceforge.net/pub/sourceforge/vmips/
-* ftp://sartre.dgate.org/vmips/releases/vmips-1.0.1/
+* ftp://sartre.dgate.org/vmips/releases/vmips-1.0.2/
 * http://download.sourceforge.net/vmips/
-* https://github.com/Hordeking/vmips/releases/vmips-1.0.1/
-* http://vmips.sourceforge.net/releases/vmips-1.0.1/
+* https://github.com/Hordeking/vmips/releases/vmips-1.0.2/
+* http://vmips.sourceforge.net/releases/vmips-1.0.2/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -21,14 +21,21 @@ features since the last publically released version are detailed in
    The home page for VMIPS is "https://github.com/Hordeking/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.0.1 (since version 1.0):
+  User-visible changes in version 1.0.2 (since version 1.0.1):
 
-* Fixed format-string bug in vmipstool.
-* Fixed "extra tokens after #endif" warning in sample_code/asm_regnames.h. 
+* New default handling of `-o ttydev' option; manual updated.
+* /etc/vmipsrc contains only comments by default.
+  These two fixes work around a bug in Darwin select(2)'s tty handling.
+* Only print host processor endianness if `-o bootmsg' is set.
+  Fixes bug where `-o bootmsg' should (but doesn't) turn this message off.
+* Remove test_code/testdev.S from the branch.
+  This is a test for a feature (TestDev) which wasn't distributed with 1.0.x.
+* Comment out extra tokens after #endif in test_code/{sort.c,tester.c}.
+  Fixes bug where gcc 3.0 gives warnings compiling these files.
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_0-branch". VMIPS 1.0.1 itself can be checked out using the tag
-"release-1-0-1".
+"vmips-1_0-branch". VMIPS 1.0.2 itself can be checked out using the tag
+"release-1-0-2".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.

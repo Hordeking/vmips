@@ -1,3 +1,17 @@
+User-visible changes in version 1.0.2 (since version 1.0.1):
+
+* Add warning message to man page directing the interested reader to the
+  Info manual.
+* New default handling of `-o ttydev' option; manual updated.
+* /etc/vmipsrc contains only comments by default.
+  These two fixes work around a bug in Darwin select(2)'s tty handling.
+* Only print host processor endianness if `-o bootmsg' is set.
+  Fixes bug where `-o bootmsg' should (but doesn't) turn this message off.
+* Remove test_code/testdev.S from the branch.
+  This is a test for a feature (TestDev) which wasn't distributed with 1.0.x.
+* Comment out extra tokens after #endif in test_code/{sort.c,tester.c}.
+  Fixes bug where gcc 3.0 gives warnings compiling these files.
+
 User-visible changes in version 1.0.1 (since version 1.0):
 
 * Fixed format-string bug in vmipstool.

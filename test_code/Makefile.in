@@ -42,7 +42,7 @@ MOBJCOPY=@mipstoolprefix@objcopy
 DISASSEMBLE=$(MOBJDUMP) --disassemble-all --all-headers
 ROMS= addi.rom bgezal.rom bltzal.rom bc0.rom bdexcp.rom clocker.rom echo.rom \
  emptymain.rom exception.rom hello.rom load.rom loser.rom mthi_lo.rom \
- mumble.rom shift.rom sort.rom syscall.rom testdev.rom tester.rom xor.rom \
+ mumble.rom shift.rom sort.rom syscall.rom tester.rom xor.rom \
  coproc.rom bltz.rom multu.rom ulw.rom tlbwr.rom sub.rom usw.rom
 RAWTEXTS=$(ROMS:.rom=.raw)
 RELOCS=$(ROMS:.rom=.exe)
@@ -51,7 +51,7 @@ OBJS=$(COBJS) $(AOBJS)
 #------
 CSRCS=tester.c sort.c random.c emptymain.c hello.c echo.c
 ASRCS= addi.S bc0.S bdexcp.S bgezal.S bltzal.S clocker.S exception.S load.S \
- loser.S mthi_lo.S mumble.S shift.S syscall.S testdev.S xor.S coproc.S bltz.S \
+ loser.S mthi_lo.S mumble.S shift.S syscall.S xor.S coproc.S bltz.S \
  multu.S ulw.S tlbwr.S sub.S usw.S
 CPREP=$(CSRCS:.c=.i)
 CASM=$(CSRCS:.c=.s)

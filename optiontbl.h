@@ -178,7 +178,8 @@ static Option nametable[] = {
 	{ "ttydev", STR },
 	/** This pathname will be used as the device from which reads
 		from the console device will take their data, and to which writes
-		to the console device will send their data. **/
+        to the console device will send their data. If the OS supports
+        ttyname(3), that call will be used to guess the default pathname. **/
 
 	{ "debug", FLAG },
 	/** If debug is set, then the gdb remote serial protocol backend will

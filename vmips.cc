@@ -23,6 +23,7 @@ vmips::vmips()
 	halted = false;
 	dumpcpu = false;
 	dumpcp0 = false;
+	opt_bootmsg = false;
 	num_instrs = 0;
 }
 
@@ -37,11 +38,15 @@ vmips::host_endian_selftest(void)
 	((uint8 *) &x)[3] = 3;
 	if (x == 0x03020100) {
 		machine->host_bigendian = false;
-		fprintf(stderr, "Little-Endian host processor detected.\n");
+		if (opt_bootmsg) {
+			fprintf(stderr, "Little-Endian host processor detected.\n");
+		}
 		return 0;
 	} else if (x == 0x00010203) {
 		machine->host_bigendian = true;
-		fprintf(stderr, "Big-Endian host processor detected.\n");
+		if (opt_bootmsg) {
+			fprintf(stderr, "Big-Endian host processor detected.\n");
+		}
 		return 0;
 	} else {
 		return x;
@@ -113,7 +118,7 @@ vmips::run(int argc, char **argv)
 	FILE *rom;
 	Range *r;
 	uint32 loadaddr;
-	bool haltdumpcpu, haltdumpcp0, bootmsg, instcounts, memdump, debug;
+	bool haltdumpcpu, haltdumpcp0, instcounts, memdump, debug;
 	extern void setup_disassembler(FILE *stream);
 	/* For instruction counting: */
 	uint32 memsize;
@@ -137,7 +142,7 @@ vmips::run(int argc, char **argv)
 	dumpcpu = opt->option("dumpcpu")->flag;
 	dumpcp0 = opt->option("dumpcp0")->flag;
 	instcounts = opt->option("instcounts")->flag;
-	bootmsg = opt->option("bootmsg")->flag;
+	opt_bootmsg = opt->option("bootmsg")->flag;
 	loadaddr = opt->option("loadaddr")->num;
 	memsize = opt->option("memsize")->num;
 	memdump = opt->option("memdump")->flag;
@@ -157,7 +162,7 @@ vmips::run(int argc, char **argv)
 	/* Print lots of cutesy information. */
 	uint32 rom_size;
 	rom_size = auto_size_rom(rom);
-	if (bootmsg) {
+	if (opt_bootmsg) {
 		fprintf(stderr,"Auto-size ROM image: %ld words.\n",rom_size);
 		fprintf(stderr,"Running self tests.\n");
 	}
@@ -166,7 +171,7 @@ vmips::run(int argc, char **argv)
 	if (run_self_tests() != 0) {
 		fprintf(stderr, "Failed self test %ld\n", test_code);
 		return 1;
-	} else if (bootmsg) {
+	} else if (opt_bootmsg) {
 		fprintf(stderr,"Self tests passed.\n");
 	}
 
@@ -177,7 +182,7 @@ vmips::run(int argc, char **argv)
 	}
 	loadaddr -= KSEG1_CONST_TRANSLATION;
 	physmem->add_file_mapping(rom, loadaddr, MEM_READ);
-	if (bootmsg) {
+	if (opt_bootmsg) {
 		r = physmem->find_mapping_range(loadaddr);
 		fprintf(stderr,"Mapping ROM image (%s): %lu words at 0x%lx [%lx]\n",
 			image, r->getExtent() / 4,
@@ -202,7 +207,7 @@ vmips::run(int argc, char **argv)
 		ttyfd = open(ttydev, O_RDWR|O_NONBLOCK);
 		if (ttyfd < 0) {
 			fprintf(stderr, "open %s: %s\n", ttydev, strerror(errno));
-			if (bootmsg)
+			if (opt_bootmsg)
 				fprintf(stderr, "using stdout instead, input disabled\n");
 			ttyfd = fileno(stdout);
 		}
@@ -221,14 +226,14 @@ vmips::run(int argc, char **argv)
 		}
 		ttyhost = new SerialHost(ttyfd); 
 		console = new SPIMConsole(ttyhost, NULL);
-		if (bootmsg) {
+		if (opt_bootmsg) {
 			fprintf(stderr,
 				"Attached SerialHost(fd %d) at 0x%lx to "
 				"SPIMConsole [host=0x%lx]\n", ttyfd, (long) ttyhost,
 				(long) console);
 		}
 		physmem->add_device_mapping(console, 0x02000000);
-		if (bootmsg) {
+		if (opt_bootmsg) {
 			fprintf(stderr,
 				"Attached SPIMConsole [host=0x%lx] to phys addr 0x%x\n",
 				(long) console, 0x02000000);
@@ -242,7 +247,7 @@ vmips::run(int argc, char **argv)
 	}
 #endif
 
-	if (bootmsg) {
+	if (opt_bootmsg) {
 		fprintf(stderr,"Mapped (host=0x%lx) %ldk RAM at base phys addr 0\n",
 			(unsigned long) memmod[0]->addr,memmod[0]->len / 1024);
 
@@ -271,7 +276,7 @@ vmips::run(int argc, char **argv)
 #endif
 
 	/* Halt! */
-	if (bootmsg) {
+	if (opt_bootmsg) {
 		fprintf(stderr,"\n*************HALT*************\n\n");
 	}
 
@@ -307,7 +312,7 @@ vmips::run(int argc, char **argv)
 	}
 
 	/* We're done. */
-	if (bootmsg) {
+	if (opt_bootmsg) {
 		fprintf(stderr,"Goodbye.\n");
 	}
 	return 0;

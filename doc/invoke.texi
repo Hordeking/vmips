@@ -7,8 +7,15 @@
 @ignore
 @c man begin SEEALSO
 as(1), ld(1), gdb(1), 
-and the Info entries for @file{gcc}, @file{as},
+and the Info entries for @file{vmips}, @file{gcc}, @file{as},
 @file{ld}, @file{binutils} and @file{gdb}.
+
+Important: The information in this man page is an extract from the full
+documentation of the VMIPS simulator, and is limited to the meaning of
+the command-line options. If you didn't find what you were looking for here,
+or you want more information, please refer to the Info file @file{vmips}
+or the VMIPS Programmer's Manual.  Both are made from the Texinfo source
+file vmips.texi.
 @c man end
 @c man begin BUGS
 For instructions on reporting bugs, see
@@ -17,7 +24,6 @@ the "Reporting Bugs" appendix of the Info manual.
 @c man begin AUTHOR
 VMIPS was written by Brian Gaeke.
 @c man end
-@ignore
 @c man begin COPYRIGHT
 Copyright @copyright{} 2001 Brian R. Gaeke.
 

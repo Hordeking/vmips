@@ -1,21 +1,24 @@
-bootmsg
-configfile=~/.vmipsrc
-haltbreak
-haltibe
-instdump
-loadaddr=0xbfc00000
-memsize=0x100000
-nodebug
-nodumpcp0
-nodumpcpu
-noexcmsg
-noexcpriomsg
-nohaltdumpcp0
-nohaltdumpcpu
-nohaltjrra
-noinstcounts
-nomemdump
-noreportirq
-romfile=romfile.rom
-ttydev=/dev/tty
-usetty
+## All of the following settings are defaults.
+## You can change them on a system-wide basis using this file.
+##
+# bootmsg
+# configfile=~/.vmipsrc
+# haltbreak
+# haltibe
+# instdump
+# loadaddr=0xbfc00000
+# memsize=0x100000
+# nodebug
+# nodumpcp0
+# nodumpcpu
+# noexcmsg
+# noexcpriomsg
+# nohaltdumpcp0
+# nohaltdumpcpu
+# nohaltjrra
+# noinstcounts
+# nomemdump
+# noreportirq
+# romfile=romfile.rom
+# ttydev=/dev/tty
+# usetty
