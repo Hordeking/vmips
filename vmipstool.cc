@@ -475,7 +475,7 @@ public:
         else if (strcmp (argv[i], "-o") == 0)
           {
             if (argc <= i + 1)
-              fatal_error ("The -o flag requires an argument. Try %s --help",
+              error_exit ("The -o flag requires an argument. Try %s --help",
                            argv[0]);
             command_line_options.push_back (argv[i + 1]);
             ++i;
@@ -483,7 +483,7 @@ public:
         else if (strcmp (argv[i], "-F") == 0)
           {
             if (argc <= i + 1)
-              fatal_error ("The -F flag requires an argument. Try %s --help",
+              error_exit ("The -F flag requires an argument. Try %s --help",
                            argv[0]);
             strcpy (user_config_filename, argv[i + 1]);
             ++i;

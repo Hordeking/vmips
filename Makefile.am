@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 
-SUBDIRS = libopcodes_mips . @MIPS_CODE_DIRS@ doc
+SUBDIRS = libopcodes_mips . sample_code @TESTCODE_DIR@ doc
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
 DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
  debian/copyright debian/dirs debian/docs debian/info debian/rules

@@ -1,5 +1,5 @@
 /* Command-line and preferences-file options processing.
-   Copyright 2001, 2003 Brian R. Gaeke.
+   Copyright 2001, 2003, 2004 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -273,7 +273,6 @@ Options::process_options_from_file(char *filename)
 {
 	FILE *f;
 	char *buf, *p;
-	bool done = false;
 	int rc, lineno;
 
 	buf = new char[OPTBUFSIZ];
@@ -292,18 +291,11 @@ Options::process_options_from_file(char *filename)
 	}
 	p = buf;
 	lineno = 1;
-	fgets(buf, OPTBUFSIZ, f);
-	do {
-		do {
-			rc = process_first_option(&p, lineno, filename);
-		} while (rc == 1);
-		p = buf;
-		if (fgets(buf, OPTBUFSIZ, f) == NULL) {
-			done = true;
-		}
-		lineno++;
-	} while (!done);
-
+    for (char *ptr = fgets(buf, OPTBUFSIZ, f); ptr;
+         ++lineno, p = buf, ptr = fgets(buf, OPTBUFSIZ, f))
+      do
+          rc = process_first_option(&p, lineno, filename);
+      while (rc == 1);
 	fclose(f);
 	delete [] buf;
 	return 0;
@@ -354,13 +346,13 @@ Options::process_options(int argc, char **argv)
 			exit (0);
 		} else if (strcmp (argv[i], "-o") == 0) {
 			if (argc <= i + 1)
-				fatal_error ("The -o flag requires an argument. Try %s --help",
+				error_exit ("The -o flag requires an argument. Try %s --help",
                              argv[0]);
 			command_line_options.push_back (argv[i + 1]);
 			++i;
 		} else if (strcmp (argv[i], "-F") == 0) {
 			if (argc <= i + 1)
-				fatal_error ("The -F flag requires an argument. Try %s --help",
+				error_exit ("The -F flag requires an argument. Try %s --help",
                              argv[0]);
 			strcpy (user_config_filename, argv[i + 1]);
 			++i;
@@ -369,7 +361,7 @@ Options::process_options(int argc, char **argv)
 		} else if (i == argc - 1) {
 			set_str_option("romfile", argv[i]);
 		} else {
-			fatal_error ("Unrecognized option %s. Try %s --help", argv[i],
+			error_exit ("Unrecognized option %s. Try %s --help", argv[i],
                          argv[0]);
 		}
 	}
@@ -434,7 +426,7 @@ Options::print_package_version(char *toolname, char *version)
 {
 	printf(
 "%s %s\n"
-"Copyright (C) 2001, 2002, 2003 by Brian R. Gaeke and others.\n"
+"Copyright (C) 2001, 2002, 2003, 2004 by Brian R. Gaeke and others.\n"
 "(See the files `AUTHORS' and `THANKS' in the %s source distribution\n"
 "for a complete list.)\n"
 "\n"

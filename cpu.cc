@@ -1958,13 +1958,14 @@ CPU::debug_registers_to_packet(void)
 	 * cpzero->reg[BadVAddr]
 	 * cpzero->reg[Cause]
 	 * cpu->pc
-     * fpu stuff: 35 zeroes (Unimplemented registers read as
-     *  all bits zero.)
-     */
+	 * fpu stuff: 35 zeroes (Unimplemented registers read as
+	 *  all bits zero.)
+	 */
 	packet[0] = '\0';
 	r = 0;
-	for (i = 0; i < 32; i++)
-		debug_packet_push_word(packet, reg[i]); r++;
+	for (i = 0; i < 32; i++) {
+	  debug_packet_push_word(packet, reg[i]); r++;
+	}
 	uint32 sr, bad, cause;
 	cpzero->read_debug_info(&sr, &bad, &cause);
 	debug_packet_push_word(packet, sr); r++;
@@ -1974,7 +1975,7 @@ CPU::debug_registers_to_packet(void)
 	debug_packet_push_word(packet, cause); r++;
 	debug_packet_push_word(packet, pc); r++;
 	for (; r < 90; r++) /* unimplemented regs at end */
-		debug_packet_push_word(packet, 0);
+	  debug_packet_push_word(packet, 0);
 	return packet;
 }
 

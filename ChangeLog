@@ -1,6 +1,88 @@
+2004-08-23 01:43  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: updated with NEWS items pertinent to 1.2.2
+
+2004-08-23 01:41  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Regenerated for 1.2.2
+
+2004-08-23 01:39  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE, VERSION, configure.in, debian/changelog,
+	doc/vmips.texi: Update version number and add release notes
+
+2004-08-23 01:14  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: pull up options.cc,v 1.47 patch (fixing processing of
+	completely empty vmipsrc)
+
+2004-08-23 01:04  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Sometimes a read from an empty file would end up with
+	garbage characters in buf. Guard against processing them by
+	checking for a NULL return value from fgets the first time.
+
+2004-07-31 01:17  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in, sample_code/Makefile.in: Merge from
+	cvs mainline: always build in sample_code, but don't build xmboot
+	or setup.o if there's no mips compiler. Fixes installation bug.
+
+2004-07-31 01:16  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in, sample_code/Makefile.in: 2nd try at making xmboot
+	and setup.o not build when there's no mips compiler.
+
+2004-07-31 00:59  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in, sample_code/Makefile.in: Always build
+	in sample_code, but exclude sample_code/xmboot if there is no MIPS
+	compiler. This makes the installation of asm_regnames.h and
+	ld.script work, even if there is no MIPS compiler.
+
+2004-07-31 00:20  Brian R. Gaeke <brg@dgate.org>
+
+	* THANKS: Merge from mainline.
+
+2004-07-31 00:20  Brian R. Gaeke <brg@dgate.org>
+
+	* THANKS: Add Vladimir Machulsky. @ --> at.
+
+2004-07-30 23:13  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Merge debug_registers_to_packet fix from mainline.
+
+2004-07-30 23:10  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Fix bug in debug_registers_to_packet; patch by Vladimir
+	Machuslkiy.
+
+2004-07-30 23:04  Brian R. Gaeke <brg@dgate.org>
+
+	* error.cc, error.h: Add error_exit() (merge from mainline)
+
+2004-07-30 23:03  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, vmipstool.cc: Don't need to call fatal_error() when
+	error_exit() will do.
+
+2004-07-30 22:47  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Don't dump core when presented funny command-line
+	options.
+
+2004-07-28 02:23  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/coff.c: Clean this file up a little; return -1
+	from coff_analyze if the file is not bootable.
+
+2004-07-28 01:56  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: add notes for 1.2.1 release
+
 2004-07-26 03:55  Brian R. Gaeke <brg@dgate.org>
 
-	* NEWS: Regenerated.
+	* NEWS, ChangeLog: Regenerated.
 
 2004-07-26 03:55  Brian R. Gaeke <brg@dgate.org>
 

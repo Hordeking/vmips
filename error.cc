@@ -17,7 +17,10 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "sysinclude.h"
+#include <cstdio>
+#include <cstdarg>
+#include <cassert>
+#include <cstdlib>
 #include "error.h"
 
 /* Print PRE literally (if non-NULL), then FMT with printf style
@@ -47,6 +50,16 @@ void error(const char *msg, ...) throw()
 	va_start(ap, msg);
 	format_help(stderr, "Error: ", "\n", msg, ap);
 	va_end(ap);
+}
+
+void error_exit(const char *msg, ...) throw()
+{
+	va_list ap;
+	va_start(ap, msg);
+	format_help(stderr, "Error: ", "\n", msg, ap);
+	va_end(ap);
+
+    exit(1);
 }
 
 void fatal_error(const char *msg, ...) throw()

@@ -1,14 +1,14 @@
 %!PS-Adobe-2.0
 %%Creator: dvips(k) 5.86e Copyright 2001 Radical Eye Software
 %%Title: vmips.dvi
-%%Pages: 57
+%%Pages: 58
 %%PageOrder: Ascend
 %%BoundingBox: 0 0 596 842
 %%EndComments
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips -o vmips.ps vmips.dvi
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2004.07.26:0309
+%DVIPSSource:  TeX output 2004.08.23:0150
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -4352,371 +4352,396 @@ b(some)i(of)g(the)f(.h)g(\014les)g(that)h(just)e(con)m(tain)i(h)m(uge)g
 %%Page: 44 46
 44 45 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
 b(44)150 299 y Fj(App)t(endix)53 b(D)81 b(Release)54
-b(History)275 545 y Fl(vmips-1.2.1)37 b(w)m(as)g(released)g(on)f(26)i
+b(History)275 523 y Fl(vmips-1.2.2)28 b(w)m(as)h(released)f(on)g(23)h
+(August)f(2004.)42 b(User-visible)26 b(c)m(hanges)j(in)e(v)m(ersion)g
+(1.2.2)j(\(since)150 632 y(v)m(ersion)g(1.2.1\):)225
+765 y Fk(\017)60 b Fl(A)26 b(bug)g(in)f(the)h(Mak)m(e\014les)h(and)f
+(con\014gure)g(scripts)f(has)h(b)s(een)f(\014xed,)i(where)f(some)g
+(\014les)g(w)m(ould)f(not)330 874 y(b)s(e)i(installed)e(if)h(y)m(ou)h
+(didn't)f(con\014gure)h(with)f(cross)h(compilation)f(to)s(ols)h
+(\(using)f(`)p Fi(--with-mips)p Fl('\).)225 1007 y Fk(\017)60
+b Fl(Vladimir)22 b(Mac)m(h)m(ulsky)i(found)f(and)h(\014xed)f(a)i(bug)f
+(in)f(the)h(debugger)g(in)m(terface,)j(where)d(the)g(register)330
+1116 y(\014le)29 b(w)m(ould)h(b)s(e)f(sen)m(t)i(to)g(gdb)f(incorrectly)
+-8 b(.)40 b(Thanks!)225 1249 y Fk(\017)60 b Fl(VMIPS)37
+b(will)e(no)j(longer)f(ab)s(ort)g(and)g(dump)f(core)i(when)f(bad)g
+(command-line)f(argumen)m(ts)i(are)330 1358 y(passed)28
+b(to)h(it.)40 b(Instead,)28 b(it)g(will)e(prin)m(t)h(an)h(error)g
+(message)i(and)d(exit)i(with)e(a)h(non-zero)h(exit)f(co)s(de.)225
+1491 y Fk(\017)60 b Fl(A)24 b(bug)f(in)f(the)i(command-line)e(option)i
+(pro)s(cessor)f(w)m(as)h(\014xed,)h(where)e(using)f(a)i(completely)g
+(empt)m(y)330 1600 y(`)p Fi(~/.vmipsrc)p Fl(')39 b(or)j(the)f(`)p
+Fi(-F)30 b(/dev/null)p Fl(')39 b(option)i(could)g(cause)h(the)f
+(options)g(parser)g(to)h(parse)330 1710 y(garbage,)32
+b(usually)c(resulting)g(in)i(harmless,)f(but)g(anno)m(ying)h(error)g
+(messages.)275 1865 y(vmips-1.2.1)37 b(w)m(as)g(released)g(on)f(26)i
 (July)d(2004.)62 b(User-visible)35 b(c)m(hanges)j(in)d(v)m(ersion)i
-(1.2.1)h(\(since)150 655 y(v)m(ersion)30 b(1.2\):)225
-794 y Fk(\017)60 b Fl(Fixed)43 b(a)h(bug)f(where)g(dela)m(y)h(slot)f
+(1.2.1)h(\(since)150 1975 y(v)m(ersion)30 b(1.2\):)225
+2107 y Fk(\017)60 b Fl(Fixed)43 b(a)h(bug)f(where)g(dela)m(y)h(slot)f
 (execution)h(could)f(b)s(e)g(triggered)h(ev)m(en)g(when)f(em)m(ulating)
-g(a)330 903 y(malformed)29 b(jr)h(\(jump-register\))g(instruction.)225
-1040 y Fk(\017)60 b Fl(Fixed)23 b(a)h(bug)e(where,)j(up)s(on)d(taking)h
+g(a)330 2217 y(malformed)29 b(jr)h(\(jump-register\))g(instruction.)225
+2349 y Fk(\017)60 b Fl(Fixed)23 b(a)h(bug)e(where,)j(up)s(on)d(taking)h
 (a)h(TLB)f(Miss)g(exception,)i(the)e(ASID)h(of)f(the)h(page)g(that)g
-(could)330 1149 y(not)31 b(b)s(e)e(lo)s(ok)m(ed)i(up)e(w)m(ould)g(b)s
+(could)330 2459 y(not)31 b(b)s(e)e(lo)s(ok)m(ed)i(up)e(w)m(ould)g(b)s
 (e)h(o)m(v)m(erwritten)h(\(in)e(the)i(CP0)f(En)m(tryHi)g(register\))g
-(with)f(garbage.)225 1286 y Fk(\017)60 b Fl(Fixed)28
+(with)f(garbage.)225 2591 y Fk(\017)60 b Fl(Fixed)28
 b(a)h(bug)f(in)f(VMIPS)h(con\014gurations)g(with)g(m)m(ultiple)e(in)m
-(terrupt)h(devices,)i(where)f(In)m(terrupt)330 1396 y(P)m(ending)j
+(terrupt)h(devices,)i(where)f(In)m(terrupt)330 2701 y(P)m(ending)j
 (bits)g(of)h(the)h(CP0)f(Cause)g(from)f(previous)g(in)m(terrupts)f
-(could)h(b)s(e)h(left)g(asserted)g(ev)m(en)h(if)330 1505
+(could)h(b)s(e)h(left)g(asserted)g(ev)m(en)h(if)330 2810
 y(the)e(device)f(that)h(asserted)g(them)f(had)g(subsequen)m(tly)f
-(deasserted)h(them.)225 1642 y Fk(\017)60 b Fl(Fixed)26
+(deasserted)h(them.)225 2943 y Fk(\017)60 b Fl(Fixed)26
 b(a)g(bug)g(where)f(the)i(memory)f(dump)e(\014le)h(and)h(R)m(OM)g
 (\014le)f(w)m(ould)g(b)s(e)h(op)s(ened)f(in)g(text)i(mo)s(de.)330
-1751 y(They)j(are)h(no)m(w)f(op)s(ened)g(in)f(binary)f(mo)s(de.)275
-1917 y(vmips-1.2)22 b(w)m(as)h(released)g(on)f(26)i(June)e(2004.)39
+3052 y(They)j(are)h(no)m(w)f(op)s(ened)g(in)f(binary)f(mo)s(de.)275
+3208 y(vmips-1.2)22 b(w)m(as)h(released)g(on)f(26)i(June)e(2004.)39
 b(User-visible)21 b(c)m(hanges)j(in)d(v)m(ersion)h(1.2)i(\(since)e(v)m
-(ersion)150 2027 y(1.1.3\):)225 2165 y Fk(\017)60 b Fl(Man)m(y)27
+(ersion)150 3317 y(1.1.3\):)225 3450 y Fk(\017)60 b Fl(Man)m(y)27
 b(do)s(cumen)m(tation)f(up)s(dates)g(ha)m(v)m(e)i(b)s(een)d(made.)40
 b(Note)28 b(that)f(the)f(do)s(cumen)m(tation)g(has)h(b)s(een)330
-2275 y(relicensed)i(under)g(the)h(MIT)g(license,)g(instead)g(of)g(the)h
-(GNU)g(FDL.)225 2411 y Fk(\017)60 b Fl(Man)m(y)38 b(facets)g(of)f
+3559 y(relicensed)i(under)g(the)h(MIT)g(license,)g(instead)g(of)g(the)h
+(GNU)g(FDL.)225 3692 y Fk(\017)60 b Fl(Man)m(y)38 b(facets)g(of)f
 (VMIPS)f(are)h(no)m(w)g(con\014gurable)f(at)i(run)m(time,)f(instead)f
-(of)i(at)f(compile)f(time.)330 2521 y(F)-8 b(or)31 b(instance:)330
-2658 y(It)24 b(is)f(no)m(w)i(p)s(ossible)c(to)k(build)c(and)j(install)e
+(of)i(at)f(compile)f(time.)330 3801 y(F)-8 b(or)31 b(instance:)330
+3934 y(It)24 b(is)f(no)m(w)i(p)s(ossible)c(to)k(build)c(and)j(install)e
 (VMIPS)i(without)f(ha)m(ving)h(previously)e(installed)f(MIPS)330
-2767 y(cross-compiler)42 b(to)s(ols.)78 b(In)42 b(particular,)j(VMIPS)e
+4043 y(cross-compiler)42 b(to)s(ols.)78 b(In)42 b(particular,)j(VMIPS)e
 (no)m(w)f(incorp)s(orates)h(the)g(p)s(ortions)e(of)i(GNU)330
-2877 y(lib)s(op)s(co)s(des)32 b(used)j(to)h(implemen)m(t)e(the)i(MIPS)e
+4153 y(lib)s(op)s(co)s(des)32 b(used)j(to)h(implemen)m(t)e(the)i(MIPS)e
 (disassem)m(bler,)h(so)h(linking)c(against)k(an)f(installed)330
-2986 y(v)m(ersion)30 b(of)g(lib)s(op)s(co)s(des)e(from)i(GNU)h(bin)m
-(utils)c(is)i(no)i(longer)f(necessary)-8 b(.)330 3123
+4262 y(v)m(ersion)30 b(of)g(lib)s(op)s(co)s(des)e(from)i(GNU)h(bin)m
+(utils)c(is)i(no)i(longer)f(necessary)-8 b(.)330 4395
 y(It)30 b(is)f(no)m(w)g(p)s(ossible)f(to)i(switc)m(h)f(the)h(VMIPS)f
 (CPU)h(from)f(big-endian)f(to)i(little-endian)e(mo)s(de)h(or)330
-3232 y(vice-v)m(ersa)i(using)e(a)i(command-line)e(option.)330
-3369 y(It)35 b(is)g(no)m(w)g(p)s(ossible)e(to)j(c)m(hange)g(the)f(name)
+4504 y(vice-v)m(ersa)i(using)e(a)i(command-line)e(option.)330
+4637 y(It)35 b(is)g(no)m(w)g(p)s(ossible)e(to)j(c)m(hange)g(the)f(name)
 h(of)f(the)g(con\014guration)g(\014le)f(that)i(VMIPS)f(reads)g(on)330
-3479 y(startup)30 b(using)f(a)h(command-line)f(option.)40
+4746 y(startup)30 b(using)f(a)h(command-line)f(option.)40
 b(The)30 b Fi(")p Fl(-o)h(con\014g\014le)p Fi(")e Fl(option,)i(whic)m
-(h)e(nev)m(er)h(w)m(ork)m(ed,)330 3588 y(has)g(b)s(een)g(remo)m(v)m
-(ed.)225 3725 y Fk(\017)60 b Fl(vmipsto)s(ol)37 b(no)m(w)i(shares)g
+(h)e(nev)m(er)h(w)m(ork)m(ed,)330 4856 y(has)g(b)s(een)g(remo)m(v)m
+(ed.)225 4988 y Fk(\017)60 b Fl(vmipsto)s(ol)37 b(no)m(w)i(shares)g
 (command-line)e(pro)s(cessing)h(co)s(de)h(with)f(vmips.)64
-b(It)40 b(also)e(has)h(a)g(new)330 3834 y({sw)m(ap-w)m(ords)31
+b(It)40 b(also)e(has)h(a)g(new)330 5098 y({sw)m(ap-w)m(ords)31
 b(option)e(that)i(allo)m(ws)f(y)m(ou)h(to)g(b)m(ytesw)m(ap)g(all)e(the)
-i(4-b)m(yte)g(w)m(ords)f(in)f(a)i(\014le.)225 3971 y
+i(4-b)m(yte)g(w)m(ords)f(in)f(a)i(\014le.)225 5230 y
 Fk(\017)60 b Fl(Y)-8 b(ou)34 b(can)h(no)m(w)f(sp)s(ecify)e(n)m(umeric)h
 (constan)m(ts)i(in)e(command)h(line)e(options)h(whic)m(h)g(are)h(m)m
-(ultiples)330 4081 y(of)d(1024,)h(1024)p Fi(^)p Fl(2,)g(or)f(1024)p
-Fi(^)p Fl(3)h(using)d(the)i(K,)f(M,)h(or)f(G)h(su\016xes.)225
-4217 y Fk(\017)60 b Fl(Sev)m(eral)39 b(new)g(em)m(ulated)h(devices)f
-(based)g(on)h(the)f(DECstation)h(5000/200)j(ha)m(v)m(e)e(b)s(een)d
-(added.)330 4327 y(In)d(particular,)h(it)g(is)f(no)h(longer)f(p)s
-(ossible)f(to)i(disable)f(the)h(serial)e(device)i(at)h(compile)e(time)h
-(\(or)330 4436 y(with)28 b(`)p Fi(-o)i(nousetty)p Fl('\),)e(but)g(y)m
-(ou)h(can)h(c)m(ho)s(ose)g(whether)e(to)i(use)f(the)g(DECstation)g
-(serial)f(c)m(hip)g(or)330 4546 y(the)35 b(SPIM-compatible)e(serial)h
-(console)g(\(or)h(neither\))f(using)f(new)h(command-line)f(options.)53
-b(In)330 4655 y(addition,)31 b(the)i(R)m(OM)f(program)g(distributed)d
-(with)i(VMIPS)h(supp)s(orts)e(a)j Fi(")p Fl(b)s(o)s(ot)f(en)m(vironmen)
-m(t)p Fi(")330 4765 y Fl(similar)d(to)j(that)g(pro)m(vided)e(b)m(y)i
-(the)f(DECstation)h(PR)m(OM.)g(The)f(new)g(DECstation-compatible)330
-4875 y(devices)39 b(ha)m(v)m(e)i(not)e(b)s(een)g(comprehensiv)m(ely)f
-(v)-5 b(alidated;)43 b(they)d(should)d(b)s(e)i(considered)f
-Fi(")p Fl(b)s(eta)p Fi(")330 4984 y Fl(qualit)m(y)30
-b(at)h(this)e(p)s(oin)m(t.)225 5121 y Fk(\017)60 b Fl(There)29
-b(is)g(a)h(new)g(tracing)g(framew)m(ork)g(y)m(ou)g(can)g(use)f(to)i
-(generate)g(run)m(time)e(execution)h(traces)h(of)330
-5230 y(programs)j(that)g(run)f(in)f(VMIPS.)i(See)g(the)g(do)s(cumen)m
-(tation)g(of)g(the)g Fi(")p Fl(tracing)p Fi(")f Fl(command-line)330
-5340 y(option)d(and)g(the)g(other)h(options)e(that)i(b)s(egin)e(with)g
-Fi(")p Fl(trace)p Fi(")i Fl(for)g(more)f(details.)p eop
+(ultiples)330 5340 y(of)d(1024,)h(1024)p Fi(^)p Fl(2,)g(or)f(1024)p
+Fi(^)p Fl(3)h(using)d(the)i(K,)f(M,)h(or)f(G)h(su\016xes.)p
+eop
 %%Page: 45 47
 45 46 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
-b(45)225 299 y Fk(\017)60 b Fl(The)24 b(VMIPS)g(in)m(terface)g(to)h
-(GDB)h(no)m(w)e(supp)s(orts)e(the)i Fi(")p Fl(remote)h(Z-pac)m(k)m(et)p
-Fi(")h Fl(in)m(terface)f(for)f(setting)330 408 y(breakp)s(oin)m(ts.)225
-538 y Fk(\017)60 b Fl(VMIPS)24 b(no)m(w)g(prin)m(ts)e(more)i
+b(45)225 299 y Fk(\017)60 b Fl(Sev)m(eral)39 b(new)g(em)m(ulated)h
+(devices)f(based)g(on)h(the)f(DECstation)h(5000/200)j(ha)m(v)m(e)e(b)s
+(een)d(added.)330 408 y(In)d(particular,)h(it)g(is)f(no)h(longer)f(p)s
+(ossible)f(to)i(disable)f(the)h(serial)e(device)i(at)h(compile)e(time)h
+(\(or)330 518 y(with)28 b(`)p Fi(-o)i(nousetty)p Fl('\),)e(but)g(y)m
+(ou)h(can)h(c)m(ho)s(ose)g(whether)e(to)i(use)f(the)g(DECstation)g
+(serial)f(c)m(hip)g(or)330 628 y(the)35 b(SPIM-compatible)e(serial)h
+(console)g(\(or)h(neither\))f(using)f(new)h(command-line)f(options.)53
+b(In)330 737 y(addition,)31 b(the)i(R)m(OM)f(program)g(distributed)d
+(with)i(VMIPS)h(supp)s(orts)e(a)j Fi(")p Fl(b)s(o)s(ot)f(en)m(vironmen)
+m(t)p Fi(")330 847 y Fl(similar)d(to)j(that)g(pro)m(vided)e(b)m(y)i
+(the)f(DECstation)h(PR)m(OM.)g(The)f(new)g(DECstation-compatible)330
+956 y(devices)39 b(ha)m(v)m(e)i(not)e(b)s(een)g(comprehensiv)m(ely)f(v)
+-5 b(alidated;)43 b(they)d(should)d(b)s(e)i(considered)f
+Fi(")p Fl(b)s(eta)p Fi(")330 1066 y Fl(qualit)m(y)30
+b(at)h(this)e(p)s(oin)m(t.)225 1206 y Fk(\017)60 b Fl(There)29
+b(is)g(a)h(new)g(tracing)g(framew)m(ork)g(y)m(ou)g(can)g(use)f(to)i
+(generate)g(run)m(time)e(execution)h(traces)h(of)330
+1316 y(programs)j(that)g(run)f(in)f(VMIPS.)i(See)g(the)g(do)s(cumen)m
+(tation)g(of)g(the)g Fi(")p Fl(tracing)p Fi(")f Fl(command-line)330
+1426 y(option)d(and)g(the)g(other)h(options)e(that)i(b)s(egin)e(with)g
+Fi(")p Fl(trace)p Fi(")i Fl(for)g(more)f(details.)225
+1566 y Fk(\017)60 b Fl(The)24 b(VMIPS)g(in)m(terface)g(to)h(GDB)h(no)m
+(w)e(supp)s(orts)e(the)i Fi(")p Fl(remote)h(Z-pac)m(k)m(et)p
+Fi(")h Fl(in)m(terface)f(for)f(setting)330 1676 y(breakp)s(oin)m(ts.)
+225 1816 y Fk(\017)60 b Fl(VMIPS)24 b(no)m(w)g(prin)m(ts)e(more)i
 (informativ)m(e)f(diagnostic)h(messages)g(ab)s(out)g(the)g(causes)h(of)
-f(bus)e(errors)330 648 y(and)30 b(in)m(terrupts.)225
-777 y Fk(\017)60 b Fl(Y)-8 b(ou)27 b(can)g(no)m(w)f(use)g
+f(bus)e(errors)330 1926 y(and)30 b(in)m(terrupts.)225
+2066 y Fk(\017)60 b Fl(Y)-8 b(ou)27 b(can)g(no)m(w)f(use)g
 Fi(^)p Fl(C)g(\(y)m(our)h(terminal's)e(In)m(terrupt)h(k)m(ey\))h(to)g
-(stop)g(VMIPS)f(and)g(break)g(in)m(to)h(the)330 887 y(debugger,)33
-b(if)e(the)h(`)p Fi(-o)e(debug)p Fl(')h(command)h(line)e(option)i(w)m
-(as)g(set,)h(or)g Fi(^\\)e Fl(\(y)m(our)h(terminal's)f(Quit)330
-996 y(k)m(ey\))g(to)h(halt)d(VMIPS)h(in)g(an)g(orderly)f(manner)g(at)j
-(an)m(y)e(time.)225 1126 y Fk(\017)60 b Fl(The)24 b(`)p
-Fi(--disable-debug)p Fl(')d(option)j(to)i Fi(configure)c
-Fl(no)m(w)j(strips)e(the)h(compiled)g(VMIPS)g(binaries,)330
-1235 y(although)30 b(it)g(has)g(b)s(een)f(do)s(cumen)m(ted)i(to)g(do)f
-(this)f(for)h(some)h(time)f(no)m(w.)275 1385 y(vmips-1.1.3)25
+(stop)g(VMIPS)f(and)g(break)g(in)m(to)h(the)330 2176
+y(debugger,)33 b(if)e(the)h(`)p Fi(-o)e(debug)p Fl(')h(command)h(line)e
+(option)i(w)m(as)g(set,)h(or)g Fi(^\\)e Fl(\(y)m(our)h(terminal's)f
+(Quit)330 2285 y(k)m(ey\))g(to)h(halt)d(VMIPS)h(in)g(an)g(orderly)f
+(manner)g(at)j(an)m(y)e(time.)225 2426 y Fk(\017)60 b
+Fl(The)24 b(`)p Fi(--disable-debug)p Fl(')d(option)j(to)i
+Fi(configure)c Fl(no)m(w)j(strips)e(the)h(compiled)g(VMIPS)g(binaries,)
+330 2535 y(although)30 b(it)g(has)g(b)s(een)f(do)s(cumen)m(ted)i(to)g
+(do)f(this)f(for)h(some)h(time)f(no)m(w.)275 2712 y(vmips-1.1.3)25
 b(w)m(as)h(released)e(on)h(24)h(Octob)s(er)f(2003.)41
 b(User-visible)23 b(c)m(hanges)j(in)e(v)m(ersion)g(1.1.3)j(\(since)150
-1494 y(v)m(ersion)j(1.1.2\):)225 1624 y Fk(\017)60 b
+2822 y(v)m(ersion)j(1.1.2\):)225 2968 y Fk(\017)60 b
 Fl(A)39 b(bug)f(in)g(comparing)g(large)h(immediate)f(constan)m(ts)i
-(near)f(UINT)p 2736 1624 28 4 v 32 w(MAX)h(using)d(the)i(sltiu)e(in-)
-330 1733 y(struction)30 b(has)g(b)s(een)f(\014xed.)225
-1863 y Fk(\017)60 b Fl(A)36 b(bug)f(where)g(the)h(meaning)f(of)g(the)h
+(near)f(UINT)p 2736 2968 28 4 v 32 w(MAX)h(using)d(the)i(sltiu)e(in-)
+330 3078 y(struction)30 b(has)g(b)s(een)f(\014xed.)225
+3218 y Fk(\017)60 b Fl(A)36 b(bug)f(where)g(the)h(meaning)f(of)g(the)h
 (`dirt)m(y')g(bit)e(in)h(TLB)g(en)m(tries)g(w)m(as)h(acciden)m(tally)g
-(rev)m(ersed)330 1973 y(has)30 b(b)s(een)g(\014xed.)225
-2102 y Fk(\017)60 b Fl(A)31 b(bug)e(in)h(sp)s(ecifying)e(whic)m(h)h
+(rev)m(ersed)330 3328 y(has)30 b(b)s(een)g(\014xed.)225
+3468 y Fk(\017)60 b Fl(A)31 b(bug)e(in)h(sp)s(ecifying)e(whic)m(h)h
 (bits)g(are)i(treated)h(as)e(writable)f(in)g(the)i(CP0)f(En)m(tryLo)h
-(register)f(b)m(y)330 2212 y(the)d(tlbr)e(instruction)g(has)i(b)s(een)f
+(register)f(b)m(y)330 3578 y(the)d(tlbr)e(instruction)g(has)i(b)s(een)f
 (\014xed.)39 b(Thanks)25 b(to)j(Mingyu)e(Chen)f(for)i(p)s(oin)m(ting)e
-(out)i(these)g(last)330 2321 y(t)m(w)m(o)32 b(bugs.)275
-2471 y(vmips-1.1.2)c(w)m(as)h(released)f(on)g(20)h(August)f(2003.)42
+(out)i(these)g(last)330 3688 y(t)m(w)m(o)32 b(bugs.)275
+3865 y(vmips-1.1.2)c(w)m(as)h(released)f(on)g(20)h(August)f(2003.)42
 b(User-visible)26 b(c)m(hanges)j(in)e(v)m(ersion)g(1.1.2)j(\(since)150
-2580 y(v)m(ersion)g(1.1.1\):)225 2710 y Fk(\017)60 b
+3974 y(v)m(ersion)g(1.1.1\):)225 4121 y Fk(\017)60 b
 Fl(An)29 b(instruction)d(that)k(turns)e(on)g(in)m(terrupts)g(in)f(the)i
 (system)g(con)m(trol)h(copro)s(cessor)f(\(copro)s(cessor)330
-2819 y(0\))j(will)c(no)j(longer)g(immediately)e(tak)m(e)j(an)f
+4230 y(0\))j(will)c(no)j(longer)g(immediately)e(tak)m(e)j(an)f
 (exception)h(if)d(an)i(in)m(terrupt)f(is)g(p)s(ending;)f(no)m(w)i(it)g
-(will)330 2929 y(happ)s(en)e(at)i(least)f(one)h(instruction)d(later.)
-225 3059 y Fk(\017)60 b Fl(When)27 b(building)c(VMIPS)j(in)g(debug)g
+(will)330 4340 y(happ)s(en)e(at)i(least)f(one)h(instruction)d(later.)
+225 4480 y Fk(\017)60 b Fl(When)27 b(building)c(VMIPS)j(in)g(debug)g
 (mo)s(de,)i(the)f(copro)s(cessor)g(0)g(Cause)g(register)g(ma)m(y)h(no)e
-(longer)330 3168 y(con)m(tain)31 b(random,)f(non-clearable)f(in)m
-(terrupt-p)s(ending)e(bits.)225 3298 y Fk(\017)60 b Fl(The)42
+(longer)330 4590 y(con)m(tain)31 b(random,)f(non-clearable)f(in)m
+(terrupt-p)s(ending)e(bits.)225 4730 y Fk(\017)60 b Fl(The)42
 b(copro)s(cessor)g(0)g(Cause)g(register's)g(in)m(terrupt-p)s(ending)d
-(and)i(copro)s(cessor-error)i(bits)e(are)330 3407 y(no)m(w)30
+(and)i(copro)s(cessor-error)i(bits)e(are)330 4840 y(no)m(w)30
 b(correctly)h(up)s(dated)e(when)h(an)g(exception)g(is)g(tak)m(en.)225
-3537 y Fk(\017)60 b Fl(The)25 b(VMIPS)g(ph)m(ysical-memory)g(manager)h
+4980 y Fk(\017)60 b Fl(The)25 b(VMIPS)g(ph)m(ysical-memory)g(manager)h
 (will)d(no)m(w)i(allo)m(w)g(y)m(ou)h(to)h(place)e(t)m(w)m(o)i(devices)e
-(directly)330 3646 y(adjacen)m(t)37 b(to)f(one)g(another)f(in)g
+(directly)330 5090 y(adjacen)m(t)37 b(to)f(one)g(another)f(in)g
 (memory;)j(it)d(used)f(to)j(complain)d(that)i(they)f(o)m(v)m(erlapp)s
-(ed,)i(when)330 3756 y(they)31 b(actually)f(did)e(not.)225
-3885 y Fk(\017)60 b Fl(A)30 b(t)m(yp)s(o)h(w)m(as)g(\014xed)f(in)f(the)
-h(testsuite)h(do)s(cumen)m(tation.)275 4035 y(vmips-1.1.1)36
-b(w)m(as)g(released)f(on)g(16)i(June)d(2003.)59 b(User-visible)33
-b(c)m(hanges)k(in)d(v)m(ersion)h(1.1.1)i(\(since)150
-4144 y(v)m(ersion)30 b(1.1\):)225 4274 y Fk(\017)60 b
-Fl(A)42 b(bug)g(in)m(v)m(olving)e(shifts)h(b)m(y)h(0)h(or)f(32)h(bits)e
-(\(e.g.,)47 b(using)41 b(instructions)f(lik)m(e)h(srlv\))g(pro)s
-(ducing)330 4384 y(incorrect)30 b(results)f(has)i(b)s(een)e(\014xed.)
-225 4513 y Fk(\017)60 b Fl(The)37 b(absence)h(of)f(an)g(FPU)h(attac)m
-(hed)h(to)f(copro)s(cessor)g(slot)f(1)g(can)h(no)m(w)f(b)s(e)g
-(detected)h(b)m(y)g(user)330 4623 y(programs.)225 4752
-y Fk(\017)60 b Fl(The)28 b(system)g(con)m(trol)h(copro)s(cessor)g
-(\(copro)s(cessor)g(0\))g(no)m(w)f(returns)g(the)g(correct)i(ID)e(n)m
-(um)m(b)s(er)f(for)330 4862 y(the)k(R3000A)h(pro)s(cessor)e(in)f(the)h
-(PRId)g(register.)225 4991 y Fk(\017)60 b Fl(Em)m(ulation)32
-b(of)h(store-b)m(yte)h(and)e(store-halfw)m(ord)g(op)s(erations)h(for)f
-(em)m(ulated)h(devices)f(that)i(only)330 5101 y(supp)s(ort)29
-b(store-w)m(ord)i(should)d(no)m(w)i(w)m(ork)h(correctly)g(on)f(b)m
-(yte-sw)m(app)s(ed)g(con\014gurations.)225 5230 y Fk(\017)60
-b Fl(A)25 b(bug)f(in)g(vmipsto)s(ol)f(whic)m(h)h(caused)h(it)g(to)g
-(fail)f(to)i(\014nd)d(alternate)j(link)m(er)d(scripts)h(\(supplied)e
-(with)330 5340 y(the)31 b({ld-script)d(option\))j(has)f(b)s(een)f
-(\014xed.)p eop
+(ed,)i(when)330 5200 y(they)31 b(actually)f(did)e(not.)225
+5340 y Fk(\017)60 b Fl(A)30 b(t)m(yp)s(o)h(w)m(as)g(\014xed)f(in)f(the)
+h(testsuite)h(do)s(cumen)m(tation.)p eop
 %%Page: 46 48
 46 47 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
-b(46)225 299 y Fk(\017)60 b Fl(A)30 b(gcc)h(w)m(arning)d(caused)i(b)m
-(y)f(a)h(\(harmless\))g(commen)m(t)g(in)f(asm)p 2526
-299 28 4 v 32 w(regnames.h)h(has)g(b)s(een)f(quashed.)225
-428 y Fk(\017)60 b Fl(A)23 b(bug)f(where)g(little-endian)f(vmips)g
+b(46)275 299 y(vmips-1.1.1)36 b(w)m(as)g(released)f(on)g(16)i(June)d
+(2003.)59 b(User-visible)33 b(c)m(hanges)k(in)d(v)m(ersion)h(1.1.1)i
+(\(since)150 408 y(v)m(ersion)30 b(1.1\):)225 538 y Fk(\017)60
+b Fl(A)42 b(bug)g(in)m(v)m(olving)e(shifts)h(b)m(y)h(0)h(or)f(32)h
+(bits)e(\(e.g.,)47 b(using)41 b(instructions)f(lik)m(e)h(srlv\))g(pro)s
+(ducing)330 648 y(incorrect)30 b(results)f(has)i(b)s(een)e(\014xed.)225
+777 y Fk(\017)60 b Fl(The)37 b(absence)h(of)f(an)g(FPU)h(attac)m(hed)h
+(to)f(copro)s(cessor)g(slot)f(1)g(can)h(no)m(w)f(b)s(e)g(detected)h(b)m
+(y)g(user)330 887 y(programs.)225 1016 y Fk(\017)60 b
+Fl(The)28 b(system)g(con)m(trol)h(copro)s(cessor)g(\(copro)s(cessor)g
+(0\))g(no)m(w)f(returns)g(the)g(correct)i(ID)e(n)m(um)m(b)s(er)f(for)
+330 1126 y(the)k(R3000A)h(pro)s(cessor)e(in)f(the)h(PRId)g(register.)
+225 1255 y Fk(\017)60 b Fl(Em)m(ulation)32 b(of)h(store-b)m(yte)h(and)e
+(store-halfw)m(ord)g(op)s(erations)h(for)f(em)m(ulated)h(devices)f
+(that)i(only)330 1365 y(supp)s(ort)29 b(store-w)m(ord)i(should)d(no)m
+(w)i(w)m(ork)h(correctly)g(on)f(b)m(yte-sw)m(app)s(ed)g
+(con\014gurations.)225 1494 y Fk(\017)60 b Fl(A)25 b(bug)f(in)g
+(vmipsto)s(ol)f(whic)m(h)h(caused)h(it)g(to)g(fail)f(to)i(\014nd)d
+(alternate)j(link)m(er)d(scripts)h(\(supplied)e(with)330
+1604 y(the)31 b({ld-script)d(option\))j(has)f(b)s(een)f(\014xed.)225
+1733 y Fk(\017)60 b Fl(A)30 b(gcc)h(w)m(arning)d(caused)i(b)m(y)f(a)h
+(\(harmless\))g(commen)m(t)g(in)f(asm)p 2526 1733 28
+4 v 32 w(regnames.h)h(has)g(b)s(een)f(quashed.)225 1863
+y Fk(\017)60 b Fl(A)23 b(bug)f(where)g(little-endian)f(vmips)g
 (con\014gurations)h(w)m(ould)f(dump)g(core)j(when)e(the)h(disassem)m
-(bler)330 538 y(w)m(as)31 b(used)e(\(e.g.,)k(when)c(the)i(instdump)c
+(bler)330 1973 y(w)m(as)31 b(used)e(\(e.g.,)k(when)c(the)i(instdump)c
 (option)j(w)m(as)h(turned)e(on\))h(has)h(b)s(een)e(\014xed.)225
-667 y Fk(\017)60 b Fl(`con\014gure')31 b(no)f(longer)g(ignores)g(its)f
-({with-mips-include)e(option.)275 817 y(vmips-1.1)40
+2102 y Fk(\017)60 b Fl(`con\014gure')31 b(no)f(longer)g(ignores)g(its)f
+({with-mips-include)e(option.)275 2252 y(vmips-1.1)40
 b(w)m(as)i(released)f(on)g(14)h(Marc)m(h)f(2003.)75 b(User-visible)39
-b(c)m(hanges)j(in)e(v)m(ersion)g(1.1)i(\(since)150 927
-y(v)m(ersion)30 b(1.0.4\):)225 1056 y Fk(\017)60 b Fl(If)31
+b(c)m(hanges)j(in)e(v)m(ersion)g(1.1)i(\(since)150 2361
+y(v)m(ersion)30 b(1.0.4\):)225 2491 y Fk(\017)60 b Fl(If)31
 b(y)m(ou)g(are)h(using)e(g)p Fi(++)h Fl(to)g(compile)g(VMIPS,)g(y)m(ou)
 g(m)m(ust)g(use)g(g)p Fi(++)g Fl(v)m(ersion)g(2.95)i(or)e(later.)43
-b(Also,)330 1166 y(y)m(ou)29 b(m)m(ust)g(sp)s(ecify)e(the)i({target)h
+b(Also,)330 2600 y(y)m(ou)29 b(m)m(ust)g(sp)s(ecify)e(the)i({target)h
 (option)f(to)g(`con\014gure',)h(with)d(an)i(argumen)m(t)g(that)g(matc)m
-(hes)h(the)330 1275 y({target)i(option)e(to)h(bin)m(utils)d
-(`con\014gure'.)41 b(See)30 b(`INST)-8 b(ALL'.)225 1405
+(hes)h(the)330 2710 y({target)i(option)e(to)h(bin)m(utils)d
+(`con\014gure'.)41 b(See)30 b(`INST)-8 b(ALL'.)225 2839
 y Fk(\017)60 b Fl(VMIPS)30 b(no)m(w)g(supp)s(orts)f(GNU)i(standard)e
-({help)h(and)g({v)m(ersion)g(options.)225 1534 y Fk(\017)60
+({help)h(and)g({v)m(ersion)g(options.)225 2969 y Fk(\017)60
 b Fl(The)24 b(man)m(ual)h(no)m(w)g(includes)d(impro)m(v)m(ed)j(do)s
 (cumen)m(tation)g(for)f(using)g(gdb)g(and)h(Insigh)m(t)f(to)h(con)m
-(trol)330 1644 y(VMIPS,)h(a)g(section)g(on)g(the)g(di\013erences)g(b)s
+(trol)330 3078 y(VMIPS,)h(a)g(section)g(on)g(the)g(di\013erences)g(b)s
 (et)m(w)m(een)g(SPIM's)g(console)g(and)g(the)g(SPIM-compatible)330
-1753 y(console)k(device,)g(a)g(section)f(on)h(prop)s(er)e(error)h(rep)s
+3188 y(console)k(device,)g(a)g(section)f(on)h(prop)s(er)e(error)h(rep)s
 (orting)f(from)h(VMIPS)g(extensions,)h(and)f(man)m(y)330
-1863 y(other)i(minor)e(revisions.)225 1993 y Fk(\017)60
+3298 y(other)i(minor)e(revisions.)225 3427 y Fk(\017)60
 b Fl(Using)28 b(gdb)g(to)h(con)m(trol)h(VMIPS)e(is)g(no)m(w)g(m)m(uc)m
 (h)h(more)g(robust)f(in)f(the)i(face)h(of)f(errors)f(and)g(excep-)330
-2102 y(tions.)225 2232 y Fk(\017)60 b Fl(VMIPS)35 b(1.1)i(mak)m(es)g
+3537 y(tions.)225 3666 y Fk(\017)60 b Fl(VMIPS)35 b(1.1)i(mak)m(es)g
 (it)f(p)s(ossible)d(to)k(use)e(the)h(2nd)f(displa)m(y/k)m(eyb)s(oard)g
-(c)m(hannel)g(of)h(the)g(SPIM-)330 2341 y(compatible)30
+(c)m(hannel)g(of)h(the)g(SPIM-)330 3776 y(compatible)30
 b(console)g(device,)h(using)e(the)h(`tt)m(ydev2')j(option.)225
-2471 y Fk(\017)60 b Fl(VMIPS)35 b(no)m(w)g(includes)e(a)i(halt)g
+3905 y Fk(\017)60 b Fl(VMIPS)35 b(no)m(w)g(includes)e(a)i(halt)g
 (device,)i(whic)m(h)c(can)j(b)s(e)e(used)h(to)h(halt)e(the)i(sim)m
-(ulator)e(without)330 2580 y(using)29 b(a)i(sp)s(ecial)e(instruction.)
-225 2710 y Fk(\017)60 b Fl(VMIPS)33 b(1.1)i(is)e(m)m(uc)m(h)h(faster)g
+(ulator)e(without)330 4015 y(using)29 b(a)i(sp)s(ecial)e(instruction.)
+225 4144 y Fk(\017)60 b Fl(VMIPS)33 b(1.1)i(is)e(m)m(uc)m(h)h(faster)g
 (than)f(VMIPS)h(1.0.4.)52 b(This)32 b(is)h(due)g(in)f(large)i(part)g
-(to)g(the)g(e\013orts)330 2819 y(of)g(P)m(aul)f(Tw)m(ohey)-8
+(to)g(the)g(e\013orts)330 4254 y(of)g(P)m(aul)f(Tw)m(ohey)-8
 b(,)35 b(who)e(reimplemen)m(ted)f(the)i(clo)s(c)m(k)g(and)f
-(SPIM-compatible)f(console)i(devices,)330 2929 y(and)c(cleaned)g(up)f
-(the)i(co)s(de)f(a)h(bit.)225 3059 y Fk(\017)60 b Fl(The)31
+(SPIM-compatible)f(console)i(devices,)330 4364 y(and)c(cleaned)g(up)f
+(the)i(co)s(de)f(a)h(bit.)225 4493 y Fk(\017)60 b Fl(The)31
 b(VMIPS)g(distribution)d(no)m(w)j(includes)e(a)j(regression)f(test)h
-(suite,)g(based)f(on)g(DejaGNU)i(\(re-)330 3168 y(places)40
-b(the)g(old)f(test)p 1086 3168 V 34 w(co)s(de)h(directory\).)70
+(suite,)g(based)f(on)g(DejaGNU)i(\(re-)330 4603 y(places)40
+b(the)g(old)f(test)p 1086 4603 V 34 w(co)s(de)h(directory\).)70
 b(In)40 b(order)f(to)i(supp)s(ort)d(this,)k(the)e(formats)h(of)f(lots)g
-(of)330 3278 y(random)30 b(messages)h(that)g(VMIPS)f(prin)m(ts)f(out)h
-(ha)m(v)m(e)i(c)m(hanged.)225 3407 y Fk(\017)60 b Fl(W)-8
+(of)330 4712 y(random)30 b(messages)h(that)g(VMIPS)f(prin)m(ts)f(out)h
+(ha)m(v)m(e)i(c)m(hanged.)225 4842 y Fk(\017)60 b Fl(W)-8
 b(e)32 b(no)m(w)e(supp)s(ort)f(64-bit)h(hosts)h(\(e.g.,)h(Alpha\).)275
-3557 y(vmips-1.0.4)i(w)m(as)h(released)f(on)h(28)g(April)d(2002.)55
+4991 y(vmips-1.0.4)i(w)m(as)h(released)f(on)h(28)g(April)d(2002.)55
 b(User-visible)32 b(c)m(hanges)j(in)e(v)m(ersion)h(1.0.4)i(\(since)150
-3666 y(v)m(ersion)30 b(1.0.3\):)225 3796 y Fk(\017)60
+5101 y(v)m(ersion)30 b(1.0.3\):)225 5230 y Fk(\017)60
 b Fl(Fixed)30 b(bug)h(where)f(the)h(\014rst)f(instruction)f(of)i(an)g
 (in)m(terrupt)f(handler)f(w)m(ould)g(b)s(e)i(executed)g(t)m(wice)330
-3905 y(in)e(a)i(ro)m(w.)41 b(Thanks)29 b(to)i(P)m(aul)f(Tw)m(ohey)-8
-b(.)225 4035 y Fk(\017)60 b Fl(W)-8 b(ork)j(around)37
-b(some)h(problems)d(in)h(the)h(w)m(a)m(y)i(casts)f(are)f(used)g(in)f
-(VMIPS)g(b)m(y)i(sp)s(ecifying)d(-fno-)330 4144 y(strict-aliasing)25
-b(to)i(gcc)h(in)e(con\014gure;)h(this)f(should)e(help)i(a)m(v)m(oid)h
-(miscompilations)d(for)i(no)m(w,)i(un)m(til)330 4254
-y(the)j(co)s(de)f(can)h(b)s(e)f(rewritten)f(for)h(cast-safet)m(y)-8
-b(.)225 4384 y Fk(\017)60 b Fl(Fix)32 b(bug)g(where)h(vmips)e(w)m(ould)
-g(dereference)j(a)f(NULL)f(p)s(oin)m(ter)g(when)g(trying)g(to)h(use)g
-(a)g(SPIM-)330 4493 y(Console)d(device)g(with)f(a)i(non-attac)m(hed)h
-(serial)d(host.)41 b(Thanks)29 b(to)i(P)m(aul)f(Tw)m(ohey)-8
-b(.)225 4623 y Fk(\017)60 b Fl(Reorder)30 b(some)h(tests)g(in)e(the)i
-(SPIMConsole)f(co)s(de)g(for)g(a)h(sligh)m(t)f(sp)s(eedup)e(when)i(in)m
-(terrupts)f(are)330 4732 y(turned)g(o\013.)225 4862 y
-Fk(\017)60 b Fl(Fix)31 b(bug)g(where)g(virtual)f(page)i(n)m(um)m(b)s
-(ers)e(w)m(ere)i(b)s(eing)e(incorrectly)h(in)m(terpreted)g(b)m(y)g(the)
-h(system)330 4971 y(con)m(trol)23 b(copro)s(cessor,)i(resulting)c(in)g
-(excess)j(TLB)e(misses)g(b)s(eing)f(generated.)39 b(Thanks)22
-b(to)h(Sanjeev)330 5081 y(Datla.)275 5230 y(vmips-1.0.3)i(w)m(as)h
-(released)f(on)g(12)h(Jan)m(uary)f(2002.)40 b(User-visible)23
-b(c)m(hanges)k(in)d(v)m(ersion)g(1.0.3)j(\(since)150
-5340 y(v)m(ersion)j(1.0.2\):)p eop
+5340 y(in)e(a)i(ro)m(w.)41 b(Thanks)29 b(to)i(P)m(aul)f(Tw)m(ohey)-8
+b(.)p eop
 %%Page: 47 49
 47 48 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
-b(47)225 299 y Fk(\017)60 b Fl(Fixed)35 b(bug)h(in)e(debugger)i(in)m
-(terface;)k(TLB)c(translations)e(caused)i(b)m(y)g(the)g(debugger)g
-(trying)f(to)330 408 y(access)d(user)d(space)i(could)f(fail)f(if)g(the)
-i(virtual)d(page)j(n)m(um)m(b)s(er)f(w)m(as)g(not)h(0.)225
-540 y Fk(\017)60 b Fl(Fixed)30 b(bugs)f(in)g(the)i(follo)m(wing)e
-(instructions:)38 b(lb,)30 b(lh,)f(lwr,)g(lwl,)g(swr,)h(swl,)f(nor.)225
-671 y Fk(\017)60 b Fl(Clari\014ed)38 b(some)i(esp)s(ecially)e
+b(47)225 299 y Fk(\017)60 b Fl(W)-8 b(ork)j(around)37
+b(some)h(problems)d(in)h(the)h(w)m(a)m(y)i(casts)f(are)f(used)g(in)f
+(VMIPS)g(b)m(y)i(sp)s(ecifying)d(-fno-)330 408 y(strict-aliasing)25
+b(to)i(gcc)h(in)e(con\014gure;)h(this)f(should)e(help)i(a)m(v)m(oid)h
+(miscompilations)d(for)i(no)m(w,)i(un)m(til)330 518 y(the)j(co)s(de)f
+(can)h(b)s(e)f(rewritten)f(for)h(cast-safet)m(y)-8 b(.)225
+652 y Fk(\017)60 b Fl(Fix)32 b(bug)g(where)h(vmips)e(w)m(ould)g
+(dereference)j(a)f(NULL)f(p)s(oin)m(ter)g(when)g(trying)g(to)h(use)g(a)
+g(SPIM-)330 762 y(Console)d(device)g(with)f(a)i(non-attac)m(hed)h
+(serial)d(host.)41 b(Thanks)29 b(to)i(P)m(aul)f(Tw)m(ohey)-8
+b(.)225 896 y Fk(\017)60 b Fl(Reorder)30 b(some)h(tests)g(in)e(the)i
+(SPIMConsole)f(co)s(de)g(for)g(a)h(sligh)m(t)f(sp)s(eedup)e(when)i(in)m
+(terrupts)f(are)330 1005 y(turned)g(o\013.)225 1139 y
+Fk(\017)60 b Fl(Fix)31 b(bug)g(where)g(virtual)f(page)i(n)m(um)m(b)s
+(ers)e(w)m(ere)i(b)s(eing)e(incorrectly)h(in)m(terpreted)g(b)m(y)g(the)
+h(system)330 1249 y(con)m(trol)23 b(copro)s(cessor,)i(resulting)c(in)g
+(excess)j(TLB)e(misses)g(b)s(eing)f(generated.)39 b(Thanks)22
+b(to)h(Sanjeev)330 1358 y(Datla.)275 1517 y(vmips-1.0.3)i(w)m(as)h
+(released)f(on)g(12)h(Jan)m(uary)f(2002.)40 b(User-visible)23
+b(c)m(hanges)k(in)d(v)m(ersion)g(1.0.3)j(\(since)150
+1626 y(v)m(ersion)j(1.0.2\):)225 1760 y Fk(\017)60 b
+Fl(Fixed)35 b(bug)h(in)e(debugger)i(in)m(terface;)k(TLB)c(translations)
+e(caused)i(b)m(y)g(the)g(debugger)g(trying)f(to)330 1870
+y(access)d(user)d(space)i(could)f(fail)f(if)g(the)i(virtual)d(page)j(n)
+m(um)m(b)s(er)f(w)m(as)g(not)h(0.)225 2004 y Fk(\017)60
+b Fl(Fixed)30 b(bugs)f(in)g(the)i(follo)m(wing)e(instructions:)38
+b(lb,)30 b(lh,)f(lwr,)g(lwl,)g(swr,)h(swl,)f(nor.)225
+2138 y Fk(\017)60 b Fl(Clari\014ed)38 b(some)i(esp)s(ecially)e
 (confusing)h(commen)m(ts)i(in)e(the)h(source)g(co)s(de,)j(in)c(one)i
-(of)f(the)g(test)330 781 y(cases,)32 b(and)d(in)g(the)i(testsuite)g
-(README.)225 913 y Fk(\017)60 b Fl(The)22 b(sample)g(setup)g(co)s(de)h
+(of)f(the)g(test)330 2247 y(cases,)32 b(and)d(in)g(the)i(testsuite)g
+(README.)225 2381 y Fk(\017)60 b Fl(The)22 b(sample)g(setup)g(co)s(de)h
 (no)m(w)f(halts)g(on)h(all)e(exceptions,)k(including)19
-b(user)j(TLB)g(miss)g(exceptions.)225 1044 y Fk(\017)60
+b(user)j(TLB)g(miss)g(exceptions.)225 2515 y Fk(\017)60
 b Fl(Fixed)30 b(some)h(w)m(arnings)e(compiling)f(xm)m(b)s(o)s(ot)i
-(using)f(recen)m(t)i(v)m(ersions)f(of)h(gcc.)275 1198
+(using)f(recen)m(t)i(v)m(ersions)f(of)h(gcc.)275 2673
 y(vmips-1.0.2)40 b(w)m(as)h(released)e(on)h(17)h(Decem)m(b)s(er)g
 (2001.)72 b(User-visible)38 b(c)m(hanges)j(in)e(v)m(ersion)g(1.0.2)150
-1307 y(\(since)30 b(v)m(ersion)g(1.0.1\):)225 1439 y
+2783 y(\(since)30 b(v)m(ersion)g(1.0.1\):)225 2917 y
 Fk(\017)60 b Fl(Add)29 b(w)m(arning)g(message)j(to)f(man)f(page)h
 (directing)d(the)j(in)m(terested)f(reader)g(to)h(the)g(Info)e(man)m
-(ual.)225 1570 y Fk(\017)60 b Fl(New)31 b(default)e(handling)f(of)i
+(ual.)225 3051 y Fk(\017)60 b Fl(New)31 b(default)e(handling)f(of)i
 (`-o)i(tt)m(ydev')f(option;)f(man)m(ual)g(up)s(dated.)225
-1702 y Fk(\017)60 b Fl(/etc/vmipsrc)33 b(con)m(tains)f(only)g(commen)m
+3185 y Fk(\017)60 b Fl(/etc/vmipsrc)33 b(con)m(tains)f(only)g(commen)m
 (ts)h(b)m(y)f(default.)46 b(These)32 b(t)m(w)m(o)i(\014xes)e(w)m(ork)g
-(around)g(a)h(bug)330 1811 y(in)c(Darwin)g(select\(2\)'s)k(tt)m(y)e
-(handling.)225 1943 y Fk(\017)60 b Fl(Only)19 b(prin)m(t)g(host)h(pro)s
+(around)g(a)h(bug)330 3294 y(in)c(Darwin)g(select\(2\)'s)k(tt)m(y)e
+(handling.)225 3428 y Fk(\017)60 b Fl(Only)19 b(prin)m(t)g(host)h(pro)s
 (cessor)g(endianness)f(if)g(`-o)j(b)s(o)s(otmsg')e(is)g(set.)38
-b(Fixes)20 b(bug)g(where)g(`-o)h(b)s(o)s(otmsg')330 2052
+b(Fixes)20 b(bug)g(where)g(`-o)h(b)s(o)s(otmsg')330 3538
 y(should)28 b(\(but)i(do)s(esn't\))h(turn)e(this)g(message)j(o\013.)225
-2184 y Fk(\017)60 b Fl(Remo)m(v)m(e)40 b(test)p 831 2184
+3672 y Fk(\017)60 b Fl(Remo)m(v)m(e)40 b(test)p 831 3672
 28 4 v 33 w(co)s(de/testdev.S)f(from)e(the)h(branc)m(h.)63
 b(This)36 b(is)g(a)i(test)h(for)e(a)i(feature)f(\(T)-8
-b(estDev\))330 2293 y(whic)m(h)29 b(w)m(asn't)i(distributed)c(with)i
-(1.0.x.)225 2425 y Fk(\017)60 b Fl(Commen)m(t)26 b(out)g(extra)g(tok)m
-(ens)h(after)f(#endif)e(in)g(test)p 2166 2425 V 34 w(co)s(de/)p
+b(estDev\))330 3781 y(whic)m(h)29 b(w)m(asn't)i(distributed)c(with)i
+(1.0.x.)225 3915 y Fk(\017)60 b Fl(Commen)m(t)26 b(out)g(extra)g(tok)m
+(ens)h(after)f(#endif)e(in)g(test)p 2166 3915 V 34 w(co)s(de/)p
 Fi({)p Fl(sort.c,tester.c)p Fi(})p Fl(.)42 b(Fixes)25
-b(bug)g(where)330 2534 y(gcc)32 b(3.0)f(giv)m(es)g(w)m(arnings)e
-(compiling)f(these)j(\014les.)275 2688 y(vmips-1.0.1)40
+b(bug)g(where)330 4025 y(gcc)32 b(3.0)f(giv)m(es)g(w)m(arnings)e
+(compiling)f(these)j(\014les.)275 4183 y(vmips-1.0.1)40
 b(w)m(as)g(released)f(on)g(27)i(No)m(v)m(em)m(b)s(er)g(2001.)70
 b(User-visible)37 b(c)m(hanges)k(in)d(v)m(ersion)h(1.0.1)150
-2798 y(\(since)30 b(v)m(ersion)g(1.0\):)225 2929 y Fk(\017)60
+4293 y(\(since)30 b(v)m(ersion)g(1.0\):)225 4427 y Fk(\017)60
 b Fl(Fixed)30 b(format-string)g(bug)g(in)f(vmipsto)s(ol.)225
-3061 y Fk(\017)60 b Fl(Fixed)30 b Fi(")p Fl(extra)h(tok)m(ens)g(after)g
-(#endif)p Fi(")d Fl(w)m(arning)h(in)g(sample)p 2444 3061
-V 32 w(co)s(de/asm)p 2857 3061 V 34 w(regnames.h.)275
-3214 y(vmips-1.0)35 b(w)m(as)i(released)f(on)g(28)h(Octob)s(er)f(2001.)
+4561 y Fk(\017)60 b Fl(Fixed)30 b Fi(")p Fl(extra)h(tok)m(ens)g(after)g
+(#endif)p Fi(")d Fl(w)m(arning)h(in)g(sample)p 2444 4561
+V 32 w(co)s(de/asm)p 2857 4561 V 34 w(regnames.h.)275
+4719 y(vmips-1.0)35 b(w)m(as)i(released)f(on)g(28)h(Octob)s(er)f(2001.)
 60 b(User-visible)34 b(c)m(hanges)j(in)e(v)m(ersion)h(1.0)h(\(since)150
-3324 y(v)m(ersion)30 b(0.9\):)225 3455 y Fk(\017)60 b
+4829 y(v)m(ersion)30 b(0.9\):)225 4963 y Fk(\017)60 b
 Fl(A)30 b(standard)g(clo)s(c)m(k)h(device)f(has)g(b)s(een)g(added.)225
-3587 y Fk(\017)60 b Fl(The)35 b Fi(")p Fl(vmipsto)s(ol)p
+5096 y Fk(\017)60 b Fl(The)35 b Fi(")p Fl(vmipsto)s(ol)p
 Fi(")e Fl(fron)m(t)j(end)e(to)j(compilation)d(to)s(ols)h(w)m(as)h
-(added,)g(and)f(most)h(of)f(the)h(random)330 3696 y(scripts)29
+(added,)g(and)f(most)h(of)f(the)h(random)330 5206 y(scripts)29
 b(lying)g(around)g(ha)m(v)m(e)j(b)s(een)d(consolidated)h(in)m(to)h(it.)
-225 3828 y Fk(\017)60 b Fl(The)30 b(memory-mapp)s(ed)f(test)i(device)g
+225 5340 y Fk(\017)60 b Fl(The)30 b(memory-mapp)s(ed)f(test)i(device)g
 (kno)m(wn)e(as)i Fi(")p Fl(T)-8 b(estDev)p Fi(")31 b
-Fl(has)g(b)s(een)e(remo)m(v)m(ed.)225 3959 y Fk(\017)60
-b Fl(Debian)30 b(and)g(Red)g(Hat)h(pac)m(k)-5 b(aging)31
-b(\014les)f(ha)m(v)m(e)h(b)s(een)f(added.)225 4091 y
-Fk(\017)60 b Fl(The)30 b(installation)e(pro)s(cedure)h(has)h(b)s(een)g
-(greatly)h(impro)m(v)m(ed.)225 4222 y Fk(\017)60 b Fl(The)30
-b(VMIPS)g(man)m(ual)g(has)g(b)s(een)f(completed.)225
-4354 y Fk(\017)60 b Fl(Man)m(y)-8 b(,)27 b(man)m(y)d(bugs)f(\014xed)g
-(as)h(a)h(result)e(of)h(a)g(concerted)h(attempt)g(at)g(testing)f(ev)m
-(erything.)38 b(Doubt-)330 4463 y(less,)30 b(some)h(bugs)e(still)g
-(remain.)225 4595 y Fk(\017)60 b Fl(Some)30 b(p)s(ortabilit)m(y)f
-(\014xes.)225 4726 y Fk(\017)60 b Fl(Dumping)29 b(of)h(the)h(stac)m(k)h
-(\(when)d(registers)h(are)h(dump)s(ed\))e(no)m(w)h(w)m(orks.)225
-4858 y Fk(\017)60 b Fl(Man)m(y)42 b(strange)f(messages)i(the)e
-(debugger)g(bac)m(k)m(end)g(used)g(to)h(prin)m(t)d(out)j(ha)m(v)m(e)g
-(b)s(een)e(quelled.)330 4967 y(Also,)30 b(killing)e(the)i(debugger)g
-(connection)h(should)d(no)i(longer)g(cause)h(a)g(crash.)225
-5099 y Fk(\017)60 b Fl(vmips)29 b(no)m(w)h(supp)s(orts)f({help,)g({v)m
-(ersion)h(and)g({prin)m(t-con\014g)g(command-line)f(options.)225
-5230 y Fk(\017)60 b Fl(The)27 b(SPIM-compatible)f(console)h(device)g
-(no)m(w)h(w)m(orks)f(b)s(etter)g(when)f(the)i(host)f(mac)m(hine)g(is)f
-(b)m(yte-)330 5340 y(sw)m(app)s(ed)j(with)g(resp)s(ect)i(to)g(the)f
-(MIPS)g(target.)p eop
+Fl(has)g(b)s(een)e(remo)m(v)m(ed.)p eop
 %%Page: 48 50
 48 49 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
-b(48)275 299 y(vmips-0.9)27 b(w)m(as)h(released)f(on)g(9)h(Ma)m(y)h
-(2001.)42 b(User-visible)25 b(c)m(hanges)j(in)f(v)m(ersion)g(0.9)h
-(\(since)f(v)m(ersion)150 408 y(20001014\):)225 543 y
-Fk(\017)60 b Fl(vmips.debug)28 b(is)i(no)g(longer)g(built.)225
-677 y Fk(\017)60 b Fl(Read-only)33 b(memory)h(is)e(no)m(w)i(really)e
+b(48)225 299 y Fk(\017)60 b Fl(Debian)30 b(and)g(Red)g(Hat)h(pac)m(k)-5
+b(aging)31 b(\014les)f(ha)m(v)m(e)h(b)s(een)f(added.)225
+432 y Fk(\017)60 b Fl(The)30 b(installation)e(pro)s(cedure)h(has)h(b)s
+(een)g(greatly)h(impro)m(v)m(ed.)225 566 y Fk(\017)60
+b Fl(The)30 b(VMIPS)g(man)m(ual)g(has)g(b)s(een)f(completed.)225
+700 y Fk(\017)60 b Fl(Man)m(y)-8 b(,)27 b(man)m(y)d(bugs)f(\014xed)g
+(as)h(a)h(result)e(of)h(a)g(concerted)h(attempt)g(at)g(testing)f(ev)m
+(erything.)38 b(Doubt-)330 809 y(less,)30 b(some)h(bugs)e(still)g
+(remain.)225 943 y Fk(\017)60 b Fl(Some)30 b(p)s(ortabilit)m(y)f
+(\014xes.)225 1076 y Fk(\017)60 b Fl(Dumping)29 b(of)h(the)h(stac)m(k)h
+(\(when)d(registers)h(are)h(dump)s(ed\))e(no)m(w)h(w)m(orks.)225
+1210 y Fk(\017)60 b Fl(Man)m(y)42 b(strange)f(messages)i(the)e
+(debugger)g(bac)m(k)m(end)g(used)g(to)h(prin)m(t)d(out)j(ha)m(v)m(e)g
+(b)s(een)e(quelled.)330 1319 y(Also,)30 b(killing)e(the)i(debugger)g
+(connection)h(should)d(no)i(longer)g(cause)h(a)g(crash.)225
+1453 y Fk(\017)60 b Fl(vmips)29 b(no)m(w)h(supp)s(orts)f({help,)g({v)m
+(ersion)h(and)g({prin)m(t-con\014g)g(command-line)f(options.)225
+1587 y Fk(\017)60 b Fl(The)27 b(SPIM-compatible)f(console)h(device)g
+(no)m(w)h(w)m(orks)f(b)s(etter)g(when)f(the)i(host)f(mac)m(hine)g(is)f
+(b)m(yte-)330 1696 y(sw)m(app)s(ed)j(with)g(resp)s(ect)i(to)g(the)f
+(MIPS)g(target.)275 1854 y(vmips-0.9)d(w)m(as)h(released)f(on)g(9)h(Ma)
+m(y)h(2001.)42 b(User-visible)25 b(c)m(hanges)j(in)f(v)m(ersion)g(0.9)h
+(\(since)f(v)m(ersion)150 1963 y(20001014\):)225 2097
+y Fk(\017)60 b Fl(vmips.debug)28 b(is)i(no)g(longer)g(built.)225
+2230 y Fk(\017)60 b Fl(Read-only)33 b(memory)h(is)e(no)m(w)i(really)e
 (read-only)-8 b(.)50 b(This)32 b(allo)m(w)m(ed)h(us)g(to)h(add)f
-(debugger)h(supp)s(ort)330 787 y(for)c(breakp)s(oin)m(ts)f(in)g(R)m
-(OM.)225 922 y Fk(\017)60 b Fl(Debugger)31 b(supp)s(ort)d(for)i
+(debugger)h(supp)s(ort)330 2340 y(for)c(breakp)s(oin)m(ts)f(in)g(R)m
+(OM.)225 2474 y Fk(\017)60 b Fl(Debugger)31 b(supp)s(ort)d(for)i
 (exception)h(handling)c({)k(CPU)f(exceptions)g(are)h(no)m(w)f(deliv)m
-(ered)f(to)i(y)m(our)330 1031 y(GDB,)k(if)d(it)h(is)f(attac)m(hed,)37
+(ered)f(to)i(y)m(our)330 2583 y(GDB,)k(if)d(it)h(is)f(attac)m(hed,)37
 b(giving)32 b(y)m(ou)i(a)f(c)m(hance)i(to)f(p)s(ok)m(e)g(around)e(b)s
-(efore)h(the)h(target)g(is)f(made)330 1141 y(a)m(w)m(are)f(of)e(the)h
-(condition.)225 1275 y Fk(\017)60 b Fl(Man)m(y)31 b(tast)m(y)h
+(efore)h(the)h(target)g(is)f(made)330 2693 y(a)m(w)m(are)f(of)e(the)h
+(condition.)225 2826 y Fk(\017)60 b Fl(Man)m(y)31 b(tast)m(y)h
 (con\014gury)e(up)s(dates,)f(making)h(it)g(easier)g(to)h(build.)225
-1410 y Fk(\017)60 b Fl(Miscellaneous)29 b(bugs)h(\014xed)g(in)f(man)m
-(y)h(places.)225 1544 y Fk(\017)60 b Fl(Branc)m(h)31
+2960 y Fk(\017)60 b Fl(Miscellaneous)29 b(bugs)h(\014xed)g(in)f(man)m
+(y)h(places.)225 3093 y Fk(\017)60 b Fl(Branc)m(h)31
 b(on)f(copro)s(cessor)h(0)g(instructions)d(no)m(w)i(ha)m(v)m(e)i
-(de\014ned)d(b)s(eha)m(vior.)225 1679 y Fk(\017)60 b
+(de\014ned)d(b)s(eha)m(vior.)225 3227 y Fk(\017)60 b
 Fl(Man)m(y)27 b(places)e(whic)m(h)g(erroneously)g(had)g(text)i(after)g
 (#endif)d(in)g(the)i(source)h(ha)m(v)m(e)g(b)s(een)e(corrected)330
-1788 y(to)31 b(use)f(commen)m(ts)h(instead,)f(allo)m(wing)f(y)m(ou)i
+3337 y(to)31 b(use)f(commen)m(ts)h(instead,)f(allo)m(wing)f(y)m(ou)i
 (to)g(compile)f(vmips)e(with)h(new)m(er)i(C)p Fi(++)e
-Fl(compilers.)225 1923 y Fk(\017)60 b Fl(Some)41 b(old)e(test)j(co)s
+Fl(compilers.)225 3470 y Fk(\017)60 b Fl(Some)41 b(old)e(test)j(co)s
 (de)e(that)i(used)d(to)j(run)d(at)i(the)g(b)s(eginning)c(of)k(ev)m(ery)
-g(vmips)e(job)h(has)h(b)s(een)330 2032 y(remo)m(v)m(ed,)32
+g(vmips)e(job)h(has)h(b)s(een)330 3580 y(remo)m(v)m(ed,)32
 b(so)e(y)m(ou)h(will)d(no)i(longer)g(see)h(the)f(familiar)f(messages)i
-(it)f(prin)m(ted)f(out.)275 2192 y(User-visible)f(c)m(hanges)j(since)f
-(v)m(ersion)g(20000517:)225 2326 y Fk(\017)60 b Fl(Em)m(ulating)34
+(it)f(prin)m(ted)f(out.)275 3737 y(User-visible)f(c)m(hanges)j(since)f
+(v)m(ersion)g(20000517:)225 3871 y Fk(\017)60 b Fl(Em)m(ulating)34
 b(a)h(little-endian)e(MIPS)i(on)g(a)g(big-endian)f(host)h(passes)g
-(preliminary)c(tests.)56 b(Build)330 2436 y(pro)s(cess)27
+(preliminary)c(tests.)56 b(Build)330 3980 y(pro)s(cess)27
 b(queries)e(MIPS)i(to)s(ols)g(for)f(their)g(endianness)f(automatically)
--8 b(.)40 b(Builds)25 b(tested)j(on)f(Solaris)330 2545
+-8 b(.)40 b(Builds)25 b(tested)j(on)f(Solaris)330 4090
 y(SP)-8 b(AR)m(C,)40 b(i386)h(Lin)m(ux,)g(F)-8 b(reeBSD)42
 b(and)d(HP-UX.)i(Distribution)d(building)e(\(gmak)m(e)42
-b(distc)m(hec)m(k\))330 2655 y(almost)30 b(w)m(orks.)275
-2814 y(User-visible)e(c)m(hanges)j(since)f(v)m(ersion)g(19991114:)225
-2949 y Fk(\017)60 b Fl(P)m(olling)29 b(input)f(and)i(output)g(via)g
+b(distc)m(hec)m(k\))330 4200 y(almost)30 b(w)m(orks.)275
+4357 y(User-visible)e(c)m(hanges)j(since)f(v)m(ersion)g(19991114:)225
+4491 y Fk(\017)60 b Fl(P)m(olling)29 b(input)f(and)i(output)g(via)g
 (the)h(SPIM-compatible)e(console)i(device)f(no)m(w)g(w)m(ork.)275
-3108 y(User-visible)e(c)m(hanges)j(since)f(v)m(ersion)g(19990829:)225
-3243 y Fk(\017)60 b Fl(Build)37 b(pro)s(cesses)i(seeks)g(out)g(MIPS)g
+4648 y(User-visible)e(c)m(hanges)j(since)f(v)m(ersion)g(19990829:)225
+4782 y Fk(\017)60 b Fl(Build)37 b(pro)s(cesses)i(seeks)g(out)g(MIPS)g
 (to)s(ols;)k(Installation)37 b(do)s(cumen)m(tation)i(no)m(w)g
-(brie\015y)e(do)s(cu-)330 3352 y(men)m(ts)31 b(ho)m(w)f(to)h(build)c
-(cross)k(to)s(ols.)275 3512 y(User-visible)d(c)m(hanges)j(since)f(v)m
-(ersion)g(19990823:)225 3646 y Fk(\017)60 b Fl(Spim)28
+(brie\015y)e(do)s(cu-)330 4891 y(men)m(ts)31 b(ho)m(w)f(to)h(build)c
+(cross)k(to)s(ols.)275 5049 y(User-visible)d(c)m(hanges)j(since)f(v)m
+(ersion)g(19990823:)225 5182 y Fk(\017)60 b Fl(Spim)28
 b(console)j(do)s(cumen)m(tation)f(completed;)h(\014rst)e(attempt)j(at)f
-(spim)e(console)h(co)s(de.)275 3806 y(User-visible)e(c)m(hanges)j
-(since)f(v)m(ersion)g(19990801:)225 3940 y Fk(\017)60
-b Fl(Do)s(cumen)m(tation)31 b(Mak)m(e\014le.in)f(has)g(b)s(een)g
-(built.)225 4075 y Fk(\017)60 b Fl(Some)30 b(do)s(cumen)m(tation)h(has)
-f(b)s(een)f(up)s(dated.)225 4209 y Fk(\017)60 b Fl(VMIPS)30
-b(is)f(b)s(eing)g(adapted)i(to)g(use)f(GNU)h(Auto)s(conf)g(and)e
-(Automak)m(e.)p eop
+(spim)e(console)h(co)s(de.)275 5340 y(User-visible)e(c)m(hanges)j
+(since)f(v)m(ersion)g(19990801:)p eop
 %%Page: 49 51
-49 50 bop 150 -116 a Fl(App)s(endix)28 b(E:)i(References)2557
-b(49)150 299 y Fj(App)t(endix)53 b(E)81 b(References)275
+49 50 bop 150 -116 a Fl(App)s(endix)28 b(D:)j(Release)g(History)2348
+b(49)225 299 y Fk(\017)60 b Fl(Do)s(cumen)m(tation)31
+b(Mak)m(e\014le.in)f(has)g(b)s(een)g(built.)225 433 y
+Fk(\017)60 b Fl(Some)30 b(do)s(cumen)m(tation)h(has)f(b)s(een)f(up)s
+(dated.)225 568 y Fk(\017)60 b Fl(VMIPS)30 b(is)f(b)s(eing)g(adapted)i
+(to)g(use)f(GNU)h(Auto)s(conf)g(and)e(Automak)m(e.)p
+eop
+%%Page: 50 52
+50 51 bop 150 -116 a Fl(App)s(endix)28 b(E:)i(References)2557
+b(50)150 299 y Fj(App)t(endix)53 b(E)81 b(References)275
 542 y Fl(Silicon)18 b(Graphics,)k(Inc.)37 b Ff(The)20
 b(R10000)j(Micropro)s(cessor)d(User's)h(Man)m(ual)f(-)h(V)-8
 b(ersion)21 b(2.0.)38 b Fl(Av)-5 b(ailable)150 652 y(from)390
@@ -4782,9 +4807,9 @@ g(implemen)m(tations.)275 5230 y(T)-8 b(o)s(ol)24 b(In)m(terface)j
 b(ormat)27 b(Sp)s(eci\014cation.)37 b(V)-8 b(er-)150
 5340 y(sion)29 b(1.2,)j(Ma)m(y)g(1995.)42 b(Av)-5 b(ailable)29
 b(from)p eop
-%%Page: 50 52
-50 51 bop 150 -116 a Fl(App)s(endix)28 b(E:)i(References)2557
-b(50)390 299 y Fi(http://www.linuxbase.org)o(/spe)o(c/re)o(fsp)o(ecs/)o
+%%Page: 51 53
+51 52 bop 150 -116 a Fl(App)s(endix)28 b(E:)i(References)2557
+b(51)390 299 y Fi(http://www.linuxbase.org)o(/spe)o(c/re)o(fsp)o(ecs/)o
 (elf/)o(elf)o(.pdf)275 433 y Fl(as)30 b(of)h(June)e(1,)i(2004.)390
 562 y(An)25 b(online)e(reference)i(for)g(the)g(ELF)g(\014le)f(format,)i
 (no)m(w)f(the)g(preferred)f(ob)5 b(ject)26 b(\014le)e(format)390
@@ -4806,9 +4831,9 @@ b(It)35 b(describ)s(es,)f(among)i(other)f(things,)g(a)h(p)s(osition)390
 1876 y Fi(http://www.mips.com/publ)o(icat)o(ions)o(/in)o(dex.)o(html)
 275 2011 y Fl(whic)m(h)e(p)s(oin)m(ts)g(to)i(man)m(y)f(MIPS)g(T)-8
 b(ec)m(hnologies,)31 b(Inc.)41 b(publications.)p eop
-%%Page: 51 53
-51 52 bop 150 -116 a Fl(App)s(endix)28 b(F:)j(Cop)m(ying)2648
-b(51)150 299 y Fj(App)t(endix)53 b(F)82 b(Cop)l(ying)275
+%%Page: 52 54
+52 53 bop 150 -116 a Fl(App)s(endix)28 b(F:)j(Cop)m(ying)2648
+b(52)150 299 y Fj(App)t(endix)53 b(F)82 b(Cop)l(ying)275
 533 y Fl(VMIPS)25 b(and)g(its)f(source)i(co)s(de)g(are)g(go)m(v)m
 (erned)g(b)m(y)g(the)f(GNU)h(General)g(Public)d(License,)j(whic)m(h)f
 (y)m(ou)150 643 y(should)31 b(ha)m(v)m(e)k(receiv)m(ed)f(a)f(cop)m(y)i
@@ -4846,8 +4871,8 @@ y(LIABILITY,)36 b(WHETHER)h(IN)f(AN)h(A)m(CTION)f(OF)h(CONTRA)m(CT,)f
 b(FR)m(OM,)h(OUT)f(OF)g(OR)g(IN)g(CONNECTION)e(WITH)j(THE)e(DOCUMENT)i
 (OR)e(THE)150 2740 y(USE)f(OR)g(OTHER)f(DEALINGS)i(IN)f(THE)g
 (DOCUMENT.)p eop
-%%Page: 52 54
-52 53 bop 150 -116 a Fl(Index)3286 b(52)150 299 y Fj(Index)150
+%%Page: 53 55
+53 54 bop 150 -116 a Fl(Index)3286 b(53)150 299 y Fj(Index)150
 560 y Fh(A)150 685 y Fe(arc)n(hitecture)20 b Fd(.)12
 b(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h
 (.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)g(.)h(.)f(.)g(.)46
@@ -5023,8 +5048,8 @@ h(.)f(.)g(.)44 b Fe(3,)27 b(4)2025 5544 y(vmipsto)r(ol)e(usage)f
 Fd(.)12 b(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f
 (.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)h(.)f(.)g(.)g(.)h(.)f(.)49
 b Fe(3)p eop
-%%Page: -1 55
--1 54 bop 3725 -116 a Fl(i)150 299 y Fj(T)-13 b(able)54
+%%Page: -1 56
+-1 55 bop 3725 -116 a Fl(i)150 299 y Fj(T)-13 b(able)54
 b(of)g(Con)l(ten)l(ts)168 608 y Fb(.)19 b(.)h(.)f(.)h(.)f(.)h(.)f(.)g
 (.)h(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)
 f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h
@@ -5117,8 +5142,8 @@ f(.)g(.)g(.)g(.)g(.)43 b Fl(22)449 5340 y(9.4)92 b(Using)30
 b(Insigh)m(t)f(as)i(a)f(GUI)h(for)f(VMIPS)f Fa(.)15 b(.)g(.)g(.)g(.)g
 (.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)g(.)58
 b Fl(22)p eop
-%%Page: -2 56
--2 55 bop 3699 -116 a Fl(ii)150 83 y Fh(10)135 b(Devices)33
+%%Page: -2 57
+-2 56 bop 3699 -116 a Fl(ii)150 83 y Fh(10)135 b(Devices)33
 b Fb(.)20 b(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f
 (.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)77
 b Fh(24)449 220 y Fl(10.1)92 b(SPIM-compatible)30 b(console)h(device)14
@@ -5232,16 +5257,16 @@ b(F)-11 b(uture)45 b(Directions)40 b Fb(.)20 b(.)f(.)g(.)h(.)f(.)h(.)f
 (.)h(.)f(.)h(.)f(.)g(.)h(.)84 b Fh(43)150 5268 y(App)t(endix)44
 b(D)134 b(Release)47 b(History)30 b Fb(.)21 b(.)e(.)g(.)h(.)f(.)h(.)f
 (.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)74 b Fh(44)p eop
-%%Page: -3 57
--3 56 bop 3674 -116 a Fl(iii)150 83 y Fh(App)t(endix)44
+%%Page: -3 58
+-3 57 bop 3674 -116 a Fl(iii)150 83 y Fh(App)t(endix)44
 b(E)134 b(References)29 b Fb(.)22 b(.)d(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h
-(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)74 b Fh(49)150
+(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)74 b Fh(50)150
 353 y(App)t(endix)44 b(F)134 b(Cop)l(ying)41 b Fb(.)20
 b(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h
-(.)f(.)h(.)f(.)h(.)85 b Fh(51)150 623 y(Index)37 b Fb(.)19
+(.)f(.)h(.)f(.)h(.)85 b Fh(52)150 623 y(Index)37 b Fb(.)19
 b(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h
 (.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)h(.)f(.)g(.)h(.)f(.)h(.)f(.)h(.)f(.)
-g(.)h(.)f(.)82 b Fh(52)p eop
+g(.)h(.)f(.)82 b Fh(53)p eop
 %%Trailer
 end
 userdict /end-hook known{end-hook}if

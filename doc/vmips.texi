@@ -1926,6 +1926,27 @@ constants.
 @node Release History, References, Future Directions, Top
 @appendix Release History
 
+vmips-1.2.2 was released on 23 August 2004.
+User-visible changes in version 1.2.2 (since version 1.2.1):
+
+@itemize @bullet
+@item A bug in the Makefiles and configure scripts has been fixed, where
+some files would not be installed if you didn't configure with cross
+compilation tools (using @option{--with-mips}).
+
+@item Vladimir Machulsky found and fixed a bug in the debugger interface,
+where the register file would be sent to gdb incorrectly. Thanks!
+
+@item VMIPS will no longer abort and dump core when bad command-line arguments
+are passed to it.  Instead, it will print an error message and exit with
+a non-zero exit code.
+
+@item A bug in the command-line option processor was fixed, where using a
+completely empty @file{~/.vmipsrc} or the @samp{-F /dev/null} option could cause
+the options parser to parse garbage, usually resulting in harmless,
+but annoying error messages.
+@end itemize
+
 vmips-1.2.1 was released on 26 July 2004.
 User-visible changes in version 1.2.1 (since version 1.2):
 

@@ -35,14 +35,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 
 SUBDIRS=. xmboot
 VMIPSTOOL = $(top_builddir)/vmipstool -n -F $(top_builddir)/vmipsrc --ld-script=$(srcdir)/ld.script
-SETUP=setup.o
-ASRCS=setup.S
-CLEANFILES=$(SETUP)
+CLEANFILES=setup.o
 DISTCLEANFILES=
-DISTFILES= Makefile.in asm_regnames.h ld.script $(ASRCS)
+DISTFILES= Makefile.in asm_regnames.h ld.script setup.S
 #------
 
-all: $(SETUP) build_xmboot
+all: @SAMPLE_CODE_TARGETS@
 
 .PHONY: build_xmboot
 

@@ -1,15 +1,15 @@
 
-   VMIPS 1.2.1 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.2.2 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
 This is a maintenance release with a few important bug fixes.
 
-   You can download VMIPS 1.2.1 from any of the following sites:
+   You can download VMIPS 1.2.2 from any of the following sites:
 
 * ftp://download.sourceforge.net/pub/sourceforge/vmips/
-* ftp://ftp.dgate.org/vmips/releases/vmips-1.2.1/
+* ftp://ftp.dgate.org/vmips/releases/vmips-1.2.2/
 * http://download.sourceforge.net/vmips/
-* http://www.dgate.org/vmips/releases/vmips-1.2.1/
-* http://vmips.sourceforge.net/releases/vmips-1.2.1/
+* http://www.dgate.org/vmips/releases/vmips-1.2.2/
+* http://vmips.sourceforge.net/releases/vmips-1.2.2/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -21,26 +21,27 @@ features since the last publically released version are detailed in
    The home page for VMIPS is "http://www.dgate.org/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.2.1 (since version 1.2):
+   User-visible changes in version 1.2.2 (since version 1.2.1):
 
-   * Fixed a bug where delay slot execution could be triggered even when
-     emulating a malformed jr (jump-register) instruction.
+   * A bug in the Makefiles and configure scripts has been fixed, where
+     some files would not be installed if you didn't configure with
+     cross compilation tools (using `--with-mips').
 
-   * Fixed a bug where, upon taking a TLB Miss exception, the ASID of
-     the page that could not be looked up would be overwritten (in the
-     CP0 EntryHi register) with garbage.
+   * Vladimir Machulsky found and fixed a bug in the debugger interface,
+     where the register file would be sent to gdb incorrectly. Thanks!
 
-   * Fixed a bug in VMIPS configurations with multiple interrupt
-     devices, where Interrupt Pending bits of the CP0 Cause from
-     previous interrupts could be left asserted even if the device that
-     asserted them had subsequently deasserted them.
+   * VMIPS will no longer abort and dump core when bad command-line
+     arguments are passed to it.  Instead, it will print an error
+     message and exit with a non-zero exit code.
 
-   * Fixed a bug where the memory dump file and ROM file would be opened
-     in text mode. They are now opened in binary mode.
+   * A bug in the command-line option processor was fixed, where using a
+     completely empty `~/.vmipsrc' or the `-F /dev/null' option could
+     cause the options parser to parse garbage, usually resulting in
+     harmless, but annoying error messages.
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_2-branch". VMIPS 1.2.1 itself can be checked out using the tag
-"release-1-2-1".
+"vmips-1_2-branch". VMIPS 1.2.2 itself can be checked out using the tag
+"release-1-2-2".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.

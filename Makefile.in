@@ -77,14 +77,15 @@ LDFLAGS = @LDFLAGS@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
-MIPS_CODE_DIRS = @MIPS_CODE_DIRS@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+SAMPLE_CODE_TARGETS = @SAMPLE_CODE_TARGETS@
 SOLARIS_DL_HACK = @SOLARIS_DL_HACK@
+TESTCODE_DIR = @TESTCODE_DIR@
 VERSION = @VERSION@
 mipsbin = @mipsbin@
 
-SUBDIRS = libopcodes_mips . @MIPS_CODE_DIRS@ doc
+SUBDIRS = libopcodes_mips . sample_code @TESTCODE_DIR@ doc
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
 DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control  debian/copyright debian/dirs debian/docs debian/info debian/rules
 
@@ -456,7 +457,7 @@ deviceint.o: deviceint.cc sysinclude.h config.h deviceint.h intctrl.h \
 	options.h vmips.h
 devicemap.o: devicemap.cc sysinclude.h config.h accesstypes.h range.h \
 	devicemap.h
-error.o: error.cc sysinclude.h config.h error.h
+error.o: error.cc error.h sysinclude.h config.h
 haltdev.o: haltdev.cc haltdev.h devicemap.h sysinclude.h config.h \
 	range.h accesstypes.h vmips.h
 intctrl.o: intctrl.cc sysinclude.h config.h deviceint.h intctrl.h

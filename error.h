@@ -29,6 +29,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 __ATTRIBUTE_FORMAT__(printf, 1, 2)
 void error(const char *msg, ...) throw();
 
+/* As with error(), but calls exit() with an error code of 1 afterwards.
+ */
+__ATTRIBUTE_NORETURN__
+__ATTRIBUTE_FORMAT__(printf, 1, 2)
+void error_exit(const char *msg, ...) throw();
+
 /* Use to report all fatal program errors. Calls abort(3) after printing
  * a message. MSG is a printf(3) style format specification for the remaining
  * arguments. fatal_error() will always output a newline after MSG.
