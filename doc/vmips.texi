@@ -1926,6 +1926,26 @@ constants.
 @node Release History, References, Future Directions, Top
 @appendix Release History
 
+vmips-1.2.1 was released on 26 July 2004.
+User-visible changes in version 1.2.1 (since version 1.2):
+
+@itemize @bullet
+@item Fixed a bug where delay slot execution could be triggered even when
+emulating a malformed jr (jump-register) instruction.
+
+@item Fixed a bug where, upon taking a TLB Miss exception, the ASID of the
+page that could not be looked up would be overwritten (in the CP0 EntryHi
+register) with garbage.
+
+@item Fixed a bug in VMIPS configurations with multiple interrupt devices,
+where Interrupt Pending bits of the CP0 Cause from previous interrupts could
+be left asserted even if the device that asserted them had subsequently
+deasserted them.
+
+@item Fixed a bug where the memory dump file and ROM file would be opened
+in text mode. They are now opened in binary mode.
+@end itemize
+
 vmips-1.2 was released on 26 June 2004.
 User-visible changes in version 1.2 (since version 1.1.3):
 

@@ -170,10 +170,7 @@ CPZero::load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match)
 {
 	reg[BadVAddr] = va;
 	reg[Context] = (reg[Context] & ~Context_BadVPN_MASK) | (vpn >> 6);
-	if (match)
-		reg[EntryHi] = match->entryHi & write_masks[EntryHi];
-	else
-		reg[EntryHi] = va & write_masks[EntryHi];
+	reg[EntryHi] = (va & EntryHi_VPN_MASK) | (reg[EntryHi] & ~EntryHi_VPN_MASK);
 }
 
 TLBEntry *
@@ -391,6 +388,7 @@ CPZero::enter_exception(uint32 pc, uint32 excCode, uint32 ce, bool dly)
 		reg[Cause] |= ((ce & 0x3) << 28);
 	}
 	/* Update IP, BD, ExcCode fields of Cause register. */
+	reg[Cause] &= ~Cause_IP_MASK;
 	reg[Cause] |= getIP () | (dly << 31) | (excCode << 2);
 }
 

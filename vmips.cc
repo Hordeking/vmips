@@ -376,7 +376,7 @@ bool
 vmips::setup_rom ()
 {
   // Open ROM image.
-  FILE *rom = fopen (opt_image, "r");
+  FILE *rom = fopen (opt_image, "rb");
   if (!rom) {
     error ("Could not open ROM `%s': %s", opt_image, strerror (errno));
     return false;
@@ -522,7 +522,7 @@ vmips::run()
 
 	if (opt_memdump) {
 		fprintf(stderr,"Dumping RAM to %s...", opt_memdumpfile);
-		if (FILE *ramdump = fopen (opt_memdumpfile, "w")) {
+		if (FILE *ramdump = fopen (opt_memdumpfile, "wb")) {
 			fwrite (memmod->getAddress (), memmod->getExtent (), 1, ramdump);
 			fclose(ramdump);
 			fprintf(stderr,"succeeded.\n");

@@ -1127,6 +1127,7 @@ CPU::jr_emulate(uint32 instr, uint32 pc)
 	}
 	if (reg[rd(instr)] != 0) {
 		exception(RI);
+		return;
 	}
 	delay_state = DELAYING;
 	delay_pc = reg[rs(instr)];

@@ -1,3 +1,514 @@
+2004-07-26 03:55  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Regenerated.
+
+2004-07-26 03:55  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Update to have release date.
+
+2004-07-26 03:50  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: Updated release notes for vmips-1.2.1
+
+2004-07-26 03:21  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in, debian/changelog: Updated version number
+	to 1.2.1.
+
+2004-07-26 03:21  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Regenerated.
+
+2004-07-26 03:08  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add 1.2.1 changes
+
+2004-07-26 03:04  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpzero.cc, vmips.cc: Merge bug fixes from mainline.
+
+2004-07-26 02:27  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: mumble.S, mumble.par: Use break (w/ -o
+	haltbreak) instead of jr 1 (w/ -o haltjrra, which has been removed)
+	to end test.
+
+2004-07-26 02:27  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Remove haltjrra option.
+
+2004-07-26 02:27  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Abort if we try to get the value of a bad option
+	(which would be a bug, and would ordinarily lead to a crash).
+
+2004-07-26 02:27  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Remove haltjrra option.  If we get a badly formatted jr
+	instruction, don't modify delay_state or delay_pc.
+
+2004-07-23 04:38  Brian R. Gaeke <brg@dgate.org>
+
+	* tlbentry.h: I don't know why there were hardcoded constants here
+	instead of the EntryLo_*_MASK defines.	Use the latter instead.
+
+2004-07-23 04:38  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.h: find_matching_tlb_entry now returns the index of the
+	TLB entry instead of a pointer to it.  Add prototype for tlb_write.
+
+2004-07-23 04:38  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Fix bug in the setting of EntryHi during a TLB miss.
+	We should only be setting the VPN field, I think; the ASID should
+	remain the same.  Shorten tlb_translate (no functional change). 
+	Refactor common code from tlbwi_emulate and tlbwr_emulate into
+	tlb_write.  Shorten find_matching_tlb_entry.  Share its
+	implementation with tlbp_emulate.  Shorten debug_tlb_translate.
+
+2004-07-22 05:10  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Fix --disassemble-word bugs (left over from
+	standalone version)
+
+2004-07-20 22:53  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Fix typo.
+
+2004-07-14 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Ding dong, attach() is dead
+
+2004-07-14 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Don't keep a separate pointer to cpzero. No one needs
+	it.
+
+2004-07-14 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Shorten the sequence of code used to construct the
+	machine objects, eliminating attach() calls.  Use new
+	cpzero_dump_regs_and_tlb wrapper method for *dumpcp0 options.
+
+2004-07-14 22:39  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc, mapper.h: Sort #includes.	Get rid of attach() and the
+	CPU pointer, which aren't needed.
+
+2004-07-14 22:39  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc, debug.h: Get rid of attach() by making the constructor
+	less flexible.	Inline the destructor.
+
+2004-07-14 22:39  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc, cpzero.h: Get rid of attach(). Inline the constructor.
+
+2004-07-14 22:39  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: Get rid of the private member 'machine' which
+	shadows the global 'machine'.  Get rid of attach() by making the
+	constructor less flexible.  Make cpzero a private member of cpu,
+	because the only outside access which anyone else needs is
+	dump_regs_and_tlb(), which can be provided by a wrapper method.
+
+2004-07-13 05:25  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Add a brief note about NetBSD kernel.
+
+2004-07-13 04:21  Brian R. Gaeke <brg@dgate.org>
+
+	* remotegdb.h: Fix warning from macosx gcc3.3 about PARAMS being
+	redefined, by not allowing it to leak out from this file.
+
+2004-07-13 04:20  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Fix bug involving missing option values.
+
+2004-07-13 04:20  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.h: Fix warning from macosx gcc3.3 about throws clause
+	for dtor.
+
+2004-07-13 04:20  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Update head-of-file comment about the state of the
+	implementation.  Wrap long lines.  Fix endianness bugs.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Connect IRQ2 to DECCSR and the serial device to DECCSR,
+	instead of connecting IRQ2 directly to the serial device.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* terminalcontroller.h: Constify line_connected().
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.h: Add deccsr_irq data member and constructor
+	parameter.  Inline the destructor.  Add prototypes for new
+	receiver_done(), transmitter_ready(),
+	keyboardInterruptReadyForLine(), and displayInterruptReadyForLine()
+	methods.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Remove some to-do list items.  Make DECSerialDevice
+	ctor take a DECCSR_IRQ parameter, which represents the CSR IRQ line
+	assigned to this device.  Inline the destructor.  Refactor common
+	logic into new receiver_done(), transmitter_ready(),
+	keyboardInterruptReadyForLine(), and displayInterruptReadyForLine()
+	methods.  Only check MSE once per read of CSR.	Get rid of some
+	commented-out code and debugging printfs.  Rewrite store_word flag
+	checking code.	Fix some interrupt bugs.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: Get rid of some commented-out code.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* deccsr.h: Inline the DECCSRDevice constructor.  Make DECCSRDevice
+	derive from DeviceInt, and let it do the asserting/deasserting of
+	the MIPS CPU IRQ2.  Add constants for all the CSR interrupt lines. 
+	Make ioint be 8 bits wide.  Take assertInt() and deassertInt()
+	methods out-of-line.  Add interrupt checks to them.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* deccsr.cc: Inline the DECCSRDevice constructor.  Refactor the
+	interrupt checks into a macro. (We'll turn this into a member
+	function or something, later.) Comment out the spammy reg
+	read/write printfs for now.  Take assertInt() and deassertInt()
+	methods out-of-line.  Add interrupt checks to them.
+
+2004-07-12 00:52  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Don't let old interrupt-pending bits stick around from
+	previous interrupts! This confuses the software greatly.
+
+2004-07-11 16:52  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/README: Fix typo.
+
+2004-07-07 19:25  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.h: No need for explicit private: at beginning of class. 
+	Reformat some comments.  Add prototypes for read_reg and write_reg.
+	 Make cpCond() into a method.
+
+2004-07-07 19:24  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Add read_reg and write_reg methods.  Make mfc0 and
+	mtc0 use them.	Make bc0x use the cpCond() method.
+
+2004-07-07 18:45  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Changes to "future directions" bullets.
+
+2004-07-07 18:40  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/: Makefile.am, Makefile.in: Regenerated.
+
+2004-07-07 18:40  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Take some finished items out of the testsuite
+	to-do list.
+
+2004-07-07 18:37  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/badoption.par: Test for what error
+	happens when you pass a bad option to -o flag
+
+2004-07-07 04:17  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Open image and memdumpfile using "b" (binary) flag to
+	fopen.
+
+2004-07-07 04:17  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Use fileutils.h's can_read_file() to print a more
+	intelligent error message on "vmips -garbage" -- they probably
+	thought "-garbage" was an option, not a ROM file.  Make the
+	set_*_option calls ONLY when we know the type of the option.  Make
+	them look more like one other.	Make find_option_type() and
+	process_options_from_file() more compact.  Make
+	process_one_option() print the same kind of error messages for bad
+	boolean options as for other bad options. Make it use error(). 
+	Make process_options() not abort when it gets a missing argument. 
+	Add 2004 copyright year.
+
+2004-07-07 04:17  Brian R. Gaeke <brg@dgate.org>
+
+	* error.cc, error.h: Add a new error_exit() function which prints
+	an error and exits with a bad status, but does not abort.
+
+2004-07-07 04:17  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add fileutils.cc and fileutils.h to the build.
+
+2004-07-07 04:17  Brian R. Gaeke <brg@dgate.org>
+
+	* fileutils.cc, fileutils.h, vmipstool.cc: Move vmipstool's
+	can_read_file() function to fileutils.{cc,h} so it can be shared
+	with the VMIPS options-processing code.
+
+2004-07-07 04:16  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/badargs.par: New test case for what
+	happens when you give vmips a bad command-line flag.
+
+2004-07-07 03:32  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/testmkmf-all: If a regeneration step fails, print a
+	"failed" message instead of blithely marching forward.
+
+2004-07-07 03:32  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/testcase-maker: Support "empty" build rules
+	(testcase_empty).
+
+2004-07-07 03:30  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: If we can't mmap the ROM, we should return false, not
+	true!
+
+2004-07-07 03:29  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/: Makefile.am, Makefile.in,
+	nonexistent.par: Add new test case for nonexistent ROM file
+
+2004-07-07 03:28  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/lib/vmips-outcheck.exp: If the BUILD RULES are
+	testcase_empty, don't try to build the ROM file.
+
+2004-07-06 19:03  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in, debian/changelog: Update version to 1.3a
+	on the CVS head.
+
+2004-07-06 18:56  Brian R. Gaeke <brg@dgate.org>
+
+	* endiantest.h: New host endianness self-testing object.
+
+2004-07-06 18:56  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipstool.cc: Add the ability to disassemble arbitrary hex data
+	typed in at the command line (--disassemble-word option).
+
+2004-07-06 18:56  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add stub-dis, endiantest, and libopcodes_mips to the
+	vmipstool build.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Use the new disassembler object. Make deccsr_device
+	public so that dec devices can signal it with interrupt
+	information. Fix some tabs.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: The endian self test has been encapsulated in an endian
+	self-tester object.  Use it, along with the new disassembler
+	object.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* stub-dis.cc, stub-dis.h: Create a Disassembler object to
+	encapsulate the disassembler's private data and public methods.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Rewrite documentation for options "clockintr" and
+	"clockspeed".
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* deviceint.cc, deviceint.h: Remove unused method bool
+	DeviceInt::isAsserted(uint32).
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.h: Add prototypes for methods to assert and deassert
+	CSR interrupt lines.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: Include deccsr.h. No need to re-include
+	deviceint.h.  Sort includes.  Add support for asserting and
+	deasserting CSR interrupt lines.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* deccsr.h: Add public methods for asserting and deasserting CSR
+	interrupt lines.
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Use the vmips machine's disassembler object instead of
+	call_disassembler().
+
+2004-07-03 02:37  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Add endiantest.h to the build.
+
+2004-06-30 23:09  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Wipe away a non-goal
+
+2004-06-30 00:41  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: It's now "after the release". :-) test_code/README has
+	now been integrated into the manual.
+
+2004-06-30 00:39  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/README: This file is now generated automatically from
+	the Test Suite chapter of the manual.
+
+2004-06-30 00:38  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL: Regenerated.
+
+2004-06-30 00:38  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeINSTALL: Add code for generating test_code/README
+
+2004-06-30 00:36  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add the Test Suite chapter, based loosely on
+	test_code/README.
+
+2004-06-29 23:51  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: I think that this has actually been done for some time
+	now!
+
+2004-06-29 23:41  Brian R. Gaeke <brg@dgate.org>
+
+	* intctrl.cc, intctrl.h: Move ctor/dtor inline.
+
+2004-06-29 23:40  Brian R. Gaeke <brg@dgate.org>
+
+	* clock.cc, clock.h, clockdev.h, cpu.cc, cpu.h, cpzero.h, debug.cc,
+	debug.h, decrtc.h, decserial.h, deviceexc.h, haltdev.h, intctrl.h,
+	mapper.h, options.h, range.h, spimconsole.cc, spimconsole.h,
+	stub-dis.h, terminalcontroller.cc, terminalcontroller.h,
+	tlbentry.h, vmips.cc: Minor, gratuitous cleanups: Don't #include
+	something when a forward class declaration will do.  Sort #includes
+	and forward class declarations, and remove some unused ones. 
+	Remove some extra whitespace here and there.  Move some constants
+	used only in one source file out of header files.
+
+2004-06-29 03:53  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: sysinclude.h is history
+
+2004-06-29 03:49  Brian R. Gaeke <brg@dgate.org>
+
+	* clock.h, cpu.h, cpzero.h, debug.cc, debug.h, deccsr.cc, deccsr.h,
+	decrtc.cc, decrtc.h, decserial.cc, decstat.cc, deviceexc.h,
+	deviceint.cc, deviceint.h, devicemap.cc, devicemap.h, error.cc,
+	error.h, intctrl.cc, intctrl.h, mapper.cc, mapper.h, options.cc,
+	options.h, range.cc, range.h, remotegdb.cc, remotegdb.h,
+	rommodule.cc, rommodule.h, stub-dis.cc, stub-dis.h,
+	terminalcontroller.cc, tlbentry.h, vmips.cc, vmips.h, vmipstool.cc:
+	Many #includes of sysinclude.h have been replaced with one or more
+	of gccattr.h, mmapglue.h or types.h (or just deleted!)	System
+	headers are now included directly, and only by the files that need
+	them.
+
+2004-06-29 03:49  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: Remove sysinclude.h; add gccattr.h, mmapglue.h and
+	types.h.
+
+2004-06-29 03:49  Brian R. Gaeke <brg@dgate.org>
+
+	* gccattr.h, mmapglue.h, sysinclude.h, types.h: We're not
+	#including all conceivable system headers from a single location
+	anymore. It slows down compilation quite a bit.  The other
+	functions sysinclude.h performed have been split into gccattr.h
+	(for __attribute__ thingies), mmapglue.h (for mmap() and its
+	attendant constants), and types.h (for uint{8,16,32} etc.)
+
+2004-06-29 02:30  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmipsrun.txt: Notes for something I would like to do someday.
+
+2004-06-27 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS, doc/vmips.texi, utils/do-cvs2cl: Merge with
+	vmips-1_2-branch.
+
+2004-06-25 23:34  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Regenerated.
+
+2004-06-25 23:34  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add release date.
+
+2004-06-23 23:49  Brian R. Gaeke <brg@dgate.org>
+
+	* regnames.h: Merge removal from vmips-1_2-branch
+
+2004-06-23 23:48  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, VERSION, clock.h, clockdev.cc, configure.in, cpu.cc,
+	debug.cc, debian/changelog, doc/Makefile.in, doc/vmips.texi: Merge
+	changes from vmips-1_2-branch
+
+2004-06-23 22:06  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am: regnames.h is history.
+
+2004-06-23 22:06  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Fix erroneous reference to regnames.h, which is
+	gone, anyway.
+
+2004-06-23 22:04  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Instead of using regnames.h, which contains #defines that
+	conflict with Solaris/SPARC headers, just declare static constants
+	in this file (because the only uses are here) that reference the
+	three (count 'em!) registers whose numbers we need to care about.
+
+2004-06-23 22:04  Brian R. Gaeke <brg@dgate.org>
+
+	* regnames.h: regnames.h is no longer used anywhere.
+
+2004-06-23 21:30  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Fix bug in detecting endianness.
+
+2004-06-23 21:30  Brian R. Gaeke <brg@dgate.org>
+
+	* clockdev.cc: Fix bug in the sizeof(long)!=sizeof(int) (e.g.,
+	alpha) case.
+
+2004-06-23 20:26  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc: There's no need whatsoever for SA_SIGINFO here, and it
+	breaks on NetBSD.
+
+2004-06-23 17:44  Brian R. Gaeke <brg@dgate.org>
+
+	* clock.h: Don't rely on preexisting definitions of
+	timespec{add,sub}. Fixes build on OpenBSD.
+
+2004-06-23 01:37  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/Makefile.in: Add more files to the release.
+
+2004-06-23 01:32  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: Regenerated using cvs2cl.
+
 2004-06-23 01:30  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/do-cvs2cl: Apparently this was only on the 1.1 branch

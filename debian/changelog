@@ -1,8 +1,8 @@
-vmips (1.2-1) unstable; urgency=low
+vmips (1.2.1-1) unstable; urgency=low
 
-  * Created debian package for version 1.2.
+  * Created debian package for version 1.2.1.
 
- -- Brian Gaeke <vmips@dgate.org>  Wed, 23 Jun 2004 00:03:16 -0500
+ -- Brian Gaeke <vmips@dgate.org>  Mon, 26 Jul 2004 03:13:16 -0500
 
 Local variables:
 mode: debian-changelog
