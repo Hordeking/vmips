@@ -28,7 +28,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h \
   accesstypes.h deviceexc.h clockdev.h excnames.h error.h \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
-  haltreg.h wipe.h
+  haltreg.h wipe.h stub-dis.h
 vmips_LDADD = $(mipslibdirs) -lopcodes -lbfd -liberty
 vmips_LDFLAGS = -static
 

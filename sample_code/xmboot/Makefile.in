@@ -51,7 +51,7 @@ install: boot.rom
 	$(INSTALL_DATA) boot.rom $(pkglibdir)/boot.rom
 
 loadtest: loadtest_setup.o loadtest.o lib.o serial.o
-	$(VMIPSTOOL) --ld-script=$(srcdir)/loadtest.script --link -o $@ $+
+	-$(VMIPSTOOL) --ld-script=$(srcdir)/loadtest.script --link -o $@ $+
 
 %.rom: %.exe
 	$(VMIPSTOOL) --make-rom $< $@

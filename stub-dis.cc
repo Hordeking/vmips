@@ -1,6 +1,6 @@
 /* Stub functions to interface to the GNU disassembler library
     (libopcodes).
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -46,10 +46,10 @@ call_disassembler(uint32 pc, uint32 instr)
 	disasm_info.buffer = (bfd_byte *) &instr;
 
 	/* Disassemble the instruction, which is in *host* byte order. */
-#if defined(WORDS_BIGENDIAN)
-	print_insn_big_mips(pc, &disasm_info);
-#else
-	print_insn_little_mips(pc, &disasm_info);
-#endif
+	if (WORDS_BIGENDIAN) {
+		print_insn_big_mips(pc, &disasm_info);
+	} else {
+		print_insn_little_mips(pc, &disasm_info);
+	}
 	putc('\n', (FILE *)disasm_info.stream);   /* End the line. */
 }

@@ -121,7 +121,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   sysinclude.h tlbentry.h vmips.h debug.h remotegdb.h \
   accesstypes.h deviceexc.h clockdev.h excnames.h error.h \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
-  haltreg.h wipe.h
+  haltreg.h wipe.h stub-dis.h
 
 vmips_LDADD = $(mipslibdirs) -lopcodes -lbfd -liberty
 vmips_LDFLAGS = -static
@@ -478,6 +478,66 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+clock.o: clock.cc clock.h task.h devreg.h sysinclude.h config.h error.h \
+	wipe.h
+clockdev.o: clockdev.cc clockdev.h clock.h task.h devreg.h sysinclude.h \
+	config.h devicemap.h range.h deviceint.h intctrl.h
+cpu.o: cpu.cc cpu.h sysinclude.h config.h deviceexc.h accesstypes.h \
+	mapper.h range.h devicemap.h debug.h cpzero.h tlbentry.h \
+	vmips.h intctrl.h clock.h task.h devreg.h clockdev.h \
+	deviceint.h haltdev.h memorymodule.h options.h spimconsole.h \
+	terminalcontroller.h regnames.h excnames.h cpzeroreg.h error.h \
+	remotegdb.h stub-dis.h
+cpzero.o: cpzero.cc cpzero.h tlbentry.h sysinclude.h config.h mapper.h \
+	range.h devicemap.h deviceexc.h accesstypes.h debug.h \
+	excnames.h cpu.h cpzeroreg.h intctrl.h error.h
+debug.o: debug.cc debug.h sysinclude.h config.h deviceexc.h \
+	accesstypes.h remotegdb.h cpu.h mapper.h range.h devicemap.h \
+	cpzero.h tlbentry.h excnames.h cpzeroreg.h vmips.h intctrl.h \
+	clock.h task.h devreg.h clockdev.h deviceint.h haltdev.h \
+	memorymodule.h options.h spimconsole.h terminalcontroller.h
+deviceint.o: deviceint.cc sysinclude.h config.h deviceint.h intctrl.h \
+	vmips.h cpzero.h tlbentry.h mapper.h range.h devicemap.h \
+	deviceexc.h accesstypes.h debug.h clock.h task.h devreg.h \
+	clockdev.h cpu.h haltdev.h memorymodule.h options.h \
+	spimconsole.h terminalcontroller.h
+devicemap.o: devicemap.cc sysinclude.h config.h accesstypes.h range.h \
+	devicemap.h
+error.o: error.cc sysinclude.h config.h error.h
+haltdev.o: haltdev.cc haltdev.h devicemap.h sysinclude.h config.h \
+	range.h vmips.h intctrl.h cpzero.h tlbentry.h mapper.h \
+	deviceexc.h accesstypes.h debug.h clock.h task.h devreg.h \
+	clockdev.h deviceint.h cpu.h memorymodule.h options.h \
+	spimconsole.h terminalcontroller.h
+intctrl.o: intctrl.cc sysinclude.h config.h deviceint.h intctrl.h
+mapper.o: mapper.cc sysinclude.h config.h excnames.h mapper.h range.h \
+	devicemap.h deviceexc.h accesstypes.h debug.h cpu.h cpzero.h \
+	tlbentry.h error.h
+memorymodule.o: memorymodule.cc sysinclude.h config.h memorymodule.h \
+	error.h
+options.o: options.cc options.h sysinclude.h config.h optiontbl.h \
+	error.h
+range.o: range.cc sysinclude.h config.h range.h accesstypes.h error.h
+remotegdb.o: remotegdb.cc remotegdb.h sysinclude.h config.h
+spimconsole.o: spimconsole.cc spimconsole.h clock.h task.h devreg.h \
+	sysinclude.h config.h devicemap.h range.h deviceint.h intctrl.h \
+	terminalcontroller.h spimconsreg.h mapper.h deviceexc.h \
+	accesstypes.h debug.h
+stub-dis.o: stub-dis.cc sysinclude.h config.h vmips.h intctrl.h cpzero.h \
+	tlbentry.h mapper.h range.h devicemap.h deviceexc.h \
+	accesstypes.h debug.h clock.h task.h devreg.h clockdev.h \
+	deviceint.h cpu.h haltdev.h memorymodule.h options.h \
+	spimconsole.h terminalcontroller.h
+task.o: task.cc task.h
+terminalcontroller.o: terminalcontroller.cc error.h sysinclude.h \
+	config.h terminalcontroller.h clock.h task.h devreg.h
+tlbentry.o: tlbentry.cc tlbentry.h sysinclude.h config.h cpzeroreg.h
+vmips.o: vmips.cc clock.h task.h devreg.h sysinclude.h config.h \
+	clockdev.h devicemap.h range.h deviceint.h intctrl.h clockreg.h \
+	cpzeroreg.h error.h haltreg.h spimconsole.h \
+	terminalcontroller.h spimconsreg.h vmips.h cpzero.h tlbentry.h \
+	mapper.h deviceexc.h accesstypes.h debug.h cpu.h haltdev.h \
+	memorymodule.h options.h stub-dis.h
 
 info-am:
 info: info-recursive

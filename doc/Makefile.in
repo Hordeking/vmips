@@ -47,7 +47,7 @@ USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.dvi vmips.info vmips.html vmips.ps \
  vmips.pdf $(MANPAGES)
 MAINTAINERCLEANFILES = $(USERDOCS) vmips.pod vmipstool.pod
 DISTFILES = Makefile.in linux-cross to-do vmips.texi invoke.texi \
- $(USERDOCS) options.texi vmipstool.texi texinfo.tex
+ $(USERDOCS) options.texi vmipstool.texi texinfo.tex fdl.texi
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 MANSECT = 1
 vmips_MANPAGE = vmips.$(MANSECT)

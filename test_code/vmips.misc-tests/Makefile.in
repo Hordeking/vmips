@@ -273,6 +273,9 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+echo.o: echo.c ../../spimconsreg.h ../../devreg.h
+random.o: random.c
+sort.o: sort.c
 
 info-am:
 info: info-am

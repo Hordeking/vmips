@@ -1,5 +1,5 @@
 /* Definitions to support the physical memory system.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 

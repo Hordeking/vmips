@@ -4,7 +4,7 @@ AC_INIT(vmips.cc)
 dnl Get the canonical and user-supplied names for the host and target. 
 AC_CANONICAL_SYSTEM
 program_prefix=NONE
-AM_INIT_AUTOMAKE(vmips, 1.1)
+AM_INIT_AUTOMAKE(vmips, 1.1.1)
 AM_CONFIG_HEADER(config.h)
 
 dnl Look for mips tool installation:
@@ -84,27 +84,39 @@ do
 	fi
 done
 
+dnl Check for C compiler.
+dnl We have to do this early because AC_TRY_CPP depends on it.
+AC_PROG_CC
+
 AC_ARG_WITH(mips-include,
 [  --with-mips-include=DIR specify path to mips cross tools' includes
                            (default MDIR/HOST/TARGET/include)],
-[mipsinclude="-I$withval"],
-[mipsinclude="-I${mipsdir}/${host}/${target_alias}/include"])dnl
-
-dirs="${host_alias}/${target_alias}/include"
-dirs="$dirs ${host_alias}/${target}/include"
-dirs="$dirs ${host}/${target_alias}/include"
-dirs="$dirs ${host}/${target}/include"
-dirs="$dirs include"
+[mipsinclude="$withval"],
+[mipsinclude="$mipsdir/${host}/${target_alias}/include"])dnl
+dirs="$mipsinclude"
+dirs="$dirs $mipsdir/${host_alias}/${target_alias}/include"
+dirs="$dirs $mipsdir/${host_alias}/${target}/include"
+dirs="$dirs $mipsdir/${host}/${target}/include"
+dirs="$dirs $mipsdir/include"
 mipsincdirs=""
+result='not found'
+AC_REQUIRE_CPP
+oldcppflags="$CPPFLAGS"
 for subdir in $dirs
 do
-	dir="$mipsdir/$subdir"
-	if test -d "$dir"
+	if test -d "$subdir" -a "x$result" != xfound
 	then
-		case "$mipsincdirs" in
-		*-I$dir*) ;;
-		*) mipsincdirs="${mipsincdirs} -I$dir" ;;
+		CPPFLAGS="$oldcppflags -I$subdir"
+		AC_MSG_CHECKING([for binutils headers in $subdir])
+		AC_TRY_CPP([#include "bfd.h"
+#include "dis-asm.h"],
+		[case "$mipsincdirs" in
+		*-I$subdir*) ;;
+		*) mipsincdirs="-I$subdir" ;;
 		esac
+        result=found],[result='not found'])
+        AC_MSG_RESULT($result)
+		CPPFLAGS="$oldcppflags"
 	fi
 done
 
@@ -223,8 +235,6 @@ enable_tty=yes;;
 esac
 AC_MSG_RESULT($enable_tty)
 
-dnl Check for C compiler.
-AC_PROG_CC
 
 dnl Checks for interesting flavors of Unix.
 AC_AIX

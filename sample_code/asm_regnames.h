@@ -3,8 +3,8 @@
 
 /* Special names */
 #define zero $0	/* always zero */
-/*#define at $1	/* assembler temporary */
-/* this conflicts with the .set at assembler directive. just use $1 instead */
+/*#define at $1	(* assembler temporary *) */
+/* above conflicts with the .set at assembler directive. just use $1 instead */
 #define v0 $2	/* function values */
 #define v1 $3
 #define a0 $4	/* function arguments */

@@ -1,5 +1,5 @@
 /* R3000 system control coprocessor emulation ("coprocessor zero").
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2002, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -29,6 +29,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpzeroreg.h"
 #include "intctrl.h"
 #include "deviceexc.h"
+#include "error.h"
 
 static uint32 read_masks[] = {
 	Index_MASK, Random_MASK, EntryLo_MASK, 0, Context_MASK,
@@ -73,6 +74,7 @@ CPZero::reset(void)
 	reg[Status] = (reg[Status] | Status_DS_BEV_MASK) &
 		~(Status_KUc_MASK | Status_IEc_MASK | Status_DS_SwC_MASK |
 		  Status_DS_TS_MASK);
+	reg[PRId] = 0x00000230; /* MIPS R3000A */
 }
 
 /* We have been presented with a CPU and/or interrupt controller to
@@ -389,6 +391,18 @@ bool
 CPZero::caches_swapped(void)
 {
 	return (reg[Status] & Status_DS_SwC_MASK);
+}
+
+bool
+CPZero::cop_usable(int coprocno)
+{
+	switch (coprocno) {
+		case 3: return (reg[Status] & Status_CU3_MASK);
+		case 2: return (reg[Status] & Status_CU2_MASK);
+		case 1: return (reg[Status] & Status_CU1_MASK);
+		case 0: return (reg[Status] & Status_CU0_MASK);
+		default: fatal_error ("Bad coprocno passed to CPZero::cop_usable()");
+	};
 }
 
 bool

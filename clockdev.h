@@ -1,5 +1,5 @@
 /* Declarations to support the VMIPS clock device.
-   Copyright 2002 Paul Twohey.
+   Copyright 2003 Paul Twohey.
 
 This file is part of VMIPS.
 

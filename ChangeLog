@@ -1,3 +1,463 @@
+2003-06-16 13:15  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE, NEWS: Add NEWS for one more bug fix.
+
+2003-06-01 00:08  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Fix handling of --with-mips-include, which never
+	really worked.
+
+2003-05-29 00:37  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Partial merge from HEAD - don't
+	abort if we fail to link loadtest.
+
+2003-05-29 00:36  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Make failures due to linking
+	loadtest optional -- this way we aren't unnecessarily bothering
+	people who don't have a ecoff-littlemips toolchain.
+
+2003-05-29 00:17  Brian R. Gaeke <brg@dgate.org>
+
+	* accesstypes.h, clockdev.cc, clockdev.h, cpu.cc, cpu.h, cpzero.cc,
+	cpzero.h, cpzeroreg.h, debug.cc, debug.h, deviceexc.h,
+	deviceint.cc, deviceint.h, devicemap.cc, devicemap.h, intctrl.cc,
+	intctrl.h, mapper.cc, mapper.h, memorymodule.cc, memorymodule.h,
+	optiontbl.h, range.cc, range.h, regnames.h, remotegdb.cc,
+	remotegdb.h, spimconsole.cc, spimconsole.h, spimconsreg.h,
+	stub-dis.cc, sysinclude.h, tlbentry.cc, tlbentry.h, vmips.cc,
+	vmips.h, vmipstool.cc: Update copyright dates.
+
+2003-05-29 00:14  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: update NEWS for 1.1.1, from branch.
+
+2003-05-29 00:14  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/copydocs: merge from 1.1 branch.
+
+2003-05-28 23:58  Brian R. Gaeke <brg@dgate.org>
+
+	* accesstypes.h, clockdev.cc, clockdev.h, cpu.cc, cpu.h, cpzero.cc,
+	cpzero.h, cpzeroreg.h, debug.cc, debug.h, deviceexc.h,
+	deviceint.cc, deviceint.h, devicemap.cc, devicemap.h, intctrl.cc,
+	intctrl.h, mapper.cc, mapper.h, memorymodule.cc, memorymodule.h,
+	optiontbl.h, range.cc, range.h, regnames.h, remotegdb.cc,
+	remotegdb.h, spimconsole.cc, spimconsole.h, spimconsreg.h,
+	stub-dis.cc, sysinclude.h, tlbentry.cc, tlbentry.h, vmips.cc,
+	vmips.h, vmipstool.cc: Update copyright dates.
+
+2003-05-28 22:47  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: New announcement for version 1.1.1
+
+2003-05-28 22:35  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in: update VERSION to 1.1.1
+
+2003-05-28 22:24  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: update changelog for 1.1.1
+
+2003-05-28 22:09  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Add NEWS for version 1.1.1
+
+2003-05-28 21:26  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in: regenerated
+	after addition of srlv test case on branch.
+
+2003-05-28 21:12  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, cpu.cc, cpu.h, cpzero.cc, cpzero.h, cpzeroreg.h,
+	devicemap.cc, vmips.cc, vmipstool.cc, doc/Makefile.in,
+	sample_code/asm_regnames.h, test_code/vmips.regcheck/srlv.S,
+	test_code/vmips.regcheck/srlv.par: Merge from HEAD in preparation
+	for 1.1.1 release
+
+2003-05-23 03:10  Brian R. Gaeke <brg@dgate.org>
+
+	* devicemap.cc: Another attempt at writing the generic
+	lb/lh/sb/sh->lw/sw conversions.  This time, it uses no old-style
+	(C) casts.
+
+2003-05-23 02:33  Brian R. Gaeke <brg@dgate.org>
+
+	* devicemap.cc: trying something new.
+
+2003-05-01 22:22  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Remove xmsend.c from the
+	distribution.
+
+2003-05-01 22:20  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/Makefile.in, sample_code/xmboot/Makefile.in: Add various
+	files to distribution that got left out inadvertently.
+
+2003-04-29 01:28  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: cpu.cc: Make srl work right. Apply a similar fix to sra.
+	Remember, kids,  shifting an int32 by 32 results in funny
+	substances in your drinking water.
+
+2003-04-29 01:26  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/bootenv.c: We'll pretend we're a 5000/200, for
+	now. apparently 5000/1xx docs are too hard to find.
+
+2003-04-28 23:57  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, srlv.S,
+	srlv.par: Add a stronger check for srlv, which was broken.
+
+2003-04-28 01:45  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc, debug.h: debug.cc: Introduce virtual destructor.  
+	Replace rom_bp_bitmap with a STL set (bp_set) of addresses.  
+	Introduce interrupt handling: ^C when in debug mode acts like a
+	breakpoint.   Generalize rom_breakpoint handling (and rename
+	methods accordingly) to    deal with all breakpoints (but leave the
+	weird GDB backwards compatibility    stuff in there.)	Introduce
+	support for the GDB 'Z' and 'z' packets.   Rewrite some of the
+	commented-out debug fprintfs as meaningful comments.  debug.h:
+	Replace rom_bp_bitmap with a STL set (bp_set) of addresses.  
+	Introduce prototypes for virtual destructor.   Update prototypes
+	for rom_breakpoint methods to reflect their new names.	 Declare
+	got_interrupt flag.   Add prototype for 'Z'/'z' handler.
+
+2003-04-28 01:19  Brian R. Gaeke <brg@dgate.org>
+
+	* sysinclude.h: Include signal.h, for signal handlers.
+
+2003-04-27 22:50  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Update the name of coff_main.
+
+2003-04-27 17:49  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.h: Make machine->dbgr public; this helps with some debugger
+	hacking I am doing at the moment.
+
+2003-04-27 16:28  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Get rid of a zillion little
+	rules; try to regularize the rules for building things on the host
+	vs. vmips target. Eventually we'll automake this.
+
+2003-04-27 16:26  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: coff_main.c, pftest.c: coff_main.c: use
+	correct name.  pftest.c: Make it use main() instead of entry().
+
+2003-04-27 16:25  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/runtests: quick script that runs some test
+	code
+
+2003-04-27 16:25  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/README: update descriptions of what's here;
+	add description of testing framework.
+
+2003-04-27 15:34  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: pftest.output, testbootenv.output: Expected
+	test case output for pftest and testbootenv.
+
+2003-04-27 14:48  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/xmsend.c: Not sure if this was ever used! ;-)
+
+2003-04-13 15:22  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/copydocs: update to new copy command.
+
+2003-04-12 13:07  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Add the rest of the files I
+	forgot.
+
+2003-04-12 13:02  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Add boot_setup.S to the
+	distribution.
+
+2003-04-12 12:59  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, sample_code/xmboot/Makefile.in: Add stub-dis.h and
+	sample_code/xmboot/boot.script to the distribution.
+
+2003-04-12 12:56  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: More on debugging.
+
+2003-04-12 12:49  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Flesh out existing brainstorms.
+
+2003-04-12 12:30  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/bootstrap: Add xmboot/boot.script to list of files to
+	delete.
+
+2003-04-12 12:28  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: 
+	doc/to-do: Update version release info. Add coprocessor interface
+	item.
+
+2003-04-12 12:28  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: 
+	vmips.cc: Include stub-dis.h and use that instead of keying in the
+	prototype  separately.
+
+2003-04-12 12:26  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h, cpzero.cc, cpzero.h, cpzeroreg.h, stub-dis.h:
+	stub-dis.h: New file with interfaces to stub-dis.cc.  cpu.cc:
+	Include stub-dis.h. Refactor unimplemented-coprocessor handling
+	code.	Make the "no fpu" response from cfc1 work.  cpu.h: New
+	prototype for cop_unimpl().  cpzero.cc: Include error.h. New
+	cop_usable() method to check status word  for coprocessor usable
+	bit.  cpzero.h: New prototype for cop_usable().  cpzeroreg.h: Split
+	out the individual flags in Status's CU field and give them  their
+	own names.
+
+2003-04-12 12:21  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: boot.c: Add support for auto-booting a
+	preloaded kernel.
+
+2003-04-12 11:27  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: Add support for patching the booter to
+	obviate the need for the user to type the "rom" command.
+
+2003-04-11 13:52  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot.c, catrom, vmips16M: boot.c: Make "rx"
+	work after a "rom" command.  catrom: Delete the intermediate .pad
+	file.  vmips16M: Turn on DBE messages.
+
+2003-04-10 12:41  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: New flag to cache dbemsg option.
+
+2003-04-10 12:40  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc, optiontbl.h: optiontbl.h: New flag "dbemsg",
+	defaulting to false.  mapper.cc: Print out the physical addresses
+	of accesses that cause data bus errors, if dbemsg flag is set.
+
+2003-04-07 19:03  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: cpzero.cc: reset() sets the right PRId value.
+
+2003-04-07 18:56  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.script, boot.script.in,
+	vmips16M: 
+	Makefile.in: Don't build loadtest by default; it *must* be in ECOFF
+	 format to be useful at the moment, and the user may not have ECOFF
+	tools.	vmips16M: Don't halt on break.	boot.script.in:
+	Autoconf-friendly version of boot.script (replaces boot.script)
+
+2003-04-07 18:55  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: configure.in: Build sample_code/xmboot/boot.script.
+
+2003-04-06 13:53  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.c, utils.S: Rewrite
+	turn_on_clock_interrupts as a C function in boot.c, in terms of
+	get/set_status(). Now utils.S is no longer needed.
+
+2003-04-06 13:44  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.c, boot_setup.S,
+	bootenv.c, bootenv.h, lib.c, lib.h, set_status.h, testbootenv.c,
+	vmips16M: Makefile.in: Add bootenv.o as a booter object (both
+	boot.host and real booter) boot.c: Include set_status.h and
+	bootenv.h.  Add commands for printenv,	setenv, unsetenv.  Move
+	prototypes for get_status, set_status to  set_status.h.  Initialize
+	boot environment.  Fix typo in load_rom.  set_status.h: New file
+	with prototypes for set_status.S.  boot_setup.S: Fill in more slots
+	in the jump table for getenv, setenv,	unsetenv, and printenv. 
+	lib.c: Add strncmp, strncpy. Reindent.	lib.h: Add protos for
+	strncmp, strncpy.  bootenv.c: New file with code to manage the boot
+	environment.  bootenv.h: New file with prototypes for bootenv.c. 
+	testbootenv.c: New file with test code for bootenv.c.  vmips16M:
+	New script to run vmips with 16 megs of core.
+
+2003-04-06 12:19  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot_main.c: Makefile.in:
+	remove set_bev.o, which doesn't exist boot_main.c: replace set_bev
+	stub with set_status/get_status stubs
+
+2003-04-06 11:43  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/asm_regnames.h: Squish comment warning from gcc -Wall
+	:-P
+
+2003-04-06 11:42  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.c, boot_main.c,
+	boot_setup.S, coff.c, lib.c, lib.h, panic.c, serial.c,
+	set_status.S: set_status.S: Short routines that twiddle CP0 Status
+	register.  Makefile.in: Use -Wall to compile.  Add (set_bev.o
+	set_status.o) to  objects list for boot.exe.  boot.c: Declare
+	set_bev(). Fix format-string warnings.	Turn off boot-time 
+	exception handler when we finally jump to the program, and turn it
+	back  on again if/when we come back. (added routine to do this.)
+	boot_main.c: Provide a stub set_bev().	boot_setup.S:  Wrap jump
+	table in .set noreorder to avoid as inserting  more NOPs. Pass
+	BadVAddr to panic routine -- hey, maybe it'll help.  coff.c: Fix
+	format-string warnings.  lib.c: Include serial.h to pull in
+	prototypes for read/write.  Change  (set_echo term_enable
+	term_disable) to return void.  Make puts always  return 0 like the
+	man page says.	lib.h: Update protos for (set_echo term_enable
+	term_disable); they now  return void.  panic.c: Make uncaught's
+	parameters unsigned (just being paranoid). Add	badvaddr as
+	parameter & print it, too.  serial.c: Replace the 0; with a comment
+	saying "nothing"; squashes a  warning from gcc -Wall.
+
+2003-04-06 10:18  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot.c, serial.c, serial.h, xmrcv.c,
+	xmrcv.h: serial.h: Prototypes for write() and read().  boot.c:
+	Include serial.h and xmrcv.h to pull in prototypes.   Remove unused
+	vars from peek, poke, load_rom.  serial.c: Include serial.h to pull
+	in prototypes.	xmrcv.c: Make bytes_rcvd be a long, to match
+	boot.c.  xmrcv.h: Likewise.
+
+2003-04-06 10:10  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot_setup.S, lib.c, lib.h, libtest.c,
+	libtest.output: boot_setup.S: Flesh out the DEC PROM jump table
+	some more.  Refactor the  exception handler.  Rename 'begin' as
+	'reset'.  lib.c: Implement strcat and atoi.  lib.h: Get rid of
+	turn_on_mode and turn_off_mode, which don't exist.   Add prototypes
+	for strcat and atoi.  libtest.c: Reindent.  Add tests for: strcat
+	toupper tolower isprint  memcpy memset atoi.  libtest.output:
+	Update with current list of passing tests.
+
+2003-04-05 21:30  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc, sample_code/xmboot/boot.c,
+	sample_code/xmboot/boot_setup.S: debug.cc: This printf produces way
+	too much spam.
+	
+	sample_code/xmboot/boot.c: Try passing boot's arguments to the
+	program we booted.
+	
+	sample_code/xmboot/boot_setup.S: Add the beginnings of a DEC PROM
+	compatible jump table.
+
+2003-04-05 19:34  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.script, ld.script,
+	setup.S: ld.script, setup.S: changed names to boot.script,
+	boot_setup.S Makefile.in: put back changes that got blown away :-(
+
+2003-04-05 19:31  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot.script, boot_setup.S: booter gets its
+	own setup routine & linker script
+
+2003-04-02 09:00  Brian R. Gaeke <brg@dgate.org>
+
+	* stub-dis.cc: Fix #if defined/if() messup here (same as on 1.1
+	branch).
+
+2003-04-02 08:59  Brian R. Gaeke <brg@dgate.org>
+
+	* stub-dis.cc: Fix #if defined/if() messup here.
+
+2003-04-02 08:57  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: options.cc: remove label "out" which is no longer
+	used.
+
+2003-03-24 02:56  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: .gdbinit, ld.script, panic.c, setup.S:
+	.gdbinit: removed; don't need this for the moment.  ld.script:
+	added (load booter at high address, allows for loading large
+	files.) panic.c: added (helps to print out what causes the
+	exception) setup.S: added (support for panic routine & ld.script
+	mods)
+
+2003-03-24 02:55  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: 
+	boot.c: print out ranges
+
+2003-03-24 01:57  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc, vmipstool.cc: options.cc: Add support for K, M, G
+	suffixes to numeric options to multiply by  the appropriate power
+	of 2.  vmipstool.cc: Fix completely broken handling of --ld-script
+	option
+
+2003-03-24 01:05  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot.c, catrom, coff.c: catrom: New script
+	to merge executables into the loader.  boot.c: Add support for
+	booting executables which are already in ROM.	Make messages from
+	boot() more responsive.   Clarify comment of recv_size.   Fix
+	return value of poke().  coff.c: Comment out the "bad relocation"
+	stuff, at least until it becomes  clear why this is needed.
+
+2003-03-24 00:04  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, NEWS, VERSION, configure.in, options.cc, vmips.spec.in,
+	doc/to-do, doc/vmips.texi: Bring up-to-date with updates made only
+	on branch for 1.1 release.
+
+2003-03-10 01:53  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: One more time.
+
+2003-03-10 01:53  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Update copyright date, sigh.
+
+2003-03-10 01:23  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in: Don't install files (for now, at least) as
+	mipsel-ecoff-vmips, etc.
+
+2003-03-10 01:08  Brian R. Gaeke <brg@dgate.org>
+
+	* options.cc: Fix bug in display of host processor endianness that
+	was caused when we changed sysinclude.h.
+
+2003-02-21 01:41  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in: Update specfile to have a --target option, and
+	update description of package to mention it.
+
+2003-02-13 00:23  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Update to-do to remove all to-do items from release
+	candidate
+
+2003-02-13 00:22  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, doc/vmips.texi: INSTALL: Regenerate from manual. 
+	doc/vmips.texi: Update installation instructions to mention
+	--target  requirement.
+
+2002-12-19 10:15  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE, ChangeLog, NEWS: Remove references to sartre.  Add
+	NEWS.  Update ChangeLog.
+
 2002-12-14 14:41  Brian R. Gaeke <brg@dgate.org>
 
 	* doc/to-do: 
@@ -4482,10 +4942,8 @@
 2000-10-22 19:27  Brian R. Gaeke <brg@dgate.org>
 
 	* sample_code/setup.S: Halt on exceptions.  CVS:
-	-------------------------------------------------------------------
-	---
-	-------------------------------------------------------------------
-	---
+	----------------------------------------------------------------------
+	----------------------------------------------------------------------
 
 2000-10-22 19:00  Brian R. Gaeke <brg@dgate.org>
 
@@ -5703,16 +6161,16 @@
 
 1999-08-29 14:46  Brian R. Gaeke <brg@dgate.org>
 
-	* NEWS: NEWS: Updated.	INSTALL: Info on building cross tools, and
-	specifying prefix thereto upon	invoking configure.  MAKEFILE-TODO:
-	Updated.  README: Pointer to home page added.
-
-1999-08-29 14:46  Brian R. Gaeke <brg@dgate.org>
-
 	* INSTALL, MAKEFILE-TODO, README: ChangeLog: Updated.  INSTALL:
 	Info on building cross tools, and specifying prefix thereto upon 
 	invoking configure.  MAKEFILE-TODO: Updated.  README: Pointer to
 	home page added.
+
+1999-08-29 14:46  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: NEWS: Updated.	INSTALL: Info on building cross tools, and
+	specifying prefix thereto upon	invoking configure.  MAKEFILE-TODO:
+	Updated.  README: Pointer to home page added.
 
 1999-08-29 13:59  Brian R. Gaeke <brg@dgate.org>
 
@@ -6565,323 +7023,323 @@
 
 	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
 	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
-	vm_backup_6.tar.gz: Initial revision
+	vm_backup_6.tar.gz: Imported sources
 
 1999-01-02 09:13  Brian R. Gaeke <brg@dgate.org>
 
 	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
 	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
-	vm_backup_6.tar.gz: Imported sources
-
-1999-01-02 09:09  Brian R. Gaeke <brg@dgate.org>
-
-	* options.cc, Makefile, doc/to-do: Initial revision
+	vm_backup_6.tar.gz: Initial revision
 
 1999-01-02 09:09  Brian R. Gaeke <brg@dgate.org>
 
 	* options.cc, Makefile, doc/to-do: Imported sources
 
-1999-01-02 08:54  Brian R. Gaeke <brg@dgate.org>
+1999-01-02 09:09  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/tildexp.cc, sysinclude.h: Initial revision
+	* options.cc, Makefile, doc/to-do: Initial revision
 
 1999-01-02 08:54  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/tildexp.cc, sysinclude.h: Imported sources
 
-1999-01-02 08:39  Brian R. Gaeke <brg@dgate.org>
+1999-01-02 08:54  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/tilde_test.txt: Initial revision
+	* misc_code/tildexp.cc, sysinclude.h: Initial revision
 
 1999-01-02 08:39  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/tilde_test.txt: Imported sources
 
-1999-01-02 08:20  Brian R. Gaeke <brg@dgate.org>
+1999-01-02 08:39  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/test_parser.cc: Initial revision
+	* misc_code/tilde_test.txt: Initial revision
 
 1999-01-02 08:20  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/test_parser.cc: Imported sources
 
-1999-01-02 07:56  Brian R. Gaeke <brg@dgate.org>
+1999-01-02 08:20  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/parse_test.txt: Initial revision
+	* misc_code/test_parser.cc: Initial revision
 
 1999-01-02 07:56  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/parse_test.txt: Imported sources
 
-1999-01-01 04:28  Brian R. Gaeke <brg@dgate.org>
+1999-01-02 07:56  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/Makefile: Initial revision
+	* misc_code/parse_test.txt: Initial revision
 
 1999-01-01 04:28  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/Makefile: Imported sources
 
-1999-01-01 04:16  Brian R. Gaeke <brg@dgate.org>
+1999-01-01 04:28  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/hash_test.cc: Initial revision
+	* utils/Makefile: Initial revision
 
 1999-01-01 04:16  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/hash_test.cc: Imported sources
 
-1999-01-01 01:52  Brian R. Gaeke <brg@dgate.org>
+1999-01-01 04:16  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/hash_test.pl: Initial revision
+	* misc_code/hash_test.cc: Initial revision
 
 1999-01-01 01:52  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/hash_test.pl: Imported sources
 
-1999-01-01 00:51  Brian R. Gaeke <brg@dgate.org>
+1999-01-01 01:52  Brian R. Gaeke <brg@dgate.org>
 
-	* cpu.cc: Initial revision
+	* misc_code/hash_test.pl: Initial revision
 
 1999-01-01 00:51  Brian R. Gaeke <brg@dgate.org>
 
 	* cpu.cc: Imported sources
 
-1999-01-01 00:06  Brian R. Gaeke <brg@dgate.org>
+1999-01-01 00:51  Brian R. Gaeke <brg@dgate.org>
 
-	* regnames.h, cacheline.h, tags: Initial revision
+	* cpu.cc: Initial revision
 
 1999-01-01 00:06  Brian R. Gaeke <brg@dgate.org>
 
 	* regnames.h, cacheline.h, tags: Imported sources
 
-1998-12-26 04:23  Brian R. Gaeke <brg@dgate.org>
+1999-01-01 00:06  Brian R. Gaeke <brg@dgate.org>
 
-	* cpu.h, test_code/Makefile: Initial revision
+	* regnames.h, cacheline.h, tags: Initial revision
 
 1998-12-26 04:23  Brian R. Gaeke <brg@dgate.org>
 
 	* cpu.h, test_code/Makefile: Imported sources
 
-1998-12-26 04:04  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 04:23  Brian R. Gaeke <brg@dgate.org>
 
-	* mapper.cc, cpzero.cc: Initial revision
+	* cpu.h, test_code/Makefile: Initial revision
 
 1998-12-26 04:04  Brian R. Gaeke <brg@dgate.org>
 
 	* mapper.cc, cpzero.cc: Imported sources
 
-1998-12-26 04:00  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 04:04  Brian R. Gaeke <brg@dgate.org>
 
-	* mapper.h: Initial revision
+	* mapper.cc, cpzero.cc: Initial revision
 
 1998-12-26 04:00  Brian R. Gaeke <brg@dgate.org>
 
 	* mapper.h: Imported sources
 
-1998-12-26 03:36  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 04:00  Brian R. Gaeke <brg@dgate.org>
 
-	* range.cc: Initial revision
+	* mapper.h: Initial revision
 
 1998-12-26 03:36  Brian R. Gaeke <brg@dgate.org>
 
 	* range.cc: Imported sources
 
-1998-12-26 02:55  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 03:36  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/mdis, test_code/bdexcp.S: Initial revision
+	* range.cc: Initial revision
 
 1998-12-26 02:55  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/mdis, test_code/bdexcp.S: Imported sources
 
-1998-12-26 02:47  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 02:55  Brian R. Gaeke <brg@dgate.org>
 
-	* vmips.cc: Initial revision
+	* utils/mdis, test_code/bdexcp.S: Initial revision
 
 1998-12-26 02:47  Brian R. Gaeke <brg@dgate.org>
 
 	* vmips.cc: Imported sources
 
-1998-12-26 02:35  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 02:47  Brian R. Gaeke <brg@dgate.org>
 
-	* test_code/load.S: Initial revision
+	* vmips.cc: Initial revision
 
 1998-12-26 02:35  Brian R. Gaeke <brg@dgate.org>
 
 	* test_code/load.S: Imported sources
 
-1998-12-26 02:32  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 02:35  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/mkrom: Initial revision
+	* test_code/load.S: Initial revision
 
 1998-12-26 02:32  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/mkrom: Imported sources
 
-1998-12-26 02:06  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 02:32  Brian R. Gaeke <brg@dgate.org>
 
-	* cache.cc: Initial revision
+	* utils/mkrom: Initial revision
 
 1998-12-26 02:06  Brian R. Gaeke <brg@dgate.org>
 
 	* cache.cc: Imported sources
 
-1998-12-26 01:51  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 02:06  Brian R. Gaeke <brg@dgate.org>
 
-	* test_code/mumble.S: Initial revision
+	* cache.cc: Initial revision
 
 1998-12-26 01:51  Brian R. Gaeke <brg@dgate.org>
 
 	* test_code/mumble.S: Imported sources
 
-1998-12-26 01:45  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 01:51  Brian R. Gaeke <brg@dgate.org>
 
-	* test_code/exception.S: Initial revision
+	* test_code/mumble.S: Initial revision
 
 1998-12-26 01:45  Brian R. Gaeke <brg@dgate.org>
 
 	* test_code/exception.S: Imported sources
 
-1998-12-26 01:38  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 01:45  Brian R. Gaeke <brg@dgate.org>
 
-	* sample_code/asm_regnames.h: Initial revision
+	* test_code/exception.S: Initial revision
 
 1998-12-26 01:38  Brian R. Gaeke <brg@dgate.org>
 
 	* sample_code/asm_regnames.h: Imported sources
 
-1998-12-26 00:37  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 01:38  Brian R. Gaeke <brg@dgate.org>
 
-	* cpzero.h: Initial revision
+	* sample_code/asm_regnames.h: Initial revision
 
 1998-12-26 00:37  Brian R. Gaeke <brg@dgate.org>
 
 	* cpzero.h: Imported sources
 
-1998-12-26 00:34  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 00:37  Brian R. Gaeke <brg@dgate.org>
 
-	* cpzeroreg.h: Initial revision
+	* cpzero.h: Initial revision
 
 1998-12-26 00:34  Brian R. Gaeke <brg@dgate.org>
 
 	* cpzeroreg.h: Imported sources
 
-1998-12-25 05:38  Brian R. Gaeke <brg@dgate.org>
+1998-12-26 00:34  Brian R. Gaeke <brg@dgate.org>
 
-	* disassembler.cc: Initial revision
+	* cpzeroreg.h: Initial revision
 
 1998-12-25 05:38  Brian R. Gaeke <brg@dgate.org>
 
 	* disassembler.cc: Imported sources
 
-1998-12-25 04:53  Brian R. Gaeke <brg@dgate.org>
+1998-12-25 05:38  Brian R. Gaeke <brg@dgate.org>
 
-	* cache.h: Initial revision
+	* disassembler.cc: Initial revision
 
 1998-12-25 04:53  Brian R. Gaeke <brg@dgate.org>
 
 	* cache.h: Imported sources
 
-1998-12-25 04:44  Brian R. Gaeke <brg@dgate.org>
+1998-12-25 04:53  Brian R. Gaeke <brg@dgate.org>
 
-	* cacheline.cc: Initial revision
+	* cache.h: Initial revision
 
 1998-12-25 04:44  Brian R. Gaeke <brg@dgate.org>
 
 	* cacheline.cc: Imported sources
 
-1998-12-25 02:31  Brian R. Gaeke <brg@dgate.org>
+1998-12-25 04:44  Brian R. Gaeke <brg@dgate.org>
 
-	* tlbentry.cc: Initial revision
+	* cacheline.cc: Initial revision
 
 1998-12-25 02:31  Brian R. Gaeke <brg@dgate.org>
 
 	* tlbentry.cc: Imported sources
 
-1998-12-25 00:10  Brian R. Gaeke <brg@dgate.org>
+1998-12-25 02:31  Brian R. Gaeke <brg@dgate.org>
 
-	* tlbentry.h: Initial revision
+	* tlbentry.cc: Initial revision
 
 1998-12-25 00:10  Brian R. Gaeke <brg@dgate.org>
 
 	* tlbentry.h: Imported sources
 
-1998-12-24 23:37  Brian R. Gaeke <brg@dgate.org>
+1998-12-25 00:10  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/getpagesize.cc: Initial revision
+	* tlbentry.h: Initial revision
 
 1998-12-24 23:37  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/getpagesize.cc: Imported sources
 
-1998-12-24 23:21  Brian R. Gaeke <brg@dgate.org>
+1998-12-24 23:37  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/parity.cc: Initial revision
+	* utils/getpagesize.cc: Initial revision
 
 1998-12-24 23:21  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/parity.cc: Imported sources
 
-1998-12-24 20:38  Brian R. Gaeke <brg@dgate.org>
+1998-12-24 23:21  Brian R. Gaeke <brg@dgate.org>
 
-	* misc_code/random.cc: Initial revision
+	* misc_code/parity.cc: Initial revision
 
 1998-12-24 20:38  Brian R. Gaeke <brg@dgate.org>
 
 	* misc_code/random.cc: Imported sources
 
-1998-12-23 05:42  Brian R. Gaeke <brg@dgate.org>
+1998-12-24 20:38  Brian R. Gaeke <brg@dgate.org>
 
-	* doc/euclid.txt: Initial revision
+	* misc_code/random.cc: Initial revision
 
 1998-12-23 05:42  Brian R. Gaeke <brg@dgate.org>
 
 	* doc/euclid.txt: Imported sources
 
-1998-12-23 02:52  Brian R. Gaeke <brg@dgate.org>
+1998-12-23 05:42  Brian R. Gaeke <brg@dgate.org>
 
-	* test_code/tester.c: Initial revision
+	* doc/euclid.txt: Initial revision
 
 1998-12-23 02:52  Brian R. Gaeke <brg@dgate.org>
 
 	* test_code/tester.c: Imported sources
 
-1998-12-23 02:11  Brian R. Gaeke <brg@dgate.org>
+1998-12-23 02:52  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/romdis: Initial revision
+	* test_code/tester.c: Initial revision
 
 1998-12-23 02:11  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/romdis: Imported sources
 
-1998-12-22 22:41  Brian R. Gaeke <brg@dgate.org>
+1998-12-23 02:11  Brian R. Gaeke <brg@dgate.org>
 
-	* memorymodule.cc, memorymodule.h: Initial revision
+	* utils/romdis: Initial revision
 
 1998-12-22 22:41  Brian R. Gaeke <brg@dgate.org>
 
 	* memorymodule.cc, memorymodule.h: Imported sources
 
-1998-12-22 22:37  Brian R. Gaeke <brg@dgate.org>
+1998-12-22 22:41  Brian R. Gaeke <brg@dgate.org>
 
-	* utils/doedit: Initial revision
+	* memorymodule.cc, memorymodule.h: Initial revision
 
 1998-12-22 22:37  Brian R. Gaeke <brg@dgate.org>
 
 	* utils/doedit: Imported sources
 
-1998-12-20 07:22  Brian R. Gaeke <brg@dgate.org>
+1998-12-22 22:37  Brian R. Gaeke <brg@dgate.org>
 
-	* range.h: Initial revision
+	* utils/doedit: Initial revision
 
 1998-12-20 07:22  Brian R. Gaeke <brg@dgate.org>
 
 	* range.h: Imported sources
 
-1998-12-20 07:16  Brian R. Gaeke <brg@dgate.org>
+1998-12-20 07:22  Brian R. Gaeke <brg@dgate.org>
 
-	* doc/transtables: Initial revision
+	* range.h: Initial revision
 
 1998-12-20 07:16  Brian R. Gaeke <brg@dgate.org>
 
 	* doc/transtables: Imported sources
+
+1998-12-20 07:16  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/transtables: Initial revision
 

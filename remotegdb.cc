@@ -5,7 +5,7 @@
 
    Copyright 1988, 1991, 1992, 1993, 1994, 1995, 1996, 1997 Free Software
      Foundation, Inc.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2002, 2003 Brian R. Gaeke.
 
 This file is part of GDB and VMIPS.
 

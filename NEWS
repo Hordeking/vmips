@@ -1,3 +1,23 @@
+User-visible changes in version 1.1.1 (since version 1.1):
+
+* A bug involving shifts by 0 or 32 bits (e.g., using instructions like srlv)
+  producing incorrect results has been fixed.
+* The absence of an FPU attached to coprocessor slot 1 can now be
+  detected by user programs.
+* The system control coprocessor (coprocessor 0) now returns the correct ID
+  number for the R3000A processor in the PRId register.
+* Emulation of store-byte and store-halfword operations for emulated devices
+  that only support store-word should now work correctly on byte-swapped
+  configurations.
+* A bug in vmipstool which caused it to fail to find alternate linker scripts
+  (supplied with the --ld-script option) has been fixed.
+* A gcc warning caused by a (harmless) comment in asm_regnames.h has
+  been quashed.
+* A bug where little-endian vmips configurations would dump core when
+  the disassembler was used (e.g., when the instdump option was turned on)
+  has been fixed.
+* `configure' no longer ignores its --with-mips-include option.
+
 User-visible changes in version 1.1 (since version 1.0.4):
 
 * If you are using g++ to compile VMIPS, you must use g++ version 2.95

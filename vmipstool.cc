@@ -1,5 +1,5 @@
 /* A sensible interface to MIPS cross compilation tools.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -309,6 +309,7 @@ int swap(char *inputfname, char *outputfname)
 int main(int argc, char **argv)
 {
 	int error = 0;
+	int ldscript_not_found = 0;
 	int done = 0;
 	char *option;
 	char tmp[TMPFNAMESIZE];
@@ -316,6 +317,11 @@ int main(int argc, char **argv)
 	char *outputfile;
 
 	argv++, argc--;
+	/* Find the default ld script. */
+	if (find_ldscript() < 0)
+	{
+		ldscript_not_found = 1;
+	}
 	while (!done)
 	{
 		option = argv[0];
@@ -354,13 +360,12 @@ int main(int argc, char **argv)
 			strcpy(ldscript_full_path, &option[12]);
 			if ((f = fopen(ldscript_full_path, "rb")) == NULL)
 			{
-				perror(ldscript_full_path);
-				error = 1;
-				done = 1;
+				ldscript_not_found = 1;
 			}
 			else
 			{
 				fclose(f);
+				ldscript_not_found = 0;
 			}
 		}
 		else if (strcmp(option, "--compile") == 0)
@@ -382,13 +387,11 @@ int main(int argc, char **argv)
 		}
 		else if (strcmp(option, "--link") == 0)
 		{
-			if (find_ldscript() < 0)
-			{
-				fprintf(stderr, "vmipstool: can't find ld.script\n");
+			if (ldscript_not_found) {
+				fprintf(stderr, "vmipstool: could not access %s\n",
+					    ldscript_full_path);
 				error = 1;
-			}
-			else
-			{
+			} else {
 				error = echo_and_run_lv
 					(ldname, endianflag, "-T", ldscript_full_path, NULL,
 					 argv, NULL);

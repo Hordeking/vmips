@@ -1,6 +1,6 @@
 /* Interrupt controller.
    Copyright 2001, 2002 Brian R. Gaeke.
-   Copyright 2002 Paul Twohey.
+   Copyright 2002, 2003 Paul Twohey.
 
 This file is part of VMIPS.
 

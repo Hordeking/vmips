@@ -1,6 +1,6 @@
 /* Main driver program for VMIPS.
-   Copyright 2001 Brian R. Gaeke.
-   Copyright 2002 Paul Twohey.
+   Copyright 2001, 2003 Brian R. Gaeke.
+   Copyright 2002, 2003 Paul Twohey.
 
 This file is part of VMIPS.
 
@@ -30,6 +30,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "spimconsreg.h"
 #include "sysinclude.h"
 #include "vmips.h"
+#include "stub-dis.h"
 
 #include <exception>
 
@@ -307,8 +308,6 @@ timediff(struct timeval *after, struct timeval *before)
 int
 vmips::run()
 {
-	extern void setup_disassembler(FILE *stream);
-
 	/* Set up the rest of the machine components. */
 	setup_machine();
 

@@ -1,5 +1,5 @@
 /* MIPS R3000 CPU emulation.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2002, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -25,6 +25,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpzeroreg.h"
 #include "error.h"
 #include "remotegdb.h"
+#include "stub-dis.h"
 
 /* pointer to CPU method returning void and taking two uint32's */
 typedef void (CPU::*emulate_funptr)(uint32, uint32);
@@ -350,28 +351,53 @@ CPU::cpzero_emulate(uint32 instr, uint32 pc)
 	cpzero->cpzero_emulate(instr, pc);
 }
 
+/* Called when the program wants to use coprocessor COPROCNO, and there
+ * isn't any implementation for that coprocessor.
+ * Results in a Coprocessor Unusable exception, along with an error
+ * message being printed if the coprocessor is marked usable in the
+ * CP0 Status register.
+ */
+void
+CPU::cop_unimpl (int coprocno, uint32 instr, uint32 pc)
+{
+	if (cpzero->cop_usable (coprocno)) {
+		/* Since they were expecting this to work, the least we
+		 * can do is print an error message. */
+		fprintf (stderr, "CP%d instruction %x not implemented at pc=0x%x:\n",
+				 coprocno, instr, pc);
+		call_disassembler (pc, instr);
+		exception (CpU, ANY, coprocno);
+	} else {
+		/* It's fair game to just throw an exception, if they
+		 * haven't even bothered to twiddle the status bits first. */
+		exception (CpU, ANY, coprocno);
+	}
+}
+
 void
 CPU::cpone_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x\n",
-		instr,pc);
-	exception(CpU,ANY,1);
+	/* If it's a cfc1 <reg>, $0 then we copy 0 into reg,
+	 * which is supposed to mean there is NO cp1... 
+	 * for now, though, ANYTHING else asked of cp1 results
+	 * in the default "unimplemented" behavior. */
+	if (cpzero->cop_usable (1) && rs (instr) == 2 && rd (instr) == 0) {
+		reg[rt (instr)] = 0; /* No cp1. */
+	} else {
+		cop_unimpl (1, instr, pc);
+	}
 }
 
 void
 CPU::cptwo_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x\n",
-		instr,pc);
-	exception(CpU,ANY,2);
+	cop_unimpl (2, instr, pc);
 }
 
 void
 CPU::cpthree_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x\n",
-		instr,pc);
-	exception(CpU,ANY,3);
+	cop_unimpl (3, instr, pc);
 }
 
 /* Return the address to jump to as a result of the J-format
@@ -976,43 +1002,37 @@ CPU::swr_emulate(uint32 instr, uint32 pc)
 void
 CPU::lwc1_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,1);
+	cop_unimpl (1, instr, pc);
 }
 
 void
 CPU::lwc2_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,2);
+	cop_unimpl (2, instr, pc);
 }
 
 void
 CPU::lwc3_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,3);
+	cop_unimpl (3, instr, pc);
 }
 
 void
 CPU::swc1_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP1 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,1);
+	cop_unimpl (1, instr, pc);
 }
 
 void
 CPU::swc2_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP2 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,2);
+	cop_unimpl (2, instr, pc);
 }
 
 void
 CPU::swc3_emulate(uint32 instr, uint32 pc)
 {
-	fprintf(stderr,"CP3 instruction %x not implemented at pc=0x%x",instr,pc);
-	exception(CpU,ANY,3);
+	cop_unimpl (3, instr, pc);
 }
 
 void
@@ -1024,13 +1044,23 @@ CPU::sll_emulate(uint32 instr, uint32 pc)
 int32
 srl(int32 a, int32 b)
 {
+	if (b == 0) {
+		return a;
+	} else if (b == 32) {
+		return 0;
+	} else {
 	return (a >> b) & ((1 << (32 - b)) - 1);
+	}
 }
 
 int32
 sra(int32 a, int32 b)
 {
+	if (b == 0) {
+		return a;
+	} else {
 	return (a >> b) | (((a >> 31) & 0x01) * (((1 << b) - 1) << (32 - b)));
+	}
 }
 
 void
@@ -1380,11 +1410,10 @@ CPU::bgezal_emulate(uint32 instr, uint32 pc)
 
 /* reserved instruction */
 void
-CPU::RI_emulate(uint32 instr, uint32 pc){
+CPU::RI_emulate(uint32 instr, uint32 pc)
+{
 	exception(RI);
 }
-
-extern void call_disassembler(uint32 pc, uint32 instr);
 
 /* dispatching */
 void

@@ -1,7 +1,7 @@
 /* Register offsets and default address for the SPIM-compatible console
    device.
    Copyright 2001 Brian R. Gaeke.
-   Copyright 2002 Paul Twohey.
+   Copyright 2002, 2003 Paul Twohey.
 
 This file is part of VMIPS.
 

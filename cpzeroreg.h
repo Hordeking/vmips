@@ -1,5 +1,5 @@
 /* Useful constants for system control coprocessor registers.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2002 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -134,7 +134,11 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #define Compare_MASK 0x00000000
 
 /* (12) Status fields */
-#define Status_CU_MASK 0xf0000000  /* Coprocessor Usable [CP3..CP0] (31-28) */
+#define Status_CU_MASK 0xf0000000      /* Coprocessor (3..0) Usable (31-28) */
+#define Status_CU3_MASK 0x80000000             /* Coprocessor 3 Usable (31) */
+#define Status_CU2_MASK 0x40000000             /* Coprocessor 2 Usable (30) */
+#define Status_CU1_MASK 0x20000000             /* Coprocessor 1 Usable (29) */
+#define Status_CU0_MASK 0x10000000             /* Coprocessor 0 Usable (28) */
 #define Status_RE_MASK 0x02000000     /* Reverse Endian (R3000A/R6000) (25) */
 #define Status_DS_MASK 0x01ff0000              /* Diagnostic Status (24-16) */
 #define Status_DS_BEV_MASK 0x00400000    /* Bootstrap Exception Vector (22) */

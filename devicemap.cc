@@ -1,7 +1,7 @@
 /* Base class for devices that are memory-mapped into the CPU's
    address space.
-   Copyright 2001 Brian R. Gaeke.
-   Copyright 2002 Paul Twohey
+   Copyright 2001, 2003 Brian R. Gaeke.
+   Copyright 2002 Paul Twohey.
 
 This file is part of VMIPS.
 
@@ -36,41 +36,29 @@ DeviceMap::DeviceMap() throw()
 uint16
 DeviceMap::fetch_halfword(uint32 offset, DeviceExc *client)
 {
-    uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-#ifdef BYTESWAPPED
-    const uint32 halfword_offset_in_word = 1 - ((offset & 0x03) >> 1);
-#else
+    const uint32 word_data = fetch_word(offset & ~0x03, DATALOAD, client);
     const uint32 halfword_offset_in_word = ((offset & 0x03) >> 1);
-#endif
-
-    return ((uint16 *) &wd)[halfword_offset_in_word];
+    const uint16 *halfwordptr = reinterpret_cast<const uint16 *>(&word_data);
+    return halfwordptr[halfword_offset_in_word];
 }
 
 uint8
 DeviceMap::fetch_byte(uint32 offset, DeviceExc *client)
 {
-    uint32 wd = fetch_word(offset & ~0x03, DATALOAD, client);
-#ifdef BYTESWAPPED
-    const uint32 byte_offset_in_word = 3 - (offset & 0x03);
-#else
+    const uint32 word_data = fetch_word(offset & ~0x03, DATALOAD, client);
     const uint32 byte_offset_in_word = (offset & 0x03);
-#endif
-
-    return ((uint8 *) &wd)[byte_offset_in_word];
+    const uint8 *byteptr = reinterpret_cast<const uint8 *>(&word_data);
+    return byteptr[byte_offset_in_word];
 }
 
 void
 DeviceMap::store_halfword(uint32 offset, uint16 data, DeviceExc *client)
 {
     const uint32 word_offset = offset & 0xfffffffc;
-#ifdef BYTESWAPPED
-    const uint32 halfword_offset_in_word = 1 - ((offset & 0x02) >> 1);
-#else
     const uint32 halfword_offset_in_word = ((offset & 0x02) >> 1);
-#endif
     uint32 word_data = 0;
-
-    ((uint16 *) &word_data)[halfword_offset_in_word] = data;
+    uint16 *halfwordptr = reinterpret_cast<uint16 *>(&word_data);
+    halfwordptr[halfword_offset_in_word] = data;
     store_word(word_offset, word_data, client);
 }
 
@@ -78,14 +66,10 @@ void
 DeviceMap::store_byte(uint32 offset, uint8 data, DeviceExc *client)
 {
     const uint32 word_offset = offset & 0xfffffffc;
-#ifdef BYTESWAPPED
-    const uint32 byte_offset_in_word = 3 - (offset & 0x03);
-#else
     const uint32 byte_offset_in_word = (offset & 0x03);
-#endif
     uint32 word_data = 0;
-
-    ((uint8 *) &word_data)[byte_offset_in_word] = data;
+    uint8 *byteptr = reinterpret_cast<uint8 *>(&word_data);
+    byteptr[byte_offset_in_word] = data;
     store_word(word_offset, word_data, client);
 }
 

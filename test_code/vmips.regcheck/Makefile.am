@@ -6,6 +6,12 @@ CPP_FLAGS = -I@top_srcdir@ -I@top_srcdir@/sample_code
 CFLAGS = -g $(CPP_FLAGS)
 SETUP = ../../sample_code/setup.o
 
+# simple_asm srlv
+# multifile_asm -setup 0 srlv srlv.S
+srlv_SOURCES = srlv.S
+srlv.rom: srlv.exe
+	$(VMIPSTOOL) --make-rom srlv.exe srlv.rom
+
 # simple_asm add
 # multifile_asm -setup 0 add add.S
 add_SOURCES = add.S
@@ -185,16 +191,16 @@ xor_SOURCES = xor.S
 xor.rom: xor.exe
 	$(VMIPSTOOL) --make-rom xor.exe xor.rom
 
-noinst_PROGRAMS =  add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor
+noinst_PROGRAMS =  srlv add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor
 
 LINK = $(VMIPSTOOL) --link -o $@
 COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 EXEEXT = .exe
 
-CLEANFILES =  add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom
+CLEANFILES =  srlv.rom add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom
 
-EXTRA_DIST =  regcheck.exp  add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par
+EXTRA_DIST =  regcheck.exp  srlv.par add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par
 
-# 1 C testcases and 28 asm testcases.
+# 1 C testcases and 29 asm testcases.
 # 0 custom makefile fragment testcases.

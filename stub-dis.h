@@ -1,6 +1,6 @@
-/* Definitions to support the interrupt controller.
-   Copyright 2001, 2002 Brian R. Gaeke.
-   Copyright 2002, 2003 Paul Twohey.
+/* Interface to: Stub functions to interface to the GNU disassembler library
+    (libopcodes).
+   Copyright 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -18,27 +18,12 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef _INTCTRL_H_
-#define _INTCTRL_H_
+#ifndef _STUB_DIS_H_
+#define _STUB_DIS_H_
 
 #include "sysinclude.h"
 
-class DeviceInt;
+void setup_disassembler(FILE *stream);
+void call_disassembler(uint32 pc, uint32 instr);
 
-class IntCtrl {
-private:
-	typedef std::vector<DeviceInt *> Devices;
-	Devices devs;
-
-public:
-	IntCtrl() throw();
-	virtual ~IntCtrl() throw();
-
-	/* Return the mask of all asserted interrupts for connected devices. */
-	virtual uint32 calculateIP() throw();
-
-	/* Connect interrupt line LINE (see deviceint.h) to device DEV. */
-	virtual void connectLine(uint32 line, DeviceInt *dev);
-};
-
-#endif /* _INTCTRL_H_ */
+#endif /* _STUB_DIS_H_ */

@@ -1,6 +1,6 @@
 /* Definitions to support devices that are memory-mapped into the CPU's
    address space.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
    Copyright 2002 Paul Twohey.
 
 This file is part of VMIPS.

@@ -1,5 +1,5 @@
 /* Table of supported options, their meanings, and defaults.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
    Copyright 2002 Paul Twohey.
 
 This file is part of VMIPS.

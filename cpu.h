@@ -1,5 +1,5 @@
 /* Definitions and declarations to support the MIPS R3000 emulation.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -69,6 +69,7 @@ private:
 	void branch(uint32 instr, uint32 pc);
 	void mult64(uint32 *hi, uint32 *lo, uint32 n, uint32 m);
 	void mult64s(uint32 *hi, uint32 *lo, int32 n, int32 m);
+	void cop_unimpl (int coprocno, uint32 instr, uint32 pc);
 
 	void funct_emulate(uint32 instr, uint32 pc);
 	void regimm_emulate(uint32 instr, uint32 pc);

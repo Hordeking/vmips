@@ -2,8 +2,8 @@
     interface, based on
    gdb/serial.h - Remote serial support interface definitions for GDB,
     the GNU Debugger.
-   Copyright 2001 Brian R. Gaeke.
    Copyright 1992, 1993 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Brian R. Gaeke.
 
 This file is part of GDB and VMIPS.
 

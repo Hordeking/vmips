@@ -1,5 +1,5 @@
 /* Definitions to support the system control coprocessor.
-   Copyright 2001 Brian R. Gaeke.
+   Copyright 2001, 2003 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -67,6 +67,7 @@ public:
 	bool use_boot_excp_address(void);
 	bool caches_isolated(void);
 	bool caches_swapped(void);
+	bool cop_usable (int coprocno);
 	void cpzero_emulate(uint32 instr, uint32 pc);
 	void dump_regs(FILE *f);
 	void dump_tlb(FILE *f);

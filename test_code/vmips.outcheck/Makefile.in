@@ -335,6 +335,9 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
+emptymain.o: emptymain.c
+hello.o: hello.c ../../spimconsreg.h ../../devreg.h
+hello2.o: hello2.c ../../spimconsreg.h ../../devreg.h
 
 info-am:
 info: info-am

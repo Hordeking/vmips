@@ -1,15 +1,15 @@
 
-   VMIPS 1.1 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.1.1 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
-This is a release with significant enhancements over the VMIPS 1.0 series.
+This is a bug-fix release.
 
-   You can download VMIPS 1.1 from any of the following sites:
+   You can download VMIPS 1.1.1 from any of the following sites:
 
 * ftp://download.sourceforge.net/pub/sourceforge/vmips/
-* ftp://ftp.dgate.org/vmips/releases/vmips-1.1/
+* ftp://ftp.dgate.org/vmips/releases/vmips-1.1.1/
 * http://download.sourceforge.net/vmips/
-* http://www.dgate.org/vmips/releases/vmips-1.1/
-* http://vmips.sourceforge.net/releases/vmips-1.1/
+* http://www.dgate.org/vmips/releases/vmips-1.1.1/
+* http://vmips.sourceforge.net/releases/vmips-1.1.1/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -21,36 +21,29 @@ features since the last publically released version are detailed in
    The home page for VMIPS is "http://www.dgate.org/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.1 (since version 1.0.4):
+   User-visible changes in version 1.1.1 (since version 1.1):
 
-* If you are using g++ to compile VMIPS, you must use g++ version 2.95
-  or later. Also, you must specify the --target option to `configure',
-  with an argument that matches the --target option to binutils
-  `configure'. See `INSTALL'.
-* VMIPS now supports GNU standard --help and --version options.
-* The manual now includes improved documentation for using gdb and
-  Insight to control VMIPS, a section on the differences between SPIM's
-  console and the SPIM-compatible console device, a section on proper
-  error reporting from VMIPS extensions, and many other minor
-  revisions.
-* Using gdb to control VMIPS is now much more robust in the face of
-  errors and exceptions.
-* VMIPS 1.1 makes it possible to use the 2nd display/keyboard channel
-  of the SPIM-compatible console device, using the `ttydev2' option.
-* VMIPS now includes a halt device, which can be used to halt the
-  simulator without using a special instruction.
-* VMIPS 1.1 is much faster than VMIPS 1.0.4. This is due in large part
-  to the efforts of Paul Twohey, who reimplemented the clock and
-  SPIM-compatible console devices, and cleaned up the code a bit.
-* The VMIPS distribution now includes a regression test suite, based on
-  DejaGNU (replaces the old test_code directory). In order to support
-  this, the formats of lots of random messages that VMIPS prints out
-  have changed.
-* We now support 64-bit hosts (e.g., Alpha). 
+* A bug involving shifts by 0 or 32 bits (e.g., using instructions like srlv)
+  producing incorrect results has been fixed.
+* The absence of an FPU attached to coprocessor slot 1 can now be
+  detected by user programs.
+* The system control coprocessor (coprocessor 0) now returns the correct ID
+  number for the R3000A processor in the PRId register.
+* Emulation of store-byte and store-halfword operations for emulated devices
+  that only support store-word should now work correctly on byte-swapped
+  configurations.
+* A bug in vmipstool which caused it to fail to find alternate linker scripts
+  (supplied with the --ld-script option) has been fixed.
+* A gcc warning caused by a (harmless) comment in asm_regnames.h has
+  been quashed.
+* A bug where little-endian vmips configurations would dump core when
+  the disassembler was used (e.g., when the instdump option was turned on)
+  has been fixed.
+* `configure' no longer ignores its --with-mips-include option.
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_1-branch". VMIPS 1.1 itself can be checked out using the tag
-"release-1-1".
+"vmips-1_1-branch". VMIPS 1.1.1 itself can be checked out using the tag
+"release-1-1-1".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.

@@ -1,5 +1,5 @@
 /* Declarations to support the SPIM-compatible console device.
-   Copyright 2002 Paul Twohey.
+   Copyright 2002, 2003 Paul Twohey.
 
 This file is part of VMIPS.
 
