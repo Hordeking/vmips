@@ -12,7 +12,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=\$${prefix}/../etc
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --sysconfdir=\$${prefix}/../etc --target=mipsel-ecoff
 
 	touch configure-stamp
 
@@ -52,7 +52,6 @@ binary-indep: build install
 
 # Build architecture-dependent files here.
 binary-arch: build install
-	dh_testversion 2
 	dh_testdir
 	dh_testroot
 #	dh_installdebconf	

@@ -520,7 +520,7 @@ CPU::slti_emulate(uint32 instr, uint32 pc)
 void
 CPU::sltiu_emulate(uint32 instr, uint32 pc)
 {
-	if (reg[rs(instr)] < immed(instr)) {
+	if (reg[rs(instr)] < (uint32)(int32)s_immed(instr)) {
 		reg[rt(instr)] = 1;
 	} else {
 		reg[rt(instr)] = 0;
@@ -1493,19 +1493,18 @@ CPU::step()
 		call_disassembler(pc,instr);
 	}
 
-	bool intsOnBefore = cpzero->interrupts_enabled();
+	/* Check for a (hardware or software) interrupt */
+	if (cpzero->interrupt_pending()) {
+		exception(Int);
+		goto out;
+	}
+	
 	/* Jump to the appropriate emulation function. */
 	(this->*opcodeJumpTable[opcode(instr)])(instr, pc);
-	bool intsOnAfter = cpzero->interrupts_enabled();
 
+out:
 	/* Register zero must always be zero; this instruction forces this. */
 	reg[REG_ZERO] = 0;
-
-	/* Check for a (hardware or software) interrupt (but only if
-	 * this instruction did not turn on interrupts.) */
-	if (intsOnBefore && intsOnAfter && cpzero->interrupt_pending()) {
-		exception(Int);
-	}
 
 	/* If there is an exception pending, we return now, so that we don't
 	 * clobber the exception vector.

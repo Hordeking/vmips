@@ -14,7 +14,7 @@ entry:
     /* test tlbwr */
     li t2, 0x0          /* VPN = 0 */
     mtc0 t2, $10        /* set EntryHi */
-    li t2, 0x00000300   /* PPN = 0, Valid, Global bits set */
+    li t2, 0x00000700   /* PPN = 0, Valid, Global, Dirty bits set */
     mtc0 t2, $2         /* set EntryLo */
     tlbwr               /* write random tlb entry */
     /* try a load and store to VPN 0 */

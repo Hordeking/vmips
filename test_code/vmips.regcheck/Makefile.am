@@ -191,16 +191,22 @@ xor_SOURCES = xor.S
 xor.rom: xor.exe
 	$(VMIPSTOOL) --make-rom xor.exe xor.rom
 
-noinst_PROGRAMS =  srlv add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor
+# simple_asm sltiu
+# multifile_asm -setup 0 sltiu sltiu.S
+sltiu_SOURCES = sltiu.S
+sltiu.rom: sltiu.exe
+	$(VMIPSTOOL) --make-rom sltiu.exe sltiu.rom
+
+noinst_PROGRAMS =  srlv add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor sltiu
 
 LINK = $(VMIPSTOOL) --link -o $@
 COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 EXEEXT = .exe
 
-CLEANFILES =  srlv.rom add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom
+CLEANFILES =  srlv.rom add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom sltiu.rom
 
-EXTRA_DIST =  regcheck.exp  srlv.par add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par
+EXTRA_DIST =  regcheck.exp  srlv.par add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par sltiu.par
 
-# 1 C testcases and 29 asm testcases.
+# 1 C testcases and 30 asm testcases.
 # 0 custom makefile fragment testcases.

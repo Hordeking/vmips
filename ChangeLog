@@ -1,3 +1,412 @@
+2003-09-24 22:15  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, tlbwr.S:
+	Makefile.am: Regenerated Makefile.in: Regenerated tlbwr.S: Merge
+	from HEAD, to match cpzero.cc bug fix
+
+2003-09-24 19:01  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: Update changelog using cvs2cl for 1.1.3 release.
+
+2003-09-24 18:58  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE, NEWS, VERSION, configure.in: Getting ready for 1.1.3
+	release.
+
+2003-09-24 18:07  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/changelog: update version number for debian package.
+
+2003-09-24 18:06  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/rules: Merge from HEAD: dh_testversion is deprecated.
+
+2003-09-24 18:05  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: Merge from HEAD: Fixes bugs in tlb translation +
+	reading.
+
+2003-09-24 18:04  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: partial merge from HEAD: 1. use the simplified interrupt
+	fix that HEAD now uses.  2. fix bug in sltiu
+
+2003-09-24 07:34  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc, test_code/vmips.regcheck/tlbwr.S: cpzero.cc: Fix two
+	bugs in TLB exception handling and TLB reading, noted by  Mingyu
+	Chen at ICT-CAS.  test_code/vmips.regcheck/tlbwr.S: Fix test case -
+	if we are writing to the  zero page, the tlb entry we write must
+	have Dirty set.
+
+2003-09-24 07:33  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/README: test_code/README: Update testsuite status a
+	little bit.
+
+2003-09-24 07:32  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Update from vmips-1_1-branch.
+
+2003-09-23 21:17  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: sltiu.S, sltiu.par: New test case from
+	HEAD.
+
+2003-09-23 19:06  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: First draft of 1.2 feature checklist.
+
+2003-09-21 23:25  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Add more to-do items, and clarifications of previous
+	items.
+
+2003-09-21 23:25  Brian R. Gaeke <brg@dgate.org>
+
+	* vmipsrc: usetty option is gone.
+
+2003-09-18 18:06  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/serial.c: Make it work with both DEC and SPIM
+	consoles.
+
+2003-09-18 18:05  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: Use the DEC serial device instead of
+	spim console when booting decstation emu.  Use 32 MB instead of 64.
+
+2003-09-18 18:03  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, vmips.h: rest of the dec serial stuff...
+
+2003-09-10 01:54  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc: Add setup code for DEC serial device. Try to share it
+	with the spimconsole setup code....
+
+2003-09-10 01:53  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h: Get rid of usetty option; replace it with decserial
+	and spimconsole options.
+
+2003-09-10 01:51  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc, decserial.h, decserialreg.h: DZ11 serial emulation.
+
+2003-09-10 01:50  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Initialize tracing explicitly to false.
+
+2003-09-05 00:51  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/vmipsdec: This is a shell script I've been
+	using for a while to boot vmips with all the decstation emulation
+	stuff turned on.
+
+2003-08-24 18:31  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: I think I can update the recommended versions,
+	since these are what I'm using these days anyway.
+
+2003-08-24 18:30  Brian R. Gaeke <brg@dgate.org>
+
+	* decstat.cc: Implement ERRADR.  Fix some indentation mistakes.
+
+2003-08-24 18:27  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.h: Don't bother caching dbemsg.  Declare type
+	Mapper::BusErrorInfo and last_berr_info.  Declare bus_error and
+	define accessor get_last_berr_info.
+
+2003-08-24 18:27  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Don't bother caching dbemsg.  In
+	Mapper::find_mapping_range(), only call ranges.end() once. 
+	Refactor bus error code into Mapper::bus_error(), and have it copy 
+	the details of the last bus error into last_berr_info.
+
+2003-08-24 18:22  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: Makefile.in, vmips.misc-tests/Makefile.in,
+	vmips.outcheck/Makefile.in: Regenerated makefiles
+
+2003-08-24 18:22  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, sltiu.S,
+	sltiu.par: Add new test case for sltiu.  Regenerate makefiles.
+
+2003-08-24 18:19  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Fix bug in sltiu.  Warn if we jump to zero.
+
+2003-08-21 03:17  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: I know this is a big mess right now, but 1) it
+	compiles and it fixes that month-long nagging bogomips bug 2) i
+	want to save the tracing stuff I wrote tonight *somewhere*
+
+2003-08-21 03:05  Brian R. Gaeke <brg@dgate.org>
+
+	* debug.cc: got_interrupt wasn't ever getting turned off.  I'm not
+	sure if this fixes it, because it's still being pretty flaky. But
+	this is a start.
+
+2003-08-20 00:48  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/rules: Remove dh_testversion, which lintian and the man
+	page both claim is deprecated.
+
+2003-08-20 00:47  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/: changelog, rules: Merge from HEAD; these should be
+	current for 1.1.2
+
+2003-08-20 00:44  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/: changelog, rules: update ./configure call, and update
+	version number for the last time i tried it
+
+2003-08-17 20:01  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE, NEWS, VERSION, configure.in, cpu.cc, cpzero.cc,
+	cpzero.h, range.cc, doc/to-do, test_code/README: ANNOUNCE: Update
+	for 1.1.2 release NEWS: Add NEWS for 1.1.2 release VERSION: Bump
+	VERSION to 1.1.2 configure.in: Bump version in AM_INIT_AUTOMAKE to
+	1.1.2 cpu.cc: Partial merge from HEAD. Fix interrupt-check bug
+	cpzero.cc: Merge from HEAD. Fix Cause bugs cpzero.h: Merge from
+	HEAD. Fix Cause bugs range.cc: Merge from HEAD. Fix adjacent-range
+	bug doc/to-do: Get rid of obsolete note to self... 
+	test_code/README: Merge from HEAD. Fix typo
+
+2003-08-13 00:40  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: Do not let an interrupt trigger at the PC of an
+	instruction that *just* turned on interrupts.
+
+2003-08-06 17:59  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/lib.c: Make memcpy use the same types of
+	temporaries as memmove.
+
+2003-08-06 17:57  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: Get rid of annoying messages when
+	interrupts are turned on/off.
+
+2003-07-30 00:28  Brian R. Gaeke <brg@dgate.org>
+
+	* stub-dis.cc, stub-dis.h, vmips.cc, vmips.h: stub-dis.h: Change
+	setup_disassembler prototype to conform to new setup   function
+	type. Add comment.  stub-dis.cc: Likewise; also: Include
+	stub-dis.h.  vmips.cc: Regularize the function types of most of the
+	setup functions.   Move clock setup code into its own method,
+	setup_clock.   Rename setup_terminals to setup_spimconsole.   Use
+	`timeval' instead of `struct timeval'.	 Update throw()
+	declarations.  vmips.h: Likewise; also: Add C++ mode line at top.
+
+2003-07-29 23:59  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: cpu.cc: Use new-style initializers in constructor.
+	  Make last_epc and last_prio in exception() into regular data
+	members instead    of static (global) variables.  cpu.h: Declare
+	last_epc and last_prio here.
+
+2003-07-29 01:38  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/testbootenv.output: Update to match change in
+	default systype
+
+2003-07-27 15:58  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: Reindent reg_names array.
+
+2003-07-27 15:56  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/Makefile.in: Add handy romkernel and kernelrom
+	targets for using catrom.  Preliminary support for linking in
+	libgcc -- doesn't work yet.
+
+2003-07-27 15:54  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/loadtest_setup.S: Add BREAK statements at
+	interrupt vectors.  Change name of called function.  Add space in
+	stack frame for its arguments.
+
+2003-07-27 15:54  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/loadtest.c: Change signature to be like 'main'
+	(not main yet, though; libgcc still doesn't seem to work.) Also,
+	make loadtest print out any command-line arguments it gets from the
+	booter.
+
+2003-07-27 15:48  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: Fix an off-by-2**10 error in the rom
+	size warning.  Add -n option to avoid patching the booter.
+
+2003-07-23 02:28  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc, cpzero.h: cpzero.cc: (reset) Turn off any randomly-set
+	pending-interrupt bits in Cause   register, as these can impact
+	correctness; i.e., you can't turn them off,   and they look real.  
+	(enter_exception) Only set Cause CE field if we have a Coprocessor 
+	  Unusable exception and therefore something reasonable to set it
+	to.    Also, be sure to update Cause IP field! I don't think we
+	were doing this    at all before. Ouch.   (interrupt_pending) Move
+	guts into getIP(), so enter_exception() can    use it.	 (getIP)
+	New method.  cpzero.h: Add prototype for getIP() method.
+
+2003-07-23 02:23  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: Gratuitously mess with formatting of ctor field
+	initializers....
+
+2003-07-23 01:41  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: boot.c: Instead of twiddling bits,
+	initialize the Status and Cause  registers explicitly.
+
+2003-07-23 01:40  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot_main.c, set_status.S, set_status.h:
+	set_status.S: Add {get,set}_cause() to mess with Cause register,
+	just like  {get,set}_status().	set_status.h: Add prototypes for
+	{get,set}_cause().  boot_main.c: Add new stubs for
+	{get,set}_cause().
+
+2003-07-23 01:39  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: catrom:  Guess name of .exe file from
+	.rom file; pass it to patchBooter()   instead of hardcoding
+	"boot.exe".   Modify usage message to show that we expect a file
+	whose name ends    in .rom.   Print an error message if the .rom,
+	.exe, or ecoff file does not exist.   Print "error" in front of
+	error messages.
+
+2003-07-23 01:32  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc, vmips.h: vmips.cc:	Get rid of run_self_tests()
+	garbage; just call   host_endian_selftest() directly.	Move ROM
+	and RAM modules' setup code out to separate methods.   Give the
+	boot messages a somewhat more uniform format.	Don't print out the
+	size of the ROM image twice.  vmips.h: Declare setup_rom() and
+	setup_ram(). Nuke run_self_tests().
+
+2003-07-23 01:31  Brian R. Gaeke <brg@dgate.org>
+
+	* decstat.cc: decstat.cc: Fix bug where we were always reversing
+	the CHKSYN and ERRADR  registers' order in memory.
+
+2003-07-23 01:27  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, optiontbl.h: cpu.cc: Print Cause and Status information
+	on interrupt exceptions, if  `excmsg' is set. Annotate
+	CPU::exception() with its default parameters, for  reference. 
+	optiontbl.h: Document this change.
+
+2003-07-19 02:29  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: Mask out ALL interrupts at beginning.
+
+2003-07-19 02:28  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: decrtc.cc: fix spacing typo in constructor.
+
+2003-07-18 02:14  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/catrom: Add options for verbosity and
+	appending vs prepending the ECOFF file to the ROM. Also check ECOFF
+	file for proper magic bytes. Rename LOADADDR to RESETADDR. Warn if
+	nonstandard loadaddr is necessary or we might extend past the 1 MB
+	of ROM a DEC 5000/200 could have.
+
+2003-07-18 02:14  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, deccsr.cc, decstat.cc, vmips.cc, deccsr.h,
+	deccsrreg.h, decrtc.h, decrtcreg.h, decstat.h, optiontbl.h,
+	vmips.h: Makefile.am: Add decstat.cc, decstat.h to the build. 
+	decstat.cc, decstat.h: New files.  deccsr.cc: Change debugging
+	printfs to fprintf to stderr.  deccsr.h: Add include guards.
+	Constify descriptor_str().  deccsrreg.h: Fix include guards. 
+	decrtc.h: Make ready_clock() public.  decrtcreg.h: Fix include
+	guards.  optiontbl.h: Add decstat option; re-fill doc paragraphs
+	for other dec* options.  vmips.cc, vmips.h: Add setup code for
+	decstat registers.
+
+2003-07-13 02:24  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/: README, vmips.regcheck/load.S: README: Fix a typo. 
+	vmips.regcheck/load.S: Add .ent/.end directives; it confuses the 
+	disassembler less.
+
+2003-07-13 02:23  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: 
+	Add some bug fix/cleanup ideas.
+
+2003-07-12 17:38  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Possible bug fix to incorporate for next 1.1.x release
+
+2003-07-12 17:28  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: decrtc.cc: Add reg_names list for debugging printouts.
+	  Initialize timebase divisor in RTC_REGA and add comments to
+	constructor.   If user program is reading RTC_REGA, fake "update in
+	progress" once a second.   Make all printfs go to stderr.   Turn on
+	interrupt_enable after ready_clock(). We don't want the first write
+	   to immediately trigger an interrupt.   Print counter of RTC
+	interrupts.
+
+2003-07-11 03:06  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in, deviceint.cc, mapper.cc, mapper.h, options.cc,
+	optiontbl.h, vmips.cc, vmips.h: configure.in: Get rid of support
+	for --disable-tty, which no one uses  anymore.	options.cc:
+	Likewise.  vmips.h: Likewise. Add support variables for decrtc and
+	deccsr.  vmips.cc: Likewise. Include many header files no longer
+	included by  vmips.h. Include setup code for decrtc and deccsr. 
+	mapper.h: Include fewer .h files.  deviceint.cc: Include options.h.
+	 mapper.cc: Include options.h. Take out "using namespace std".	
+	Improve error message for insert_into_rangelist().  optiontbl.h:
+	Add decrtc and deccsr options. (This file is getting  seriously
+	bloated. Reason #32482304823 for a real configuration language)
+
+2003-07-11 03:06  Brian R. Gaeke <brg@dgate.org>
+
+	* range.cc: range.cc: Allow two ranges to be RIGHT next to each
+	other in memory.
+
+2003-07-11 03:05  Brian R. Gaeke <brg@dgate.org>
+
+	* clockdev.cc, clockdev.h, deviceint.h, spimconsole.cc,
+	spimconsole.h: deviceint.h: Constify descriptor_str.  clockdev.cc:
+	Likewise.  clockdev.h: Likewise.  spimconsole.cc: Likewise. 
+	spimconsole.h: Likewise.
+
+2003-07-11 03:05  Brian R. Gaeke <brg@dgate.org>
+
+	* deccsr.cc, Makefile.am, deccsr.h, deccsrreg.h, decrtc.cc,
+	decrtc.h, decrtcreg.h: deccsr.cc, deccsr.h, deccsrreg.h: New files
+	to support DEC 5000/200 CSR device.  decrtc.cc, decrtc.h,
+	decrtcreg.h: New files to support DEC 5000/200 RTC device. 
+	Makefile.am: Add deccsr.cc, deccsr.h, deccsrreg.h, decrtc.cc,
+	decrtc.h, and  decrtcreg.h to vmips_SOURCES.
+
+2003-06-21 11:09  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS, configure.in: update from branch
+
+2003-06-16 13:21  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/do-cvs2cl: file do-cvs2cl was initially added on branch
+	vmips-1_1-branch.
+
+2003-06-16 13:21  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog, utils/do-cvs2cl: update ChangeLog.
+
 2003-06-16 13:15  Brian R. Gaeke <brg@dgate.org>
 
 	* ANNOUNCE, NEWS: Add NEWS for one more bug fix.

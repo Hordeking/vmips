@@ -222,16 +222,20 @@ tlbwr_SOURCES = tlbwr.S
 # multifile_asm -setup 0 xor xor.S
 xor_SOURCES = xor.S
 
-noinst_PROGRAMS = srlv add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor
+# simple_asm sltiu
+# multifile_asm -setup 0 sltiu sltiu.S
+sltiu_SOURCES = sltiu.S
+
+noinst_PROGRAMS = srlv add addi bc0 bgezal bgtz blez bltz bltzal coproc divu handler5 jalr load logical lwl lwr mthi_lo multu mumble shift slti store sub swl swr syscall tester tlbwr xor sltiu
 
 LINK = $(VMIPSTOOL) --link -o $@
 COMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS) -o $@
 EXEEXT = .exe
 
-CLEANFILES = srlv.rom add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom
+CLEANFILES = srlv.rom add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom coproc.rom divu.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom sltiu.rom
 
-EXTRA_DIST = regcheck.exp  srlv.par add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par
+EXTRA_DIST = regcheck.exp  srlv.par add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par coproc.par divu.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par sltiu.par
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../../config.h
 CONFIG_CLEAN_FILES = 
@@ -241,7 +245,8 @@ bltzal$(EXEEXT) coproc$(EXEEXT) divu$(EXEEXT) handler5$(EXEEXT) \
 jalr$(EXEEXT) load$(EXEEXT) logical$(EXEEXT) lwl$(EXEEXT) lwr$(EXEEXT) \
 mthi_lo$(EXEEXT) multu$(EXEEXT) mumble$(EXEEXT) shift$(EXEEXT) \
 slti$(EXEEXT) store$(EXEEXT) sub$(EXEEXT) swl$(EXEEXT) swr$(EXEEXT) \
-syscall$(EXEEXT) tester$(EXEEXT) tlbwr$(EXEEXT) xor$(EXEEXT)
+syscall$(EXEEXT) tester$(EXEEXT) tlbwr$(EXEEXT) xor$(EXEEXT) \
+sltiu$(EXEEXT)
 PROGRAMS =  $(noinst_PROGRAMS)
 
 
@@ -364,6 +369,10 @@ xor_OBJECTS =  xor.$(OBJEXT)
 xor_LDADD = $(LDADD)
 xor_DEPENDENCIES = 
 xor_LDFLAGS = 
+sltiu_OBJECTS =  sltiu.$(OBJEXT)
+sltiu_LDADD = $(LDADD)
+sltiu_DEPENDENCIES = 
+sltiu_LDFLAGS = 
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 DIST_COMMON =  Makefile.am Makefile.in
@@ -373,8 +382,8 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-SOURCES = $(srlv_SOURCES) $(add_SOURCES) $(addi_SOURCES) $(bc0_SOURCES) $(bgezal_SOURCES) $(bgtz_SOURCES) $(blez_SOURCES) $(bltz_SOURCES) $(bltzal_SOURCES) $(coproc_SOURCES) $(divu_SOURCES) $(handler5_SOURCES) $(jalr_SOURCES) $(load_SOURCES) $(logical_SOURCES) $(lwl_SOURCES) $(lwr_SOURCES) $(mthi_lo_SOURCES) $(multu_SOURCES) $(mumble_SOURCES) $(shift_SOURCES) $(slti_SOURCES) $(store_SOURCES) $(sub_SOURCES) $(swl_SOURCES) $(swr_SOURCES) $(syscall_SOURCES) $(tester_SOURCES) $(tlbwr_SOURCES) $(xor_SOURCES)
-OBJECTS = $(srlv_OBJECTS) $(add_OBJECTS) $(addi_OBJECTS) $(bc0_OBJECTS) $(bgezal_OBJECTS) $(bgtz_OBJECTS) $(blez_OBJECTS) $(bltz_OBJECTS) $(bltzal_OBJECTS) $(coproc_OBJECTS) $(divu_OBJECTS) $(handler5_OBJECTS) $(jalr_OBJECTS) $(load_OBJECTS) $(logical_OBJECTS) $(lwl_OBJECTS) $(lwr_OBJECTS) $(mthi_lo_OBJECTS) $(multu_OBJECTS) $(mumble_OBJECTS) $(shift_OBJECTS) $(slti_OBJECTS) $(store_OBJECTS) $(sub_OBJECTS) $(swl_OBJECTS) $(swr_OBJECTS) $(syscall_OBJECTS) $(tester_OBJECTS) $(tlbwr_OBJECTS) $(xor_OBJECTS)
+SOURCES = $(srlv_SOURCES) $(add_SOURCES) $(addi_SOURCES) $(bc0_SOURCES) $(bgezal_SOURCES) $(bgtz_SOURCES) $(blez_SOURCES) $(bltz_SOURCES) $(bltzal_SOURCES) $(coproc_SOURCES) $(divu_SOURCES) $(handler5_SOURCES) $(jalr_SOURCES) $(load_SOURCES) $(logical_SOURCES) $(lwl_SOURCES) $(lwr_SOURCES) $(mthi_lo_SOURCES) $(multu_SOURCES) $(mumble_SOURCES) $(shift_SOURCES) $(slti_SOURCES) $(store_SOURCES) $(sub_SOURCES) $(swl_SOURCES) $(swr_SOURCES) $(syscall_SOURCES) $(tester_SOURCES) $(tlbwr_SOURCES) $(xor_SOURCES) $(sltiu_SOURCES)
+OBJECTS = $(srlv_OBJECTS) $(add_OBJECTS) $(addi_OBJECTS) $(bc0_OBJECTS) $(bgezal_OBJECTS) $(bgtz_OBJECTS) $(blez_OBJECTS) $(bltz_OBJECTS) $(bltzal_OBJECTS) $(coproc_OBJECTS) $(divu_OBJECTS) $(handler5_OBJECTS) $(jalr_OBJECTS) $(load_OBJECTS) $(logical_OBJECTS) $(lwl_OBJECTS) $(lwr_OBJECTS) $(mthi_lo_OBJECTS) $(multu_OBJECTS) $(mumble_OBJECTS) $(shift_OBJECTS) $(slti_OBJECTS) $(store_OBJECTS) $(sub_OBJECTS) $(swl_OBJECTS) $(swr_OBJECTS) $(syscall_OBJECTS) $(tester_OBJECTS) $(tlbwr_OBJECTS) $(xor_OBJECTS) $(sltiu_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -560,6 +569,10 @@ xor$(EXEEXT): $(xor_OBJECTS) $(xor_DEPENDENCIES)
 	@rm -f xor$(EXEEXT)
 	$(LINK) $(xor_LDFLAGS) $(xor_OBJECTS) $(xor_LDADD) $(LIBS)
 
+sltiu$(EXEEXT): $(sltiu_OBJECTS) $(sltiu_DEPENDENCIES)
+	@rm -f sltiu$(EXEEXT)
+	$(LINK) $(sltiu_LDFLAGS) $(sltiu_OBJECTS) $(sltiu_LDADD) $(LIBS)
+
 tags: TAGS
 
 ID: $(HEADERS) $(SOURCES) $(LISP)
@@ -604,7 +617,6 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-tester.o: tester.c
 
 info-am:
 info: info-am
@@ -741,8 +753,10 @@ tlbwr.rom: tlbwr.exe
 	$(VMIPSTOOL) --make-rom tlbwr.exe tlbwr.rom
 xor.rom: xor.exe
 	$(VMIPSTOOL) --make-rom xor.exe xor.rom
+sltiu.rom: sltiu.exe
+	$(VMIPSTOOL) --make-rom sltiu.exe sltiu.rom
 
-# 1 C testcases and 29 asm testcases.
+# 1 C testcases and 30 asm testcases.
 # 0 custom makefile fragment testcases.
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

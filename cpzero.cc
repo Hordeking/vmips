@@ -210,8 +210,8 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 			load_addr_trans_excp_info(vaddr,vpn,match);
 			client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
 			return 0xffffffff;
-		} else if (match->dirty() && mode == DATASTORE) {
-			/* TLB Mod exception */
+		} else if ((!match->dirty()) && (mode == DATASTORE)) {
+			/* TLB Mod exception - write to page not marked "dirty" */
 			load_addr_trans_excp_info(vaddr,vpn,match);
 			client->exception(Mod, DATASTORE);
 			return 0xffffffff;
@@ -279,7 +279,7 @@ CPZero::tlbr_emulate(uint32 instr, uint32 pc)
 	reg[EntryHi] = (tlb[(reg[Index] & Index_Index_MASK) >> 8].entryHi) &
 		write_masks[EntryHi];
 	reg[EntryLo] = (tlb[(reg[Index] & Index_Index_MASK) >> 8].entryLo) &
-		write_masks[EntryHi];
+		write_masks[EntryLo];
 }
 
 void
