@@ -1,0 +1,70 @@
+
+Explanations of files in the test_code directory
+------------------------------------------------
+
+ These programs are used to test that vmips works correctly. Hopefully,
+ soon, a DejaGNU test suite will be built around these, to automate
+ checking of test results.
+
+ Makefile.in - a Makefile generated from this by configure is used to
+ build the test cases, and is also a shining example of how to build
+ ROMs in general (in concert with setup.S and ld.script, generated from
+ ld.script.in).
+
+ asm_regnames.h - makes the so-called "software names" available to
+ the assembler.
+
+ bdexcp.S - intended to cause a bus error resulting from an access to
+ a nonexistent memory address from a load instruction in the branch
+ delay slot.
+
+ clocker.S - intended to demonstrate the use of the clock interrupt,
+ by printing a dot once each second.
+
+ echo.c - intended as a very simple test program for the spim serial
+ console chip. this program prints prompts, and echoes serial input bytes
+ on the serial output (surrounded by brackets) until ^D is input.
+
+ emptymain.c - this is a C file with an empty entry function used in the
+ debugging of setup.S.
+
+ exception.S - code to trigger an overflow exception (in the "add"
+ statement) and a breakpoint exception (in the "break" statement).
+
+ hello.c - a very simple "Hello, world!" ROM which outputs to the
+ spim-compatible serial console device by polling.
+
+ ld.script.in - ld.script, generated from this by configure, defines
+ the layout of the program in a ROM file (for the benefit of the linker)
+ and how it differs from the layout of the same program in the simulator.
+ Originally advertised as "the answer to your every relocation woe."
+
+ load.S - loads of all three data sizes (word, halfword, byte).
+
+ loser.S - a 4-byte rom, used to demonstrate what happens when you run
+ off the end of memory. (There's a special rule in the Makefile to build
+ this one; usually ROMs are some multiple of the host system's page size,
+ for the benefit of mmap.)
+
+ mumble.S - zeroes out all the registers. use vmips -o dumpcpu to verify
+ the results. this was the first program run on vmips.
+
+ random.c - Random number generator from FreeBSD's C library. (This should
+ eventually be expunged from source releases due to its non-GPL status.)
+
+ setup.S - The original note for this file read: "the mini-kernel used to
+ run sort.c; this will undoubtedly have a prolonged, painful existence and
+ support many programs it was never meant to support." This prediction has
+ proved to be true. However, now it supports halting vmips when exceptions
+ occur, and has gdb support (added correct stabs entries).
+
+ sort.c - an insertion sort demo. uses random.c or the CP0 Random register.
+ use memdump option to vmips and od(1) to see results.
+
+ testdev.S - a program to copy words from the TestDev device at 0xa1000000;
+ you can use the memdump option to vmips and od(1) to verify the results.
+
+ tester.c - Euclidean algorithm gcd program; first C program run on vmips.
+
+CVS: $Id: README,v 1.1 2000/11/16 09:20:14 brg Exp $
+

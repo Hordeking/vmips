@@ -1,0 +1,2444 @@
+2000-10-22 19:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+    * NEWS: Reformatted to use a more NEWSy style and to use the
+    version numbering  we're using.
+
+2000-10-22 18:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* accesstypes.h, devicemap.cc, devicemap.h, mapper.cc, mapper.h,
+	range.cc, range.h, vmips.cc: accesstypes.h: Added constants for
+	different types of memory permissions.	devicemap.cc: Add
+	permissions parameter to Range constructor call, and  default
+	canRead() and canWrite() methods which are always true	everywhere.
+	 devicemap.h: Add prototypes for canRead() and canWrite() methods, 
+	which memory-mapped devices must override for fine-grained control.
+	 mapper.cc: Add permissions parameter to Range constructor calls
+	and  add_core_mapping calls.   (add_file_mapping) Translate
+	permissions parameters to mmap PROT_*	constants.   (fetch_word,
+	fetch_halfword, fetch_byte) Add support for aborting   reads from
+	Ranges which do not have canRead() permission.	 (store_word,
+	store_halfword, store_byte) Add support for aborting   writes to
+	Ranges which do not have canWrite() permission.  mapper.h: Add
+	perms parameter to add_file_mapping, add_core_mapping.	range.cc:
+	Include accesstypes.h to get M_* constants. Implement new 
+	getPerms, setPerms, canRead, canWrite methods.	Range constructor
+	now  takes a permissions parameter (p).  Ditto all this for
+	ProxyRange, too.  range.h: Add perms instance variable and change
+	constructor prototype  as mentioned above. Add methods as above. 
+	vmips.cc: Make the ROM image read-only.
+
+2000-10-22 18:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: doc/to-do: Mention the xmboot stuff and the fact that
+	we need to make  hardware breakpoints (or something) work.
+
+2000-10-22 18:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, spimconsole.cc, testdev.cc: cpu.cc: Get rid of extra
+	newline in instruction display.  spimconsole.cc, testdev.cc: Remove
+	spurious newlines.
+
+2000-10-22 17:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/setup.S: Halt on exceptions.  CVS:
+	-------------------------------------------------------------------
+	---
+	-------------------------------------------------------------------
+	---
+
+2000-10-22 17:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: Makefile, boot.c, lib.c, lib.h: Makefile: Add
+	dependencies on lib.h for lib.o. Add rule to help make pftest. 
+	boot.c: A first attempt at making peek work.  lib.c: Re-indented. 
+	digit is now named char_to_digit, and now there is  a corresponding
+	digit_to_char.	Add new toupper, tolower, and memcpy  functions. 
+	Add new printf function, and new supporting print_int and 
+	print_unsigned_int functions.  Include stdarg.h (provided by gcc)
+	to  support printf.  lib.h: Add new typedef for size_t.  Add
+	prototypes for toupper, tolower,  printf, memcpy.
+
+2000-10-22 17:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/pftest.c: New program to test printf
+	implementation in the little C library.
+
+2000-10-22 15:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in: Bad spacing corrected.
+
+2000-10-21 17:18  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc: debug.cc: Initialize threadno_* variables in
+	constructor.   Print gdb command to attach instead of just port and
+	address.
+
+2000-10-21 17:17  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/ld.script.in: Add .scommon symbols to .sdata section.
+
+2000-10-21 16:29  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/.gdbinit: Commands for debugging the boot
+	loader.
+
+2000-10-21 16:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: README, lib.c, lib.h: README: Added
+	descriptions of some more files.  lib.c: Constify some arguments. 
+	lib.h: Likewise.
+
+2000-10-21 15:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO: This doesn't represent any useful action items
+	anymore.
+
+2000-10-21 15:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.OLD: I don't think this is useful at all anymore.
+
+2000-10-21 14:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/setup.S: test_code/setup.S: Add .ent/.end to make gdb
+	happy.
+
+2000-10-21 14:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h: debug.cc: Comment out a bunch of debugging
+	printfs, including the	packet-receipt stuff which can be done from
+	gdb.   Add target_set_thread(), which makes gdb think the target
+	supports   threads (although it remembers the thread id gdb tells
+	it,   it doesn't otherwise change the stub's behavior.)  debug.h:
+	Add threadno_step and threadno_gen instance variables to  save the
+	gdb thread id (possibly useful later.) Add prototype  for
+	target_set_thread().
+
+2000-10-19 00:57  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile.in, tester.c: Makefile.in: Make tester.rom
+	use the standard setup procedure.  tester.c: Start at entry(), not
+	__start().
+
+2000-10-17 00:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: Makefile, boot.c, boot_main.c: Makefile: Fix
+	rules to compile or link their dependencies, in most cases;  add
+	rules for compiling boot monitor for host OS.  boot.c: Clean up
+	comments and TESTING stuff. Move main() for host OS to 
+	boot_main.c. Re-run indent. Fix bug w/ # of params in peek stub. 
+	boot_main.c: New file.
+
+2000-10-16 23:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: Makefile, lib.c, lib.h, libtest.c: Makefile:
+	libtest_std changed names - now libtest.std.  Created a slightly 
+	saner set of makefile rules for building libtest and friends. 
+	lib.c: Added set_echo() function and support for it to getchar().  
+	Made gets() use getchar() after all.  lib.h: Added set_echo()
+	prototype.  libtest.c: TESTING_TESTS is now USE_STANDARD_LIBRARY.  
+	[USE_STANDARD_LIBRARY] Use set_echo(0) to turn off echo when
+	testing getchar   and gets.
+
+2000-10-16 23:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/README: Updated description to reflect the new
+	christening...
+
+2000-10-16 23:33  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/lib.c: Comment to reflect the new christening...
+
+2000-10-16 23:33  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: boot.c, lib.c, lib.h, xmrcv.c, xmrcv.h,
+	xmrcv_main.c: xmrcv.c: put_char and get_char are  history, having
+	been replaced  with receive_byte and send_byte.  xmrcv.h: Likewise.
+	 xmrcv_main.c: Likewise.  boot.c: Likewise. Add peek, poke commands
+	w/ corresponding functions (not  fully implemented). print_line has
+	been replaced with puts, string_equal  has been replaced with
+	strcmp, print_str has been replaced with puts_nonl,  and read_line
+	has been replaced with gets.  indent has been re-run.	(Almost all
+	these changes affect the whole file.)  lib.c: getchar and putchar
+	added. Functions renamed as listed above.   gets was modified to
+	use read() and to return the correct value.   strcmp now compares
+	strings for <, ==, or >, not just ==.	strlen, isspace, isdigit,
+	and strtol added.  lib.h: Functions renamed as listed above. NULL
+	defined.
+
+2000-10-16 23:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/Makefile: copy ld.script and setup.S from
+	test_code dir for now.	'clobber' target is unnecessary.
+
+2000-10-16 23:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/serial.c: provides read()/write() interface to
+	spim console device
+
+2000-10-16 23:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: libtest.c, libtest.input, libtest.output:
+	little C library simplistic test suite
+
+2000-10-16 23:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/Makefile: Makefile: Added stuff for library test
+	suite.
+
+2000-10-16 20:30  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* devicemap.h, spimconsole.cc, spimconsole.h, testdev.cc,
+	testdev.h, zschip.cc, zschip.h: devicemap.h: Memory access
+	functions now use DeviceExc *client as a parameter  instead of CPU
+	*client.  spimconsole.cc: Likewise.  testdev.cc: Likewise. 
+	testdev.h: Likewise.  spimconsole.h: Likewise.	zschip.cc:
+	Likewise.  zschip.h: Likewise.	testdev.h: Likewise. No need to
+	include cpu.h.
+
+2000-10-16 20:30  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: Makefile, boot.c, lib.c: Makefile: Bunch of
+	stuff stolen from (generated)  test_code/Makefile; this will all
+	end up being a part of test_code anyway.  lib.c: Use the same
+	get_char and put_char APIs as xmrcv.c.	boot.c: Likewise. Turn off
+	TESTING flag.
+
+2000-10-14 01:49  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* NEWS: Updated with gdb progress.
+
+2000-10-14 01:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc: debug.cc: (packet_pop_byte) Remember to increment the
+	caller's packet pointer.   (packet_pop_word) Likewise, also, swap
+	word if TARGET_LITTLE_ENDIAN, not if	BYTESWAPPED.   (targetloop)
+	Increase size of receiving packet buffer.  
+	(debug_packet_to_registers) Chop off the first byte (i.e., the
+	command byte).
+
+2000-10-14 01:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h, cpzero.cc, cpzero.h, debug.cc, mapper.cc,
+	mapper.h: cpu.cc: All callers of CPZero::address_trans were
+	modified to pass  this as a final parameter (of type DeviceExc).  
+	Some explanatory comments were added to the beginning of most of
+	the   debug functions. Some of these functions' prototypes were
+	reformatted.   (debug_registers_to_packet) Renamed from
+	registers_to_packet.   (debug_packet_to_registers) Renamed from
+	packet_to_registers.   (debug_pending_exception) Renamed from
+	pending_exception.   (debug_fetch_region) Was
+	Mapper::debugger_fetch_region. Now call    CPZero::address_trans on
+	all addresses before fetching them.   (debug_store_region)
+	Likewise.  cpu.h: Renamed function prototypes to match cpu.cc. 
+	cpzero.cc: Include deviceexc.h.   (address_trans) Now take a
+	parameter of type DeviceExc which receives all	  exceptions
+	generated.   (tlb_translate) Likewise.	cpzero.h: Fix function
+	prototypes to match cpzero.cc.	debug.cc: Modify names of functions
+	called in class CPU to match their new	names.	mapper.cc:
+	(debugger_fetch_region) Transplant to class CPU.  
+	(debugger_store_region) Likewise.  mapper.h: Remove
+	debugger_fetch_region and debugger_store_region.
+
+2000-10-09 22:58  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc: debug.cc: (exception) Print out a message when an
+	exception is caught by the  debugger (for now.) 
+	(target_read_memory) Note that we should be translating the
+	addresses.   (target_write_memory) Likewise.
+
+2000-10-08 13:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* accesstypes.h, deviceexc.h: accesstypes.h: New file - contains
+	constants for types of memory access which  were in mapper.h. 
+	deviceexc.h: New file - contains superclass for devices which can
+	handle	exceptions.
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am: Makefile.am: (vmips_SOURCES) Add new files
+	accesstypes.h and deviceexc.h.
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* testdev.h: testdev.h: Remove stub definition of periodic().
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.h: spimconsole.h: class SPIMConsole now also derives
+	from class Periodic.
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.cc, range.h: range.cc: (fetch_word) Type of `client' arg
+	changed to DeviceExc in class  Range and class ProxyRange.  
+	(fetch_halfword) Likewise.   (fetch_byte) Likewise.   (store_word)
+	Likewise.   (store_halfword) Likewise.	 (store_byte) Likewise. 
+	range.h: Prototypes for functions in range.cc which now take a
+	`DeviceExc  *client' arg have been changed.
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc, mapper.h: mapper.cc: (fetch_word) client parameter is
+	now of type DeviceExc.	 (fetch_halfword) Likewise.   (fetch_byte)
+	Likewise.   (store_word) Likewise.   (store_halfword) Likewise.  
+	(store_byte) Likewise.	 (debugger_fetch_region) Now takes a
+	parameter `DeviceExc *client', which   receives any exception
+	caused in the course of accessing bytes in the region,	 instead of
+	the attached CPU.   (debugger_store_region) Likewise.  mapper.h:
+	Move constants for types of memory access into accesstypes.h, 
+	which is #included in this file. Also include deviceexc.h.
+	Prototypes for	functions in mapper.cc which now take a `DeviceExc
+	*client' arg have been	changed.
+
+2000-10-08 13:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* devicemap.h: devicemap.h: Remove pure-virtual prototype for
+	periodic().  Subclasses can  derive from Periodic if they choose.
+
+2000-10-08 13:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* deviceint.h: deviceint.h: class DeviceInt no longer derives from
+	class Periodic.   Subclasses can derive from Periodic if they
+	choose.
+
+2000-10-08 13:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h: debug.cc: (exception) Stub implementation of
+	Debug::exception().   (target_read_memory) Add `this' as a
+	parameter to   Mapper::debugger_fetch_region().  
+	(target_read_memory) [TARGET_LITTLE_ENDIAN] Swap address and length
+	  before calling Mapper::debugger_fetch_region().  debug.h: Make
+	class Debug derive from class DeviceExc. Include deviceexc.h.	Add
+	prototype for Debug::exception().
+
+2000-10-08 13:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h: cpu.h: Make class CPU derive from class DeviceExc. Include
+	deviceexc.h.
+
+2000-10-04 01:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/xmboot/: Makefile, README, boot.c, lib.c, lib.h,
+	xmrcv.c, xmrcv.h, xmrcv_main.c, xmsend.c: Import of serial boot
+	program, still in its infancy.
+
+2000-10-04 01:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/README: Another explanatory note.
+
+2000-10-02 17:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/linux-cross: more notes on glibc mips hacking
+
+2000-09-28 00:40  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in: test_code/Makefile.in: (MGCC_FLAGS) NetBSD
+	targets like -mno-abicalls,  and it doesn't seem to break anything.
+
+2000-09-28 00:40  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, debug.cc, debug.h, mapper.cc, mapper.h: cpu.cc:
+	(registers_to_packet) get rid of debugging printf.  debug.cc:
+	(packet_push_word) swap words when TARGET_LITTLE_ENDIAN, not  
+	BYTESWAPPED. This appears to fix the gcc register-reading bug.	
+	(targetloop) Implement 'k' request as target_kill() (doesn't work
+	yet).	 Print out packet with .'s on every eighth char to make
+	them easier to read.   (target_kill) New method.  debug.h:
+	(target_kill) Add prototype.  mapper.cc: (swap_word, swap_halfword)
+	Also define when TARGET_LITTLE_ENDIAN.	 Don't declare them as
+	static, because current g++ snapshots barf on that.  mapper.h:
+	Likewise, except here they are static (?).
+
+2000-09-26 23:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: Duh.
+
+2000-09-26 23:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-patches/: binutils/binutils-0002.patch,
+	binutils/patch-mips, egcs/egcs-1.1.1-NetBSD-19980104.diff,
+	egcs/patch-aa, egcs/patch-ab, egcs/patch-ac, egcs/patch-ae,
+	egcs/patch-af, egcs/patch-ag, egcs/patch-ah, libc/Makefile.patch,
+	libc/net.Makefile.inc.patch, make/Makefile.boot.patch,
+	mk/bsd.lib.mk.patch: Patches for linux->netbsd/mips cross
+	compilation environment.
+
+2000-09-26 23:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: Instructions on where to get patches and source
+	added.	"patches" subdir of $src/binutils and $src/egcs is gone.
+
+2000-09-25 00:17  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* .gdbinit: gdb commands for debugging vmips.
+
+2000-09-24 19:08  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, debug.cc, debug.h, mapper.cc, remotegdb.cc, vmips.cc:
+	cpu.cc (registers_to_packet): Increase packet buffer size. Keep
+	track of #  of regs written with r (should be 90 regs written). 
+	debug.cc: Constructor initializes cpu, mem, and listener to
+	invalid/NULL  values.  New attach() function to fill in cpu/mem
+	correctly.  Use correct  names for CPU::registers_to_packet(),
+	CPU::packet_to_registers().  debug.h: attach() prototype added. 
+	mapper.cc: Declare swap_word, swap_halfword static.  remotegdb.cc:
+	Increase packet buffer size.  vmips.cc: In constructor, create new
+	Debug object and attach it appropriately.
+
+2000-09-24 18:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/ld.script.in: netbsd targets apparently want these
+	other sections... reginfo is supposed to be read only, but it's not
+	that big a deal for now.
+
+2000-09-24 16:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h: register_packet() and write_register_packet() are
+	now registers_to_packet() and packet_to_registers() respectively.
+
+2000-09-24 01:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h, vmips.cc, vmips.h: debug.cc: Initialize
+	debugger_shutdown correctly in ctor.  Debug::start()  is dead; move
+	setup code to Debug::setup(), and make 'listener' parameter  into
+	an instance variable.  Initialize remote_desc from clientsock in 
+	serverloop.  (Not sure how to do this "right".) Use () != 0 around
+	some  predicate assignments, to make gcc shut up.  debug.h: Make
+	'listener' into an instance variable.	New function setup().
+	serverloop() is now public.  vmips.cc: New 'dbgr' instance variable
+	holds pointer to the Debug instance  for this vm. In run(), grab
+	the "debug" option, and call setup() and  serverloop() as
+	appropriate.  vmips.h: New 'dbgr' instance variable.
+
+2000-09-23 20:42  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: 
+	netbsd-cross: Add #!/bin/csh (yuck), and calls to set $user and
+	$group.
+
+2000-09-23 20:15  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/linux-cross: re-indented.
+
+2000-09-23 19:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: netbsd-cross: Add explanatory comment. Use $src
+	instead of $foo.
+
+2000-09-23 19:15  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: netbsd-cross: Commented variable definitions. 
+	Added definition of  $root.  Added extra spacing.  Use bunzip2 -c
+	... | tar xf - instead of  gtar Ixf.  Use full paths in cd, mkdir
+	(mostly).  Remove OLD...END OLD  sections.  Patches are now
+	retrieved from the source dir.	Integrated  patch from
+	http://mail-index.netbsd.org/tech-toolchain/1999/02/05/0002.html.  
+	Clean up build dirs for binutils, egcs after building. Use mkdir -p
+	  (mostly). Build egcs the second time just like the first time.
+
+2000-09-23 17:01  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: was netbsd-mips-cross.txt
+
+2000-09-23 17:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: was netbsd-mips-cross.txt.~7~
+
+2000-09-23 17:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: was netbsd-mips-cross.txt.~6~
+
+2000-09-23 16:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: was netbsd-mips-cross.txt.~2~
+
+2000-09-23 16:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/netbsd-cross: was netbsd-mips-cross.txt.~1~
+
+2000-09-10 16:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: Try to make maintainer-clean first, if there
+	exists a Makefile.
+
+2000-09-10 16:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h: debug.cc: Add target_last_signal() method
+	(tied to '?' packet), and constructor.	debug.h: Likewise, and
+	privatize some variables.
+
+2000-09-10 16:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h, cpzero.cc, debug.cc, deviceint.h, options.cc,
+	stub-dis.cc: cpu.cc: (lwl_emulate, lwr_emulate) Remove unused
+	variables.  cpzero.cc: (address_trans, tlbp_emulate) Likewise. 
+	debug.cc: (targetloop) Likewise.  options.cc:
+	(process_options_from_args, process_options) Likewise. 
+	stub-dis.cc: (setup_disassembler) Likewise.  cpu.h: Use "friend
+	class" instead of "friend".  deviceint.h: Likewise.
+
+2000-09-10 15:29  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/makeoptdoc: doc/makeoptdoc: Don't spew out the whole option
+	table when an option  does not have a default.
+
+2000-09-10 15:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h, debug.cc, debug.h, optiontbl.h: cpu.cc: Comment
+	about debug functions.	Add debug_set_pc().  cpu.h: Likewise. 
+	debug.cc: Add signo to Debug instance variables. First try at
+	implementing  target_step() -- it always returns the last signal we
+	caught.  debug.h: Add signo to Debug instance variables. 
+	optiontbl.h: Add default "nodebug".
+
+2000-09-09 19:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h, debug.cc, debug.h, options.cc, optiontbl.h,
+	range.cc, vmips.cc, vmips.h: cpu.cc: Include cpzeroreg.h. Implement
+	pending_exception(), as an  exception code accessor for the Debug
+	class.	cpu.h: Declare pending_exception().  debug.cc: Include
+	regnames.h and cpzeroreg.h.  Create signal_packet(),  analogous to
+	error_packet().  First try at making target_continue()	control the
+	CPU.  Created exccode_to_signal(), to translate exception  codes
+	for GDB.  debug.h: Declare signal_packet() and exccode_to_signal().
+	 options.cc: Bogus extra fprintf argument.  optiontbl.h: Add
+	"debug" option.  range.cc (descriptor_str): Use %ld.  vmips.cc:
+	Move loop with periodic() calls to new cpu_loop() method.   Move
+	SPIMConsole instance to vmips class variables.	 Use %ld in
+	printing self_tests and mapping RAM.  vmips.h: Move SPIMConsole
+	instance to vmips class variables. Declare  cpu_loop().
+
+2000-09-05 22:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc: Extract actual addresses from arguments in continue and
+	step.
+
+2000-09-03 23:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h: Merge in the rest of the useful stuff from
+	remotebackend.	step and continue don't compile yet (what_now() is
+	a placeholder for what needs to be done-- i haven't worked out how
+	this is going to work yet.)
+
+2000-09-03 23:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am: Add remotegdb.cc, remotegdb.h.
+
+2000-09-03 23:26  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* remotegdb.cc, remotegdb.h: Moved from misc_code/remotegdb
+
+2000-09-03 18:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h, sysinclude.h,
+	misc_code/remotegdb/remotebackend.cc: debug.cc: Added
+	Debug::setup_listener_socket(), Debug::set_nonblocking(), 
+	Debug::print_local_name(), Debug::serverloop() (with
+	modifications),  stub version of Debug::targetloop(), and
+	Debug::start().  debug.h: Added prototypes for same, and
+	debugger_shutdown instance variable.  sysinclude.h: Include socket
+	headers and signal.h, for debug code. 
+	misc_code/remotegdb/remotebackend.cc: Removed
+	setup_listener_socket(),  set_nonblocking(), print_local_name(),
+	serverloop(), and start() (which are  all reincarnated in
+	debug.cc).
+
+2000-09-01 00:45  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/abistuff: added link info
+
+2000-08-31 23:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: remotebackend.cc: Include
+	debug.h. tidy up some function headers.   Move packet_push_word,
+	packet_push_byte, packet_pop_word, packet_pop_byte   to class Debug
+	(debug.cc, debug.h). Move class CPZero, CPU, and Mapper   functions
+	to their respective files.
+
+2000-08-31 23:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/abistuff: added url
+
+2000-08-31 23:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: blow away vmips.spec when it exists and we are
+	unbootstrapping
+
+2000-08-31 23:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* debug.cc, debug.h: Utilities for the debugging backend
+
+2000-08-31 23:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: abistuff, linux-cross: abistuff: clues about the mips 32
+	bit elf ABI, which we might switch to linux-cross: account of the
+	battle with mips cross builds of glibc/linux kernel
+
+2000-08-31 23:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, cpu.cc, cpu.h, cpzero.cc, mapper.cc, mapper.h:
+	Makefile.am (vmips_SOURCES): Add debug.cc, debug.h.  cpu.cc: Add
+	CPU::register_packet, CPU::write_register_packet (from 
+	remotebackend.cc).  cpu.h: Include debug.h.  cpzero.cc: Fix
+	formatting on some function headers.  Add  CPZero::read_debug_info,
+	and CPZero::write_debug_info (from  remotebackend.cc).	mapper.cc:
+	Add Mapper::debugger_fetch_region and 
+	Mapper::debugger_store_region, which now return ints (reserved	for
+	future status information purposes).  mapper.h: Likewise. Include
+	debug.h.
+
+2000-08-25 00:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h, cpzero.h, mapper.h: cpu.h: Added debugging function
+	prototypes -- currently their implementations live in
+	remotebackend.cc, but they'll move to cpu.cc when they're ready. 
+	cpzero.h: Likewise.  mapper.h: Likewise.
+
+2000-08-25 00:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: remotebackend.cc: Moved
+	some protos into mapper.h, cpu.h, cpzero.h. Now  this module
+	compiles again! (it doesn't link, but there aren't any	important
+	reasons why it shouldn't, except for continue/step.) The  interface
+	to the rest of the system is perhaps not as clean as it  could be,
+	but it's a start.  Continue/step are not yet implemented,  because
+	I'd like to work that into vmips.cc.
+	
+	In other news, added CPZero::read_debug_info and
+	CPZero::write_debug_info,  and the debug functions in class CPU use
+	these to read/write CP0 regs.	Fleshed out target_write_mem. 
+	Mapper::debugger_fetch_region and friends   need to do error
+	checking!
+
+2000-08-22 23:11  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: More cleanups to get this
+	to compile.  Add CPU and mapper variables.  packet_pop_byte added. 
+	Mapper::debugger_store_region added.
+
+2000-08-20 21:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: remotebackend.cc: Use
+	'return EMPTY' as necessary for unimplemented ops.   More random
+	changes to try to get this ready to integrate into the rest   of
+	the code.
+
+2000-08-20 21:25  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO: updated Makefile todo list (subdirs work with dist
+	now)
+
+2000-08-20 21:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: update to-do list
+
+2000-08-20 20:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: remotebackend.cc:
+	packet_push_word/byte and packet_pop added. new functions in  class
+	CPU -- this doesn't compile right now, but it will later (when they
+	are  merged in to the main source). we're leaving the P packet
+	(write_reg)  unimplemented for now.
+
+2000-08-17 01:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotebackend.cc: experimenting with starting
+	to fill in the stubs...
+
+2000-08-16 01:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am: I actually didn't want to include the whole
+	directory. sigh.
+
+2000-08-16 00:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, configure.in: Include package stuff in the
+	distribution, and generate vmips.spec from vmips.spec.in.
+
+2000-08-15 09:57  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* package/vmips.spec.in: RPM spec file for vmips (needs to be
+	munged with autoconf to contain  correct VERSION.)
+
+2000-08-13 22:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile.in, test_code/Makefile.in, utils/Makefile.in: Empty
+	(for now) targets that make 'make dist' work.
+
+2000-08-05 01:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/remotegdb.cc: typo in header
+
+2000-08-05 01:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/Makefile: bogus directory in -I
+
+2000-08-05 01:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/remotegdb/: Makefile, remotebackend.cc, remotegdb.cc,
+	remotegdb.h: Remote backend test code. Eventually this will get
+	folded into vmips.cc and friends; for now it's a little program all
+	its own...
+
+2000-06-01 23:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* acconfig.h, configure.in, optiontbl.h, vmips.cc: acconfig.h: Add
+	TTY symbol.  configure.in: Add --disable-tty option.  optiontbl.h:
+	Add usetty flag and ttydev string, with their respective defaults. 
+	vmips.cc: Make it possible to turn the tty on or off at runtime,
+	and make the  tty device configurable. (A sly hacker could
+	conceivably point the tty device  at /dev/fd/* and do Really
+	Interesting things with this, but I am hoping it  will get even
+	better soon.)
+
+2000-05-17 02:11  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in: Since ld.script is generated from
+	ld.script.in, don't look for it in $(srcdir).
+
+2000-05-17 02:02  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* NEWS: Updated with recent build improvements.
+
+2000-05-17 01:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in: Distributions should include ld.script.in,
+	not ld.script.
+
+2000-05-17 01:30  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.h, stub-dis.cc: mapper.h: swap_word and swap_halfword are
+	potentially useful elsewhere; make  'em static.  stub-dis.cc: The
+	instructions are in host byte order; switch the #if to look  at
+	WORDS_BIGENDIAN instead of TARGET_BIG_ENDIAN.
+
+2000-05-17 01:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: Added support for passing args after -c to
+	configure.
+
+2000-05-17 01:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* acconfig.h, mapper.cc, mapper.h: mapper.cc: Add swap_word and
+	swap_halfword functions, and add support for  accessing
+	byte-swapped memory correctly.	mapper.h: Add prototypes for
+	swap_word and swap_halfword.  acconfig.h: Needed for
+	TARGET_LITTLE_ENDIAN and TARGET_BIG_ENDIAN, which  are defined in
+	configure.in.
+
+2000-05-15 01:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* stub-dis.cc: stub-dis.cc: (call_disassembler) I think this call
+	actually depends on the  target, not the host; so changed.
+
+2000-05-15 01:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* configure.in, sysinclude.h: configure.in: Define
+	TARGET_BIG_ENDIAN and TARGET_LITTLE_ENDIAN depending  on the
+	configured value of $mipsendianness. Call AC_C_BIGENDIAN to check 
+	whether the host is big-endian.  sysinclude.h: Add some
+	preprocessor logic to define BYTESWAPPED if the  MIPS target is
+	byte-swapped with respect to the host processor.
+
+2000-05-09 01:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: I think I know how to fix the endianness bugs, after
+	talking with mconst.
+
+2000-05-09 01:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/ld.script.in: test_code/ld.script.in: Use mipsbfdtarget
+	instead of CROSS_BFDTARGET.
+
+2000-05-09 01:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* acinclude.m4, configure.in: acinclude.m4: removed
+	VMIPS_CROSS_TARGET_ENDIAN.  configure.in: added
+	--with-mips-bfdtarget and --with-mips-endianness,  with reasonable
+	defaults, and removed VMIPS_CROSS_TARGET_ENDIAN, and  now we subst
+	ENDIAN_FLAG and mipsbfdtarget.
+
+2000-03-25 23:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO, Makefile.am, utils/bootstrap: Makefile.am: We no
+	longer attempt to install vmips.debug.	MAKEFILE-TODO: Updated, as
+	this was a documented Makefile bug.  utils/bootstrap: Updated to
+	add test_code/ld.script as a file that unbootstrap  can safely blow
+	away.
+
+2000-03-25 23:18  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* acinclude.m4, configure.in, test_code/Makefile.in,
+	test_code/ld.script, test_code/ld.script.in, utils/romdis.in,
+	utils/swap: acinclude.m4: Add VMIPS_CROSS_TARGET_ENDIAN check for
+	the cross target.   This is not finished yet.  test_code/ld.script:
+	Is now test_code/ld.script.in.	test_code/ld.script.in: Was
+	formerly test_code/ld.script. Use  @CROSS_BFDTARGET@ instead of
+	assuming ecoff-littlemips.  configure.in: Add test_code/ld.script
+	to the list of things munged by  configure. Add call to
+	VMIPS_CROSS_TARGET_ENDIAN.  utils/romdis.in: Use @ENDIAN_FLAG@
+	instead of assuming -EL.  test_code/Makefile.in: Likewise. 
+	utils/swap: Used for converting between big- and little-endian rom
+	files.
+
+2000-03-25 22:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, stub-dis.cc, vmips.cc, vmips.h: cpu.cc: Prettied up `CPx
+	instruction 0xXXXX not implemented' messages.	Moved
+	host_bigendian inside of machine.  stub-dis.cc: Check for host
+	endianness when printing instructions.	 (I'm not so sure what the
+	Right Thing To Do is anymore with respect to   target
+	endianness...)	vmips.cc: Moved host_bigendian inside of machine. 
+	vmips.h: Likewise.
+
+2000-03-25 17:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* configure.in: configure.in: Disable non-C++-happy tests.
+
+2000-03-25 16:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: bootstrap: Explicitly specify Makefile.am
+
+2000-03-25 13:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* acinclude.m4: acinclude.m4: Move code to set SOLARIS_DL_HACK
+	outside of AC_CACHE_CHECK.
+
+2000-03-25 13:40  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, acinclude.m4, configure.in, vmips.cc: Makefile.am:
+	(vmips_debug_LDADD) Add SOLARIS_DL_HACK, which is sometimes 
+	substituted with /usr/lib/libdl.so to allow debug builds to finish
+	even  in the absence of a getpwnam that requires dlopen() (and thus
+	cannot be  statically linked).	configure.in: Make the tests run
+	using the C++ compiler. Add a call to  the new
+	VMIPS_STATIC_GETPWNAM macro in acinclude.m4 so that SOLARIS_DL_HACK
+	 is correctly set.  acinclude.m4: New file with above-named test
+	for statically-linkable  getpwnam.  vmips.cc: Comment regarding tty
+	modes.
+
+1999-12-11 21:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: updated (lwcZ, switch->table, disassembler.)
+
+1999-12-11 21:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: updated (endianness)
+
+1999-12-11 21:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: made the lwcZ/swcZ instructions throw Coprocessor
+	Unusable exceptions.
+
+1999-12-09 04:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: doc/to-do: Updated (endianness).
+
+1999-12-09 04:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: doc/to-do: Updated (list of instrs, threading.)
+
+1999-12-09 04:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO, THANKS: MAKEFILE-TODO: Updated (building subdirs,
+	finding cross tools, making "make  distcheck" work.) THANKS:
+	Initial list of acknowledgements.
+
+1999-12-09 04:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h, options.h, vmips.h: cpu.h: one_instr is now periodic; fix
+	the comment.  options.h: DEFAULT_ROM_IMAGE is no longer used;
+	delete it. Fix the comment on  DUMP_FILE_NAME.	vmips.h: Bunch of
+	options which were also in options.h deleted.
+
+1999-12-09 04:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, serialhost.cc: cpu.cc: lwr, lwl now abort on invalid
+	OFFSET.  swl, swr copied from SPIM6.   swl_emulate, swr_emulate
+	filled in to call them.  serialhost.cc: The cast to ssize_t appears
+	to be just the thing to quash that  warning about signed/unsigned.
+	Hadn't ever heard of ssize_t before but it  appears to be in Sol7,
+	BSD and Linux, so we'll give it a try......
+
+1999-12-09 03:29  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: lwl, lwr are in; swl and swr are not ready yet. We're
+	going to have to write	swl and swr as read-modify-write
+	instructions; funny, that...
+
+1999-12-08 03:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in, utils/Makefile.in, utils/bootstrap:
+	utils/bootstrap: -c option runs configure after bootstrapping. 
+	test_code/Makefile.in: Get ld.script from $(srcdir) instead of
+	build dir.  utils/Makefile.in: The right place to find config.h is
+	the utils build  directory's parent directory.
+	
+	(With these changes, "make distcheck" works as well as it will
+	until we get some real documentation written.)
+
+1999-12-08 03:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile.in, test_code/Makefile.in, utils/Makefile.in:
+	doc/Makefile.in: Add DISTFILES and distdir target. 
+	test_code/Makefile.in: Likewise. Also add SHELL, srcdir,
+	top_srcdir, VPATH.  utils/Makefile.in: Likewise. There's something
+	wrong that prevents sysinclude.h  from finding config.h -- the
+	-I$(top_builddir) is an attempt at fixing that,  but it doesn't
+	work.
+
+1999-12-08 03:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am: Makefile.am: Add headers and EXTRA_DIST for the
+	distribution.
+
+1999-12-08 02:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* VERSION, configure.in: configure.in: We call this version
+	1.0-alpha. Also, munge variables and  twiddle the executable bits
+	on utils/{mkrom,romdis}.  VERSION: Modified for consistency's sake.
+
+1999-12-08 02:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/: bootstrap, mas, mdis, mgcc, mkrom, mkrom.in, mld,
+	mobjcopy, mobjdump, romdis, romdis.in: mas, mdis, etc.: These have
+	not been used in centuries. No, really... their  last recorded use
+	was about the time of the Bayeux Tapestry...  romdis, mkrom:
+	Renamed to romdis.in, mkrom.in, respectively, and now we take 
+	$mipstoolprefix from configure instead of guessing
+	mips-dec-ultrix4.5-.  bootstrap: Unbootstrap removes romdis and
+	mkrom now, because configure  re-creates them.
+
+1999-12-08 01:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* sysinclude.h, utils/Makefile.in, utils/getpagesize.cc:
+	sysinclude.h: An obviously better way to do the MAP_FAILED thing.
+	And some  stuff for ULTRIX, which doesn't work because ULTRIX can't
+	mmap files. Whee! utils/Makefile.in: Include files from
+	$top_srcdir.  utils/getpagesize.cc: Include sysinclude.h instead of
+	stdio.h/unistd.h.
+
+1999-12-07 01:21  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/lwl.cc: misc_code/lwl.cc: Fixed up hardware versions of
+	lwl and lwr, and the  software versions appear to work correctly
+	now that I look at them  the right way.  (Whew.)
+
+1999-12-06 20:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am: Disable exceptions.
+
+1999-12-06 19:49  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/lwl.cc: clobbers fixed
+
+1999-12-06 00:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/lwl.cc: Added some hardware type things. Gonna blaze up
+	the sheep soon.
+
+1999-12-05 21:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, vmips.cc, vmips.h: INSTALL: Require libtool for CVS
+	builds.  vmips.cc: Add host_bigendian boolean global and host
+	endianness test (SIGH!) vmips.h: Add prototype for
+	vmips::host_endian_selftest().
+
+1999-12-05 18:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/lwl.cc: Experimenting with how to code up lwl/lwr.
+
+1999-12-05 16:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* VERSION: To mark the version number of the code in the
+	repository.
+
+1999-12-03 03:19  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: lwl is not ready yet, but soon...
+
+1999-12-01 14:12  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: Efficiency concerns, note about possible future
+	embedded scheme interpreter.
+
+1999-12-01 14:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: vmips.cc: Added "TTY" define which controls whether the
+	console is connected.
+
+1999-12-01 13:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, options.cc: cpu.cc: 1st instruction of exc handler is not
+	in delay slot, so set  delay_state to NORMAL before we return, when
+	we know we're going to	start interpreting the exception handler. 
+	options.cc: Check for compiled-in defaults on all options when
+	OPTIONS_DEBUG  is defined. Comment about -D option.
+
+1999-11-16 07:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile.in, asm_regnames.h, clocker.S:
+	test_code/Makefile.in: CPP now includes headers from @top_srcdir@,
+	too.   Add clocker.rom as a new asm rom file. 
+	test_code/asm_regnames.h: We want to actually _use_ the cp0
+	regnames, so we  put dollarsigns on their numbers. 
+	test_code/clocker.S: print a dot to the screen once a second.
+
+1999-11-16 07:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/spim-console: doc/spim-console: Fix bug in clock description
+	- reads make it unready, not  writes, which have no special
+	function.
+
+1999-11-16 07:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, deviceint.cc, deviceint.h, intctrl.cc, spimconsole.cc,
+	spimconsole.h, vmips.cc, vmips.h: cpu.cc: Move exception check to
+	start of loop. I think this might have caused  an off-by-one
+	exception pc error...  deviceint.cc: Added strlineno() method,
+	report(De)Assert and friends,  and debugging stuff (might go away,
+	someday...) Add descriptor_str abstract  method.  deviceint.h:
+	Protos for same.  intctrl.cc: The list is actually
+	circularly-terminated. Fix traversal in  calculateIP to account for
+	this.  spimconsole.cc: Add descriptor_str. Set clock unready at
+	initialization.   The clock doesn't have a data register, so it's
+	safe to ignore writes.	 A bunch of commented-out debugging code is
+	here, grinning madly.	Added in calls to appropriate
+	assert/deassertInt functions in periodic().   Make clock unready
+	when its control register is read, in fetch_word().  spimconsole.h:
+	Add proto for descriptor_str.  vmips.cc: Include intctrl.h. Create
+	interrupt controller ("intc"),	attach it to cp0. Attach 5
+	interrupt lines to console (gotta love spim!) vmips.h: Add
+	declaration of intc. Include intctrl.h.
+
+1999-11-16 06:42  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* disassembler.cc: We're using libopcodes now -- no need to keep
+	the Berkeley code in here.
+
+1999-11-16 06:40  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/clocker.S: test_code/clocker.S: Try to abort by
+	keypress (this doesn't work).	Also sometimes the dots stop after
+	two dots -- why does this happen?   We mustn't forget to turn on
+	IM2 as well as IEc.
+
+1999-11-16 06:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* deviceint.cc, optiontbl.h, spimconsole.cc, spimconsole.h:
+	optiontbl.h: Add reportirq boolean option.  deviceint.cc: Use
+	reportirq boolean option to stem the tide of spammy IRQ msgs. 
+	spimconsole.cc: Add "read" function on SPIMConsoleClock, which is
+	explicitly  called when the CLOCK_CONTROL is read in order to make
+	the clock unready.  spimconsole.h: Add proto for same.
+
+1999-11-16 03:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: utils/bootstrap: Clean up more autogenerated
+	files. Repeatedly call automake  --gnu --add-missing to bring them
+	back.
+
+1999-11-16 03:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpu.h, deviceint.h, periodic.h, spimconsole.cc, vmips.cc:
+	cpu.cc: one_instr() changed to periodic().  cpu.h: likewise.
+	Include periodic.h. class CPU now inherits from class Periodic. 
+	deviceint.h: likewise, for class DeviceInt.  spimconsole.cc: Check
+	for intEnable() for each device that has become ready,	in
+	periodic().  vmips.cc: Add a call to SPIMConsole::periodic() in the
+	instruction loop.  utils/bootstrap: Clean up more autogenerated
+	files. Repeatedly call automake  --gnu --add-missing to bring them
+	back.  periodic.h: Define (interface only, for now) class Periodic.
+
+1999-11-14 20:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, cpu.cc, cpzero.cc, cpzero.h, cpzeroreg.h,
+	deviceint.cc, deviceint.h, intctrl.cc, intctrl.h, spimconsole.h:
+	Makefile.am: Added intctrl.cc and deviceint.cc to vmips_SOURCES. 
+	cpu.cc: Check whether there is an interrupt pending and throw an
+	exception,  in one_instr().  cpzero.cc: Include intctrl.h. Support
+	attaching to an interrupt controller.	Implement
+	CPZero::interrupts_enabled(), to query the master interrupt enable 
+	 bit in the Status register, and CPZero::interrupt_pending() to
+	query the   interrupt controller and software interrupts. 
+	cpzero.h: Modify and add protos to support above changes. 
+	cpzeroreg.h: Add separate masks for hardware and software interrupt
+	masks  in Status register.  spimconsole.h: Include deviceint.h.
+	SPIMConsole now also inherits from  DeviceInt.	deviceint.cc,
+	deviceint.h: An abstract interrupt-generating device class. 
+	intctrl.cc, intctrl.h: An interrupt controller.
+
+1999-11-14 18:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/interrupt: My first guess at pseudocoding the interrupt
+	stuff.
+
+1999-11-14 18:41  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/interrupt: Interrupt controller initial design.
+
+1999-11-14 14:30  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: Typo in comment corrected.
+
+1999-11-14 03:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* serialhost.cc: serialhost.cc (dataAvailable): bug in args to
+	select - pass largest fd,  not number of fds
+
+1999-11-14 03:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* NEWS: Polling works...
+
+1999-11-14 03:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile.in, echo.c: test_code/Makefile.in: Add
+	echo.rom as another C romfile.	test_code/echo.c: A program that
+	prints prompts, and echoes serial input  bytes on the serial output
+	(surrounded by brackets) until ^D is input.
+
+1999-11-14 03:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc, spimconsole.cc, sysinclude.h, vmips.cc: options.cc:
+	Fixed some error message fprintfs with variables missing in
+	formats.  spimconsole.cc: SPIMConsole{Keyboard,Display,Device}
+	ctors now initialize all  data members. Display is initially ready
+	(changed in  SPIMConsoleDisplay::ready()).  sysinclude.h: Include
+	termios.h.  vmips.cc: Include sysinclude.h. Attach the SerialHost
+	to /dev/tty and turn off  ICANON and ECHO to engage "raw mode". Put
+	things back the way they were  before exiting. Add some more
+	serial-related boot messages.
+
+1999-11-14 02:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile.in, ld.script: test_code/Makefile.in: When
+	cross-compiling C, add the top_srcdir to the  include path. Add
+	hello.rom as a C romfile. (Something's funky about its	rule,
+	though.) test_code/ld.script: Lump the .rdata sections together
+	with the .data sections.
+
+1999-11-14 02:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.cc, spimconsole.h, vmips.cc: spimconsole.cc: Include
+	spimconsreg.h. Update the clock timer whenever we make	the clock
+	ready, and likewise for the keyboard. (Not sure if this is correct 
+	yet.) The sense of the timediff() in SPIMConsoleDisplay::ready()
+	was  reversed; fixed. Embarrassingly left out all the break
+	statements in  SPIMConsole::get_type; added.  spimconsole.h: Moved
+	bitmasks and register offsets to spimconsreg.h.   Removed separate
+	keyboard_time and clock_time members -- use "timer" instead.  
+	(What was I on?)  vmips.cc: Include spimconsole.h and serialhost.h,
+	and set up a SPIM serial  console at physical 0x02000000.
+
+1999-11-14 02:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/hello.c: test_code/hello.c: Writes a friendly message
+	to the serial output by polling.
+
+1999-11-14 02:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsreg.h: spimconsreg.h: Moved register offsets and bitmasks
+	to a separate file, so they  can be included in test code.
+
+1999-11-13 23:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in, utils/Makefile.in: Added a trivial
+	maintainer-clean target so that recursion works.
+
+1999-11-13 22:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: Makefile.in, to-do: doc/Makefile.in: Add `all' target which
+	makes the documentation, so that  recursive makes work.  doc/to-do:
+	Integrating libopcodes is done. Implementing autoconf is also, 
+	more or less, done.
+
+1999-11-13 22:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.h: spimconsole.h: Define IOSPEED and
+	CLOCK_GRANULARITY. Add proto for  SPIMConsole::periodic.  Change
+	all the data and setData functions to use  uint8's instead of
+	chars. Add data members rdy, keyboard_time and databyte  to
+	SPIMConsoleKeyboard, and rdy and clock_time to SPIMConsoleClock.
+	Add  proto for check method to SPIMConsoleKeyboard and
+	SPIMConsoleClock.
+
+1999-11-13 22:58  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.cc: spimconsole.cc: Space things out more. For all
+	classes, data/setData  now deal exclusively in uint8's, not chars.
+	Writing to clock makes it  unready, as in the specification.
+	Implemented SPIMConsoleClock::check,  which makes the clock ready
+	if the clock has ticked since we last  looked.
+	SPIMConsoleClock::ready calls it. (Maybe we should consolidate 
+	these into one function later.)  Implemented
+	SPIMConsoleKeyboard::check,  which checks to see if it's time to
+	read in the next byte from  the SerialHost, and reads it in (making
+	the keyboard ready) if	so. SPIMConsoleKeyboard::ready calls it. 
+	SPIMConsoleKeyboard::data now  always returns the last byte we
+	read.  SPIMConsole::periodic, inherited  from DeviceMap, now has a
+	new stub implementation. (We'll use this to  trigger interrupts,
+	when necessary.) attach and the ctor now use h0 and h1	instead of
+	h1 and h2.
+
+1999-11-13 22:58  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, devicemap.h, serialhost.cc, serialhost.h, testdev.h:
+	INSTALL: note about rerunning automake --add-missing added
+	devicemap.h: added pure virtual periodic() function to declaration
+	of class  DeviceMap serialhost.cc: added SerialHost::read_byte and
+	SerialHost::dataAvailable  implementations serialhost.h: Add protos
+	for same. include "sysinclude.h".  testdev.h: Add periodic function
+	which does nothing.
+
+1999-11-13 20:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/Makefile.in: test_code/Makefile.in: Use $mipstoolprefix
+	subst to find tools.  utils/Makefile.in: Inherit $(CXX) from
+	configure.
+
+1999-11-13 20:26  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO, Makefile.am, configure.in, serialhost.cc,
+	serialhost.h, test_code/Makefile.in: MAKEFILE-TODO: Updated to
+	exhibit recent changes.  Makefile.am: Add subdirectory processing.
+	Winnage! configure.in: Add mips-tool-seeking logic. 
+	test_code/Makefile.in: Use $mipstoolprefix subst to find tools. 
+	utils/Makefile.in: Inherit $(CXX) from configure.  serialhost.h,
+	serialhost.cc: host serial driver, stub implementation at  the
+	moment
+
+1999-11-13 19:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.h: Moved a bunch of stuff (class declarations and
+	defines/includes) from	spimconsole.cc.
+
+1999-11-13 19:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, cache.cc, spimconsole.cc: Makefile.am
+	(vmips_SOURCES): Building a lot more files again... just  so that
+	we have less bit rot, and I'm trying to get spimconsole to  compile
+	again :-) cache.cc (Cache::refill_one_word): old version of
+	fetch_word was	being used; updated to pass `client' parameter. 
+	spimconsole.cc: Moved a bunch of stuff (class declarations and 
+	defines/includes) to spimconsole.h. Moved a bunch of silly little 
+	functions out from where they used to be embedded in the class 
+	declarations in order to solve a stupid link error (they can go 
+	back eventually). Implemented SPIMConsole::store_halfword and 
+	SPIMConsole::store_byte.
+
+1999-11-13 13:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL: INSTALL: Re-indented Building MIPS Cross Tools section.
+
+1999-11-13 13:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.in, utils/Makefile.in: test_code/Makefile.in:
+	`clobber' target changed to `distclean'.  utils/Makefile.in:
+	Likewise.
+
+1999-11-13 13:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* include/dis-asm.h: include/dis-asm.h: Updated from
+	binutils-991112.
+
+1999-11-13 13:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, configure.in, vmips.cc: Makefile.am: Search
+	user-provided MIPS cross include directory for	includes.  Pull in
+	CXXFLAGS from configure, for debugging.  vmips_CXXFLAGS  and
+	vmips_debug_CXXFLAGS deleted, since they never worked anyway. 
+	configure.in: --with-mips defaults to /opt/mips now. Tidied up some
+	help  messages. Added --with-mips-include. Added --disable-debug. 
+	vmips.cc (vmips::run): Call setup_disassembler().
+
+1999-09-06 16:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* spimconsole.cc: 
+	SPIMConsole::get_type added SPIMConsoleDevice::timediff isn't
+	static anymore SPIMConsoleDisplay::ready always returns a defined
+	value SPIMConsole::fetch_halfword added SPIMConsole::fetch_byte
+	added SPIMConsole::store_word added
+
+1999-08-29 12:46  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* NEWS: NEWS: Updated.	INSTALL: Info on building cross tools, and
+	specifying prefix thereto upon	invoking configure.  MAKEFILE-TODO:
+	Updated.  README: Pointer to home page added.
+
+1999-08-29 12:46  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, MAKEFILE-TODO, README: ChangeLog: Updated.  INSTALL:
+	Info on building cross tools, and specifying prefix thereto upon 
+	invoking configure.  MAKEFILE-TODO: Updated.  README: Pointer to
+	home page added.
+
+1999-08-29 11:59  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, configure.in, utils/bootstrap: Makefile.am: Rules
+	for building debugging version. (I don't think the CXXFLAGS are
+	getting  set properly yet for the debugging objects, though.) Rules
+	to correctly link in installed versions of libopcodes, libbfd, and 
+	libiberty, based on the settings of --with-mips-lib from configure,
+	are  now available. (FINALLY!!!) Some commenting, sectioning and
+	rationalizing.
+	
+	configure.in: AM_PROG_LIBTOOL called again.
+	
+	utils/bootstrap: Zorch unwanted subdirectory Makefiles when doing
+	unbootstrap.
+
+1999-08-26 20:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* stub-dis.cc: stupid c++ compatibility library bug
+
+1999-08-24 00:58  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* configure.in: support for --with-mips (but this may not end up
+	working!? how do we link in what they tell us to link in, if there
+	are conflicting system libraries? do we have to divine the shared
+	library suffix somehow?)
+
+1999-08-23 22:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, NEWS: Added note about utils/bootstrap to INSTALL and
+	updated changelog.
+
+1999-08-23 22:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile.OLD, test_code/Makefile.in,
+	utils/Makefile.OLD, utils/Makefile.in: I'm moving Makefile.OLD back
+	into place as Makefile.in for now.
+
+1999-08-23 22:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO, Makefile.am, configure.in, spimconsole.cc,
+	stub-dis.cc: MAKEFILE-TODO: Updated Makefile.am: some cruft removed
+	configure.in: updated to try slightly harder to find libopcodes, 
+	but I think i'm going to nuke that and make it use a --with option,
+	 because the linker is misbehaving.  stub-dis.cc: include files
+	messed with spimconsole.cc: first draft, definitely not compilable 
+	Need to start thinking about the SerialHosts soon.
+
+1999-08-21 18:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/spim-console: finally finished the spim-console docs, yeow!
+
+1999-08-21 10:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: added "unbootstrap" option
+
+1999-08-21 10:43  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* configure.in: added check for print_insn_little_mips() in
+	libopcodes (does it work yet?)
+
+1999-08-17 13:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* include/dis-asm.h: header file for libopcodes, swiped from same.
+
+1999-08-17 13:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* stub-dis.cc: a disassembler module that uses libopcodes.
+
+1999-08-17 13:02  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/bootstrap: A script to automate getting the build system
+	setup.
+
+1999-08-17 13:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.am, configure.in: 
+	Breaking things in anticipation of including bfd/opcodes/libiberty
+	support.
+
+1999-08-10 12:02  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: 
+	More interesting ideas courtesy of Paul Twohey.
+
+1999-08-01 14:33  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL: mention the cvs repository w.r.t. regenerating files
+
+1999-08-01 14:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO, Makefile.am: Top-level Makefile should now also
+	generate ctags as well as Etags,  and we're (preliminarily) passing
+	$prefix as CONFIG_PREFIX to options.h.
+
+1999-08-01 14:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, NEWS: Updated for documentation building
+	scripts/Makefiles.
+
+1999-08-01 14:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile.in: This is a much better Makefile.in than I had
+	before :-)
+
+1999-08-01 14:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: makeoptdoc, maketoc: Using magic perl invocation header
+	now.
+
+1999-08-01 13:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/spim-console: Documentation of the spim-compatible console
+	interface, almost.
+
+1999-08-01 13:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: Makefile.OLD, forw.txt, plans, status-plans: plans: renamed
+	as status-plans forw.txt: goes at very beginning of document
+	Makefile.OLD: updated to take into account all the new chapters
+
+1999-08-01 13:15  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: cache, delay: cache: fleshed out somewhat delay: rearranged
+	slightly, notes to update
+
+1999-08-01 13:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/opt-forw.txt: Add mention of --prefix; but this doesn't take
+	into account that we need  to use sysconfdir, because that's not
+	implemented yet. (FIXME.)
+
+1999-08-01 13:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/fix-devs: Re-format, add title
+
+1999-08-01 13:12  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/excprio: added some explanatory verbiage to beginning
+
+1999-08-01 03:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile.OLD, Makefile.in: Here's a copy of the old
+	Makefile.
+
+1999-08-01 03:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: Makefile.OLD, Makefile.in: Okay, here's a copy of the old
+	makefile.
+
+1999-08-01 03:17  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/: Makefile.OLD, Makefile.in: I'm confused, but here's the
+	old Makefile.
+
+1999-08-01 03:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* MAKEFILE-TODO: More than I thought.
+
+1999-08-01 03:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* INSTALL, README: Moved some installation stuff to INSTALL from
+	README.
+
+1999-08-01 02:57  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* AUTHORS, MAKEFILE-TODO, Makefile.am, NEWS, README: MAKEFILE-TODO
+	Makefile.am: They describe what sucks about the new build  process
+	and what doesn't, respectively.  README: Whoa, it's almost an
+	introductory note.  AUTHORS ChangeLog NEWS: A bunch of stuff that
+	automake wanted. It may go  away eventually.
+
+1999-08-01 02:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* COPYING, INSTALL, install-sh, missing, mkinstalldirs: Imported
+	from automake --gnu --add-missing.
+
+1999-08-01 02:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* sysinclude.h: Added what should be much more portable checks
+	(thanks to configure)  for 64-bit types, etc.
+
+1999-08-01 02:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile.OLD, Makefile.in, configure.in: Okay, out with the old
+	and in with the new already. We're using automake now,	so
+	Makefile.in is history. configure.in checks for strange Unix
+	variants and  interesting types' sizes now.
+
+1999-08-01 01:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile, Makefile.in, configure.in, doc/Makefile,
+	doc/Makefile.in, test_code/Makefile, test_code/Makefile.in,
+	utils/Makefile, utils/Makefile.in: Renamed Makefile as Makefile.in,
+	preliminarily.
+
+1999-08-01 01:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* configure.in: Initial version, generated by autoscan
+
+1999-07-27 23:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: More blue-skying from yours truly.
+
+1999-07-27 02:46  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/testdev.S: Copy words from test device at 0xa1000000.
+
+1999-07-27 02:46  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: added testdev.rom
+
+1999-07-27 02:46  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, testdev.cc: cpu.cc: fixed bgtz typo testdev.cc: returning
+	offsets instead of # stores, for now.
+
+1999-07-27 01:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: Path to cpp changed. (I smell autoconf in the
+	future.)
+
+1999-07-27 01:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/makeoptdoc: Path to perl changed. (I smell autoconf in the
+	future.)
+
+1999-07-27 01:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile, devicemap.cc, devicemap.h, mapper.cc, mapper.h,
+	range.cc, range.h, testdev.cc, testdev.h, vmips.cc, vmips.h,
+	zschip.cc, zschip.h: Makefile: Removed cacheline.cc zschip.cc from
+	compilation, added testdev.cc.	 Updated dependencies. 
+	devicemap.cc: Constructor now protected & no longer takes a base. 
+	mapper.cc: Use Range accessor functions.  mapper.h:
+	add_device_mapping() proto.  range.cc: One form of ctor now. Add
+	accessor functions. Fix ProxyRange to  call Range ctor with
+	appropriate args. Add ProxyRange::getRealRange()  accessor. 
+	range.h: Updated list of possible mapping types. class Range now
+	has protected  state variables. ProxyRange inherits from Range and
+	has getRealRange().  testdev.cc, testdev.h: Ctor no longer takes a
+	base.  vmips.cc, vmips.h: Use Range accessor functions. Correct
+	syntax errors. Import  declaration of class TestDev.  zschip.cc:
+	Preliminary implementations of ZSChip::extended_read_enable(). Some
+	 bugs here, but at least it compiles (though it's not in the
+	Makefile at  present.) zschip.h: Useful though perhaps potentially
+	problematic definitions for  ZS[WR]R_[AB]_BASE and ZSWR_7PRIME.
+	Declare ZSChip::readregs[] and	writeregs[]. Protos for some more
+	functions.
+
+1999-07-26 00:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.cc, range.h: starting to make ranges more robust to support
+	proxyrange....hooboy this is gonna break a lot of stuff.
+
+1999-07-25 17:26  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc: I guess this is another silly change.
+
+1999-07-25 17:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc: Getting rid of the silly change (more testing.)
+
+1999-07-25 17:08  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc: This is a silly change to test the new network-able
+	CVS repository.
+
+1999-07-15 12:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.cc: 
+	Modified memory range accessor functions to use offsets instead of
+	absolute addresses.
+
+1999-07-15 11:26  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/fix-devs: Documentation on breaking and re-writing the
+	memory-mapped device architecture.
+
+1999-07-15 11:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc, testdev.cc, testdev.h: 
+	Fixed mapper to pass offsets instead of absolute addresses to
+	mapped range objects.
+	
+	Committed test-device code (it's really lame, and it will have to
+	go away eventually.)
+
+1999-07-14 20:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: Note on BC0F, BC0T.
+
+1999-07-14 20:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* sysinclude.h: 
+	Modified linux compatibility stuff here (w.r.t. mmap)
+
+1999-07-14 20:19  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc, range.cc, range.h, vmips.cc: mapper.cc: Replaced guts
+	of add_device_mapping with instantiation of a  (new) ProxyRange
+	object.  range.cc: Preliminary implementation of a ProxyRange
+	class, which causes  loads and stores to one range to be redirected
+	to another range.  range.h: Preliminary specification of class
+	ProxyRange.  vmips.cc: TestDev instantiation is now added, by means
+	of a ProxyRange.   THIS VERSION WILL NOT BUILD!
+
+1999-05-17 00:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile, cpu.cc, devicemap.cc, devicemap.h, mapper.cc, mapper.h,
+	range.cc, range.h, sysinclude.h, zschip.cc, zschip.h: Reworked code
+	to allow for memory-mapped devices.   (cache.cc has succumbed to
+	bit rot; we're leaving it out for now.)  Started working on the
+	first such device, a Zilog Z85C30 Serial Comms	Controller, in
+	zschip.{cc,h}.
+
+1999-05-05 01:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpzero.cc, disassembler.cc, sysinclude.h: a first hack at
+	alpha/64bit host support is coming -- a  problem with printf will
+	require lots of unnecessary (on  32-bit hosts) casts to uint64 to
+	get right...  i found a couple more random longs and ints hanging
+	around	which needed converting to appropriate bit sizes.
+
+1999-04-30 00:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile, bdexcp.S: autoconf is needed here too.
+	perhaps bdexcp.S didn't need changing, but it got some. :-P
+
+1999-04-30 00:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: makeoptdoc, to-do: we need autoconf!
+
+1999-04-30 00:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile, cache.cc, cache.h, cacheline.cc, cacheline.h, cpu.cc,
+	cpu.h, cpzero.cc, cpzero.h, disassembler.cc, mapper.cc, mapper.h,
+	memorymodule.h, options.cc, options.h, range.cc, range.h,
+	sysinclude.h, tlbentry.cc, tlbentry.h, vmips.cc, vmips.h:
+	everything changed -- we went to "uint32" instead of using builtin
+	C types.  hopefully nothing broke.
+
+1999-01-23 18:29  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.cc: Clarify head-of-file comment.  INTENTIONAL_CONFUSION
+	should only randomize bits of registers that are  readable or
+	writable.  I got the masks backwards nearly everywhere. There is an
+	explanatory  comment near mtc0_emulate().
+
+1999-01-23 15:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/egcs-bug: Why we can't call the C entry point of rom files
+	"main"
+
+1999-01-23 15:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile: There's probably a better way to do this, and once
+	we move to autoconf I suppose we can use $(srcdir) to find
+	makeoptdoc and friends. But right now we are stuck with this crap.
+
+1999-01-23 15:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: We like uniformity, yes.
+
+1999-01-23 15:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/emptymain.c: A no-op entry function for debugging
+	setup.S.
+
+1999-01-23 15:03  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: setup.S, sort.c: setup_sort --> entry (see
+	../doc/egcs-bug for why we can't use "main")
+
+1999-01-23 15:02  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: added emptymain.rom w/ its own make rule
+
+1999-01-23 15:01  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc, cpzero.cc: Added support for -DINTENTIONAL_CONFUSION
+	(increases randomness) cpzero.cc: mtc0_emulate sense was backwards.
+	rd has destination register  number on cp0, and rt has source
+	register number on cpu.
+
+1999-01-23 15:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.cc, tlbentry.cc: Added support for -DINTENTIONAL_CONFUSION
+	(increases randomness)
+
+1999-01-23 15:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: Added -DINTENTIONAL_CONFUSION which increases the
+	general randomness on startup and changed the ram dump file name to
+	memdump.bin
+
+1999-01-23 12:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: Added support for "memsize" and "memdump" options. (Use
+	user-specified	RAM size instead of hard-coding it and only dump it
+	at the end if they  say so.)
+
+1999-01-23 12:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.h, optiontbl.h: optiontbl.h: added memsize and memdump
+	options options.h: added DUMP_FILE_NAME definition; later this
+	should probably be  a default of some sort
+
+1999-01-09 07:49  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/plans: A description of some things I want to do - merge this
+	with to-do eventually
+
+1999-01-09 07:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: Added -lstdc++; don't know why this became necessary
+	all of a sudden...
+
+1999-01-08 09:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/setup.S: We now let the linker fill in the correct
+	value for gp like a good little  runtime glue function ought.
+
+1999-01-08 09:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: Added ramdump.bin to the list of `make clean' files
+
+1999-01-08 08:40  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: If $VMIPS was set the newargv[] wouldn't contain
+	original argv[0] so  getopt would barf; fixed.
+
+1999-01-08 08:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.cc: Boot exception vector was not being set; now we use
+	masks from cpzeroreg.h	instead of hand-hacked ones so it works
+	correctly.
+
+1999-01-08 08:21  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: testing memory is done.
+
+1999-01-07 16:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/ld.script: Moved data, bss, sdata relocation base
+	address to 0xa0004000 while still loading them directly after text
+	section.
+
+1999-01-07 16:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: -g makes it easier to debug the .c files.
+	"like, duh!"
+
+1999-01-07 16:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/random.c: removed initstate(), setstate(), degrees[]
+	and seps[] - not strictly necessary.
+
+1999-01-07 16:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/setup.S: Copy writeable data to RAM and set GP to the
+	base address of the upper 16k of RAM. This allows for 16k of global
+	data and 16k of stack and heap.
+
+1999-01-07 16:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/sort.c: doubled array size
+
+1999-01-07 16:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: RAM size doubled to 32k & parameterized
+
+1999-01-07 13:56  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: delaying wasn't getting set in exception() phys address
+	was being used instead of virtual in sw_emulate()
+
+1999-01-07 13:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* disassembler.cc: stupid error in cp0 function opcode disassembler
+	routines
+
+1999-01-07 13:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.cc: read-mask sense corrected
+
+1999-01-07 13:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: A primitive RAM functionality implemented.
+
+1999-01-07 13:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: Added random.c & a separate rule for .raw
+	files, removed TEXT_BASE_ADDR
+
+1999-01-07 13:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/ld.script: Added _gp, .sdata, and _end -- but still
+	need to figure out how to make .sdata writeable
+
+1999-01-07 13:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/sort.c: now we can use random() which might not be the
+	random_register routine.
+
+1999-01-07 13:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/random.c: From freebsd
+	/usr/src/lib/libc/stdlib/random.c
+
+1999-01-07 12:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: ld.script, setup.S, sort.c: ld.script - the answer to
+	your every relocation woe.  setup.S - the mini-kernel used to run
+	sort.c; this will undoubtedly  have a prolonged, painful existence
+	and support many programs it was  never meant to support.  sort.c -
+	an insertion sort program. *twitch*
+
+1999-01-07 12:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/: Makefile, bdexcp.S, exception.S, load.S, loser.S,
+	mumble.S, tester.c: modified *.S and tester.c to have a global
+	__start symbol for ld.script benefit; using Makefile from sort now.
+
+1999-01-07 10:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/: mas, mdis, mgcc, mld, mobjcopy, mobjdump: Added a bunch
+	more aliases to mips-dec-ultrix4.5-* utils.
+
+1999-01-05 15:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/cache: Probably going to become some useful thing to do with
+	caches.
+
+1999-01-05 15:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: Some progress reporting, and noted instrs left to do
+	(only 6 now!)
+
+1999-01-05 15:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: Implemented sw, sh, sb.  Fixed bug in lw, lh, lb, lbu
+	where the virtual address was being passed  as the physical address
+	to the memory fetch routine.
+
+1999-01-05 15:12  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.h: Added cache_refill_mask to class Cache.  access_* -->
+	read_cache_*, for clarity & contrast to expected write-through 
+	function(s) (?).
+
+1999-01-05 15:11  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.cc: Added Cache::attach().  Calculate cache_refill_mask at
+	cache init time.  Changed the way we calculate cache_tag_mask...
+	this all needs to be tested,  thoroughly! MISS -> -1, HIT -> 0.
+	(Who cares?) The cache should take care of refilling itself, I
+	think, so I implemented  that.	First hack at implementing cache
+	isolation, once I figured out what it was.   (See doc/cache). 
+	First hack at implementing cache refills; added refill_one_word();
+	this  _should_ work for cache_refill == 1 (i.e., non-multi-word
+	refill.) Cache functions all take a mode argument now, in case we
+	have to signal	an exception.
+
+1999-01-05 14:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h: Added Cache as a friend class. (Hmm....)
+
+1999-01-05 14:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: Implemented lbu_emulate() and lhu_emulate().
+
+1999-01-05 14:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cacheline.cc: Removed extraneous copy of class CacheLine
+	definition.  This class may need to be completely rewritten (argh!)
+
+1999-01-05 14:45  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.cc, cpzero.h: Added caches_isolated() and
+	caches_swapped().
+
+1999-01-05 08:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/README: Perhaps this will ward off the randoms.
+
+1999-01-05 08:07  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile: Parameterization is your friend.
+
+1999-01-05 08:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: added subdir rules for clean and clobber, and also
+	generalized subdir rules.  added SUBDIRS var.
+
+1999-01-05 07:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/maketoc: Simple /usr/pub-style table of contents maker.
+
+1999-01-05 07:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/Makefile: Added chapter list & table of contents rules
+
+1999-01-05 07:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: excprio, to-do: correctedspa cing
+
+1999-01-05 07:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tags: Now that I think about it, I agree that having tags in CVS
+	is silly.
+
+1999-01-05 07:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tags: Updated tags.
+
+1999-01-05 07:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/: Makefile, delay, euclid.txt, excprio, makeoptdoc,
+	opt-forw.txt, to-do: excprio, delay: indented and titled
+	euclid.txt: indented, a bunch of no-longer-applicable stuff cut out
+	to-do: indented, titled, excprio is done, and moved the transtables
+	file  in as a to-do item (ha!) Makefile, makeoptdoc, opt-forw.txt:
+	used to generate options documentation	from the comments in
+	optiontbl.h
+
+1999-01-05 07:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/transtables: Moved "transtables" into "to-do".
+
+1999-01-05 06:56  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* optiontbl.h: Added documentation and format description for
+	parsing with makeoptdoc.pl
+
+1999-01-05 06:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h: added strmemmode() to class CPU
+
+1999-01-05 06:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: added strmemmode() and display of memory access mode to
+	exception()
+
+1999-01-05 04:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: OPTIONS_DEBUG support.  dump_options_table() made
+	more user-friendly, call moved to end of  process_options(). 
+	process_options_from_file() now doesn't complain if it can't open 
+	an options file because it doesn't exist.
+
+1999-01-05 04:17  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.h: Added support for OPTIONS_DEBUG; dump_options_table ->
+	class Options
+
+1999-01-05 04:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* optiontbl.h: Added instcounts option.
+
+1999-01-05 04:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: Added support for instruction counting ("instcounts"
+	option.)
+
+1999-01-05 04:14  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.h: Added time_diff proto
+
+1999-01-05 04:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: Finished implementing options. Now need to document.
+
+1999-01-05 04:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: Added -DOPTIONS_DEBUG to CXXFLAGS
+
+1999-01-05 03:01  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: In the immortal words of mconst, "AFAICT, something
+	that looks like scanf cannot possibly be useful for real-world
+	input."
+
+1999-01-03 10:27  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/scanf_bug.cc: i think i'm going to cry
+
+1999-01-03 10:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* optiontbl.h: made haltibe and haltjrra the default for now.
+
+1999-01-03 10:24  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: set_{str,num,flag}_option() implemented.	you don't
+	need to strdup() arguments to them, so strdup is gone from 
+	process_options_from_args().  process_options() no longer looks at
+	$HOME (what was I smoking?)  (I also got a test for extra arguments
+	wrong, oops.) Added dump_options_table (this will probably only be
+	temporary.)
+
+1999-01-03 10:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: 
+	Altered run() to use loadaddr parameter from Options instead of
+	ROM_BASE_ADDRESS.
+
+1999-01-03 07:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.h, optiontbl.h, vmips.h: moved stuff from options.cc to
+	options.h and optiontbl.h moved stuff from cpu.cc to options.h
+	moved stuff from vmips.cc to vmips.h
+
+1999-01-03 07:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/excprio: Moved excprio from a comment in cpu.cc
+
+1999-01-03 07:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: 
+	more includes defines and some data structures moved to cpu.h
+	statestr[] -> strdelaystate(), excCode_to_string() -> strexccode()
+	attach() now only attaches IFF args are not NULL, allowing for
+	"partial"  attaching reset() sets $0 to 0. call me paranoid... 
+	exception priority description moved to doc/excprio. 
+	exception_priority(), exception(), jr_emulate(), and one_instr()
+	now query  class Options for stuff they should or should not do. no
+	more nasty ifdefs.  jr_emulate() and jalr_emulate() implemented. 
+	prettied up some comments.
+
+1999-01-03 07:05  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: moved a bunch of defines & includes to vmips.h,
+	options.h from top  (and class vmips def'n) nuked a bunch of old
+	commented-out printfs from mapper_test halt_now is now
+	vmips::halt() and the HALT_* ifdefs are gone! yay ROM file
+	measuring stuff moved to auto_size_rom() vmips::run() now
+	instantiates Options and queries it for which messages to  display.
+	don't know if this works because Options doesn't work yet.  
+	num_instrs, as a finite no. of instructions to execute, is gone.
+	more   commenting all around.  main() now references a global vmips
+	*machine instead of a local vmips *m.	this may or may not be
+	useful.
+
+1999-01-03 07:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: bunch of defines & includes at top,
+	struct/union/class defs moved to options.h static name table &
+	defaults table moved to optiontbl.h fixed pointer idiocy in
+	process_defaults() dummy messages in set_{str,num,flag}_option() --
+	this will compile & link,  but it will dump core (can't
+	tilde-expand a null filename, and that's what  the "configfile"
+	option gets...) added strprefix(), find_option_type() to class
+	Options first working version of process_one_option() -- seems to
+	work replaced option() with a simple version based on optstruct()
+	which actually	returns the value out of the table, not the address
+	of an auto variable :)
+
+1999-01-03 06:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h: 
+	regnames.h was not needed in cpu.h, moved to cpu.cc delay states
+	moved from cpu.cc struct excPriority moved from cpu.cc updated
+	prototypes added pointer to vmips instance to CPU class
+
+1999-01-03 06:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc: attach() now does nothing if argument is null, which
+	it now is by default
+
+1999-01-03 06:50  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.h: edit prototype of attach()
+
+1999-01-03 06:49  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* Makefile: Remove defines from CXXFLAGS - no longer needed updated
+	dependencies
+
+1999-01-03 06:48  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tags: updated
+
+1999-01-03 04:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/loser.S: Added a comment to loser.S about the new
+	Makefile rule for loser.rom.
+
+1999-01-03 04:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: Added rule to make loser.rom a 4-byte ROM
+	instead of a 4-Kbyte ROM in order to make it simpler to demonstrate
+	what happens when you run off the end of memory...
+
+1999-01-03 04:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/euclid.txt: Took out the stupid joke about my dog.
+
+1999-01-03 04:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h: Added next_epc and removed branch_pc.
+
+1999-01-03 04:33  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: Exception handling made sane: 1. [one_instr()] The PC is
+	updated AFTER instruction emulation. This caused    slight changes
+	to branch(), {jal,bgezal,bltzal}_emulate(), and   
+	calc_jump_target().  2. [exception(), one_instr()] The EPC is
+	calculated at every instruction,    by one_instr(), and exception()
+	doesn't pretend to know anything magical    about what the EPC
+	should be. dump_regs() now displays NEXT_EPC instead	of
+	BRANCH_PC.
+
+1999-01-03 02:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/Makefile: added loser.rom to makefile
+
+1999-01-03 02:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/delay: added a description of how to reproduce bug
+
+1999-01-03 02:25  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/delay: Added a description of just how nasty the inside of
+	someone's mouth can be.  No, actually, just a description of how
+	broken un-exceptional exception processing can be. :-P
+
+1999-01-03 02:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/loser.S: 
+	added more test code
+
+1999-01-03 02:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/to-do: Added more tests to to-do.
+	* doc/delay: Added description of a horrible kludge in delay
+	slot / EPC handling which I want to fix.
+
+1999-01-02 08:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tags: [no log message]
+
+1999-01-02 08:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc: 
+	Added set_{str,num,flag}_option skeletons Added
+	process_options_from_args
+
+1999-01-02 07:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
+	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
+	vm_backup_6.tar.gz: Imported sources
+
+1999-01-02 07:13  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
+	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
+	vm_backup_6.tar.gz: Initial revision
+
+1999-01-02 07:09  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc, Makefile, doc/to-do: Imported sources
+
+1999-01-02 07:09  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* options.cc, Makefile, doc/to-do: Initial revision
+
+1999-01-02 06:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/tildexp.cc, sysinclude.h: Imported sources
+
+1999-01-02 06:54  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/tildexp.cc, sysinclude.h: Initial revision
+
+1999-01-02 06:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/tilde_test.txt: Imported sources
+
+1999-01-02 06:39  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/tilde_test.txt: Initial revision
+
+1999-01-02 06:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/test_parser.cc: Imported sources
+
+1999-01-02 06:20  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/test_parser.cc: Initial revision
+
+1999-01-02 05:56  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/parse_test.txt: Imported sources
+
+1999-01-02 05:56  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/parse_test.txt: Initial revision
+
+1999-01-01 02:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/Makefile: Imported sources
+
+1999-01-01 02:28  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/Makefile: Initial revision
+
+1999-01-01 02:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/hash_test.cc: Imported sources
+
+1999-01-01 02:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/hash_test.cc: Initial revision
+
+1998-12-31 23:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/hash_test.pl: Imported sources
+
+1998-12-31 23:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/hash_test.pl: Initial revision
+
+1998-12-31 22:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: Imported sources
+
+1998-12-31 22:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.cc: Initial revision
+
+1998-12-31 22:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* regnames.h, cacheline.h, tags: Imported sources
+
+1998-12-31 22:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* regnames.h, cacheline.h, tags: Initial revision
+
+1998-12-26 02:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h, test_code/Makefile: Imported sources
+
+1998-12-26 02:23  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpu.h, test_code/Makefile: Initial revision
+
+1998-12-26 02:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc, cpzero.cc: Imported sources
+
+1998-12-26 02:04  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.cc, cpzero.cc: Initial revision
+
+1998-12-26 02:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.h: Imported sources
+
+1998-12-26 02:00  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* mapper.h: Initial revision
+
+1998-12-26 01:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.cc: Imported sources
+
+1998-12-26 01:36  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.cc: Initial revision
+
+1998-12-26 00:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/mdis, test_code/bdexcp.S: Imported sources
+
+1998-12-26 00:55  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/mdis, test_code/bdexcp.S: Initial revision
+
+1998-12-26 00:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: Imported sources
+
+1998-12-26 00:47  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* vmips.cc: Initial revision
+
+1998-12-26 00:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/load.S: Imported sources
+
+1998-12-26 00:35  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/load.S: Initial revision
+
+1998-12-26 00:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/mkrom: Imported sources
+
+1998-12-26 00:32  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/mkrom: Initial revision
+
+1998-12-26 00:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.cc: Imported sources
+
+1998-12-26 00:06  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.cc: Initial revision
+
+1998-12-25 23:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/mumble.S: Imported sources
+
+1998-12-25 23:51  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/mumble.S: Initial revision
+
+1998-12-25 23:45  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/exception.S: Imported sources
+
+1998-12-25 23:45  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/exception.S: Initial revision
+
+1998-12-25 23:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/asm_regnames.h: Imported sources
+
+1998-12-25 23:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/asm_regnames.h: Initial revision
+
+1998-12-25 22:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.h: Imported sources
+
+1998-12-25 22:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzero.h: Initial revision
+
+1998-12-25 22:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzeroreg.h: Imported sources
+
+1998-12-25 22:34  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cpzeroreg.h: Initial revision
+
+1998-12-25 03:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* disassembler.cc: Imported sources
+
+1998-12-25 03:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* disassembler.cc: Initial revision
+
+1998-12-25 02:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.h: Imported sources
+
+1998-12-25 02:53  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cache.h: Initial revision
+
+1998-12-25 02:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cacheline.cc: Imported sources
+
+1998-12-25 02:44  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* cacheline.cc: Initial revision
+
+1998-12-25 00:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tlbentry.cc: Imported sources
+
+1998-12-25 00:31  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tlbentry.cc: Initial revision
+
+1998-12-24 22:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tlbentry.h: Imported sources
+
+1998-12-24 22:10  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* tlbentry.h: Initial revision
+
+1998-12-24 21:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/getpagesize.cc: Imported sources
+
+1998-12-24 21:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/getpagesize.cc: Initial revision
+
+1998-12-24 21:21  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/parity.cc: Imported sources
+
+1998-12-24 21:21  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/parity.cc: Initial revision
+
+1998-12-24 18:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/random.cc: Imported sources
+
+1998-12-24 18:38  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* misc_code/random.cc: Initial revision
+
+1998-12-23 03:42  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/euclid.txt: Imported sources
+
+1998-12-23 03:42  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/euclid.txt: Initial revision
+
+1998-12-23 00:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/tester.c: Imported sources
+
+1998-12-23 00:52  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* test_code/tester.c: Initial revision
+
+1998-12-23 00:11  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/romdis: Imported sources
+
+1998-12-23 00:11  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/romdis: Initial revision
+
+1998-12-22 20:41  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* memorymodule.cc, memorymodule.h: Imported sources
+
+1998-12-22 20:41  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* memorymodule.cc, memorymodule.h: Initial revision
+
+1998-12-22 20:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/doedit: Imported sources
+
+1998-12-22 20:37  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* utils/doedit: Initial revision
+
+1998-12-20 05:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.h: Imported sources
+
+1998-12-20 05:22  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* range.h: Initial revision
+
+1998-12-20 05:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/transtables: Imported sources
+
+1998-12-20 05:16  Brian R. Gaeke <brg@sartre.dgate.ORG>
+
+	* doc/transtables: Initial revision
+

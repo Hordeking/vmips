@@ -1,0 +1,12 @@
+
+Acknowledgements
+----------------
+
+ Conversations I had with Michael Constant <mconst@csua.berkeley.edu>
+ provided me with the initial impetus for writing the emulator.
+ My experience in Computer Science 61C at UC Berkeley helped to reinforce
+ my convictions in the matter. ;-)
+
+ I looked to James Larus's SPIM simulator for examples of what to do
+ (and sometimes, what not to do) when faced with certain tricky issues.
+

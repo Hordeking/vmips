@@ -1,0 +1,28 @@
+# vmips RPM spec file.
+Name: vmips
+Summary: A MIPS-based virtual machine simulator.
+Version: @VERSION@
+Release: 1
+Copyright: GPL
+Group: Emulators
+URL: http://sartre.dgate.org/vmips/
+Source: ftp://sartre.dgate.org/pub/vmips/snapshots/vmips-@VERSION@.tar.gz
+Packager: Brian R. Gaeke <brg@sartre.dgate.org>
+
+%description
+VMIPS is a software simulator for a virtual machine based
+on a MIPS R3000 CPU.
+
+%prep
+%setup
+./configure
+
+%build
+make
+
+%install
+make install
+
+%files
+/usr/local/bin/vmips
+

@@ -1,0 +1,116 @@
+VMIPSTOOL=../vmipstool
+MGCC=$(VMIPSTOOL) --compile
+MGCC_FLAGS=-g -I@top_srcdir@
+MAS=$(VMIPSTOOL) --assemble
+MLD=$(VMIPSTOOL) --link
+CPP=$(VMIPSTOOL) --preprocess -I@top_srcdir@
+MOBJDUMP=@mipstoolprefix@objdump
+MOBJCOPY=@mipstoolprefix@objcopy
+DISASSEMBLE=$(MOBJDUMP) --disassemble-all --all-headers
+ROMS=tester.rom sort.rom bdexcp.rom exception.rom load.rom loser.rom \
+	mumble.rom emptymain.rom testdev.rom hello.rom echo.rom clocker.rom
+RAWTEXTS=$(ROMS:.rom=.raw)
+RELOCS=$(ROMS:.rom=.fix)
+SETUP=setup.o
+OBJS=$(COBJS) $(AOBJS)
+SHELL = @SHELL@
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+#------
+CSRCS=tester.c sort.c random.c emptymain.c hello.c echo.c
+ASRCS=bdexcp.S clocker.S exception.S load.S loser.S mumble.S setup.S testdev.S
+CPREP=$(CSRCS:.c=.i)
+CASM=$(CSRCS:.c=.s)
+COBJS=$(CSRCS:.c=.o)
+APREP=$(ASRCS:.S=.s)
+AOBJS=$(APREP:.s=.o)
+ODUMP=$(COBJS:.o=.dump) $(AOBJS:.o=.dump)
+CLEANFILES=$(CPREP) $(COBJS) $(APREP) $(AOBJS) $(ODUMP) $(CASM) $(RAWTEXTS) $(RELOCS)
+CLOBBERFILES=$(ROMS)
+DISTFILES=Makefile.in asm_regnames.h ld.script.in $(ASRCS) $(CSRCS) README
+#------
+
+all: $(SETUP) $(ROMS)
+
+dump: $(ODUMP)
+
+# Nothing to do here:
+dvi install check installcheck:
+
+clean:
+	-rm -f $(CLEANFILES)
+
+distclean: clean
+	-rm -f $(CLOBBERFILES)
+
+maintainer-clean: distclean
+
+loser.rom: loser.raw
+    dd if=$*.raw of=$@ bs=4c count=1
+
+%.rom: %.fix
+	$(VMIPSTOOL) --make-rom $*.fix $*.rom
+
+%.raw: %.fix
+	$(MOBJCOPY) -O binary $< $@
+
+hello.fix: $(SETUP) hello.o
+	$(MLD) -o $@ $+
+
+echo.fix: $(SETUP) echo.o
+	$(MLD) -o $@ $+
+
+sort.fix: $(SETUP) sort.o random.o
+	$(MLD) -o $@ $+
+
+emptymain.fix: $(SETUP) emptymain.o
+	$(MLD) -o $@ $+
+
+tester.fix: $(SETUP) tester.o
+	$(MLD) -o $@ $+
+
+%.fix: %.o
+	$(MLD) -o $@ $+
+
+%.s: %.S
+	$(CPP) $< > $@
+
+%.s: %.c
+	$(MGCC) $(MGCC_FLAGS) -S -c -o $@ $<
+
+%.o: %.c
+	$(MGCC) $(MGCC_FLAGS) -c -o $@ $<
+
+%.o: %.s
+	$(MAS) -o $@ $<
+
+%.o: %.S
+	@$(MAKE) $*.s
+	@$(MAKE) $*.o
+
+%.i: %.c
+	$(CPP) $< > $@
+
+%.dump: %.o
+	$(DISASSEMBLE) $< > $@
+
+# Snarfed from automake and modified.
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+

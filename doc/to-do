@@ -1,0 +1,251 @@
+
+Things yet to be done
+---------------------
+
+ /* Options processing
+  *  - debug flags
+  *  - halting flags
+  *  - output file, rom file
+  * [vmips.cc: vmips::run()]
+  * DONE (tested)
+  */
+ 
+ /* Convert #ifdefs and command line args to use Options class
+  * [vmips.cc: vmips::run(), cpu.cc, mapper.cc]
+  * DONE (tested)
+  */
+ 
+ /* Write initial documentation of options!
+  * (Automated by `makeoptdoc' program)
+  * DONE (tested)
+  */
+ 
+ /* Bit-level write-protecting system for registers:
+  * every MTCz instruction (etc.) sets the register using
+  * Rc = 0 | (Rs & masks[Rc])  instead of  Rc = Rs.
+  * [cpzero.cc: CPZero::mtc0_emulate()]
+  * DONE (Not thoroughly tested)
+  */
+ 
+ /* Find out what the behavior of BC0F and BC0T instructions is on a real
+  * R3000, because the MIPS book doesn't specify it.
+  * Update (14/Jul/1999): See p. A-8, Heinrich & Kane.
+  * More info (14/Dec/2000) - from MIPS1 locore:
+  *  The insn below [1: bc0f 1b] attempts to wait for the writebuffer to
+  *  drain. It does not work on all MIPS hosts or maybe even all DEC machines.
+  *  It assumes that the COP0 usability bit is wired to external
+  *  writebuffer logic. This is not true on some DECstations or on
+  *  the SONY news3400.
+  * Also:
+  *  "The bc0f instruction checks the state of the write buffer."
+  *  <http://archi.snu.ac.kr/khkim/presentation/sys_trace.script.txt>
+  * Also:
+  *  NetBSD port-mips PR #4400  - news 3400 hangs up when you try to
+  *  do 1: bc0f 1b (i.e., it always takes the jump, meaning that CpCond for
+  *  CP0 is always false, I guess).
+  * More on the write buffer: p. 2-25, Heinrich & Kane.
+  * Also:
+  *  A-15, A-17, A-19, A-21 give me the impression that BC0F/BC0T/BC0FL/BC0TL
+  *  are NOT supposed to ever cause reserved instruction (RI) exceptions,
+  *  even on the R2000/R3000/R3000A, though they DO cause RI exceptions on
+  *  the R10000:
+  *   <http://www.sgi.com/processors/r10k/manual/t5.Ver.2.0.book_299.html>
+  *   specifies: "Branch on Coprocessor 0.  On the R4400 processor, CacheOps
+  *   that hit in the specified cache set the CH bit in the Diagnostic field
+  *   of the CP0 Status register (bit 18). Though it was undocumented, this
+  *   bit could be tested by the Branch on Coprocessor 0 instructions (bc0t,
+  *   bc0f, bc0tl, bc0fl).  The R10000 processor also implements the CH
+  *   bit but it is not associated with a Coprocessor 0 condition. Instead,
+  *   execution of a branch on Coprocessor 0 instruction takes a Reserved
+  *   Instruction exception."
+  * It looks like the most compatible thing to do would be to emulate the case
+  * where the CpCond bit for CP0 is always TRUE, i.e., the writebuffer is
+  * always empty. That's what we've gone with for now.
+  * [cpzero.cc: CPZero::cpzero_emulate()]
+  */
+ 
+ /* Implement multi-word refill.
+  * [cache.cc: Cache::refill(), mapper.cc: Mapper::fetch_*()]
+  * DONE (Not tested)
+  */
+ 
+ /* Implement non-multi-word refill.
+  * [cache.cc: Cache::refill(), mapper.cc: Mapper::fetch_*()]
+  * This should have been done as a consequence of multi-word refill
+  * with the cache refill size set to 1 word.
+  * Neither of these has been tested, and neither will be tested
+  * until I get to connecting the caches to the mapper.
+  */
+ 
+ /* Implement TLBR, TLBWI, TLBWR, TLBP, and RFE instructions.
+  * [cpzero.cc: CPZero::{tlbr,tlbwi,tlbwr,tlbp,rfe}_emulate()]
+  * DONE (Not tested)
+  */
+ 
+ /* Implement exception prioritizing.
+  * [cpu.cc: CPU::exception_priority(), CPU::exception()]
+  * DONE (Not tested, because I can't think of a sick enough test case!)
+  */
+ 
+ Test every instruction!
+
+ Currently existing instructions: add addi addiu addu and andi bc0f bc0t
+ beq bgez bgezal bgtz blez bltz bltzal bne break div divu j jal jalr jr
+ lb lbu lh lhu lui lw lwc1 lwc2 lwc3 lwl lwr mfc0 mfhi mflo mtc0 mthi
+ mtlo mult multu nor or ori rfe sb sh sll sllv slt slti sltiu sltu sra
+ srav srl srlv sub subu sw swc1 swc2 swc3 swl swr syscall tlbp tlbr
+ tlbwi tlbwr xor xori
+
+ Currently tested instructions: add addiu addu and andi beq beqz bgez
+ bgtz blez bne bnez break div divu j jal jalr jr la lb lbu lhu li lui lw
+ mfc0 mfhi mflo move mtc0 mult negu nop nor or ori rfe sb sh sll slt slti
+ sltiu sltu sra subu sw tlbwi
+
+ Currently untested instructions: addi bc0f bc0t bgezal bltz bltzal lh
+ lwc1 lwc2 lwc3 lwl lwr mthi mtlo multu sllv srav srl srlv sub swc1 swc2
+ swc3 swl swr syscall tlbp tlbr tlbwr xor xori
+
+ [cpu.cc, cpzero.cc: CPZero::cpzero_emulate()] 
+
+ /* Maybe it would be nice to implement the various huge switch statements
+  * as jump tables, like God intended. :-P Here's a start:
+  *    EmulationMethod opcode_trans_table = {
+  *        funct, regimm, j, jal, beq, bne, blez, bgtz,
+  *        addi, addiu, slti, sltiu, andi, ori, xori, lui,
+  *        cpzero, cpone, cptwo, cpthree, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  *        lb, lh, lwl, lw, lbu, lhu, lwr, NULL,
+  *        sb, sh, swl, sw, NULL, NULL, swr, NULL,
+  *        NULL, lwc1, lwc2, lwc3, NULL, NULL, NULL, NULL,
+  *        NULL, swc1, swc2, swc3, NULL, NULL, NULL, NULL
+  *    };
+  *    EmulationMethod funct_trans_table = {
+  *        sll, NULL, srl, sra, sllv, NULL, srlv, srav,
+  *        jr, jalr, NULL, NULL, syscall, break, NULL, NULL,
+  *        mfhi, mthi, mflo, mtlo, NULL, NULL, NULL, NULL,
+  *        mult, multu, div, divu, NULL, NULL, NULL, NULL,
+  *        add, addu, sub, subu, and, or, xor, nor,
+  *        NULL, NULL, slt, sltu, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  *    };
+  * [cpu.cc: one_instr(), funct_emulate(), cpzero.cc: cpzero_emulate()]
+  * Decided not to do this, because it would be slower.
+  */
+ 
+ /* Instructions left to be implemented:
+  * lwcZ, swcZ
+  * DONE; coprocessors are unusable.
+  * swl, swr, lwl, lwr
+  * DONE, but untested. (Copied this code from SPIM6.)
+  * [cpu.cc]
+  */
+
+ /* Lamely, there are places where we assume little-endianness. These
+  * should be quashed or otherwise dealt with.
+  * - The right way to deal with this is to allow for host and target to be
+  *    of arbitrary endianness, and have a function 'Mapper::swap_bytes(data,
+  *    nbytes)' which does the translation, and put it in a separate file,
+  *    and have a host-swapped-from-target version and a host-equals-to-target
+  *    version, and have them be conditionally compiled in. This will work
+  *    because we store words of data using uint32 and friends.
+  * DONE
+  * [stub-dis.cc, utils/romdis, others?]
+  */
+
+ /* Loading and storing to uncached, unmapped memory
+  * [cpu.cc, mapper.cc]
+  * DONE (tested)
+  */
+ 
+ /* rewrite disassembler to use GNU libopcodes
+  * [disassembler.cc]
+  * DONE. Result is in stub-dis.cc.
+  */
+
+ /* implement autoconf in makefiles, shell scripts. we should also bring
+  * in automake and aclocal; this will ease the addition of libbfd/libopcodes
+  * to the simulator.
+  * [Makefile, */Makefile, etc.]
+  * DONE.
+  */
+
+ /* Standard ROM monitor - this needs to be able to interface with the
+  * serial chip long enough to do TFTP (UDP) over SLIP with some fixed
+  * kernel name and a configurable address (I think ARP would be unworkable),
+  * at the very least.
+  * [Most of this development is going on in misc_code/xmboot]
+  * DONE.
+  */
+
+ /* SPIM compatible console serial device. I don't know how much code sharing
+  * might be possible or useful between this and the zschip emulation.
+  * DONE.
+  */
+
+ /* Problems building on Solaris 2.7:
+  * Libraries: need -lsocket -lnsl to build with debugging.
+  * inet_aton doesn't exist - roll our own?
+  * [debug.cc]
+  * [inet_aton has been disused in debug.cc]
+  * [DONE - now check for socket in -lsocket, inet_ntoa in -lnsl]
+  */
+ /* Figure out some sane way to set breakpoints in ROM using the generic
+  * gdb remote interface, which sadly does not have support for hardware
+  * breakpoints.  The remote Z-packet needs to be investigated -- why doesn't
+  * it work in a canonical mips-dec-ultrix4.5-gdb ver. 4.17?
+  * [debug.cc]
+  * [DONE - well, we never figured out the Z packet, but we have a heuristic
+  * that works]
+  */
+
+ /* The debugger and the non-debugging controller should execute the same
+  * code on each instruction. Currently, vmips.cc calls vmips::cpu_loop()
+  * whereas debug.cc just calls cpu->periodic() directly. vmips.cc should
+  * probably be refactored.
+  * [vmips.cc, debug.cc]
+  * [DONE: debug.cc now calls machine->periodic().]
+  */
+
+ The debugger should cleanly support being detached from the remote
+ process, instead of calling abort() when the TCP connection is lost.  The
+ k-packet should probably halt the machine. Related: debugger_shutdown
+ (debug.cc) and halted (vmips.cc) should probably be merged.
+ [vmips.cc, debug.cc]
+
+Version 1.1 type thing:
+
+ Finish implementing the cache. This has two parts:
+  1. Implement cache "store partial" mode.
+  2. Implement the non-"store partial" mode; i.e., where a store causes the
+   cache line to be invalidated unconditionally. (pp. 5-5 & 5-6 in MIPS RISC
+   Architecture)
+ [cache.cc, mapper.cc]
+
+ Make the SPIM console device more efficient. Currently the code spends
+ 36% of its time in calls to select() and 35% in all the emulation functions,
+ which is unacceptably slow. Probably we will want to use a separate thread
+ to cause interrupts instead of polling. We'll likely have to restructure the
+ interrupt controller for this.
+ - A thought I had was to use a separate thread for everyone who wants to
+   have periodic() called.
+ - Michael Constant suggesting using FIOASYNC, sigaction with SA_SIGINFO,
+   and handling SIGPOLL by dispatching to the correct interrupt generator.
+   This would be both more portable and easier to understand than threads. 
+
+Version 1.5 type thing:
+
+ When configuring a serial device, the user should be able to select a
+ machine-dependent serial front-end (e.g., unix-xterm, posix-serial,
+ mac-serial, mac-ttywidget, etc.) and a machine-independent serial
+ back-end (zilog-z85c30, spim-console, etc.) These would be good to
+ implement using shared libs. Also, modularizing the CPU, memory mapper
+ and other pieces (freezing APIs, building as shlibs) would be a Very
+ Good Thing Indeed. (In general, we need to throw out vmips.cc and replace
+ it with a smart configuration mechanism, probably based on Scheme or Tcl.)
+
+These are version 2.0 type things:
+
+ A good way to get started on building an FPU would be to use
+ SoftFloat: <http://www.cs.berkeley.edu/~jhauser/arithmetic/softfloat.html>.
+

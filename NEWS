@@ -1,0 +1,32 @@
+
+User-visible changes since version 20001014:
+
+* Reading and writing memory and registers and single-stepping
+  programs from gdb now works. ("continue" isn't quite there yet.)
+
+User-visible changes since version 20000517:
+
+* Emulating a little-endian MIPS on a big-endian host passes preliminary
+  tests.  Build process queries MIPS tools for their endianness
+  automatically.  Builds tested on Solaris SPARC, i386 Linux, FreeBSD
+  and HP-UX.  Distribution building (gmake distcheck) almost works.
+
+User-visible changes since version 19991114:
+
+* Polling input and output via the SPIM-compatible console device now work.
+
+User-visible changes since version 19990829:
+
+* Build processes seeks out MIPS tools; Installation documentation now
+  briefly documents how to build cross tools. 
+
+User-visible changes since version 19990823:
+
+* Spim console documentation completed; first attempt at spim console code.
+
+User-visible changes since version 19990801:
+
+* Documentation Makefile.in has been built.
+* Some documentation has been updated.
+* VMIPS is being adapted to use GNU Autoconf and Automake.
+

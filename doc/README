@@ -1,0 +1,1143 @@
+VMIPS hacking guide
+
+CONTENTS:
+        Delay slot handling
+        Exception prioritizing
+        The current (re-)implementation of memory-mapped devices
+        Overview of the SPIM-compatible console device
+        Description of SPIM's implementation of the keyboard
+        Notes on caches
+        Things yet to be done
+        January 1999 status report
+        A simple test case for VMIPS
+        VMIPS interrupt controller
+        How the interrupt controller is integrated
+        Notes on cross-compiling glibc
+        Bugs in EGCS dealing with kernel code
+        Dealing with PIC MIPS code
+        Clues for a MIPS ELF ld script
+
+
+Delay slot handling
+-------------------
+ 
+ The MIPS virtual CPU could be in a delay state of DELAYING, DELAYSLOT,
+ or NORMAL at the beginning of the call to one_instr(), which state could
+ change after PC address translation and instruction fetching had occurred
+ (i.e., right before instruction emulation.)  The value of the delay state
+ has an effect on the exception PC calculation. In all but extraordinary
+ circumstances the EPC should be the address of the instruction which
+ caused the exception; however, if the instruction is executing in a
+ delay slot, and it causes an exception, the EPC should be reported as the
+ address of the immediately-preceding branch instruction. The following
+ are the (myriad) different possible ways this is accomplished with the
+ current code.
+
+ The two possible sources of exceptions that an instruction can cause
+ to occur before that instruction is actually emulated are the call to
+ CPZero::address_trans() and the call to Mapper::fetch_word(), which are
+ roughly equivalent to PC address translation and instruction fetching,
+ respectively.
+ 
+ If the delay state was DELAYING at the beginning of the call to
+ one_instr(), it meant that the previous instruction was a branch that
+ was taken. The action required would be to execute the instruction
+ immediately after the branch (i.e., the instruction in the delay slot),
+ whose address would be given by the PC. After PC address translation
+ and instruction fetching, the PC would be saved in branch_pc (which was
+ actually the address of the instruction in the delay slot, NOT that of
+ the branch), the PC would be loaded with the target of the branch, which
+ was computed earlier and saved in delay_pc, and the delay state would be
+ set to DELAYSLOT for the duration of the emulation of the instruction in
+ the delay slot. If an exception was taken during address translation or
+ instruction fetching, the delay state was DELAYING, and the EPC would be
+ calculated as PC - 4, which is the address of the branch. If an exception
+ was taken during instruction emulation, the delay state was DELAYSLOT,
+ and the EPC would be calculated as branch_pc - 4, which is the address
+ of the branch.
+ 
+ If the delay state was DELAYSLOT at the beginning of the call to
+ one_instr(), it meant that the *previous* instruction was executed in a
+ delay slot; that is, the current PC was calculated by taking a branch. The
+ problem with the current code is that if the address translation or
+ instruction fetch of the instruction to which the branch was taken
+ results in an exception, the delay state will still be DELAYSLOT when
+ exception() is called, and the EPC would be calculated as branch_pc -
+ 4, which is the address of the branch that got us to the current PC,
+ not the instruction that caused the exception. If, on the other hand,
+ the exception was caused by the instruction emulation, and not by the
+ instruction fetch or the PC address translation, the delay state would
+ be NORMAL, and the exception PC would be calculated as PC - 4, which
+ is correct because as the delay state was set to NORMAL from DELAYSLOT,
+ the PC was incremented by 4.
+ 
+ If the delay slot was NORMAL at the beginning of the call to one_instr(),
+ the EPC was correctly calculated if the exception resulted from instruction
+ emulation; otherwise, it was off by one instruction (because PC - 4 was
+ the instruction prior to the current one.) This could be easily demonstrated
+ by having a four-byte ROM with one valid instruction, and watching the EPC
+ calculated when it tried to run off the end...
+ 
+ XXX This should be revised for accuracy and completeness; no one cares about
+ what this bug was.
+
+
+Exception prioritizing
+----------------------
+
+ It is possible for more than one exception to occur during the emulation
+ of the same instruction.  The MIPS architecture has a system for
+ determining which of a set of conflicting exceptions is reported to
+ the exception handler.
+
+ When two or more exceptions occur on the same execution of the same
+ instruction, only one is reported, according to the following priority
+ list. The ordering is by exception code (EXCCODE) and mode of memory
+ access (MODE), where applicable. Each ordered pair (EXCCODE, MODE)
+ below has the priority listed in brackets. * denotes a position where
+ any value matches.
+
+    [1] Address error - instruction fetch 
+        (AdEL, INSTFETCH)
+
+	[2] TLB refill - instruction fetch
+		TLB invalid - instruction fetch 
+		(TLBL, INSTFETCH)
+		(TLBS, INSTFETCH)
+
+	[3] Bus error - instruction fetch
+		(IBE, *)
+
+	[4] Integer overflow, Trap, System call, Breakpoint, Reserved
+		Instruction, or Coprocessor Unusable
+		(Ov, *)
+		(Tr, *)
+		(Sys, *)
+		(Bp, *)
+		(RI, *)
+		(CpU, *)
+
+	[5] Address error - data load or data store
+		(AdEL, DATALOAD)
+		(AdES, *)
+
+	[6] TLB refill - data load or data store
+		TLB invalid - data load or data store
+		(TLBL, DATALOAD)
+		(TLBS, DATALOAD)
+		(TLBL, DATASTORE)
+		(TLBS, DATASTORE)
+
+	[7] TLB modified - data store
+		(Mod, *)
+
+	[8] Bus error - data load or data store
+		(DBE, *)
+
+	[9] Interrupt
+		(Int, *)
+
+
+The current (re-)implementation of memory-mapped devices
+--------------------------------------------------------
+ 
+ The central problem with the current half-implementation of memory
+ mapped devices is that you can't map them at multiple locations, which
+ makes their design completely different from all the other kinds of
+ mappable entities. The assumption was that you wouldn't ever really
+ want to map a device at more than one separate location, so it was
+ okay to hardwire one physical base address (Range::base field) in each
+ mappable device. But this also would necessitate a series of calls for
+ instantiation as follows:
+ 
+ 	/* Test device at base phys addr 0x01000000 */
+ 	testdev = new TestDev(0x01000000);
+ 	physmem->add_device_mapping(testdev);
+ 
+ whereas you'd really want it to be like
+ 
+ 	/* Test device at base phys addr 0x01000000 */
+ 	testdev = new TestDev();
+ 	physmem->add_device_mapping(testdev, 0x01000000);
+ 
+ so that it looked vaguely like add_core_mapping and add_file_mapping,
+ which both take a mapping-source (host machine memory address and
+ filehandle, respectively) as well as a destination address. Also, this
+ would allow for multiple base-addresses for a device.
+ 
+ The solution as I envision it is to remove the base address from
+ consideration when actually doing stuff to any mappable entity; that is,
+ instead of having everything know its base address and having to subtract
+ it from any physical address accessed, just subtract the base address
+ of the Range object before the mappable entity ever sees it.
+ 
+ The other part of this is that there is no entity which corresponds
+ even roughly to a DeviceMap object which means "thing taken care of
+ by the OS's virtual memory architecture." The performance differential
+ incurred if a separate object were created for this should be investigated.
+
+Overview of the SPIM-compatible console device
+----------------------------------------------
+
+ The SPIM-compatible Console Device models a serial controller with
+ two 200-baud full-duplex communication lines and a 1 Hz clock providing
+ timer interrupts.
+ 
+ With a SPIM-compatible Console Device configured, the following interrupt
+ lines are enabled.
+
+ Interrupt line 2 (Cause bit 0x0400) is wired to the Clock
+ Interrupt line 3 (Cause bit 0x0800) is wired to the #1 Keyboard
+ Interrupt line 4 (Cause bit 0x1000) is wired to the #1 Display
+ Interrupt line 5 (Cause bit 0x2000) is wired to the #2 Keyboard
+ Interrupt line 6 (Cause bit 0x4000) is wired to the #2 Display
+
+ The SPIM-compatible console device communicates with the CPU by means
+ of a series of 9 32-bit-wide control and data registers, for a total
+ of 36 memory-mapped bytes. The control registers are used for enabling
+ and disabling specific devices' interrupt request mechanisms, and for
+ determining which device(s) is/are ready for data when polling or during
+ interrupt processing.
+
+ Register             Offset
+ ------------------   ------
+ Keyboard 1 Control   00
+ Keyboard 1 Data      04
+ Display 1 Control    08
+ Display 1 Data       0c
+ Keyboard 2 Control   10
+ Keyboard 2 Data      14
+ Display 2 Control    18
+ Display 2 Data       1c
+ Clock Control        20
+
+ Within each control register, Bit 2 of each word is the Device
+ Interrupt Enable bit, and bit 1 is the Device Ready bit.  Only the
+ Device Interrupt Enable bits of the control registers are writable;
+ other bits must be written as zero. Only Device Interrupt Enable and
+ Device Ready are readable; other bits read as zero.
+
+ Within each data register, writes are allowed only to the
+ least-significant 8 bits; the other 24 bits read as zero and must be
+ written as zero.
+
+ On a write to the data register, the display becomes unready and writes
+ a char to the connected serial interface; it becomes ready again in 40
+ ms. The keyboard data register is read-only.
+
+ The keyboard is initially unready; whenever the connected serial
+ interface has a char waiting on input, and the keyboard is unready,
+ the keyboard reads the char into its buffer, and becomes ready. If the
+ keyboard is ready for more than 40 ms., it will check the connected
+ serial interface again.  If there is another char available, it will
+ read it and save it in the buffer, writing over the one which was
+ originally in the buffer. No provision is made for detection of these
+ buffer overruns.
+
+ On a read from the data register, if the keyboard is ready it becomes
+ unready and returns the byte in its holding buffer. If the keyboard
+ data register is read while the keyboard is unready, the data in the
+ buffer is the same as when the keyboard was last ready. The display
+ data register is write-only.
+
+ The Clock has no data register and becomes ready at most every second. A
+ read from the Clock Control register makes the clock unready. Writes to
+ the clock control register are as above.
+
+ When any of the above devices becomes ready while its Device Interrupt
+ Enable bit is set, it also sets the appropriate bits in the Cause
+ register of CP0 and signals an Interrupt exception.
+
+Description of SPIM's implementation of the keyboard
+----------------------------------------------------
+
+ The keyboard becomes unready on a read from the data register.
+ Updates happen once per instruction fetched.
+
+ During an update, if the keyboard time's tv_sec field is nonzero, the
+ keyboard's count is incremented, and if the keyboard time is more than
+ 40 ms. ago and the keyboard's count is more than 4000, a timeout
+ occurs: the keyboard time's tv_sec field is set to zero and the count
+ is set to zero.
+
+ Then, if the keyboard is unready (meaning that the data register has been
+ read since the last byte was received), or the keyboard time's tv_sec
+ field is zero (meaning that the keyboard's count has incremented past
+ 4000 and the timeout has expired), the emulator attempts to get a byte
+ from the host serial interface. If there is a byte, then the buffer is
+ filled with that byte, the keyboard becomes ready, and the keyboard
+ time is set to the current time.
+
+
+
+Notes on caches
+---------------
+
+ The caches are not currently finished, not connected to the rest of
+ the memory subsystem, and in fact not currently compiled. I'm not sure
+ whether to continue working on them or not; probably I will eventually,
+ but this is a lower priority.
+
+ CP0 implements two Diagnostic Status bits in the Status register called
+ IsC and SwC; they can be used by the OS to determine the cache geometry
+ exactly, for example. These can be tested by the appropriate accessor
+ functions in cpzero.cc.
+
+ Cache isolation (IsC = 1) means the cache is never refilled and all
+ accesses are considered hits; stores write into the cache and do not
+ write into memory.
+
+ Cache swapping (SwC = 1) means the instruction cache and data cache
+ are switched, so that instruction fetches go through the data cache
+ and load/store instructions go through the instruction cache.
+
+
+Things yet to be done
+---------------------
+
+ /* Options processing
+  *  - debug flags
+  *  - halting flags
+  *  - output file, rom file
+  * [vmips.cc: vmips::run()]
+  * DONE (tested)
+  */
+ 
+ /* Convert #ifdefs and command line args to use Options class
+  * [vmips.cc: vmips::run(), cpu.cc, mapper.cc]
+  * DONE (tested)
+  */
+ 
+ /* Write initial documentation of options!
+  * (Automated by `makeoptdoc' program)
+  * DONE (tested)
+  */
+ 
+ /* Bit-level write-protecting system for registers:
+  * every MTCz instruction (etc.) sets the register using
+  * Rc = 0 | (Rs & masks[Rc])  instead of  Rc = Rs.
+  * [cpzero.cc: CPZero::mtc0_emulate()]
+  * DONE (Not thoroughly tested)
+  */
+ 
+ /* Find out what the behavior of BC0F and BC0T instructions is on a real
+  * R3000, because the MIPS book doesn't specify it.
+  * Update (14/Jul/1999): See p. A-8, Heinrich & Kane.
+  * More info (14/Dec/2000) - from MIPS1 locore:
+  *  The insn below [1: bc0f 1b] attempts to wait for the writebuffer to
+  *  drain. It does not work on all MIPS hosts or maybe even all DEC machines.
+  *  It assumes that the COP0 usability bit is wired to external
+  *  writebuffer logic. This is not true on some DECstations or on
+  *  the SONY news3400.
+  * Also:
+  *  "The bc0f instruction checks the state of the write buffer."
+  *  <http://archi.snu.ac.kr/khkim/presentation/sys_trace.script.txt>
+  * Also:
+  *  NetBSD port-mips PR #4400  - news 3400 hangs up when you try to
+  *  do 1: bc0f 1b (i.e., it always takes the jump, meaning that CpCond for
+  *  CP0 is always false, I guess).
+  * More on the write buffer: p. 2-25, Heinrich & Kane.
+  * Also:
+  *  A-15, A-17, A-19, A-21 give me the impression that BC0F/BC0T/BC0FL/BC0TL
+  *  are NOT supposed to ever cause reserved instruction (RI) exceptions,
+  *  even on the R2000/R3000/R3000A, though they DO cause RI exceptions on
+  *  the R10000:
+  *   <http://www.sgi.com/processors/r10k/manual/t5.Ver.2.0.book_299.html>
+  *   specifies: "Branch on Coprocessor 0.  On the R4400 processor, CacheOps
+  *   that hit in the specified cache set the CH bit in the Diagnostic field
+  *   of the CP0 Status register (bit 18). Though it was undocumented, this
+  *   bit could be tested by the Branch on Coprocessor 0 instructions (bc0t,
+  *   bc0f, bc0tl, bc0fl).  The R10000 processor also implements the CH
+  *   bit but it is not associated with a Coprocessor 0 condition. Instead,
+  *   execution of a branch on Coprocessor 0 instruction takes a Reserved
+  *   Instruction exception."
+  * It looks like the most compatible thing to do would be to emulate the case
+  * where the CpCond bit for CP0 is always TRUE, i.e., the writebuffer is
+  * always empty. That's what we've gone with for now.
+  * [cpzero.cc: CPZero::cpzero_emulate()]
+  */
+ 
+ /* Implement multi-word refill.
+  * [cache.cc: Cache::refill(), mapper.cc: Mapper::fetch_*()]
+  * DONE (Not tested)
+  */
+ 
+ /* Implement non-multi-word refill.
+  * [cache.cc: Cache::refill(), mapper.cc: Mapper::fetch_*()]
+  * This should have been done as a consequence of multi-word refill
+  * with the cache refill size set to 1 word.
+  * Neither of these has been tested, and neither will be tested
+  * until I get to connecting the caches to the mapper.
+  */
+ 
+ /* Implement TLBR, TLBWI, TLBWR, TLBP, and RFE instructions.
+  * [cpzero.cc: CPZero::{tlbr,tlbwi,tlbwr,tlbp,rfe}_emulate()]
+  * DONE (Not tested)
+  */
+ 
+ /* Implement exception prioritizing.
+  * [cpu.cc: CPU::exception_priority(), CPU::exception()]
+  * DONE (Not tested, because I can't think of a sick enough test case!)
+  */
+ 
+ Test every instruction!
+
+ Currently existing instructions: add addi addiu addu and andi bc0f bc0t
+ beq bgez bgezal bgtz blez bltz bltzal bne break div divu j jal jalr jr
+ lb lbu lh lhu lui lw lwc1 lwc2 lwc3 lwl lwr mfc0 mfhi mflo mtc0 mthi
+ mtlo mult multu nor or ori rfe sb sh sll sllv slt slti sltiu sltu sra
+ srav srl srlv sub subu sw swc1 swc2 swc3 swl swr syscall tlbp tlbr
+ tlbwi tlbwr xor xori
+
+ Currently tested instructions: add addiu addu and andi beq beqz bgez
+ bgtz blez bne bnez break div divu j jal jalr jr la lb lbu lhu li lui lw
+ mfc0 mfhi mflo move mtc0 mult negu nop nor or ori rfe sb sh sll slt slti
+ sltiu sltu sra subu sw tlbwi
+
+ Currently untested instructions: addi bc0f bc0t bgezal bltz bltzal lh
+ lwc1 lwc2 lwc3 lwl lwr mthi mtlo multu sllv srav srl srlv sub swc1 swc2
+ swc3 swl swr syscall tlbp tlbr tlbwr xor xori
+
+ [cpu.cc, cpzero.cc: CPZero::cpzero_emulate()] 
+
+ /* Maybe it would be nice to implement the various huge switch statements
+  * as jump tables, like God intended. :-P Here's a start:
+  *    EmulationMethod opcode_trans_table = {
+  *        funct, regimm, j, jal, beq, bne, blez, bgtz,
+  *        addi, addiu, slti, sltiu, andi, ori, xori, lui,
+  *        cpzero, cpone, cptwo, cpthree, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  *        lb, lh, lwl, lw, lbu, lhu, lwr, NULL,
+  *        sb, sh, swl, sw, NULL, NULL, swr, NULL,
+  *        NULL, lwc1, lwc2, lwc3, NULL, NULL, NULL, NULL,
+  *        NULL, swc1, swc2, swc3, NULL, NULL, NULL, NULL
+  *    };
+  *    EmulationMethod funct_trans_table = {
+  *        sll, NULL, srl, sra, sllv, NULL, srlv, srav,
+  *        jr, jalr, NULL, NULL, syscall, break, NULL, NULL,
+  *        mfhi, mthi, mflo, mtlo, NULL, NULL, NULL, NULL,
+  *        mult, multu, div, divu, NULL, NULL, NULL, NULL,
+  *        add, addu, sub, subu, and, or, xor, nor,
+  *        NULL, NULL, slt, sltu, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  *        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+  *    };
+  * [cpu.cc: one_instr(), funct_emulate(), cpzero.cc: cpzero_emulate()]
+  * Decided not to do this, because it would be slower.
+  */
+ 
+ /* Instructions left to be implemented:
+  * lwcZ, swcZ
+  * DONE; coprocessors are unusable.
+  * swl, swr, lwl, lwr
+  * DONE, but untested. (Copied this code from SPIM6.)
+  * [cpu.cc]
+  */
+
+ /* Lamely, there are places where we assume little-endianness. These
+  * should be quashed or otherwise dealt with.
+  * - The right way to deal with this is to allow for host and target to be
+  *    of arbitrary endianness, and have a function 'Mapper::swap_bytes(data,
+  *    nbytes)' which does the translation, and put it in a separate file,
+  *    and have a host-swapped-from-target version and a host-equals-to-target
+  *    version, and have them be conditionally compiled in. This will work
+  *    because we store words of data using uint32 and friends.
+  * DONE
+  * [stub-dis.cc, utils/romdis, others?]
+  */
+
+ /* Loading and storing to uncached, unmapped memory
+  * [cpu.cc, mapper.cc]
+  * DONE (tested)
+  */
+ 
+ /* rewrite disassembler to use GNU libopcodes
+  * [disassembler.cc]
+  * DONE. Result is in stub-dis.cc.
+  */
+
+ /* implement autoconf in makefiles, shell scripts. we should also bring
+  * in automake and aclocal; this will ease the addition of libbfd/libopcodes
+  * to the simulator.
+  * [Makefile, */Makefile, etc.]
+  * DONE.
+  */
+
+ /* Standard ROM monitor - this needs to be able to interface with the
+  * serial chip long enough to do TFTP (UDP) over SLIP with some fixed
+  * kernel name and a configurable address (I think ARP would be unworkable),
+  * at the very least.
+  * [Most of this development is going on in misc_code/xmboot]
+  * DONE.
+  */
+
+ /* SPIM compatible console serial device. I don't know how much code sharing
+  * might be possible or useful between this and the zschip emulation.
+  * DONE.
+  */
+
+ /* Problems building on Solaris 2.7:
+  * Libraries: need -lsocket -lnsl to build with debugging.
+  * inet_aton doesn't exist - roll our own?
+  * [debug.cc]
+  * [inet_aton has been disused in debug.cc]
+  * [DONE - now check for socket in -lsocket, inet_ntoa in -lnsl]
+  */
+ /* Figure out some sane way to set breakpoints in ROM using the generic
+  * gdb remote interface, which sadly does not have support for hardware
+  * breakpoints.  The remote Z-packet needs to be investigated -- why doesn't
+  * it work in a canonical mips-dec-ultrix4.5-gdb ver. 4.17?
+  * [debug.cc]
+  * [DONE - well, we never figured out the Z packet, but we have a heuristic
+  * that works]
+  */
+
+ /* The debugger and the non-debugging controller should execute the same
+  * code on each instruction. Currently, vmips.cc calls vmips::cpu_loop()
+  * whereas debug.cc just calls cpu->periodic() directly. vmips.cc should
+  * probably be refactored.
+  * [vmips.cc, debug.cc]
+  * [DONE: debug.cc now calls machine->periodic().]
+  */
+
+ The debugger should cleanly support being detached from the remote
+ process, instead of calling abort() when the TCP connection is lost.  The
+ k-packet should probably halt the machine. Related: debugger_shutdown
+ (debug.cc) and halted (vmips.cc) should probably be merged.
+ [vmips.cc, debug.cc]
+
+Version 1.1 type thing:
+
+ Finish implementing the cache. This has two parts:
+  1. Implement cache "store partial" mode.
+  2. Implement the non-"store partial" mode; i.e., where a store causes the
+   cache line to be invalidated unconditionally. (pp. 5-5 & 5-6 in MIPS RISC
+   Architecture)
+ [cache.cc, mapper.cc]
+
+ Make the SPIM console device more efficient. Currently the code spends
+ 36% of its time in calls to select() and 35% in all the emulation functions,
+ which is unacceptably slow. Probably we will want to use a separate thread
+ to cause interrupts instead of polling. We'll likely have to restructure the
+ interrupt controller for this.
+ - A thought I had was to use a separate thread for everyone who wants to
+   have periodic() called.
+ - Michael Constant suggesting using FIOASYNC, sigaction with SA_SIGINFO,
+   and handling SIGPOLL by dispatching to the correct interrupt generator.
+   This would be both more portable and easier to understand than threads. 
+
+Version 1.5 type thing:
+
+ When configuring a serial device, the user should be able to select a
+ machine-dependent serial front-end (e.g., unix-xterm, posix-serial,
+ mac-serial, mac-ttywidget, etc.) and a machine-independent serial
+ back-end (zilog-z85c30, spim-console, etc.) These would be good to
+ implement using shared libs. Also, modularizing the CPU, memory mapper
+ and other pieces (freezing APIs, building as shlibs) would be a Very
+ Good Thing Indeed. (In general, we need to throw out vmips.cc and replace
+ it with a smart configuration mechanism, probably based on Scheme or Tcl.)
+
+These are version 2.0 type things:
+
+ A good way to get started on building an FPU would be to use
+ SoftFloat: <http://www.cs.berkeley.edu/~jhauser/arithmetic/softfloat.html>.
+
+January 1999 status report
+--------------------------
+
+ From brg Sat Jan  9 10:47:39 1999
+ Subject: status of mips project, #2
+ To: mconst@csua.berkeley.edu
+ Date: Sat, 9 Jan 1999 10:47:39 -0500 (EST)
+ 
+ Here's where the MIPS project is now (Jan 9 1999): 
+ 
+ * Only 6 instructions remain unimplemented: lwcZ, swcZ, lwl, lwr, swl,
+   and swr.  (I've never seen these generated or anything, so I'm not
+   treating these as a high priority right now.)
+ 
+ * The MIPS emulator successfully runs a kernel-mode insertion sort of 300
+   numbers generated by the FreeBSD random() code, successfully executing
+   just over 1 million instructions in 2.344 seconds. (Yes, that's pretty
+   slow; it runs a little faster if you optimize the code, but not by
+   much. I need to work on streamlining the internals somewhat. This may
+   result in the entire thing having to be rewritten, but I suspect this
+   version is good enough for most classwork...)
+ 
+ * I have written a GNU ld script and a bit of assembly glue to make loading
+   ROM images easier.
+ 
+ * Caches remain unfinished, and the TLB remains untested. Also, there still
+   aren't any I/O devices, and I want to think about what's a good way to
+   implement these. I was thinking about borrowing the idea of the IOASIC
+   (a chip which memory-maps a bunch of different registers on a bunch of
+   different chips) from the DECstation, and implementing a virtual 4-port
+   serial interface as the first thing. By default I would probably choose
+   the Zilog serial chip, but if you have any other recommendations...
+ 
+ * I also eventually want to think about writing a virtual VGA board
+   for the simulator, as well, which would display itself in an X window. I
+   know these ASICs aren't things you would find in any earthly DECstation,
+   but I started to think about what you'd really want in a simulator, and
+   I thought it might be nice to emulate things students might actually
+   see in real life -- this would favor the generic VGA board over the
+   DECstation Turbochannel PMAG-B frame buffer and its brethren, which
+   I think it's universally accepted are strange, hairy, undocumented
+   beasts indeed...
+ 
+ * Another thing to implement, eventually, would be a MIPS R3010 FPU. I 
+   can't say I'm looking forward to this.
+
+A simple test case for VMIPS
+----------------------------
+
+ The program in "test_code/tester.c" is a fixed-data, register
+ implementation of the Euclidean Algorithm for computing the greatest
+ common divisor. Here is a list of the (ten) calculations that it
+ completes for a = 120,923,429 and b = 30,030:
+
+   120923429 % 30030 = 22649
+       30030 % 22649 = 7381
+        22649 % 7381 = 506
+          7381 % 506 = 297
+           506 % 297 = 209
+           297 % 209 = 88
+            209 % 88 = 33
+             88 % 33 = 22
+             33 % 22 = 11
+             22 % 11 = 0
+
+ Here is the relevant function from tester.c:
+
+    void tester(void)
+    {
+	    register int a, b, c;
+    
+	    a = 120923429;
+	    b = 30030;
+	    do {
+		    c = a % b; a = b; b = c;
+	    } while (c);
+    }
+
+ The following is an assembly language dump of the program from
+ "romdis" (a shell script which calls objdump), followed by a trace
+ of the instructions as executed by VMIPS when you run the "tester.c"
+ program. I compiled it with "gcc -O3 -c -o tester.o tester.c" and "mkrom
+ tester.o"; this latter command uses objcopy and dd to extract the code.
+ (This particular build of VMIPS had a disassembler bug which caused it
+ not to compute branch addresses correctly, but the branch delay slot
+ emulation code was correct so the code ran correctly.)
+
+    4000:	3c030735 	lui	$v1,0x735
+    4004:	34632525 	ori	$v1,$v1,0x2525
+    4008:	2404754e 	li	$a0,30030
+    400c:	14800002 	bnez	$a0,0x4018
+    4010:	0064001a 	div	$zero,$v1,$a0
+    4014:	0007000d 	break	0x7
+    4018:	2401ffff 	li	$at,-1
+    401c:	14810004 	bne	$a0,$at,0x4030
+    4020:	3c018000 	lui	$at,0x8000
+    4024:	14610002 	bne	$v1,$at,0x4030
+    4028:	00000000 	nop
+    402c:	0006000d 	break	0x6
+    4030:	00001010 	mfhi	$v0
+    4034:	00801821 	move	$v1,$a0
+    4038:	00402021 	move	$a0,$v0
+    403c:	1480fff3 	bnez	$a0,0x400c
+    4040:	00000000 	nop
+    4044:	03e00008 	jr	$ra
+
+ The key thing about this code is that it doesn't have any references
+ to memory, and doesn't call any procedures or do anything that needs
+ the stack.  Hence, it can operate without any loading or storing
+ beyond that which is required for instruction fetching from uncached,
+ non-TLB-mapped memory.
+
+ Here's the trace, instruction-by-instruction. The actual output from
+ VMIPS is not necessarily this pretty, but it's configurable using
+ several run-time options.  You can see from this that branches happen
+ the instruction after they're executed, just like on a real MIPS (and
+ as opposed to SPIM). I have omitted the instruction-by-instruction
+ register dumps, as they tend to make the output rather verbose.
+
+       PC            Instr    Disassembly
+       -------------------------------------------
+    PC=0xbfc00000    3c030735 lui $3, 1845
+    PC=0xbfc00004    34632525 ori $3, $3, 9509
+    PC=0xbfc00008    2404754e addiu $4, $0, 30030
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc0000c    14800002 bne $4, $0, 0xbfc00014
+    PC=0xbfc00010    0064001a div $3, $4
+    PC=0xbfc00018    2401ffff addiu $1, $0, -1
+    PC=0xbfc0001c    14810004 bne $4, $1, 0xbfc0002c
+    PC=0xbfc00020    3c018000 lui $1, -32768
+    PC=0xbfc00030    00001010 mfhi $2
+    PC=0xbfc00034    00801821 addu $3, $4, $0
+    PC=0xbfc00038    00402021 addu $4, $2, $0
+    PC=0xbfc0003c    1480fff3 bne $4, $0, 0xbfc00008
+    PC=0xbfc00040    00000000 sll $0, $0, 0
+    PC=0xbfc00044    03e00008 jr $31
+
+ Here's the final screen's-worth of output from VMIPS, in which the fact
+ that the program terminated correctly can be seen:
+
+    *************HALT*************
+
+	Dumping:
+	Reg Dump:  PC=bfc00054(ffffffff) HI=00000000 LO=00000002
+	  DELAYING = FALSE (branch was NOT TAKEN) ; DELAY_PC=bfc00030
+	 R00=00000000  R01=80000000  R02=00000000  R03=0000000b  R04=00000000 
+	 R05=00000000  R06=00000000  R07=00000000  R08=00000000  R09=00000000 
+	 R10=00000000  R11=00000448  R12=40107600  R13=40107600  R14=00000000 
+	 R15=00000000  R16=00000000  R17=00000410  R18=401075f8  R19=401075f8 
+	 R20=00000000  R21=080528c8  R22=00000018  R23=00000018  R24=00000000 
+	 R25=00000000  R26=080524a8  R27=080524d8  R28=080524b8  R29=000003e0 
+	 R30=401075f0  R31=401075f0 
+	(stack dump not implemented)
+	CP0 Dump Registers:
+	 R00=00000000  R01=0000003f  R02=00000000  R03=00000018 
+	 R04=401073d0  R05=401073d0  R06=00000000  R07=080528d8 
+	 R08=00000030  R09=00000018  R10=00000000  R11=00000000 
+	 R12=088523c8  R13=080523f8  R14=00000000  R15=00000528 
+	Goodbye.
+
+ The register with the answer is R03 (also known as $v1 to objdump, and
+ also also known as $3). Note that this is the R03 which comes between
+ "Reg Dump" and "(stack dump not implemented)" -- not the one which comes
+ after "CP0 Dump Registers" and before "Goodbye"; that is Coprocessor
+ Zero's register three, which is actually named EntryLo1. The DELAY_PC is
+ used to implement the branch delay slot, as described in "doc/delay".
+
+
+VMIPS interrupt controller
+--------------------------
+
+ There are 8 interrupt lines in the R3000/R3000A, 6 of which (7..2) are
+ hardware interrupts (readable by software), and the other 2 of which
+ (1..0) are software interrupts (readable/writable by software).
+
+                          _     IP0   _____
+                         /       o----|    \
+                        |             | AND |-----.
+                        |        o----|____/       \
+                        |       IM0                 |
+               from    /                            |
+             software -         IP1   _____         |
+               regs    \         o----|    \        |
+                        |             | AND |-.     |
+                        |        o----|____/   \    |
+                         \_     IM1             \   |
+ Dv1.2-------._____                              \  |
+       Inputs \    \  IP2             _____       | |
+ Dv2.2---------) OR )-----------------|    \      | |
+         :    /    /                  | AND |-.   | |
+ DvN.2-------'----'   (from reg) o----|____/   \  | |                      Int
+                                IM2             \ \ \                       o
+ Dv1.3-------._____                              \ \ \._______              |
+       Inputs \    \  IP3             _____       \ `--\      \       _____  \
+ Dv2.3---------) OR )-----------------|    \       `----\      \    .-|    \  |
+         :    /    /                  | AND |------------\      \__/  | AND |-'
+ DvN.3-------'----'   (from reg) o----|____/      .------/ OR   /  .--|____/
+                                IM3              //-----/      /  /
+                                      _____     //.----/      /   |
+                           .----------|    \   ///  .-/______/    o
+                          / IP4       | AND |-'/ |  |             IEc
+                          |      o----|____/  /  |  |            (from
+                          |     IM4           |  |  |             reg)
+              .           .  (from reg)       o  o  o
+              .           .                   5  6  7
+              .           .                                 
+
+  DvI.j - `device interrupt input for line j'
+          becomes true when device I calls assertInt(j); becomes false
+          when device I calls deassertInt(j)
+  IPj   - `interrupt pending on line j'
+          true if any of the DvI.j is true (becomes true when assertInt(j)
+          is called by any DvI.j; becomes false when some DvI.j calls
+          deassertInt(j) and no other DvI.j is asserted)
+  IMj   - `interrupt mask for line j'
+          true if interrupts from line j are enabled, false if they are
+          to be ignored. Note that IMj's setting does not change IPj;
+          it only exposes it to or shields it from influencing the
+          processor's exception state.
+  Int   - `interrupt pending'
+          asserted if any interrupt is pending which is not masked, and
+          if interrupts are enabled; Int = ((IP & IM != 0) && IEc)
+
+ The interrupt controller maps each device to some number of the 6 hardware
+ interrupt lines, in response to calls to attachLine().  When a device
+ wants to interrupt the processor, it asserts a hardware interrupt input,
+ using assertInt(j). If at least one of the devices tied to a particular
+ hardware interrupt line j has asserted that line, then IP for line j+2
+ is asserted.  (Therefore, assertInt() always causes IP to become nonzero.)
+
+ When a device decides that the interrupt condition has been satisfied,
+ then it can deassert its input for the interrupt line by calling
+ deassertInt(). This causes all the other devices tied to that hardware
+ interrupt line (call it j) to be checked to see if they are currently
+ asserting the hardware interrupt input; if none of them are, then IP
+ for line j+2 is deasserted. (Therefore, deassertInt() does not always
+ cause IP to become zero.)
+
+ An exception is triggered in the processor at the beginning of a cycle
+ if there is an interrupt pending (at least one IPj for j=0..7 must be
+ set; i.e., IP != 0), and the IEc field of Status is set (interrupts are
+ enabled), and for each IPj which is set, IMj is also set (IP & IM != 0).
+
+
+How the interrupt controller is integrated
+------------------------------------------
+
+ What if there were more than one cpu? Then you'd still want to have at
+ most one interrupt controller, and you'd want it to be attached to a
+ certain processor. This means that you'd create the interrupt controller
+ object and attach it to a "primary" cpu at boot time. The primary cpu's
+ cpzero would check at the beginning of each cycle whether there was a
+ pending interrupt, and call exception(Int) if there was.  The sequence
+ of events would be something like this, for every cpu:
+
+  Ask the cpzero to see if there is an interrupt.
+   If there is no attached interrupt controller, there is no interrupt.
+   If IEc is deasserted, there is no interrupt.
+   Ask the interrupt controller to calculate IP.
+    The interrupt controller calculates IP, by querying each device.
+   If IP & IM == 0, then there is no interrupt.
+   Otherwise, there is an interrupt.
+  If there is an interrupt, raise an Int exception.
+
+Notes on cross-compiling glibc
+------------------------------
+
+ using egcs-1.0.3a with sgi patches, binutils 2.10, glibc 2.1.92 does
+ pretty well: it fails with assertion failures in ld.
+
+ using gcc-2.95.2, binutils 2.10, glibc 2.1.92 generates
+ this: ../sysdeps/mips/setjmp.S:43: Error: Can not represent
+ BFD_RELOC_16_PCREL_S2 relocation in this object file format
+
+ best so far was egcs-1.0.3a with sgi patches, binutils 000827, glibc
+ 2.1.92 it fails in linuxthreads -- it is not seeing __attribute((weak)) on
+ __pthread_initialize_minimal in libc-start and soinit, and so anything
+ that links against libc.so.6 fails w/ an undefined reference to that
+ symbol.
+
+ this looks pretty promising:
+  http://www.suse.de/~aj/glibc-mips.html
+  http://sources.redhat.com/ml/libc-hacker/2000-09/msg00116.html
+ (amazing. you mean it's easier to port a library when you have something
+ to run it on? :-)
+
+
+Bugs in EGCS dealing with kernel code
+-------------------------------------
+
+ EGCS 1.1.1 configured as a cross-compiler from i586-pc-linux-gnu
+ to mips-dec-ultrix4.5 using --with-gnu-as --with-gnu-ld
+ --enable-version-specific-runtime-libs will not disregard the return type
+ of main even if you use -Wno-main, and will not refrain from trying to use
+ __main to set up C library type things even if you use -ffreestanding.
+ The -Wno-main thing is probably a bug; the -ffreestanding thing is by
+ design, according to the gcc people.
+
+ There is probably a better way to configure cross compilers for VMIPS,
+ which will go into the docs once it is discovered; this will alleviate
+ the -ffreestanding lossage.
+
+ I think the -Wno-main thing should be fixed by the time GCC3.0 comes
+ around...
+
+ I'm able to get around the bug by calling the entry function ``entry''
+ instead of ``main'', so it's not a show-stopper.
+
+Dealing with PIC MIPS code
+--------------------------
+
+This is yanked from an sgi man page someone had online, and has to do with the
+MIPS 32-bit ELF ABI. -- at: http://www.hpcc.nectec.or.th/PCH/man/dso.html
+
+  24) How do I change my assembly language sources to use -KPIC?
+
+
+     The following refers to the older 32 bit abi using ucode compilers.  For
+     n32 and 64 bit abi information, look at the information and pointers in
+     the abi(5) manpage.
+
+     Several new assembler directives are added to support generation of PIC.
+     You should also get yourself familiar with the MIPS ABI Supplement and
+     the PIC coding model it describes.  In addition, files which are to be
+     assembled with -KPIC must also be -G 0.  This is normally turned on by
+     the driver by default.
+
+     Note that with the exception of (a) and (d), all other directives
+     described below will be ignored when -KPIC is not explicitly specified.
+     Also, item (d), ".gpword", will be turned into ".word". The result will
+     be a NON-PIC version of the same routine.
+
+     a) .option pic2
+
+     This directive forces the assembler to mark the output object file "PIC"
+     and activates the following directives.  It overrides the command line
+     argument.  Normally, you don't need to specify this directive.  Instead,
+     you should use the -KPIC or -non_shared flags to toggle between
+     generating PIC or non-PIC.
+
+     Note that even though -KPIC will be made the default for the high-
+     language driver (cc/pc/f77) in future releases, it will *NOT* be the
+     default for assembly sources.  You will always have to explicitly specify
+     -KPIC for compiling .s files.
+
+     b) .cpload reg
+
+     This directive expands into three instructions that sets the gp register
+     to the context pointer value for the current function.  The three
+     instructions are:
+          lui  gp,_gp_disp
+          addui     gp,gp,_gp_disp
+          addu gp,gp,reg
+
+     _gp_disp is a reserved symbol defined by the linker to be the distance
+     between the lui instruction and the context pointer.  This directive is
+     required at the beginning of each subroutine that uses the gp register.
+
+     You must add this directive at the beginning of every procedure, with the
+     exception of leaf-procedures that do not access any global variables, and
+     procedures that are static (i.e., not marked .globl or .extern).
+
+     c) .cprestore offset
+
+     This directive causes the assembler to issue
+               sw   gp,offset(sp)
+     at the point where it appears.  Additionally, it causes the assembler to
+     emit
+               lw   gp,offset(sp)
+
+     after every jump-and-link (jal) or branch-and-link (bal) operation,
+     thereby restoring the gp register after function calls.  The programmer
+     is responsible for allocating the stack space for the gp.  This space
+     should be in the saved register area of the stack frame to remain
+     consistent with MIPS' calling and debugger conventions.
+
+     d) .gpword local-sym
+
+     This directive is similar to .word except that the relocation entry for
+     local-sym has the R_MIPS_GPREL32 type.  After linkage, this results in a
+     32-bit value that is the distance between local-sym and the context
+     pointer (i.e. the gp).  local-sym must be local.  It is currently used
+     for PIC switch tables.
+
+     e) .cpadd reg
+
+     This adds the value of the context pointer (gp) to reg.
+
+     EXAMPLES:
+          This is a simplified version of the "hello world" program:
+          --------------------------------------------------------------
+               .option   pic2
+               .data
+               .align    2
+          $$5:
+               .ascii    "hello world\X0A\X00"
+               .text
+               .align    2
+          main:
+               .set  noreorder
+               .cpload   $25
+               .set  reorder
+               subu $sp, 40
+               sw   $31, 36($sp)
+               .cprestore     32
+               la   $4, $$5
+               jal  printf
+               move $2, $0
+               lw   $31, 36($sp)
+               addu $sp, 40
+               j    $31
+          ----------------------------------------------------------------
+          The actual instructions generated by the assembler will be:
+
+               lui  gp,0      #
+               addiu     gp,gp,0        # generated by .cpload
+               addu gp,gp,t9  #
+               lw   a0,0(gp)  # gp-relative addressing used
+               lw   t9,0(gp)  # t9 is used for func. call
+               addiu     sp,sp,-40
+               sw   ra,36(sp)
+               sw   gp,32(sp) # from .cprestore
+
+              jalr  ra,t9          # jal is changed to jalr
+               addiu     a0,a0,0
+               lw   ra,36(sp)
+               lw   gp,32(sp) # activated by .cprestore
+               move v0,zero
+               jr   ra
+               addiu     sp,sp,40
+               nop
+          ----------------------------------------------------------------
+
+     NOTE:
+
+     The MIPS's ABI required register t9 ($25) be used for indirect function
+     call, so .cpload should always use $25.  No reorder mode should also be
+     used.  Also, programmers should make sure that t9 is dead before any
+     function call.
+
+     If your program uses an indirect jump (jalr), you must also use t9 as the
+     jump register.
+
+     If you have an unconditional jump to an external label:
+               j  _cerror
+         you have to rewrite it into indirect jump via t9, i.e.:
+               la t9,_cerror
+               j  t9
+
+     If you use branch-and-link (bal) instruction, and if the target procedure
+     begins with a .cpload, you have to specify an alternate entry point:
+
+          foo: .set noreorder # callee
+               .cpload   $25
+               .set reorder
+          $$1: ...            # alternative entry point
+               ...
+               j    $31       # foo returns
+
+          bar: ...            # caller
+               ...
+               bal  $$1       # by-pass the .cpload
+               ...
+
+     This is very important because .cpload assumes register $25 contains the
+     address of foo, but in this case $25 is not set up.  Note that since both
+     foo and bar reside in the same file, they must have the same value for
+     $gp.  So the .cpload instructions can be and must be bypassed.  However,
+     since foo can still be called from outside, the .cpload is still
+     required.
+
+     Alternatively, if you don't want to have an alternate entry point, you
+     can set up register $25 before the bal:
+               la   t9,foo
+               bal  foo
+
+         but this will be less efficient.
+
+     position-independent jump table (or any table of text addresses).
+     Entries of the address table created by .gpword are converted into
+     displacement from the context pointer.  To get the correct text address,
+     .cpadd should be used to add the value of gp back to them.  Since the gp
+     is updated by the run-time linker, the correct text address can be
+     reconstructed regardless of the location of the dso.
+
+
+Clues for a MIPS ELF ld script
+------------------------------
+
+OUTPUT_FORMAT(elf32-littlemips)
+SECTIONS {
+ ENTRY( __start )
+ . = 0xbfc00000;
+ .text : { *(.text) ; _etext = . ; }
+ . = 0xa0004000;
+ _gp = .;
+ _copystart = SIZEOF(.text) + ADDR(.text) ;
+ .data : AT ( SIZEOF(.text) + ADDR(.text) )
+	{ _data = . ; *(.data) *(.rdata) *(.mdebug) *(.reginfo) ; _edata = . ; }
+ .sdata : AT ( SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) )
+	{ _sdata = . ; *(.sdata) ; _esdata = . ; }
+ _copyend = SIZEOF(.sdata) + SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) ;
+ .bss : AT ( SIZEOF(.sdata) + SIZEOF(.data) + SIZEOF(.text) + ADDR(.text) )
+	{ _bss = . ; *(.bss) *(COMMON) ; _ebss = . ; }
+ _end = . ;
+}
+
+You also need to give gcc the flag -mno-abicalls, otherwise you 
+get link errors trying to find _gp_disp.
+

@@ -1,0 +1,22 @@
+Notes on cross-compiling glibc
+------------------------------
+
+ using egcs-1.0.3a with sgi patches, binutils 2.10, glibc 2.1.92 does
+ pretty well: it fails with assertion failures in ld.
+
+ using gcc-2.95.2, binutils 2.10, glibc 2.1.92 generates
+ this: ../sysdeps/mips/setjmp.S:43: Error: Can not represent
+ BFD_RELOC_16_PCREL_S2 relocation in this object file format
+
+ best so far was egcs-1.0.3a with sgi patches, binutils 000827, glibc
+ 2.1.92 it fails in linuxthreads -- it is not seeing __attribute((weak)) on
+ __pthread_initialize_minimal in libc-start and soinit, and so anything
+ that links against libc.so.6 fails w/ an undefined reference to that
+ symbol.
+
+ this looks pretty promising:
+  http://www.suse.de/~aj/glibc-mips.html
+  http://sources.redhat.com/ml/libc-hacker/2000-09/msg00116.html
+ (amazing. you mean it's easier to port a library when you have something
+ to run it on? :-)
+

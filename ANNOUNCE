@@ -1,0 +1,20 @@
+
+VMIPS 0.9 is a pre-release version.
+
+VMIPS is a MIPS R3000 virtual machine
+simulator with support for a serial console and GNU cross-compiler tools.
+
+VMIPS is free software available under the GNU General Public
+License; for details, please read the file "COPYING". For installation
+instructions, please read "INSTALL". VMIPS was built by Brian Gaeke and
+others; for details, please see the files "AUTHORS" and "THANKS". New
+features since the last publically released version are detailed in
+"NEWS".
+
+The home page for VMIPS is "https://github.com/Hordeking/vmips". For bug
+reporting instructions, please see the VMIPS Manual.
+
+   Please refer to the bug reporting instructions in the VMIPS manual
+if you have trouble using the software.
+
+-Brian Gaeke and the VMIPS developers <vmips@sartre.dgate.org>

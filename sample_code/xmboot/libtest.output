@@ -1,0 +1,10 @@
+ok puts
+ok puts_nonl
+ok putchar
+ok getchar
+ok strlen
+ok strcmp
+ok gets
+ok isspace
+ok isdigit
+ok strtol

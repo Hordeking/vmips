@@ -1,0 +1,14 @@
+
+This is a pre-release of VMIPS, a MIPS R3000 virtual machine simulator.
+
+VMIPS is available under the GNU General Public License; for details,
+please read "COPYING". For installation instructions, please read
+"INSTALL".
+
+Various bits of documentation are beginning to emerge in the "doc"
+directory; some code you can run on it is in the "test_code" directory.
+
+The home page for VMIPS is "http://sartre.dgate.org/vmips".
+
+ -Brian Gaeke <brg@CSUA.Berkeley.EDU> Sun Aug  1 02:55:12 PDT 1999
+

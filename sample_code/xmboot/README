@@ -1,0 +1,25 @@
+This will some day become a serial-based boot loader.
+
+Distributed under the GNU General Public License -- see file COPYING for
+details.
+
+What's here:
+
+Makefile - builds 'boot' for a unix command line
+README - this file
+boot.c - command processor, entry point
+boot_main.c - used for running the booter as a Unix process
+coff.c - procedures to interpret mips coff headers
+coff.h - data structures representing mips coff file & section headers
+coff_main.c - program to test coff.c
+lib.c - the "little C library"
+lib.h - public interface to lib.c
+libtest.c - test suite for the little C library
+libtest.input - inputs to libtest.c
+libtest.output - expected outputs from libtest.c
+pftest.c - vmips-hosted tests for printf in little C library
+serial.c - interface betwene lib.c and serial device
+xmrcv.c - XMODEM receive code
+xmrcv.h - public interface to xmrcv.c
+xmrcv_main.c - program to test xmrcv
+xmsend.c - wrapper which sends a file to xmrcv by using the "sx" program
