@@ -1365,14 +1365,9 @@ CPU::periodic(void)
 	bool cacheable, instdump = machine->opt->option("instdump")->flag,
 		excmsg = machine->opt->option("excmsg")->flag;
 
-	/* Check for a (hardware or software) interrupt. */
-	if (cpzero->interrupt_pending()) {
-		exception(Int);
-	} else {
-		/* Clear exception_pending flag if it was set by a
-		 * prior instruction. */
-		exception_pending = false;
-	}
+	/* Clear exception_pending flag if it was set by a
+	 * prior instruction. */
+	exception_pending = false;
 
 	/* decrement Random register */
 	cpzero->adjust_random();
@@ -1459,6 +1454,11 @@ CPU::periodic(void)
 	 * this instruction forces this.
 	 */
 	reg[0] = 0;
+ 
+ 	/* Check for a (hardware or software) interrupt. */
+ 	if (cpzero->interrupt_pending()) {
+ 		exception(Int);
+ 	}
 
 	/* If there is an exception pending, we return now, so that we don't
 	 * clobber the exception vector.

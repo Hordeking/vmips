@@ -1,3 +1,18 @@
+User-visible changes in version 1.0.4 (since version 1.0.3):
+
+* Fixed bug where the first instruction of an interrupt handler would be
+  executed twice in a row. Thanks to Paul Twohey.
+* Workaround some problems in the way casts are used in VMIPS by specifying
+  -fno-strict-aliasing to gcc in configure; this should help avoid
+  miscompilations for now, until the code can be rewritten for cast-safety.
+* Fix bug where vmips would dereference a NULL pointer when trying to use a
+  SPIMConsole device with a non-attached serial host. Thanks to Paul Twohey.
+* Reorder some tests in the SPIMConsole code for a slight speedup when
+  interrupts are turned off.
+* Fix bug where virtual page numbers were being incorrectly interpreted
+  by the system control coprocessor, resulting in excess TLB misses being
+  generated. Thanks to Sanjeev Datla.
+
 User-visible changes in version 1.0.3 (since version 1.0.2):
 
 * Fixed bug in debugger interface; TLB translations caused by the debugger

@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -89,36 +89,24 @@ mipstoolprefix = @mipstoolprefix@
 
 SUBDIRS = . sample_code test_code doc 
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
-DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
- debian/copyright debian/dirs debian/docs debian/info debian/rules
+DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control  debian/copyright debian/dirs debian/docs debian/info debian/rules
 
-EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh \
- $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
+EXTRA_DIST = VERSION include/dis-asm.h $(REDHAT_PKG_FILES) join.sh  $(sysconf_DATA) $(DEBIAN_PKG_FILES) buildstat.sh.in
 
 
 # What are we building here?
 bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
-CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\" \
-  -I$(top_srcdir)/include -I$(mipsinclude) @CXXFLAGS@
+CXXFLAGS = -DSYSCONFDIR=\"$(sysconfdir)\"   -I$(top_srcdir)/include -I$(mipsinclude) @CXXFLAGS@
 
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 
 # How to build the simulator:
-vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc \
-  mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc \
-  spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc zschip.cc \
-  deviceint.cc debug.cc remotegdb.cc clockdev.cc \
-  cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h \
-  devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
-  periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h \
-  sysinclude.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h \
-  accesstypes.h deviceexc.h clockdev.h
+vmips_SOURCES = cache.cc cacheline.cc cpu.cc cpzero.cc devicemap.cc   mapper.cc memorymodule.cc options.cc range.cc serialhost.cc intctrl.cc   spimconsole.cc stub-dis.cc tlbentry.cc vmips.cc zschip.cc   deviceint.cc debug.cc remotegdb.cc clockdev.cc   cache.h cacheline.h cpu.h cpzero.h cpzeroreg.h deviceint.h   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h   periodic.h range.h regnames.h serialhost.h spimconsole.h spimconsreg.h   sysinclude.h tlbentry.h vmips.h zschip.h debug.h remotegdb.h   accesstypes.h deviceexc.h clockdev.h
 
-vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la \
-  $(mipslib)/libiberty.a
+vmips_LDADD = $(mipslib)/libopcodes.la $(mipslib)/libbfd.la   $(mipslib)/libiberty.a
 
 vmips_LDFLAGS = -static
 
@@ -172,7 +160,7 @@ configure.in install-sh ltmain.sh missing mkinstalldirs vmips.spec.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(vmips_SOURCES) $(vmipstool_SOURCES)
 OBJECTS = $(vmips_OBJECTS) $(vmipstool_OBJECTS)
@@ -190,7 +178,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4):  configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -365,7 +353,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

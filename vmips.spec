@@ -1,12 +1,12 @@
 # vmips RPM spec file.
 Name: vmips
 Summary: A MIPS-based virtual machine simulator.
-Version: 1.0.3
+Version: 1.0.4
 Release: 1
 Copyright: GPL
 Group: Emulators
 URL: http://sartre.dgate.org/vmips/
-Source: ftp://sartre.dgate.org/pub/vmips/snapshots/vmips-1.0.3.tar.gz
+Source: ftp://sartre.dgate.org/pub/vmips/snapshots/vmips-1.0.4.tar.gz
 Packager: VMIPS Maintainers <vmips@sartre.dgate.org>
 
 %description

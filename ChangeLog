@@ -1,3 +1,1457 @@
+2002-04-28 14:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpzero.cc, cpzeroreg.h: Merge fix for VPN mask bug from HEAD.
+
+2002-04-28 14:34  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h, remotegdb.cc, remotegdb.h, serialhost.h: Roll back
+	these merges -- we can't run tests on the 1.0 branch, so we  just
+	can't merge anything we don't absolutely have to... :-(
+
+2002-04-28 13:35  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* remotegdb.cc, remotegdb.h, serialhost.h, spimconsole.cc:
+	remotegdb.cc, remotegdb.h, serialhost.h: merge from HEAD (just
+	comments,  mainly.) spimconsole.cc: Merge from
+	vmips-oldttyclock-branch, except: mapper hooks'  return values
+	remain old-style, and byteswapping remains old-style.	Lots of
+	cleanup.
+
+2002-04-28 13:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in: Partial merge from HEAD:  Sanity check mips
+	directory settings.   Don't do setvbuf check.	Add
+	-fno-strict-aliasing.
+
+2002-04-28 13:04  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h, buildstat.sh.in: Merge from HEAD.
+
+2002-04-28 13:03  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: Update from 1.0 branch.
+
+2002-04-28 12:54  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* THANKS: Sanjeev Datla <sanjeev_datla@hotmail.com>
+
+2002-04-28 12:51  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpzero.cc, cpzeroreg.h, doc/to-do: Fix VPNMASK vs.
+	EntryHi_VPN_MASK inconsistency by removing VPNMASK and substituting
+	EntryHi_VPN_MASK everywhere. Noted by Sanjeev Datla.
+
+2002-04-11 01:06  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: mention extent for devicemap.
+
+2002-03-31 02:31  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more to-dos: gcc 2.95, and spimconsole.
+
+2002-03-30 17:47  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more updates -- twohey's patch, testcase makefiles
+
+2002-03-30 17:45  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* Makefile.am, README, acinclude.m4, clock.h, clockdev.cc,
+	clockdev.h, clockreg.h, configure.in, haltdev.h, haltreg.h,
+	mkinstalldirs, optiontbl.h, remotegdb.cc, remotegdb.h,
+	spimconsole.cc, spimconsole.h, task.h, terminalcontroller.cc,
+	terminalcontroller.h, vmips.cc, vmips.h, doc/vmips.texi: This is
+	the rest of the vmips-time patch from Paul Twohey.  The unpatched
+	version of the tree is still available on vmips-oldttyclock-branch
+	(starting from tag vmips-oldttyclock-branch-base).
+	
+	Makefile.am: Remove serialhost.{cc,h} from the build and add
+	clock.cc.  spimconsole.cc: Import new version from Twohey's patch. 
+	spimconsole.h: Likewise.  clockdev.cc: Likewise.  clockdev.h:
+	Likewise.  vmips.cc: Likewise.	vmips.h: Likewise.  doc/vmips.texi:
+	Updates to documentation from Twohey's patch.  README: Remove RCS
+	ID tag.  acinclude.m4: Likewise.  configure.in: Likewise. 
+	mkinstalldirs: Likewise.  clock.h: Untabify. Fix header guard
+	comment.  clockreg.h: Likewise.  haltdev.h: Likewise.  haltreg.h:
+	Likewise.  terminalcontroller.h: Likewise.  optiontbl.h: Untabify.
+	Remove clockspeed option.  remotegdb.cc: Change "This program" to
+	"VMIPS" in the copyright notice.  remotegdb.h: Likewise. 
+	terminalcontroller.cc: Likewise. Also untabify.  task.h: Insert
+	copyright message. Fix header guard comments.
+
+2002-03-24 03:06  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sysinclude.h: twohey's patch uses <new>, among others.
+
+2002-03-24 03:00  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.h: tsort is the STANDARD! #include order.
+
+2002-03-24 02:50  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.h: add yet more includes
+
+2002-03-24 02:49  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.h: add more include files from twohey's patch.
+
+2002-03-24 02:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* optiontbl.h, vmips.h: optiontbl.h: add new options from twohey's
+	patch.	     "haltdevice" FLAG	     "clockdeviceirq" NUM      
+	"clockdevice" FLAG  and their defaults.
+	
+	vmips.h: Add in an aesthetically-placed blank line.
+
+2002-03-23 01:14  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* Makefile.am: add a bunch more files from twohey's patch to the
+	build.
+
+2002-03-21 02:33  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* clock.cc, clock.h, clockreg.h, devreg.h, error.cc, error.h,
+	haltdev.cc, haltdev.h, haltreg.h, spimconsreg.h, task.h,
+	terminalcontroller.cc, terminalcontroller.h, wipe.h: Remove RCS Id
+	tags at head of file.
+
+2002-03-21 02:24  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* devicemap.cc, devicemap.h: Copy over devicemap.cc and devicemap.h
+	parts of twohey's patch.  Interesting changes include:	Default
+	methods for devices to fetch and store halfwords and bytes.  
+	Documentation included in interface description.
+
+2002-03-20 00:24  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* utils/testcase-maker: utils/testcase-maker: fix panic in
+	testcase_get_buildrules.   fix testcase_multifile_asm to look for
+	.S instead of .c.   fix debugging puts which was not printing a
+	comment.
+
+2002-03-20 00:18  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* debug.cc: debug.cc: add comment about future fix
+
+2002-03-17 22:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* utils/testcase-maker: tcl script to make test case
+	makefiles...coming soon to a theatre near you.
+
+2002-03-14 01:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* clock.cc, clock.h, clockreg.h, haltdev.cc, haltdev.h, haltreg.h,
+	task.cc, task.h, terminalcontroller.cc, terminalcontroller.h: add
+	more files (mostly unchanged) from twohey's patch
+
+2002-03-14 01:41  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.cc: Use SPIM_BASE constant
+
+2002-03-14 01:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsreg.h: use devreg.h.	also reformat it. remove tabs.
+	include default addresses.
+
+2002-03-14 01:36  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* devreg.h: added devreg.h
+
+2002-03-14 01:29  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* wipe.h: added from twohey's patch
+
+2002-03-02 03:19  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more info about testsuite makefiles
+
+2002-03-01 01:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* intctrl.h: add comments.
+
+2002-03-01 01:10  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* range.cc: add default delete action for DEVICE Ranges.
+
+2002-03-01 01:09  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* range.h: nicer comments
+
+2002-02-22 04:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* intctrl.cc: Assert the device is non-NULL before connecting IRQs
+	to it.
+
+2002-02-22 03:47  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* debug.cc, vmips.cc, vmips.h: More stuff from twohey's vmips-time
+	patch
+	
+	debug.cc: vmips::periodic renamed to vmips::step.  vmips.cc:
+	likewise.	     use initialization list in class vmips
+	constructor.		add destructor. 	   add throw()
+	specifications to halt and auto_size_rom.  vmips.h: likewise.	   
+	    class vmips no longer inherits from class Periodic. 	 
+	remove unused class variables dumpcpu, dumpcp0. 	  Add some
+	comments to declarations of methods.
+
+2002-02-17 02:07  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.h, vmips.cc: spimconsole.h: Get rid of class Periodic
+	here, too.  vmips.cc: Call cpu->step() instead of cpu->periodic().
+
+2002-02-17 01:25  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, cpu.h: removal of class Periodic, part 1 -- twohey is
+	right, it doesn't really add much
+
+2002-02-17 01:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* deviceint.h: deviceint.h: Add comments. Make strlineno and
+	num2irq public.   Reorganize slightly.
+
+2002-02-17 01:03  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* deviceint.cc: Add num2irq (from twohey)
+
+2002-02-09 02:51  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: directory restructuring is done
+
+2002-02-09 01:30  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, README: Makefile.in: Zorched everything
+	except what is absolutely necessary to run  testsuite.	README:
+	Zorched the big list of explanations of files and all mentions of 
+	unflatten.sh.
+
+2002-02-09 01:23  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: add.S, add.par, addi.S, addi.par, bc0.S, bc0.par,
+	bdexcp.S, bdexcp.par, bgezal.S, bgezal.par, bgtz.S, bgtz.par,
+	blez.S, blez.par, bltz.S, bltz.par, bltzal.S, bltzal.par,
+	clocker.S, clocker.exp, coproc.S, coproc.par, divu.S, divu.par,
+	echo.c, echo.exp, emptymain.c, emptymain.par, exception.S,
+	exception.par, handler5.S, handler5.par, hello.c, hello.par,
+	hello2.c, hello2.par, jalr.S, jalr.par, load.S, load.par,
+	logical.S, logical.par, loser.S, loser.par, lwl.S, lwl.par, lwr.S,
+	lwr.par, mthi_lo.S, mthi_lo.par, multu.S, multu.par, mumble.S,
+	mumble.par, outcheck.exp, poke2.S, poke2.par, random.c,
+	regcheck.exp, sb-print.S, sb-print.par, shift.S, shift.par, slti.S,
+	slti.par, sort.c, sort.exp, store.S, store.par, sub.S, sub.par,
+	swl.S, swl.par, swr.S, swr.par, syscall.S, syscall.par, tester.c,
+	tester.par, tlbwr.S, tlbwr.par, unflatten.sh, xor.S, xor.par: The
+	directory structure has gotten kind of necessary, so we are going
+	to rearrange things in the repository.	unflatten.sh has gone away
+	for good.
+	
+	Here's the damage, by directory:
+	
+	clocker.exp --> vmips.misc-tests/clocker.exp clocker.S -->
+	vmips.misc-tests/clocker.S echo.c --> vmips.misc-tests/echo.c
+	echo.exp --> vmips.misc-tests/echo.exp random.c -->
+	vmips.misc-tests/random.c sort.c --> vmips.misc-tests/sort.c
+	sort.exp --> vmips.misc-tests/sort.exp
+	
+	bdexcp.par --> vmips.outcheck/bdexcp.par bdexcp.S -->
+	vmips.outcheck/bdexcp.S emptymain.c --> vmips.outcheck/emptymain.c
+	emptymain.par --> vmips.outcheck/emptymain.par exception.par -->
+	vmips.outcheck/exception.par exception.S -->
+	vmips.outcheck/exception.S hello2.c --> vmips.outcheck/hello2.c
+	hello2.par --> vmips.outcheck/hello2.par hello.c -->
+	vmips.outcheck/hello.c hello.par --> vmips.outcheck/hello.par
+	loser.par --> vmips.outcheck/loser.par loser.S -->
+	vmips.outcheck/loser.S outcheck.exp --> vmips.outcheck/outcheck.exp
+	poke2.par --> vmips.outcheck/poke2.par poke2.S -->
+	vmips.outcheck/poke2.S sb-print.par --> vmips.outcheck/sb-print.par
+	sb-print.S --> vmips.outcheck/sb-print.S
+	
+	addi.par --> vmips.regcheck/addi.par addi.S -->
+	vmips.regcheck/addi.S add.par --> vmips.regcheck/add.par add.S -->
+	vmips.regcheck/add.S bc0.par --> vmips.regcheck/bc0.par bc0.S -->
+	vmips.regcheck/bc0.S bgezal.par --> vmips.regcheck/bgezal.par
+	bgezal.S --> vmips.regcheck/bgezal.S bgtz.par -->
+	vmips.regcheck/bgtz.par bgtz.S --> vmips.regcheck/bgtz.S blez.par
+	--> vmips.regcheck/blez.par blez.S --> vmips.regcheck/blez.S
+	bltzal.par --> vmips.regcheck/bltzal.par bltzal.S -->
+	vmips.regcheck/bltzal.S bltz.par --> vmips.regcheck/bltz.par bltz.S
+	--> vmips.regcheck/bltz.S coproc.par --> vmips.regcheck/coproc.par
+	coproc.S --> vmips.regcheck/coproc.S divu.par -->
+	vmips.regcheck/divu.par divu.S --> vmips.regcheck/divu.S
+	handler5.par --> vmips.regcheck/handler5.par handler5.S -->
+	vmips.regcheck/handler5.S jalr.par --> vmips.regcheck/jalr.par
+	jalr.S --> vmips.regcheck/jalr.S load.par -->
+	vmips.regcheck/load.par load.S --> vmips.regcheck/load.S
+	logical.par --> vmips.regcheck/logical.par logical.S -->
+	vmips.regcheck/logical.S lwl.par --> vmips.regcheck/lwl.par lwl.S
+	--> vmips.regcheck/lwl.S lwr.par --> vmips.regcheck/lwr.par lwr.S
+	--> vmips.regcheck/lwr.S mthi_lo.par --> vmips.regcheck/mthi_lo.par
+	mthi_lo.S --> vmips.regcheck/mthi_lo.S multu.par -->
+	vmips.regcheck/multu.par multu.S --> vmips.regcheck/multu.S
+	mumble.par --> vmips.regcheck/mumble.par mumble.S -->
+	vmips.regcheck/mumble.S regcheck.exp -->
+	vmips.regcheck/regcheck.exp shift.par --> vmips.regcheck/shift.par
+	shift.S --> vmips.regcheck/shift.S slti.par -->
+	vmips.regcheck/slti.par slti.S --> vmips.regcheck/slti.S store.par
+	--> vmips.regcheck/store.par store.S --> vmips.regcheck/store.S
+	sub.par --> vmips.regcheck/sub.par sub.S --> vmips.regcheck/sub.S
+	swl.par --> vmips.regcheck/swl.par swl.S --> vmips.regcheck/swl.S
+	swr.par --> vmips.regcheck/swr.par swr.S --> vmips.regcheck/swr.S
+	syscall.par --> vmips.regcheck/syscall.par syscall.S -->
+	vmips.regcheck/syscall.S tester.c --> vmips.regcheck/tester.c
+	tester.par --> vmips.regcheck/tester.par tlbwr.par -->
+	vmips.regcheck/tlbwr.par tlbwr.S --> vmips.regcheck/tlbwr.S xor.par
+	--> vmips.regcheck/xor.par xor.S --> vmips.regcheck/xor.S
+
+2002-02-09 01:00  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, sb-print.S, sb-print.par: add new
+	sb-print test case
+
+2002-02-09 00:58  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in, spimconsole.cc: configure.in: Add
+	-fno-strict-aliasing.  spimconsole.cc: Fix sb/sh-->sw conversions.
+
+2002-02-08 01:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.cc: We weren't returning the right value in the
+	byteswapped case when we had a disconnected terminal. (grr.)
+
+2002-02-07 01:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in: We don't need to check setvbuf, because the vmips
+	code doesn't call it (only misc_code does.)
+
+2002-01-26 00:42  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/divu.S: move .set nomacro down to avert a warning
+
+2002-01-26 00:28  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.cc: Possible fix for 507879 (do the equivalent of "stty min
+	0 time 0" to the tty we are using.)
+
+2002-01-26 00:10  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: Clarify interrupt condition. Fixes 505638
+
+2002-01-24 00:25  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/bdexcp.S: robustify the assembly language here, we do
+	not want li $3, 0xffffffff to end up as a lui and ori pair, no
+	matter how cute that would be, because it will result in a spurious
+	FAIL.
+
+2002-01-24 00:12  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: hmm, more stuff :-P
+
+2002-01-24 00:04  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/clocker.exp: fix typo in name of testcase...we really
+	ought to be able to do better than hardcoding the names of the
+	files!!
+
+2002-01-23 22:42  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: Partial merge from HEAD, fixes bug 505637 (double
+	execution of first interrupt handler insn.)
+
+2002-01-22 20:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/Makefile.in: Add handler5 test case.
+
+2002-01-22 20:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/.cvsignore: we can let cvs ignore rom files.
+
+2002-01-22 20:17  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: handler5.S, handler5.par: Test case for #505637.
+
+2002-01-22 20:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: Patch to fix #505637, wherein the first instruction of an
+	interrupt handler would be executed twice in a row. Testcase coming
+	soon.
+
+2002-01-22 20:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/unflatten.sh: Fix to deal with hello/hello2 globs...
+
+2002-01-16 19:36  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: Documentation issues.
+
+2002-01-16 19:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.cc: spimconsole.cc: Only set up the various
+	SPIMConsoleDevices if the  associated SerialHost is there. Also,
+	define proper behavior for  disconnected SPIMConsoleDevices. This
+	helps us not loop infinitely on  a test case like hello2.
+
+2002-01-16 18:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, hello2.c, hello2.par, unflatten.sh: New
+	test case: hello2
+
+2002-01-16 11:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/unflatten.sh: poke2 -> outcheck
+
+2002-01-16 11:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, poke2.S, poke2.par: Add poke2 test case.
+
+2002-01-16 11:21  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in, spimconsole.cc: configure.in: Sanity check the
+	--with-mips settings.  spimconsole.cc: Check that SerialHost(s) and
+	SPIMConsoleDevice(s) are  not NULL if we want to try to use them.
+
+2002-01-15 17:40  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* options.cc: Fix typo in error message.
+
+2002-01-15 17:34  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sysinclude.h, vmips.cc, test_code/sort.exp: sysinclude.h: Include
+	<vector>.  vmips.cc: Fix regression from vmips.cc,v 1.49. (extra \n
+	in memdump  output removed) test_code/sort.exp: Only try to verify
+	memdump if the output didn't  look strange and the memdump file
+	exists.
+
+2002-01-15 16:23  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* deviceint.cc, deviceint.h, intctrl.cc, intctrl.h: intctrl.cc,
+	intctrl.h:  Update copyright dates.   Update prototypes.   Add
+	exception descriptors.	 Add destructor.   Switch to using vector
+	of DeviceInts (typename Devices),    instead of linked list.   Get
+	rid of separate link() method.
+	
+	deviceint.cc, deviceint.h:  Update copyright dates.   No longer
+	include periodic.h.   Update prototypes.   Correct some comments.  
+	Expose IRQ1 and IRQ0 constants.   Make strlineno use the constants
+	we already have for IRQ lines.	 Use initialization list syntax for
+	DeviceInt ctor.
+
+2002-01-14 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h, cache.cc, cache.h, cacheline.cc, cacheline.h,
+	clockdev.cc, clockdev.h, cpu.cc, cpu.h, cpzero.cc, cpzero.h,
+	cpzeroreg.h, debug.cc, debug.h, deviceexc.h, deviceint.cc,
+	deviceint.h, devicemap.cc, devicemap.h, error.cc, error.h,
+	excnames.h, intctrl.cc, intctrl.h, mapper.cc, mapper.h,
+	memorymodule.cc, memorymodule.h, options.cc, options.h,
+	optiontbl.h, periodic.h, range.cc, range.h, regnames.h,
+	serialhost.cc, serialhost.h, spimconsole.cc, spimconsole.h,
+	spimconsreg.h, stub-dis.cc, sysinclude.h, tlbentry.cc, tlbentry.h,
+	vmips.cc, vmips.h, vmipstool.cc, zschip.cc, zschip.h: Fix up
+	copyright notice. Should say "VMIPS" instead of "This program".
+
+2002-01-14 00:27  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h, cache.h, cacheline.h, clockdev.h, cpu.h, cpzero.h,
+	cpzeroreg.h, debug.h, deviceexc.h, deviceint.h, devicemap.h,
+	intctrl.h, memorymodule.h, options.h, optiontbl.h, periodic.h,
+	remotegdb.h, serialhost.h, spimconsole.h, spimconsreg.h,
+	sysinclude.h, tlbentry.h, vmips.h, zschip.h: Fix up include guards:
+	move from __file_h__ to _FILE_H_.
+
+2002-01-13 23:13  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* Makefile.am, error.cc, error.h, mapper.cc, options.cc, range.cc,
+	vmips.cc: Add some error reporting functions, and use them.
+
+2002-01-12 01:42  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* VERSION, configure.in: Set version to 1.0.3
+
+2002-01-12 01:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE: Update for 1.0.3 announcement.
+
+2002-01-12 01:37  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: one more bug fix.
+
+2002-01-12 01:36  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpzero.cc: Partial merge from HEAD: Fixes bug in
+	debug_tlb_translate.
+
+2002-01-11 16:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* Makefile.am, cpu.cc, cpzero.cc, debug.cc, excnames.h, mapper.cc,
+	mapper.h, range.cc, range.h, regnames.h, sysinclude.h, zschip.cc:
+	Makefile.am: Add excnames.h.  cpu.cc: Include excnames.h.  Switch
+	to using REG_* constants.   Adjust a few comments.  debug.cc:
+	Include excnames.h instead of regnames.h.  zschip.cc: Likewise. 
+	cpzero.cc: Likewise. Also, fix a bug in debug_tlb_translate (should
+	have  been vaddr instead of sp); backport candidate.
+	
+	mapper.h: Change to new header guards. Include <vector>.   Use an
+	STL vector instead of the hand-rolled rangelist.   Adjust some
+	comments and add some comments.   Add throw() specifications to a
+	few functions.	mapper.cc: Likewise.  Include excnames.h instead of
+	regnames.h.   Don't allow ranges that overlap to be inserted into
+	the rangelist.	 Use more modern syntax for initializing data
+	members in constructors.
+	
+	range.cc: Add throw() specifications to a few functions.   Use more
+	modern syntax for initializing data members in constructors.   Get
+	rid of "UNUSED" and "OTHER" range types.   Adjust some comments and
+	add some comments.   Add new "overlaps" predicate for ranges.  
+	Adjust indenting on a few functions.  range.h: Change to new header
+	guards.   Move range types to "enum range_type". (Eventually these
+	should go away.)  regnames.h: Move exception codes to a new file.
+	Change to new header guards.   Give all register names REG_ prefix,
+	and capitalize.  excnames.h: New file, containing exception codes.
+
+2002-01-09 16:57  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* clockdev.cc: Add a few comments.
+
+2002-01-09 16:28  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h: add more comments.
+
+2002-01-09 16:23  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* deviceint.cc, deviceint.h, test_code/random.c: deviceint.cc: Add
+	comments to methods.  deviceint.h: Make report* methods private.  
+	Add comments to public methods.  test_code/random.c: Get rid of the
+	__builtin_expect, because only gcc 3.0	seems to understand it.
+
+2002-01-09 15:06  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: clarification about interrupts
+
+2002-01-09 01:48  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: G.C. completed items.  Add another one - have to make
+	the loser.rom test case pass :-[
+
+2002-01-09 01:27  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* devicemap.cc, devicemap.h, mapper.cc, mapper.h, range.cc,
+	range.h, doc/to-do, test_code/random.c, test_code/sort.c: Get rid
+	of the sorted linked list of ranges. Now we use an unsorted array,
+	which we dynamically resize as necessary. We also got rid of the
+	old FBSD based random number generator; now we use the GPL'd
+	lrand48 from glibc.
+	
+	devicemap.cc: No "next" range in ctor.	devicemap.h: Likewise. 
+	mapper.cc: Add lots more useful comments.   Rewrite a lot of the
+	stuff that uses ranges.   No "next" range in Range ctors.   New
+	method: insert_into_rangelist().   No "first" range in
+	find_mapping_range().  mapper.h: New instance and class variables
+	to support the new rangelist.	Remove prototypes for setup_icache
+	and setup_dcache (what are those?)   New prototype for
+	insert_into_rangelist().   No "first" range arg in prototype for
+	find_mapping_range().  range.cc: insert(), getNext() and setNext()
+	are history.   No "next" range in Range ctors.	range.h:  Likewise.
+	Also, no more "next" range instance variable.  doc/to-do:  Retarget
+	serious benchmarking effort to 1.2.   Done with getting rid of the
+	linked list rangelist, and all of    its method calls.	 Replace
+	all the Jan 2001 typos with Jan 2002. Oops!   Add a note about
+	final test_code updates.   Done fixing random.c. 
+	test_code/random.c: Replaced entirely with GPL'd random number 
+	generator (lrand48() from glibc).  test_code/sort.c: Call lrand48()
+	instead of random().
+
+2002-01-08 22:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* accesstypes.h, acconfig.h, cache.cc, cache.h, cacheline.cc,
+	cacheline.h, clockdev.cc, clockdev.h, cpu.cc, cpu.h, cpzero.cc,
+	cpzero.h, cpzeroreg.h, debug.cc, debug.h, deviceexc.h,
+	deviceint.cc, deviceint.h, devicemap.cc, devicemap.h, intctrl.cc,
+	intctrl.h, mapper.cc, mapper.h, memorymodule.cc, memorymodule.h,
+	options.cc, options.h, optiontbl.h, periodic.h, range.cc, range.h,
+	regnames.h, remotegdb.cc, remotegdb.h, serialhost.cc, serialhost.h,
+	spimconsole.cc, spimconsole.h, spimconsreg.h, stub-dis.cc,
+	sysinclude.h, tlbentry.cc, tlbentry.h, vmips.cc, vmips.h,
+	vmipstool.cc, zschip.cc, zschip.h, doc/to-do: All source files and
+	headers: Add copyright notices.  acconfig.h: Update definitions of
+	TARGET_BIG_ENDIAN and TARGET_LITTLE_ENDIAN.  doc/to-do: We've now
+	put copyright notices on all files.
+
+2002-01-08 21:12  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: rangelist stuff done
+
+2002-01-08 21:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* range.cc, range.h: range.cc: Remove stuff supporting prev links. 
+	range.h: Remove prev link field and prototypes for getPrev and
+	setPrev.
+
+2002-01-08 21:09  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* range.cc: Rewrite insert() so that it doesn't depend on prev
+	links.
+
+2002-01-08 21:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.h: Remove prototype for rangelist_selftest(), which no
+	longer exists.
+
+2002-01-08 21:07  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* mapper.cc: Remove delete_mapping().
+
+2002-01-08 18:53  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: merge with vmips-1_0-branch
+
+2002-01-08 18:51  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: doc/to-do: Dealt with descriptor_str & friends.
+
+2002-01-08 18:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* devicemap.cc, devicemap.h: devicemap.cc, devicemap.h: Get rid of
+	descriptor_str for mappings.
+
+2002-01-08 18:43  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* range.cc, range.h: range.cc, range.h: Remove Range::print(),
+	Range::descriptor_str(),  and all references to either.
+
+2002-01-08 18:16  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: G.C. all the closed issues.
+
+2002-01-08 18:14  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: to-do:  Update the entry on benchmarking.	 Move the
+	stuff about the testsuite to test_code/README.
+
+2002-01-08 18:13  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: add more docs
+
+2002-01-08 18:05  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* optiontbl.h, doc/to-do: optiontbl.h: Note that the "dumpcp0" and
+	"haltdumpcp0" options	also dump the TLB contents.   Also note
+	that the "haltibe", "haltjrra" and "haltbreak" options	  only take
+	effect once the corresponding event has already happened. 
+	doc/to-do: Close some issues.
+
+2002-01-08 03:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: Add list of current bugfixes.
+
+2002-01-08 02:56  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: Merge with branch
+
+2002-01-08 02:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: jalr.S, jalr.par, outcheck.exp, regcheck.exp: jalr
+	testcase: Created.  outcheck.exp: Add support for testing only
+	certain testcases.  regcheck.exp: Likewise.
+
+2002-01-08 02:44  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, README: finished all the instructions,
+	for now
+
+2002-01-08 02:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, tlbwr.S, tlbwr.par: README: updated (we
+	created subu and tlbp failure test cases,  and we tried testing
+	with #undef HAVE_LONG_LONG) tlbwr.S: add a tlbp failure test case
+	tlbwr.par: Add result
+
+2002-01-08 02:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: divu.S, divu.par: divu.S: Fix mfhi/mflo confusion. 
+	divu.par: Fix results.
+
+2002-01-08 02:00  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: sub.S, sub.par: Strengthen tests, add subu tests
+
+2002-01-08 01:37  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/divu.S: Workaround strange as behavior (macroizing two
+	argument div.)
+
+2002-01-08 01:05  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, README, divu.S, divu.par: Add test case:
+	divu README updated to reflect this
+
+2002-01-08 00:43  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: cpu.cc: Partial merge from HEAD (fix bug in nor
+	instruction)
+
+2002-01-07 21:21  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: cpu.cc: Fix a bug in the NOR instruction. It was
+	apparently  implementing IMPLIES instead of NOR.
+
+2002-01-07 21:18  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/Makefile.in: Rename CLOBBERFILES to DISTCLEANFILES. Add
+	site.exp to same.
+
+2002-01-07 21:17  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: logical.S, logical.par: logical test case: Fix a
+	typo, and add another "not" test case.
+
+2002-01-07 21:06  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: update list of untested instructions
+
+2002-01-07 21:06  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, README, add.S, add.par, logical.S,
+	logical.par: New test cases: add, logical
+
+2002-01-07 20:57  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, README: new test case: add
+	
+	README: update list of untested instructions
+
+2002-01-07 01:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, spimconsole.h, test_code/loser.S: cpu.cc: Partial merge
+	with HEAD (fixes bugs in instructions:	lb, lh, lwr, lwl, swr,
+	swl).  spimconsole.h: Partial merge with HEAD (clarifies confusing 
+	comments.) test_code/loser.S: Merge with HEAD (clarifies confusing
+	comments).
+
+2002-01-07 00:49  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* debug.cc: Fix a TARGET_LITTLE_ENDIAN defined-ness bug.
+
+2002-01-05 20:12  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* utils/bootstrap: fix bug from last added feature...sheesh
+
+2002-01-05 20:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, sort.exp, store.par: Makefile.in: Add
+	proper rules for building store testcase.  sort.exp: Fix it for
+	big-endian case. Also, fix a few typos.  store.par: Ditto.
+
+2002-01-05 16:35  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, store.S, store.par: New test case: store
+
+2002-01-05 16:16  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: cpu.cc: Fix bug in sign extension of lb and lh. Definite
+	backport candidate.
+
+2002-01-05 16:14  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: bgtz.S, bgtz.par, load.S, load.par: bgtz test case:
+	Fix bug in expected results.  load test case: Ditto.
+
+2002-01-05 15:58  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, load.S, load.par, lwr.S: README: Update to
+	instruction list load.S: Add lhu, lbu load.par: Update answers
+	lwr.S: Add missing .end
+
+2002-01-05 14:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: more info copied from to-do
+
+2002-01-05 14:14  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, bgtz.S, bgtz.par, blez.S, blez.par,
+	slti.S, slti.par: Add test cases: blez bgtz slti
+
+2002-01-05 03:30  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: stuff from gcov
+
+2002-01-05 01:31  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more testsuite news
+
+2002-01-05 01:25  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* utils/bootstrap: add test_code/site.exp to unbootstrap files.
+
+2002-01-05 01:24  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, clocker.exp, echo.exp, loser.par, sort.c,
+	unflatten.sh: README: Add a section for "additional test cases
+	needed." clocker.exp: Add some comments. Use vmips_tool_exec_name
+	instead of just  randomly calling ../vmips.  echo.exp: Use
+	vmips_default_timeout.	loser.par: XFAIL it until we can fix the
+	Makefile rule.	sort.c: Fix the "TESTING" code so that it actually
+	tests things.  unflatten.sh: Group the "sort" test case with
+	vmips.misc-tests.  config/unix.exp:  Add comments. Add support for
+	timeouts to vmips_start.  lib/vmips-outcheck.exp: Add support for
+	XFAIL.	lib/vmips-regcheck.exp: Change support for XFAIL so that
+	testcases can  (eventually) say which targets they should be
+	XFAILed on. Also, use  vmips_default_timeout in
+	regcheck_run_one_test.	lib/vmips.exp: Add comments. Add
+	vmips_default_timeout.
+
+2002-01-05 01:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/sort.exp: New test case for sort.c; created.
+
+2002-01-05 01:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/Makefile.in: Makefile.in: Refactor some cpp flags into
+	CPP_FLAGS; use it in MGCC_FLAGS,  CPP, etc. Add back the .s->.S
+	rule, because it was convenient to me  (I think this shouldn't
+	cause too much in the way of problems for the  case-insensitive
+	filesystem folks, because it is no longer automatically  activated
+	as part of the build process.)
+
+2002-01-04 03:56  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, unflatten.sh: README: Extra spacing. Describe
+	unflatten.sh.  unflatten.sh: temporary script to build up the
+	runtest directories (i.e., before we get around to doing the
+	makefiles)
+
+2002-01-04 03:44  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: more rants about sort.rom
+
+2002-01-04 03:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in, cpu.cc, debug.cc, options.cc, sysinclude.h,
+	test_code/Makefile.in, test_code/README, test_code/lwl.S,
+	test_code/lwl.par, test_code/lwr.S, test_code/lwr.par,
+	test_code/swl.S, test_code/swl.par, test_code/swr.S,
+	test_code/swr.par, test_code/ulw.S, test_code/usw.S,
+	utils/bootstrap: configure.in: Always define TARGET_BIG_ENDIAN and
+	TARGET_LITTLE_ENDIAN  to 1 or 0; don't just let them be defined or
+	undefined. We want to move  away from more #ifdef XXX...#endif code
+	and toward more if (XXX) {...} code.   This lets the compiler do
+	more checks.  options.cc: Adjust to correspond to the above
+	configuration fix.  sysinclude.h: Likewise.  debug.cc: Likewise.
+	(Though, there has to be a better way than this!) cpu.cc: Fix a
+	massive bug in lwl/lwr/swl/swr which was probably a mistaken 
+	assumption carried over from SPIM. This is probably a backport
+	candidate.  utils/bootstrap: Add support for "-m" option ("make"). 
+	test_code directory:  Add lwl, lwr, swl, swr test cases. Remove
+	usw, ulw test cases.   Makefile.in and README modified accordingly.
+
+2002-01-03 23:58  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, bdexcp.par, clocker.exp, echo.exp,
+	emptymain.par, exception.S, exception.par, hello.par, loser.S,
+	loser.par: This is a big patch that fixes a LOT of issues with the
+	outcheck framework.
+	
+	README: Add more info about where we are in constructing the
+	framework.  echo.exp: Convert to a dejagnu testcase: Get the right
+	directory for  the test ROM.  Change all the "send_user"s and
+	"exit"s to "verbose"s and  "fail; return"s.  End with a "pass". 
+	clocker.exp: New testcase, based on echo.exp.  exception.S: Make
+	the breakpoint happen in the right place.  bdexcp.par: Add the
+	haltibe exception message to the expected output.  hello.par: Add
+	the haltbreak exception message to the expected output. 
+	exception.par: Ditto.  emptymain.par: Ditto.  loser.par: New params
+	file, for outcheck framework.  loser.S: Update old comment. 
+	config/unix.exp: Replace the "exec" statement with a "spawn" of the
+	same  command, and then an "expect" loop that eats everything up
+	into $comp_output.  lib/vmips-outcheck.exp: We will assume for the
+	time being that the output to  be checked consists of complete
+	lines as returned by gets, because it makes  the processing easier.
+	 lib/vmips-regcheck.exp: Correct typo: "warn" --> "warning".  
+	Also, give a "warning" if the register we're looking for is not in
+	the   regdump. (therefore making the test case "unresolved".) 
+	lib/vmips.exp: Return a "unresolved" if endian_flag was not set
+	(say, if  there's no site.exp file).
+
+2002-01-03 23:45  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, optiontbl.h: 
+	cpu.cc: Revert the changes re: halting immediately after a haltibe
+	or haltbreak event. This causes these events to be less meaningful
+	because you don't get to see the exception happen. On the other
+	hand, you have to keep track of its precise effects in the
+	testsuite.
+	
+	optiontbl.h: Clarify haltibe comment (although these comments could
+	certainly use more clarification!!)
+
+2002-01-03 23:42  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/hello.exp: Now handled by outcheck framework.
+
+2002-01-03 02:53  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/emptymain.exp: This one works in "outcheck" now; I
+	don't think we need this anymore.
+
+2002-01-03 02:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: More updates on the current state of things.
+
+2002-01-03 02:47  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: README, bdexcp.par, emptymain.par, exception.par,
+	hello.par, tester.c, tester.par: hello.par, emptymain.par,
+	tester.par, exception.par:  New test files for use with outcheck
+	framework. hello doesn't work yet.
+	
+	README: Update slightly. This file no longer really has the plan
+	though.
+	
+	bdexcp.par: Update to get rid of stuff that no longer happens after
+	a  haltibe event.
+	
+	tester.c: Make it try to put the answer in the return value
+	register, for  determinism's sake.
+	
+	lib/vmips-outcheck.exp:  Add outcheck_get_diffs, to call diff(1) to
+	put diffs  in the log. Call it.
+
+2002-01-03 02:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc: 
+	cpu.cc: Try to halt immediately after a haltibe or haltbreak event.
+
+2002-01-03 02:03  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/outcheck.exp: config/unix.exp: Move vmips_target_endian
+	to lib/vmips.exp. This file  should only contain the required
+	dejagnu support procedures.
+	
+	lib/vmips-regcheck.exp: Move regcheck_remove_extension and 
+	regcheck_get_romfile_name to lib/vmips.exp.  Rename them from
+	regcheck_*  to vmips_*. All callers changed.
+	
+	lib/vmips.exp: Now contains some procedures shared between both
+	test  harnesses.
+	
+	outcheck.exp: A driver file (like the old addi.exp, recently
+	renamed to  regcheck.exp) that just calls vmips-outcheck.exp on
+	each of the files in  the subdir.
+	
+	lib/vmips-outcheck.exp: A test harness based on checking the
+	overall output	of a vmips process.
+
+2002-01-01 02:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/bdexcp.par: new possible format for simple test cases
+
+2001-12-31 18:11  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: echo.exp, hello.exp: echo.exp: Put in checks for
+	newlines at appropriate places.  hello.exp: Likewise.
+
+2001-12-31 18:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.h, test_code/echo.exp: spimconsole.h: The constants
+	are in usec, not msec.
+	
+	test_code/echo.exp: We can afford to sleep less when doing this
+	one. (I think.)
+
+2001-12-31 00:47  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: echo.exp, emptymain.exp, hello.exp: New expect
+	scripts to test some i/o roms.
+
+2001-12-29 02:09  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: benchmark metrics?
+
+2001-12-29 02:03  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: first major 1.1 update
+
+2001-12-29 02:00  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* mapper.cc, mapper.h: Remove print_rangelist() and
+	verify_rangelist(), which are no longer used.
+
+2001-12-29 01:38  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sample_code/setup.S, sample_code/xmboot/Makefile.in,
+	sample_code/xmboot/boot.c, sample_code/xmboot/lib.c,
+	sample_code/xmboot/lib.h, test_code/README: sample_code/setup.S:
+	Merge from HEAD (fixes bug where we would not halt on a  user tlb
+	miss exception.) sample_code/xmboot/Makefile.in: Merge from HEAD
+	(Fixes bugs in use of NULL and	size_t in xmboot code.)
+	sample_code/xmboot/boot.c: Merge from HEAD (Fix casts in calls to
+	memmove and  memset.) sample_code/xmboot/lib.c: Merge from HEAD
+	(Fix return type of strlen.) sample_code/xmboot/lib.h: Merge from
+	HEAD (Fix definitions of size_t and  NULL.) test_code/README:
+	Partially merged from HEAD (Remove reference to nonexistent 
+	testdev.S).
+
+2001-12-28 13:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, load.par: Makefile.in: To be consistent,
+	the tcl $objdir should be the object dir that  corresponds to
+	vmips/test_code, not the one that corresponds to $(top_srcdir). 
+	Also, we stop setting VMIPS=... in the runtest command line (this
+	didn't seem  to do anything anyway).
+	
+	load.par: This test should have different results on little and big
+	endian	targets. Fixed thus.
+	
+	config/unix.exp: Implement vmips_target_endian.
+
+2001-12-28 12:55  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/mumble.par: mumble.par: Set testcase-specific options
+	(-o haltjrra).	lib/vmips-regcheck.exp: Add regcheck_set_options.
+	Fix handling of  testcase-specific options in
+	regcheck_run_one_test.
+
+2001-12-27 17:49  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: Did the memdump option.
+
+2001-12-27 17:41  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* options.h, optiontbl.h, vmips.h, vmips.cc: options.h: Get rid of
+	DUMP_FILE_NAME, as promised since Dec. 1999.  optiontbl.h: Add
+	`memdumpfile' option.  vmips.cc: Use opt_memdumpfile instead of
+	dumpfile_name and DUMP_FILE_NAME.  vmips.h: Add decl for
+	opt_memdumpfile.
+
+2001-12-27 17:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sample_code/setup.S, test_code/tlbwr.par: 
+	sample_code/setup.S: Deal with user tlb exceptions and the
+	burgeoning size of the __start procedure, by moving it to 0x200 and
+	putting a branch at 0x0.
+	
+	test_code/tlbwr.par: Change expected nextepc.
+
+2001-12-27 16:41  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpzero.cc, test_code/tlbwr.S: cpzero.cc: Make cp0 dump output
+	easier to parse test_code/tlbwr.S: add more comments
+
+2001-12-27 16:40  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/tlbwr.par: params file for tlb test case
+
+2001-12-19 13:56  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: new notes about the dejagnu framework
+
+2001-12-18 23:36  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in, cpu.cc, cpzero.cc, debug.cc, deviceint.cc,
+	devicemap.cc, mapper.cc, memorymodule.cc, options.cc, range.cc,
+	spimconsole.cc, sysinclude.h, vmips.cc, vmips.h: This is the Alpha
+	jumbo patch!
+	
+	configure.in: Fix two places we forgot to changequote before using
+	square	brackets in a shell test. This fixes a bug where
+	--enable-debug would be  ignored.  cpu.cc: Use %x instead of %lx,
+	%u instead of %lu, and %d instead of %ld  in many format strings to
+	avert format string warnings on Alpha.	debug.cc: Likewise. 
+	deviceint.cc: Likewise.  devicemap.cc: Likewise.  mapper.cc:
+	Likewise.  memorymodule.cc: Likewise.  options.cc: Likewise. 
+	range.cc: Likewise.  spimconsole.cc: Likewise. Also, fix some
+	casts.	cpzero.cc: Likewise. Also, shift VPN right by 8 when
+	printing it out.  vmips.cc: Likewise. Also, test_code was a dead
+	variable; it has been eliminated.  vmips.h: Likewise. 
+	sysinclude.h: If int and long are both 4 bytes, let uint32 be int,
+	not long.   This, along with the format string changes, helps avert
+	format string	warnings on Alpha while not requiring a separate
+	code base.
+
+2001-12-18 23:35  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sample_code/xmboot/: Makefile.in, boot.c, lib.c, lib.h:
+	Makefile.in: Using -nostdinc is actually wrong here (surprise!)
+	because  we want to use stddef.h. It has been retired.	boot.c:
+	Cast memset's and memmove's first argument to (void *), not (char
+	*).  lib.c: strlen returns size_t.  lib.h: Likewise. Also, we don't
+	need to typedef size_t, because it's in  gcc's stddef.h. Also, we
+	don't need to define NULL unless it's not already  defined (by
+	stddef.h, presumably.) Also, the memset prototype was missing.
+
+2001-12-18 23:13  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.cc, vmips.h: vmips.cc: Use opt_usetty instead of usetty in
+	one crucial place.  vmips.h: Get rid of usetty; move opt_usetty
+	into #if TTY...#endif, along  with opt_ttydev.
+
+2001-12-17 19:17  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* buildstat.sh.in: Modify output format to be closer to what we
+	actually put on the build status page.
+
+2001-12-17 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/regcheck.exp: addi.exp: Look for .par files instead of
+	source code.   Remove -nocomplain option to glob for now.   Recite
+	names of test cases as they execute, if verbose. 
+	lib/vmips-regcheck.exp: Get rid of regcheck_get_paramsfile_name.  
+	Don't make regcheck_abort call fail (what should we really do
+	here?)	 Don't let regcheck_set_results call unset on results_ary
+	if it doesn't	 exist yet.   Make regcheck_run_one_test take the
+	name of the params file instead.
+
+2001-12-16 16:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: bc0.par, bgezal.par, bltz.par, bltzal.par,
+	coproc.par, load.par, mthi_lo.par, multu.par, mumble.par,
+	shift.par, sub.par, syscall.par, xor.par: New params files for
+	regcheck driver.
+
+2001-12-16 16:07  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: addi.par, regcheck.exp: addi.exp: Move
+	regcheck_run_one_test to lib/vmips-regcheck.exp.  addi.par: Change
+	to using new regcheck_set_results proc.
+
+2001-12-16 15:28  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: Makefile.in, addi.par, regcheck.exp: regcheck.exp,
+	lib/vmips-dg.exp: Removed (I don't think we're going to  use the dg
+	framework).  Makefile.in: Clean dbg.log (testing file from dejagnu)
+	too.  addi.exp: Move most of the guts to lib/vmips-regcheck.exp,
+	which is  now loaded by this file. Move the test-specific
+	parameters to addi.par.   Clean up the main program which is now
+	run_one_test{}. Add a foreach	loop that looks for test cases. 
+	addi.par: Added (see above).
+
+2001-12-14 21:17  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/Makefile.in: Remove to-do from CHAPTERS and DISTFILES.
+
+2001-12-14 21:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in: Update version number to 1.0.2
+
+2001-12-14 21:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/Makefile.in: Remove testdev from ROMS and ASRCS.
+
+2001-12-14 21:12  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE, NEWS, VERSION, options.cc, optiontbl.h, vmips.cc,
+	vmips.h, vmipsrc, test_code/sort.c, test_code/testdev.S,
+	test_code/tester.c: NEWS: Add NEWS for version 1.0.2.  ANNOUNCE:
+	Updated for a hypothetical 1.0.2 release.  VERSION: Update version
+	number to 1.0.2.  options.cc: Set default ttydev to result of
+	ttyname(0), if non-NULL (merged  from HEAD to work around Mac OS X
+	select bug.) optiontbl.h: Include new description of the default
+	ttydev value. (merged from  HEAD).  vmips.cc: Change bootmsg to
+	opt_bootmsg everywhere.   Only print host processor endianness if
+	opt_bootmsg is true.   (mostly merged from HEAD)  vmips.h: Add
+	opt_bootmsg as a data member to class vmips.   (partially merged
+	from HEAD)  vmipsrc: Now contains only comments. (merged from HEAD)
+	test_code/sort.c, test_code/tester.c: Comment out extra tokens
+	after #endif  (merged from HEAD) test_code/testdev.S: remove
+	(merged from HEAD)
+
+2001-12-14 21:12  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/: invoke.texi, to-do: invoke.texi: Merge from HEAD to-do:
+	Remove on branch
+
+2001-12-13 12:07  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/regcheck.exp: a basic regcheck test harness that checks
+	register outputs
+
+2001-12-13 10:08  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmips.cc: vmips.cc: Make all error messages start with "Error:"
+	and all warnings start with "Warning:"
+
+2001-12-12 18:37  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, mapper.cc, vmips.cc: cpu.cc: Modify reg and stack dump
+	output format.	mapper.cc: Likewise.  vmips.cc: Only print out
+	results of runtime host endianness test if  opt_bootmsg.
+
+2001-12-11 10:17  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: note usage of autoconf 2.52 ok
+
+2001-12-11 09:42  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, vmips.cc, vmips.h: cpu.cc: Move option stuff from
+	constructor to attach(), and then move	initialization of $zero to
+	constructor. I have to figure out once and  for all how this stuff
+	is supposed to work!
+	
+	vmips.cc: Get rid of dumpcpu and dumpcp0; we're using opt_dumpcpu
+	and  opt_dumpcp0.  Move component construction to setup_machine(),
+	which is  called at the very beginning of run().
+	
+	vmips.h: Prototype for setup_machine().
+
+2001-12-02 02:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in, vmips.cc, test_code/Makefile.in: configure.in: If
+	user already set CXXFLAGS, don't modify it with 
+	--disable-/--enable-debug, just trust what the user says. 
+	vmips.cc: Fix up some places we forgot to change to opt_*
+	variables.  test_code/Makefile.in: Fix up two places we forgot to
+	get rid of the	testdev test case.
+
+2001-12-01 02:44  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more about benchmarks.
+
+2001-12-01 02:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: More about testsuite stuff. There is a lot to do here.
+
+2001-12-01 02:38  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: TestDev is gone.
+
+2001-12-01 02:38  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/testdev.S: TestDev is history; and so should be its
+	testcase.
+
+2001-12-01 02:22  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/README: note about dejagnu breakdown
+
+2001-12-01 02:14  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/Makefile.in: Add rules for `make check' using DejaGnu's
+	runtest command.
+
+2001-11-30 20:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: Done with gdb section of manual.
+
+2001-11-30 20:46  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/: to-do, vmips.texi: to-do: Put a warning on the man page to
+	look in the info page. - Done.
+	
+	vmips.texi:  Update recommendations: binutils -> 2.11.2, gcc ->
+	3.0.2.	 Add a section describing building cross-GDB.	Add a
+	notice to the beginning of the Debugging section mentioning that
+	you  must use MIPS-gdb.
+
+2001-11-30 19:58  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/invoke.texi: Add warning message directing the interested
+	reader to the full manual.  Remove extra @ignore at beginning.
+
+2001-11-30 19:44  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, cpu.h, deviceint.cc, deviceint.h, vmips.cc, vmips.h,
+	doc/to-do: cpu.cc: Cache all options at construction time in
+	instance data members.	 Give all options opt_* variable names. 
+	cpu.h: Likewise.  deviceint.cc: Likewise.  deviceint.h: Likewise. 
+	vmips.cc: Likewise.   Pass argc and argv to vmips constructor
+	instead of vmips::run().   Only construct and attach debugger if
+	opt_debug.  vmips.h: Likewise.	doc/to-do: We've dealt with options
+	for now.   Add more to-do items.
+
+2001-11-30 19:44  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* test_code/: sort.c, tester.c: test_code/sort.c: Fix more `extra
+	tokens after #endif' warnings.	test_code/tester.c: Likewise.
+
+2001-11-29 02:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: cleaned up + updated
+
+2001-11-29 02:18  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.cc: The console device is the same endianness as the
+	target processor. Therefore, we must do some additional
+	byte-swapping.
+
+2001-11-27 23:24  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* utils/time_sort: A shell script used to do some simple
+	benchmarks.
+
+2001-11-27 23:22  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* THANKS: sktu
+
+2001-11-27 23:19  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* cpu.cc, cpu.h: I decided to go with this (Steve Tu's) patch to
+	use jumptables in the inner loop. On Celes, for example, it buys
+	you about 1% more efficiency when the optimizer is turned on. More
+	data is always welcome.
+
+2001-11-27 22:13  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* optiontbl.h, vmips.cc: Change -o instcounts output format to fit
+	on one line (more spreadsheet friendly.)
+
+2001-11-27 22:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: another bug workaround
+
+2001-11-27 21:53  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* options.cc, optiontbl.h: My bad, it actually did work, it was
+	just /etc/vmipsrc confusing me.
+
+2001-11-27 21:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmipsrc: Make the default vmipsrc contain only commented-out
+	defaults.
+
+2001-11-27 21:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* options.cc, optiontbl.h: Reverting previous change -- it does not
+	workaround the bug in Mac OS X.
+
+2001-11-27 21:16  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* options.cc, optiontbl.h: Use ttyname() to default the ttydev
+	option.
+
+2001-11-27 21:00  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* spimconsole.cc: Speed up by short-circuiting call to ready() in
+	case interrupts are off.
+
+2001-11-27 01:02  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: more info about existing items.
+
+2001-11-27 00:41  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: Add a note about the canned setup code's memory
+	map.
+
+2001-11-26 22:33  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* configure.in: Change version to 1.1-alpha on the mainline.
+
+2001-11-26 22:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* VERSION, configure.in: Change VERSION to 1.0.1.
+
+2001-11-26 22:30  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: Merge NEWS from HEAD
+
+2001-11-26 22:30  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* NEWS: News for 1.0.1
+
+2001-11-26 22:29  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* THANKS: Merge THANKS from HEAD
+
+2001-11-26 22:28  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE: 1.0.1 announcement
+
+2001-11-26 22:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sample_code/asm_regnames.h: Merge #endif fix from HEAD.
+
+2001-11-26 22:25  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmipstool.cc: Merge format string fix from HEAD.
+
+2001-11-26 22:15  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/to-do: Add some to-do items from the Manual.
+
+2001-11-07 22:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* sample_code/asm_regnames.h: Remove extra token after #endif.
+
+2001-11-07 02:07  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* THANKS: twohey
+
+2001-11-07 02:05  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/vmips.texi: Update version number.
+	
+	Update endianness issues.
+
+2001-11-07 01:57  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* VERSION, clockdev.cc, mapper.cc, spimconsole.cc: VERSION: Now
+	we're working on 1.1.  clockdev.cc: Communicate data to Mapper
+	(fetches & stores) using host  endianness exclusively. 
+	spimconsole.cc: Likewise. Also, clean up some seriously old and
+	crufty	debugging stuff, which was commented out, anyway. 
+	mapper.cc: Add more comments. Clean up the swapping stuff in
+	fetch_word,  store_word et al.
+
+2001-11-07 01:34  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* clockdev.cc, clockdev.h, devicemap.h, mapper.cc, mapper.h,
+	range.cc, range.h, spimconsole.cc, spimconsole.h, zschip.cc,
+	zschip.h: mapper.cc: Make store_word, store_halfword, store_byte
+	return void.   If anyone wonders, the convention was that they were
+	to return the stored   word. But no one ever used this return
+	value, so out it goes.	clockdev.cc: Likewise.	clockdev.h:
+	Likewise.  devicemap.h: Likewise.  range.cc: Likewise.	range.h:
+	Likewise.  spimconsole.cc: Likewise.  spimconsole.h: Likewise. 
+	zschip.cc: Likewise.  zschip.h: Likewise.  mapper.h: Likewise.
+	Also, make swapping functions static (again, oops.)
+
+2001-11-07 01:20  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* mapper.cc, mapper.h: mapper.cc, mapper.h: Define
+	mips_to_host_word(), et al., in terms of  swap_word() and
+	swap_halfword(). Define these functions always, not just  if
+	defined(BYTESWAPPED) || defined(TARGET_LITTLE_ENDIAN).
+
+2001-11-07 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* mapper.cc, memorymodule.cc, range.cc, sysinclude.h: Remove all
+	uses of iostream, including cout and cerr.
+
+2001-10-30 12:13  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* vmipstool.cc: Squash a printf format-string type warning.
+
+2001-10-28 00:26  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE: update to contain d/l sites.
+
+2001-10-27 10:57  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE: 1.0 release announcement
+
+2001-10-27 10:57  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ANNOUNCE: file ANNOUNCE was initially added on branch
+	vmips-1_0-branch.
+
+2001-10-21 01:39  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* include/dis-asm.h: Update to 2.10.1's version, because that's the
+	version we recommend.
+
+2001-10-21 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* AUTHORS, INSTALL, README, doc/vmips.texi: AUTHORS: Remove brg's
+	old e-mail address. Add pointer to bug-reporting  instructions. 
+	INSTALL: Note that this is copied from the manual. Add pointer to 
+	bug-reporting instructions.  README: Copy bug-reporting
+	instructions from the manual. Reformat old  README text to look
+	like Info (well, someday maybe it will be Info...) doc/vmips.texi:
+	Remove the old Zeroth Edition warnings in the @ifnottex  output.
+
+2001-10-14 00:52  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* ChangeLog: update (using cvs2cl)
+
 2001-10-14 00:50  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* NEWS: update for 0.9 and 1.0
@@ -4252,323 +5706,323 @@
 
 	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
 	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
-	vm_backup_6.tar.gz: Imported sources
+	vm_backup_6.tar.gz: Initial revision
 
 1999-01-02 07:13  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* old_versions/: vm_backup_1.tar.gz, vm_backup_2.tar.gz,
 	vm_backup_3.tar.gz, vm_backup_4.tar.gz, vm_backup_5.tar.gz,
-	vm_backup_6.tar.gz: Initial revision
-
-1999-01-02 07:09  Brian R. Gaeke <brg@sartre.dgate.org>
-
-	* options.cc, Makefile, doc/to-do: Imported sources
+	vm_backup_6.tar.gz: Imported sources
 
 1999-01-02 07:09  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* options.cc, Makefile, doc/to-do: Initial revision
 
-1999-01-02 06:54  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-02 07:09  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/tildexp.cc, sysinclude.h: Imported sources
+	* options.cc, Makefile, doc/to-do: Imported sources
 
 1999-01-02 06:54  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/tildexp.cc, sysinclude.h: Initial revision
 
-1999-01-02 06:39  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-02 06:54  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/tilde_test.txt: Imported sources
+	* misc_code/tildexp.cc, sysinclude.h: Imported sources
 
 1999-01-02 06:39  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/tilde_test.txt: Initial revision
 
-1999-01-02 06:20  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-02 06:39  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/test_parser.cc: Imported sources
+	* misc_code/tilde_test.txt: Imported sources
 
 1999-01-02 06:20  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/test_parser.cc: Initial revision
 
-1999-01-02 05:56  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-02 06:20  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/parse_test.txt: Imported sources
+	* misc_code/test_parser.cc: Imported sources
 
 1999-01-02 05:56  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/parse_test.txt: Initial revision
 
-1999-01-01 02:28  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-02 05:56  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/Makefile: Imported sources
+	* misc_code/parse_test.txt: Imported sources
 
 1999-01-01 02:28  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/Makefile: Initial revision
 
-1999-01-01 02:16  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-01 02:28  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/hash_test.cc: Imported sources
+	* utils/Makefile: Imported sources
 
 1999-01-01 02:16  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/hash_test.cc: Initial revision
 
-1998-12-31 23:52  Brian R. Gaeke <brg@sartre.dgate.org>
+1999-01-01 02:16  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/hash_test.pl: Imported sources
+	* misc_code/hash_test.cc: Imported sources
 
 1998-12-31 23:52  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/hash_test.pl: Initial revision
 
-1998-12-31 22:51  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-31 23:52  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cpu.cc: Imported sources
+	* misc_code/hash_test.pl: Imported sources
 
 1998-12-31 22:51  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cpu.cc: Initial revision
 
-1998-12-31 22:06  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-31 22:51  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* regnames.h, cacheline.h, tags: Imported sources
+	* cpu.cc: Imported sources
 
 1998-12-31 22:06  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* regnames.h, cacheline.h, tags: Initial revision
 
-1998-12-26 02:23  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-31 22:06  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cpu.h, test_code/Makefile: Imported sources
+	* regnames.h, cacheline.h, tags: Imported sources
 
 1998-12-26 02:23  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cpu.h, test_code/Makefile: Initial revision
 
-1998-12-26 02:04  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 02:23  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* mapper.cc, cpzero.cc: Imported sources
+	* cpu.h, test_code/Makefile: Imported sources
 
 1998-12-26 02:04  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* mapper.cc, cpzero.cc: Initial revision
 
-1998-12-26 02:00  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 02:04  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* mapper.h: Imported sources
+	* mapper.cc, cpzero.cc: Imported sources
 
 1998-12-26 02:00  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* mapper.h: Initial revision
 
-1998-12-26 01:36  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 02:00  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* range.cc: Imported sources
+	* mapper.h: Imported sources
 
 1998-12-26 01:36  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* range.cc: Initial revision
 
-1998-12-26 00:55  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 01:36  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/mdis, test_code/bdexcp.S: Imported sources
+	* range.cc: Imported sources
 
 1998-12-26 00:55  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/mdis, test_code/bdexcp.S: Initial revision
 
-1998-12-26 00:47  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 00:55  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* vmips.cc: Imported sources
+	* utils/mdis, test_code/bdexcp.S: Imported sources
 
 1998-12-26 00:47  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* vmips.cc: Initial revision
 
-1998-12-26 00:35  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 00:47  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* test_code/load.S: Imported sources
+	* vmips.cc: Imported sources
 
 1998-12-26 00:35  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* test_code/load.S: Initial revision
 
-1998-12-26 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 00:35  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/mkrom: Imported sources
+	* test_code/load.S: Imported sources
 
 1998-12-26 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/mkrom: Initial revision
 
-1998-12-26 00:06  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 00:32  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cache.cc: Imported sources
+	* utils/mkrom: Imported sources
 
 1998-12-26 00:06  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cache.cc: Initial revision
 
-1998-12-25 23:51  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-26 00:06  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* test_code/mumble.S: Imported sources
+	* cache.cc: Imported sources
 
 1998-12-25 23:51  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* test_code/mumble.S: Initial revision
 
-1998-12-25 23:45  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 23:51  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* test_code/exception.S: Imported sources
+	* test_code/mumble.S: Imported sources
 
 1998-12-25 23:45  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* test_code/exception.S: Initial revision
 
-1998-12-25 23:38  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 23:45  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* sample_code/asm_regnames.h: Imported sources
+	* test_code/exception.S: Imported sources
 
 1998-12-25 23:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* sample_code/asm_regnames.h: Initial revision
 
-1998-12-25 22:37  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 23:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cpzero.h: Imported sources
+	* sample_code/asm_regnames.h: Imported sources
 
 1998-12-25 22:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cpzero.h: Initial revision
 
-1998-12-25 22:34  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 22:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cpzeroreg.h: Imported sources
+	* cpzero.h: Imported sources
 
 1998-12-25 22:34  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cpzeroreg.h: Initial revision
 
-1998-12-25 03:38  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 22:34  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* disassembler.cc: Imported sources
+	* cpzeroreg.h: Imported sources
 
 1998-12-25 03:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* disassembler.cc: Initial revision
 
-1998-12-25 02:53  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 03:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cache.h: Imported sources
+	* disassembler.cc: Imported sources
 
 1998-12-25 02:53  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cache.h: Initial revision
 
-1998-12-25 02:44  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 02:53  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* cacheline.cc: Imported sources
+	* cache.h: Imported sources
 
 1998-12-25 02:44  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* cacheline.cc: Initial revision
 
-1998-12-25 00:31  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 02:44  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* tlbentry.cc: Imported sources
+	* cacheline.cc: Imported sources
 
 1998-12-25 00:31  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* tlbentry.cc: Initial revision
 
-1998-12-24 22:10  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-25 00:31  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* tlbentry.h: Imported sources
+	* tlbentry.cc: Imported sources
 
 1998-12-24 22:10  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* tlbentry.h: Initial revision
 
-1998-12-24 21:37  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-24 22:10  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/getpagesize.cc: Imported sources
+	* tlbentry.h: Imported sources
 
 1998-12-24 21:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/getpagesize.cc: Initial revision
 
-1998-12-24 21:21  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-24 21:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/parity.cc: Imported sources
+	* utils/getpagesize.cc: Imported sources
 
 1998-12-24 21:21  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/parity.cc: Initial revision
 
-1998-12-24 18:38  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-24 21:21  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* misc_code/random.cc: Imported sources
+	* misc_code/parity.cc: Imported sources
 
 1998-12-24 18:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* misc_code/random.cc: Initial revision
 
-1998-12-23 03:42  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-24 18:38  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* doc/euclid.txt: Imported sources
+	* misc_code/random.cc: Imported sources
 
 1998-12-23 03:42  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* doc/euclid.txt: Initial revision
 
-1998-12-23 00:52  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-23 03:42  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* test_code/tester.c: Imported sources
+	* doc/euclid.txt: Imported sources
 
 1998-12-23 00:52  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* test_code/tester.c: Initial revision
 
-1998-12-23 00:11  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-23 00:52  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/romdis: Imported sources
+	* test_code/tester.c: Imported sources
 
 1998-12-23 00:11  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/romdis: Initial revision
 
-1998-12-22 20:41  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-23 00:11  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* memorymodule.cc, memorymodule.h: Imported sources
+	* utils/romdis: Imported sources
 
 1998-12-22 20:41  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* memorymodule.cc, memorymodule.h: Initial revision
 
-1998-12-22 20:37  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-22 20:41  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* utils/doedit: Imported sources
+	* memorymodule.cc, memorymodule.h: Imported sources
 
 1998-12-22 20:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* utils/doedit: Initial revision
 
-1998-12-20 05:22  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-22 20:37  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* range.h: Imported sources
+	* utils/doedit: Imported sources
 
 1998-12-20 05:22  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* range.h: Initial revision
 
-1998-12-20 05:16  Brian R. Gaeke <brg@sartre.dgate.org>
+1998-12-20 05:22  Brian R. Gaeke <brg@sartre.dgate.org>
 
-	* doc/transtables: Imported sources
+	* range.h: Imported sources
 
 1998-12-20 05:16  Brian R. Gaeke <brg@sartre.dgate.org>
 
 	* doc/transtables: Initial revision
+
+1998-12-20 05:16  Brian R. Gaeke <brg@sartre.dgate.org>
+
+	* doc/transtables: Imported sources
 

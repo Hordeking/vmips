@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
-dnl $Id: configure.in,v 1.42.2.3 2002/01/12 09:43:42 brg Exp $
+dnl $Id: configure.in,v 1.42.2.5 2002/04/28 21:46:15 brg Exp $
 AC_INIT(vmips.cc)
-AM_INIT_AUTOMAKE(vmips, 1.0.3)
+AM_INIT_AUTOMAKE(vmips, 1.0.4)
 AM_CONFIG_HEADER(config.h)
 
 dnl Look for mips libraries:
@@ -25,6 +25,16 @@ AC_ARG_WITH(mips-include,
                            (default MDIR/include)],
 [mipsinclude="$withval"],
 [mipsinclude="${mipsdir}/include"])dnl
+
+dnl Sanity check the above settings.
+test -d "$mipsdir" || \
+ AC_MSG_ERROR([--with-mips directory \"$mipsdir\" does not exist])
+test -d "$mipsbin" || \
+ AC_MSG_ERROR([--with-mips-bin directory \"$mipsbin\" does not exist])
+test -d "$mipslib" || \
+ AC_MSG_ERROR([--with-mips-lib directory \"$mipslib\" does not exist])
+test -d "$mipsinclude" || \
+ AC_MSG_ERROR([--with-mips-include directory \"$mipsinclude\" does not exist])
 
 AC_MSG_CHECKING([for mips tool prefix])
 mipstoolprefix=""
@@ -142,7 +152,7 @@ AM_PROG_LIBTOOL
 AC_PROG_CXX
 if test "x$GXX" = "xyes"
 then
-	CXXFLAGS="$CXXFLAGS -Wall"
+	CXXFLAGS="$CXXFLAGS -Wall -fno-strict-aliasing"
 fi
 AC_PROG_CPP
 AC_PROG_RANLIB
@@ -182,7 +192,6 @@ AC_CHECK_SIZEOF(char, 1)
 
 dnl Checks for library functions.
 AC_FUNC_MMAP
-AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(mktime)
 AC_CHECK_FUNCS(gettimeofday strdup strerror strtoul)

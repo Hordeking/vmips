@@ -18,7 +18,6 @@
 #define KSEG1_CONST_TRANSLATION 0xa0000000 /* kseg1 v->p address difference */
 #define KSEG2 0xc0000000       /* beginning of mapped cached kernel segment */
 #define KSEG2_top 0xe0000000    /* 2nd half of mapped cached kernel segment */
-#define VPNMASK 0xffffff00         /* bits of address with virtual page no. */
 
 /* CP0 register names and masks
  *

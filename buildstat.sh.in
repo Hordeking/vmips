@@ -1,15 +1,15 @@
 #!/bin/sh
 
+exec 2>&1
+
 echo "Date is:"
-date
+date | awk '{ print $2, $3, $NF }'
 echo ""
 
 echo "System is:"
-uname -s
-uname -r
-uname -m
-uname -n
-./config.guess
+uname -sr
+triplet=`./config.guess`
+echo "($triplet)"
 echo ""
 
 if [ -x ./vmips ]; then
@@ -25,12 +25,13 @@ echo "Host tools (g++) version: "
 @CXX@ -v
 echo ""
 
-echo "MIPS tools (gcc) version: "
-@mipstoolprefix@gcc -v
+echo "MIPS tools (gcc) version and target: "
+@mipstoolprefix@gcc --version
+@mipstoolprefix@gcc -dumpmachine
 echo ""
 
 echo "MIPS tools (binutils) version: "
-@mipstoolprefix@ld -v
+@mipstoolprefix@ld --version | head -1
 echo ""
  
 echo "MIPS BFD target: "

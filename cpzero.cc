@@ -174,7 +174,7 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 	DeviceExc *client)
 {
 	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & VPNMASK;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & EntryHi_VPN_MASK;
 
 	match = find_matching_tlb_entry(vpn, asid);
 	tlb_miss_user = false;
@@ -192,7 +192,7 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 		} else {
 			/* We have a matching TLB entry which is valid. */
 			*cacheable = !match->noncacheable();
-			return match->pfn() | (vaddr & ~VPNMASK);
+			return match->pfn() | (vaddr & ~EntryHi_VPN_MASK);
 		}
 	} else /* No matching TLB entry */ {
 		if (seg == KUSEG) {
@@ -416,7 +416,7 @@ bool
 CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 {
 	TLBEntry *match = NULL;
-	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & VPNMASK;
+	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK, vpn = vaddr & EntryHi_VPN_MASK;
 	bool rv;
 
 	if ((!kernel_mode()) && (vaddr & KERNEL_SPACE_MASK)) {
@@ -434,7 +434,7 @@ CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 			*paddr = 0xffffffff;
 			rv = false;
 		} else {
-			*paddr = match->pfn() | (vaddr & ~VPNMASK);
+			*paddr = match->pfn() | (vaddr & ~EntryHi_VPN_MASK);
 			rv = true;
 		}
 	}

@@ -1,4 +1,4 @@
-This is vmips.info, produced by makeinfo version 4.0 from vmips.texi.
+This is vmips.info, produced by makeinfo version 4.1 from vmips.texi.
 
 START-INFO-DIR-ENTRY
 * VMIPS: (vmips).                A MIPS R3000 simulator.
@@ -1999,7 +1999,6 @@ GNU Free Documentation License
 ==============================
 
                         Version 1.1, March 2000
-
      Copyright (C) 2000 Free Software Foundation, Inc.
      59 Temple Place, Suite 330, Boston, MA  02111-1307, USA
      
@@ -2477,6 +2476,6 @@ Node: Reporting Bugs67841
 Node: Future Directions68521
 Node: References74503
 Node: Copying77955
-Node: Index98130
+Node: Index98129
 
 End Tag Table
