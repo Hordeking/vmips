@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -371,7 +371,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(srlv_SOURCES) $(add_SOURCES) $(addi_SOURCES) $(bc0_SOURCES) $(bgezal_SOURCES) $(bgtz_SOURCES) $(blez_SOURCES) $(bltz_SOURCES) $(bltzal_SOURCES) $(coproc_SOURCES) $(divu_SOURCES) $(handler5_SOURCES) $(jalr_SOURCES) $(load_SOURCES) $(logical_SOURCES) $(lwl_SOURCES) $(lwr_SOURCES) $(mthi_lo_SOURCES) $(multu_SOURCES) $(mumble_SOURCES) $(shift_SOURCES) $(slti_SOURCES) $(store_SOURCES) $(sub_SOURCES) $(swl_SOURCES) $(swr_SOURCES) $(syscall_SOURCES) $(tester_SOURCES) $(tlbwr_SOURCES) $(xor_SOURCES)
 OBJECTS = $(srlv_OBJECTS) $(add_OBJECTS) $(addi_OBJECTS) $(bc0_OBJECTS) $(bgezal_OBJECTS) $(bgtz_OBJECTS) $(blez_OBJECTS) $(bltz_OBJECTS) $(bltzal_OBJECTS) $(coproc_OBJECTS) $(divu_OBJECTS) $(handler5_OBJECTS) $(jalr_OBJECTS) $(load_OBJECTS) $(logical_OBJECTS) $(lwl_OBJECTS) $(lwr_OBJECTS) $(mthi_lo_OBJECTS) $(multu_OBJECTS) $(mumble_OBJECTS) $(shift_OBJECTS) $(slti_OBJECTS) $(store_OBJECTS) $(sub_OBJECTS) $(swl_OBJECTS) $(swr_OBJECTS) $(syscall_OBJECTS) $(tester_OBJECTS) $(tlbwr_OBJECTS) $(xor_OBJECTS)

@@ -63,6 +63,7 @@ public:
 	bool kernel_mode(void);
 	uint32 address_trans(uint32 vaddr, int mode, bool *cacheable,
 		DeviceExc *client);
+	uint32 getIP(void);
 	void enter_exception(uint32 pc, uint32 excCode, uint32 ce, bool dly);
 	bool use_boot_excp_address(void);
 	bool caches_isolated(void);

@@ -2,7 +2,7 @@
 Test-suite automation information
 ---------------------------------
 
- All of our test cases now working under automation. 
+ All of our test cases are now working under automation. 
  We have two comprehensive testing frameworks: the "regcheck"
  framework, and the "outcheck" framework. The former looks at the final
  values of registers after a test case is run, and the latter looks at the
@@ -82,5 +82,5 @@ Test-suite automation information
   Address translations in KSEG0 or KSEG2 or KUSEG or User mode
 
 
-CVS: $Id: README,v 1.23 2002/06/07 23:50:57 brg Exp $
+CVS: $Id: README,v 1.23.2.1 2003/08/18 01:01:45 brg Exp $
  

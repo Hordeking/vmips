@@ -1,3 +1,17 @@
+User-visible changes in version 1.1.2 (since version 1.1.1):
+
+* An instruction that turns on interrupts in the system control coprocessor
+  (coprocessor 0) will no longer immediately take an exception if an interrupt
+  is pending; now it will happen at least one instruction later.
+* When building VMIPS in debug mode, the coprocessor 0 Cause register may no
+  longer contain random, non-clearable interrupt-pending bits.
+* The coprocessor 0 Cause register's interrupt-pending and coprocessor-error
+  bits are now correctly updated when an exception is taken.
+* The VMIPS physical-memory manager will now allow you to place two devices
+  directly adjacent to one another in memory; it used to complain that they
+  overlapped, when they actually did not.
+* A typo was fixed in the testsuite documentation.
+
 User-visible changes in version 1.1.1 (since version 1.1):
 
 * A bug involving shifts by 0 or 32 bits (e.g., using instructions like srlv)

@@ -65,6 +65,9 @@ CPZero::reset(void)
 		reg[r] = random() & (read_masks[r] | write_masks[r]);
 #endif /* INTENTIONAL_CONFUSION */
 	}
+	/* Turn off any randomly-set pending-interrupt bits, as these
+	 * can impact correctness. */
+	reg[Cause] &= ~Cause_IP_MASK;
 	/* Reset Random register to upper bound (8<=Random<=63) */
 	reg[Random] = Random_UPPER_BOUND << 8;
 	/* Reset Status register: clear KUc, IEc, SwC (i.e., caches are not
@@ -361,6 +364,17 @@ CPZero::adjust_random(void)
 	reg[Random] = (uint32) (r << 8);
 }
 
+uint32
+CPZero::getIP(void)
+{
+    uint32 HwIP = 0, IP = 0;
+	if (intc != NULL) {
+		HwIP = intc->calculateIP();	/* Check for a hardware interrupt. */
+	}
+	IP = (reg[Cause] & Cause_IP_SW_MASK) | HwIP;
+    return IP;
+}
+
 void
 CPZero::enter_exception(uint32 pc, uint32 excCode, uint32 ce, bool dly)
 {
@@ -371,8 +385,14 @@ CPZero::enter_exception(uint32 pc, uint32 excCode, uint32 ce, bool dly)
 		((reg[Status] & Status_KU_IE_MASK) << 2);
 	/* Clear Cause register BD, CE, and ExcCode fields. */
 	reg[Cause] &= ~(Cause_BD_MASK|Cause_CE_MASK|Cause_ExcCode_MASK);
-	/* Set Cause register BD, CE, and ExcCode fields w/ exception info. */
-	reg[Cause] |= (dly << 31) | (ce << 28) | (excCode << 2);
+	/* Set Cause register CE field if this is a Coprocessor
+	 * Unusable exception. (If we are passed ce=-1 we don't want
+	 * to toggle bits in Cause.) */
+	if (excCode == CpU) {
+	  reg[Cause] |= ((ce & 0x3) << 28);
+	}
+	/* Update IP, BD, ExcCode fields of Cause register. */
+	reg[Cause] |= getIP () | (dly << 31) | (excCode << 2);
 }
 
 bool
@@ -414,16 +434,10 @@ CPZero::interrupts_enabled(void)
 bool
 CPZero::interrupt_pending(void)
 {
-	uint32 HwIP = 0, IP = 0;
-
 	if (! interrupts_enabled())
 		return false;	/* Can't very well argue with IEc == 0... */
-	if (intc != NULL) {
-		HwIP = intc->calculateIP();	/* Check for a hardware interrupt. */
-	}
-	IP = (reg[Cause] & Cause_IP_SW_MASK) | HwIP;
 	/* Mask IP with the interrupt mask, and return true if nonzero: */
-	return ((IP & (reg[Status] & Status_IM_MASK)) != 0);
+	return ((getIP () & (reg[Status] & Status_IM_MASK)) != 0);
 }
 
 void

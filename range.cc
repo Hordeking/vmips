@@ -113,10 +113,10 @@ Range::overlaps(Range *r) throw()
 
 	/* Key: --- = this, +++ = r, *** = overlap */
 	/* [---[****]+++++++] */
-	if (getBase() <= r->getBase() && end >= r->getBase())
+	if (getBase() <= r->getBase() && end > r->getBase())
 		return true;
 	/* [+++++[***]------] */
-	else if (r->getBase() <= getBase() && r_end >= getBase())
+	else if (r->getBase() <= getBase() && r_end > getBase())
 		return true;
 	/* [+++++[****]+++++] */
 	else if (getBase() >= r->getBase() && end <= r_end)

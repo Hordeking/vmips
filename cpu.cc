@@ -1493,14 +1493,17 @@ CPU::step()
 		call_disassembler(pc,instr);
 	}
 
+	bool intsOnBefore = cpzero->interrupts_enabled();
 	/* Jump to the appropriate emulation function. */
 	(this->*opcodeJumpTable[opcode(instr)])(instr, pc);
+	bool intsOnAfter = cpzero->interrupts_enabled();
 
 	/* Register zero must always be zero; this instruction forces this. */
 	reg[REG_ZERO] = 0;
 
-	/* Check for a (hardware or software) interrupt. */
-	if (cpzero->interrupt_pending()) {
+	/* Check for a (hardware or software) interrupt (but only if
+	 * this instruction did not turn on interrupts.) */
+	if (intsOnBefore && intsOnAfter && cpzero->interrupt_pending()) {
 		exception(Int);
 	}
 
