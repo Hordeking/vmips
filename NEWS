@@ -1,3 +1,7 @@
+User-visible changes in version 1.0.1 (since version 1.0):
+
+* Fixed format-string bug in vmipstool.
+* Fixed "extra tokens after #endif" warning in sample_code/asm_regnames.h.
  
 User-visible changes in version 1.0 (since version 0.9):
 

@@ -97,4 +97,4 @@
 /* 24-30 - reserved */
 #define VCED 31		/* Virtual Coherency Exception (data) (R4k) */
 
-#endif __asm_regnames_h__
+#endif /* __asm_regnames_h__ */

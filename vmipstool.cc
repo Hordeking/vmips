@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 			}
 			else
 			{
-				sprintf(tmp, "/tmp/vmipstool-%d-1", getpid());
+				sprintf(tmp, "/tmp/vmipstool-%d-1", (int) getpid());
 				inputfile = argv[0];
 				outputfile = argv[1];
 				error =
