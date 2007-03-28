@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -75,11 +75,8 @@ CCAS = @CCAS@
 CCASFLAGS = @CCASFLAGS@
 CPP = @CPP@
 CXX = @CXX@
-HAVE_LIB = @HAVE_LIB@
 LDFLAGS = @LDFLAGS@
-LIB = @LIB@
 LN_S = @LN_S@
-LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
 PACKAGE = @PACKAGE@
@@ -385,7 +382,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gnutar
 GZIP_ENV = --best
 SOURCES = $(bgezal_SOURCES) $(xor_SOURCES) $(tester_SOURCES) $(logical_SOURCES) $(mumble_SOURCES) $(divu_SOURCES) $(mthi_lo_SOURCES) $(blez_SOURCES) $(haltdev_SOURCES) $(sub_SOURCES) $(lwl_SOURCES) $(lwr_SOURCES) $(swl_SOURCES) $(swr_SOURCES) $(multu_SOURCES) $(shift_SOURCES) $(coproc_SOURCES) $(bltz_SOURCES) $(sltiu_SOURCES) $(addi_SOURCES) $(srlv_SOURCES) $(add_SOURCES) $(jalr_SOURCES) $(bc0_SOURCES) $(load_SOURCES) $(tlbwr_SOURCES) $(slti_SOURCES) $(store_SOURCES) $(handler5_SOURCES) $(bgtz_SOURCES) $(syscall_SOURCES) $(bltzal_SOURCES)
 OBJECTS = $(bgezal_OBJECTS) $(xor_OBJECTS) $(tester_OBJECTS) $(logical_OBJECTS) $(mumble_OBJECTS) $(divu_OBJECTS) $(mthi_lo_OBJECTS) $(blez_OBJECTS) $(haltdev_OBJECTS) $(sub_OBJECTS) $(lwl_OBJECTS) $(lwr_OBJECTS) $(swl_OBJECTS) $(swr_OBJECTS) $(multu_OBJECTS) $(shift_OBJECTS) $(coproc_OBJECTS) $(bltz_OBJECTS) $(sltiu_OBJECTS) $(addi_OBJECTS) $(srlv_OBJECTS) $(add_OBJECTS) $(jalr_OBJECTS) $(bc0_OBJECTS) $(load_OBJECTS) $(tlbwr_OBJECTS) $(slti_OBJECTS) $(store_OBJECTS) $(handler5_OBJECTS) $(bgtz_OBJECTS) $(syscall_OBJECTS) $(bltzal_OBJECTS)

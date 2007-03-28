@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -75,11 +75,8 @@ CCAS = @CCAS@
 CCASFLAGS = @CCASFLAGS@
 CPP = @CPP@
 CXX = @CXX@
-HAVE_LIB = @HAVE_LIB@
 LDFLAGS = @LDFLAGS@
-LIB = @LIB@
 LN_S = @LN_S@
-LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
 PACKAGE = @PACKAGE@
@@ -218,7 +215,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gnutar
 GZIP_ENV = --best
 SOURCES = $(loser_SOURCES) $(bdexcp_SOURCES) $(poke2_SOURCES) $(instcounts_SOURCES) $(exception_SOURCES) $(emptymain_SOURCES) $(simpledis_SOURCES) $(unaligned_SOURCES) $(hello2_SOURCES) $(hello_SOURCES) $(sb_print_SOURCES)
 OBJECTS = $(loser_OBJECTS) $(bdexcp_OBJECTS) $(poke2_OBJECTS) $(instcounts_OBJECTS) $(exception_OBJECTS) $(emptymain_OBJECTS) $(simpledis_OBJECTS) $(unaligned_OBJECTS) $(hello2_OBJECTS) $(hello_OBJECTS) $(sb_print_OBJECTS)

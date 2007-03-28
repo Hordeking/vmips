@@ -145,7 +145,7 @@ protected:
 		TerminalController *c, const char *c_name) throw();
 
 	/* Initialize the halt device if it is configured. */
-    bool vmips::setup_haltdevice() throw( std::bad_alloc );
+    bool setup_haltdevice() throw( std::bad_alloc );
 
 public:
 	void refresh_options(void);

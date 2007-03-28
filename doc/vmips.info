@@ -1,4 +1,4 @@
-This is vmips.info, produced by makeinfo version 4.7 from vmips.texi.
+This is vmips.info, produced by makeinfo version 4.8 from vmips.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
@@ -2493,7 +2493,17 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Appendix D Release History
 **************************
 
-vmips-1.3.1 was released on 5 January 2005.  User-visible changes in
+vmips-1.3.2 was released on 27 March 2007.  User-visible changes in
+version 1.3.2 (since version 1.3.1):
+
+   * A bug was fixed in the code which responded to address-translation
+     exceptions by loading the CP0 Context register. It was loading the
+     wrong virtual page number.
+
+   * Problems compiling VMIPS with gcc 4.1.x have been fixed.
+
+
+   vmips-1.3.1 was released on 5 January 2005.  User-visible changes in
 version 1.3.1 (since version 1.3):
 
    * VMIPS now compiles and passes most of its regression tests under
@@ -3031,7 +3041,7 @@ Index
 
 * architecture:                          Overview.            (line  11)
 * assembling, using vmipstool:           An Example.          (line  10)
-* break instruction, to halt machine:    Building Programs.   (line  58)
+* break instruction, to halt machine:    Building Programs.   (line  73)
 * C language:                            Building Programs.   (line   9)
 * compiling, using vmipstool:            An Example.          (line  18)
 * configure:                             Installation.        (line  61)
@@ -3069,8 +3079,8 @@ Index
 * interrupts, masking:                   Extending.           (line 339)
 * interrupts, request lines for:         Extending.           (line 283)
 * interrupts, reserved for software:     Extending.           (line 325)
-* linking, using vmipstool <1>:          An Example.          (line  21)
-* linking, using vmipstool:              Getting Started.     (line  19)
+* linking, using vmipstool <1>:          Getting Started.     (line  19)
+* linking, using vmipstool:              An Example.          (line  21)
 * main:                                  Building Programs.   (line  51)
 * memory-mapped devices, configuring:    Extending.           (line 261)
 * memory-mapped devices, specifying addresses for: Extending. (line 261)
@@ -3121,8 +3131,8 @@ Node: Installation85866
 Node: Reporting Bugs100670
 Node: Future Directions101362
 Node: Release History103648
-Node: References120790
-Node: Copying124261
-Node: Index125714
+Node: References121140
+Node: Copying124611
+Node: Index126064
 
 End Tag Table

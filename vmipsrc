@@ -43,4 +43,4 @@
 ## The following options have defaults set by `configure':
 ##
 bigendian
-mipstoolprefix='/opt/mips-elf/bin/mips-elf-'
+mipstoolprefix='/Users/brg/mips-tools/mips-elf/bin/mips-elf-'

@@ -96,19 +96,21 @@ CPZero::dump_regs(FILE *f)
 	fprintf(f, "]\n");
 }
 
+static void dump_tlb_entry(FILE *f, int index, const TLBEntry &e) {
+	fprintf(f,"Entry %02d: (%08x%08x) V=%05x A=%02x P=%05x %c%c%c%c\n", index,
+		e.entryHi, e.entryLo, e.vpn()>>12, e.asid()>>6, e.pfn()>>12,
+		e.noncacheable()?'N':'n', e.dirty()?'D':'d',
+		e.valid()?'V':'v', e.global()?'G':'g');
+}
+
 void
 CPZero::dump_tlb(FILE *f)
 {
 	int x;
 
 	fprintf(f, "Dump TLB: [\n");
-	for (x=0;x<64;x++) {
-		TLBEntry e = tlb[x];
-		fprintf(f,"Entry %02d: (%08x%08x) V=%05x A=%02x P=%05x %c%c%c%c\n", x,
-			e.entryHi, e.entryLo, e.vpn()>>12, e.asid()>>6, e.pfn()>>12,
-			e.noncacheable()?'N':'n', e.dirty()?'D':'d',
-			e.valid()?'V':'v', e.global()?'G':'g');
-	}
+	for (x = 0; x < TLB_ENTRIES; ++x)
+		dump_tlb_entry(f, x, tlb[x]);
 	fprintf(f, "]\n");
 }
 
@@ -154,7 +156,7 @@ void
 CPZero::load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match)
 {
 	reg[BadVAddr] = va;
-	reg[Context] = (reg[Context] & ~Context_BadVPN_MASK) | (vpn >> 6);
+	reg[Context] = (reg[Context] & ~Context_BadVPN_MASK) | ((va & 0x7ffff000) >> 10);
 	reg[EntryHi] = (va & EntryHi_VPN_MASK) | (reg[EntryHi] & ~EntryHi_VPN_MASK);
 }
 
@@ -196,11 +198,12 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 	return 0xffffffff;
 }
 
-uint32 CPZero::read_reg(uint32 r) {
+uint32 CPZero::read_reg(const uint32 r) {
+    // This ensures that non-existent CP0 registers read as zero.
     return reg[r] & read_masks[r];
 }
 
-void CPZero::write_reg(uint32 r, uint32 data) {
+void CPZero::write_reg(const uint32 r, const uint32 data) {
 	// This preserves the bits which are readable but not writable, and writes
 	// the bits which are writable with new data, thus making it suitable
 	// for mtc0-type operations.  If you want to write all the bits which

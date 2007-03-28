@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -73,11 +73,8 @@ CCASFLAGS = @CCASFLAGS@
 CPP = @CPP@
 CXX = @CXX@
 EXEEXT = @EXEEXT@
-HAVE_LIB = @HAVE_LIB@
 LDFLAGS = @LDFLAGS@
-LIB = @LIB@
 LN_S = @LN_S@
-LTLIB = @LTLIB@
 MAKEINFO = @MAKEINFO@
 MIPSTOOLPREFIX = @MIPSTOOLPREFIX@
 PACKAGE = @PACKAGE@
@@ -155,7 +152,7 @@ missing mkinstalldirs vmips.spec.in vmipsrc.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gnutar
 GZIP_ENV = --best
 SOURCES = $(vmips_SOURCES) $(vmipstool_SOURCES)
 OBJECTS = $(vmips_OBJECTS) $(vmipstool_OBJECTS)
@@ -173,7 +170,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 $(ACLOCAL_M4):  configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -319,7 +316,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -438,7 +435,8 @@ cpu.o: cpu.cc cpu.h deviceexc.h accesstypes.h types.h config.h cpzero.h \
 	tlbentry.h cpzeroreg.h debug.h mapper.h range.h vmips.h \
 	options.h excnames.h error.h gccattr.h remotegdb.h stub-dis.h \
 	libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
-	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h \
+	libopcodes_mips/bfd.h
 cpzero.o: cpzero.cc cpzero.h tlbentry.h config.h cpzeroreg.h types.h \
 	mapper.h range.h accesstypes.h excnames.h cpu.h deviceexc.h \
 	intctrl.h error.h gccattr.h
@@ -481,7 +479,8 @@ spimconsole.o: spimconsole.cc clock.h task.h types.h config.h mapper.h \
 	devicemap.h terminalcontroller.h devreg.h spimconsreg.h vmips.h
 stub-dis.o: stub-dis.cc stub-dis.h types.h config.h \
 	libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
-	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h \
+	libopcodes_mips/bfd.h
 terminalcontroller.o: terminalcontroller.cc clock.h task.h types.h \
 	config.h error.h gccattr.h terminalcontroller.h devreg.h
 vmips.o: vmips.cc clock.h task.h types.h config.h clockdev.h deviceint.h \
@@ -492,11 +491,11 @@ vmips.o: vmips.cc clock.h task.h types.h config.h clockdev.h deviceint.h \
 	options.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h decstat.h \
 	decserial.h decserialreg.h stub-dis.h libopcodes_mips/bfd.h \
 	libopcodes_mips/ansidecl.h libopcodes_mips/symcat.h \
-	libopcodes_mips/dis-asm.h rommodule.h
+	libopcodes_mips/dis-asm.h libopcodes_mips/bfd.h rommodule.h
 vmipstool.o: vmipstool.cc endiantest.h types.h config.h fileutils.h \
 	stub-dis.h libopcodes_mips/bfd.h libopcodes_mips/ansidecl.h \
-	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h error.h \
-	gccattr.h options.h
+	libopcodes_mips/symcat.h libopcodes_mips/dis-asm.h \
+	libopcodes_mips/bfd.h error.h gccattr.h options.h
 
 info-am:
 info: info-recursive

@@ -52,7 +52,9 @@ public:
 
 	/* Return the bit of the CP0 Status and Cause registers corresponding
 	   to interrupt line number NUM, or 0 if no such interrupt line exists. */
-	static uint32 DeviceInt::num2irq(uint32 num) throw();
+	static uint32 num2irq(uint32 num) throw();
+
+    virtual ~DeviceInt() { }
 
 protected:
 	/* Assert an interrupt request on interrupt line LINE, which

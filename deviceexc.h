@@ -32,6 +32,7 @@ public:
 	   and the coprocessor that generated it (if any) is COPROCNO. */
     virtual void exception(uint16 excCode, int mode = ANY,
 		int coprocno = -1) = 0;
+    virtual ~DeviceExc() { }
 
 	/* A flag which says whether an exception is ready to be handled. */
 	bool exception_pending;

@@ -42,7 +42,7 @@ CHAPTERS = $(srcdir)/to-do
 CLEANFILES = vmips.log vmips.aux vmips.cp vmips.fn vmips.vr \
  vmips.tp vmips.ky vmips.pg vmips.toc vmips.cps vmips.fns vmips.pgs vmips.pod
 DISTCLEANFILES = 
-USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.dvi vmips.info vmips.html vmips.ps \
+USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.info vmips.html \
  vmips.pdf $(MANPAGES)
 MAINTAINERCLEANFILES = $(USERDOCS) vmips.pod vmipstool.pod
 DISTFILES = Makefile.in to-do vmips.texi invoke.texi \
@@ -54,7 +54,7 @@ vmips_MANPAGE = vmips.$(MANSECT)
 vmipstool_MANPAGE = vmipstool.$(MANSECT)
 MANPAGES = $(vmips_MANPAGE) $(vmipstool_MANPAGE)
 
-all: $(DOC) dvi info html ps man pdf
+all: $(DOC) dvi info html man pdf
 
 # Nothing to do here (yet):
 check installcheck:
