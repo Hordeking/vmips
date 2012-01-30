@@ -43,20 +43,19 @@ class DECSerialDevice : public DeviceMap, public DeviceInt,
   bool keyboardInterruptReadyForLine (const int line) const;
   bool displayInterruptReadyForLine (const int line) const;
  public:
-  DECSerialDevice (Clock *clock, uint8 deccsr_irq_) throw ();
-  virtual ~DECSerialDevice() throw() { }
+  DECSerialDevice (Clock *clock, uint8 deccsr_irq_);
+  virtual ~DECSerialDevice() { }
   uint32 fetch_word (uint32 offset, int mode, DeviceExc *client);
   void store_word (uint32 offset, uint32 data, DeviceExc *client);
   const char *descriptor_str () const { return "DECstation 5000/200 DZ11 Serial"; }
 
   /* Call the routines in TerminalController and then assert or
      deassert the appropriate interrupt. */
-  virtual void ready_display (int line) throw();
-  virtual void unready_display (int line, char data)
-      throw (std::bad_alloc);
-  virtual void unready_keyboard (int line) throw();
+  virtual void ready_display (int line);
+  virtual void unready_display (int line, char data);
+  virtual void unready_keyboard (int line);
 protected:
-  virtual void ready_keyboard (int line) throw();
+  virtual void ready_keyboard (int line);
 };
 
 #endif /* _DECSERIAL_H_ */

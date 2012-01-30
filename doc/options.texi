@@ -296,13 +296,13 @@ setup!)  The default value is FALSE.
 
 @option{tracestartpc} (type: number)
 
- If the tracing option is set, then this is the PC at which tracing
-will start. Otherwise it has no effect.  The default value is 0.
+ If the tracing option is set, then this is the PC value which will
+trigger the start of tracing.  Otherwise it has no effect.  The default value is 0.
 
 @option{traceendpc} (type: number)
 
- If the tracing option is set, then this is the PC at which tracing
-will stop. Otherwise it has no effect.  The default value is 0.
+ If the tracing option is set, then this is the PC value which will
+trigger the end of tracing. Otherwise it has no effect.  The default value is 0.
 
 @option{mipstoolprefix} (type: string)
 
@@ -318,8 +318,16 @@ script; the compiled-in default is designed to cause an error.  The default valu
 @option{execname} (type: string)
 
  Name of executable to be loaded by automatic kernel loader. This
-is an experimental feature. The option value must be the name of
-a MIPS ECOFF executable file, or 'none' to disable the option.
-The executable's headers must specify load addresses in KSEG0
-or KSEG1 (0x80000000 through 0xbfffffff).   The default value is "none".
+is an experimental, unfinished feature. The option value
+must be the name of a MIPS ECOFF executable file, or 'none'
+to disable the option.  The executable's headers must specify
+load addresses in KSEG0 or KSEG1 (0x80000000 through
+0xbfffffff).   The default value is "none".
+
+@option{fpu} (type: Boolean)
+
+ True to enable hooks in the CPU to communicate with a
+floating-point unit as coprocessor 1. The floating-point unit
+is not implemented, only the hooks in the CPU are. This is an
+experimental, unfinished feature.  The default value is FALSE.
 

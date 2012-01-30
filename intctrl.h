@@ -31,11 +31,11 @@ private:
 	Devices devs;
 
 public:
-	IntCtrl() throw() { }
-	virtual ~IntCtrl() throw() { }
+	IntCtrl() { }
+	virtual ~IntCtrl() { }
 
 	/* Return the mask of all asserted interrupts for connected devices. */
-	virtual uint32 calculateIP() throw();
+	virtual uint32 calculateIP();
 
 	/* Connect interrupt line LINE (see deviceint.h) to device DEV. */
 	virtual void connectLine(uint32 line, DeviceInt *dev);

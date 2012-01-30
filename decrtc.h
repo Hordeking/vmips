@@ -24,6 +24,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #ifndef _DECRTC_H_
 #define _DECRTC_H_
 
+#include <ctime>
 #include "deviceint.h"
 #include "devicemap.h"
 #include "task.h"
@@ -36,8 +37,8 @@ protected:
   class ClockTrigger : public CancelableTask
   {
   public:
-    ClockTrigger (DECRTCDevice *rtc) throw ();
-    virtual ~ClockTrigger () throw ();
+    ClockTrigger (DECRTCDevice *rtc);
+    virtual ~ClockTrigger ();
   protected:
     virtual void real_task ();
     DECRTCDevice *rtc;

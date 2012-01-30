@@ -41,12 +41,16 @@ class DECCSRDevice;
 class DECStatDevice;
 class DECSerialDevice;
 class Disassembler;
+class Interactor;
 
 long timediff(struct timeval *after, struct timeval *before);
 
 class vmips
 {
 public:
+	// Machine states
+	enum { HALT, RUN, DEBUG, INTERACT }; 
+
 	Mapper		*physmem;
 	CPU		*cpu;
 	IntCtrl		*intc;
@@ -55,10 +59,11 @@ public:
 	Debug	*dbgr;
 	Disassembler	*disasm;
 	bool		host_bigendian;
-	bool		halted;
 	DECCSRDevice	*deccsr_device;
 
-protected:
+	int			state;
+	bool halted() const { return (state == HALT); }
+
 	Clock		*clock;
 	ClockDevice	*clock_device;
 	HaltDevice	*halt_device;
@@ -99,33 +104,33 @@ protected:
 
 private:
 	uint32	num_instrs;
+	Interactor *interactor;
 
-protected:
 	/* If boot messages are enabled with opt_bootmsg, print MSG as a
 	   printf(3) style format string for the remaing arguments. */
-	virtual void boot_msg( const char *msg, ... ) throw();
+	virtual void boot_msg( const char *msg, ... );
 
 	/* Initialize the SPIM-compatible console device and connect it to
 	   configured terminal lines. */
-	virtual bool setup_spimconsole() throw (std::bad_alloc);
+	virtual bool setup_spimconsole();
 
 	/* Initialize the clock device if it is configured. Return true if
 	   there are no initialization problems, otherwise return false. */
-	virtual bool setup_clockdevice() throw( std::bad_alloc );
+	virtual bool setup_clockdevice();
 
 	/* Initialize the DEC RTC if it is configured. Return true if
 	   there are no initialization problems, otherwise return false. */
-	virtual bool setup_decrtc() throw( std::bad_alloc );
+	virtual bool setup_decrtc();
 
 	/* Initialize the DEC CSR if it is configured. Return true if
 	   there are no initialization problems, otherwise return false. */
-	virtual bool setup_deccsr() throw( std::bad_alloc );
+	virtual bool setup_deccsr();
 
 	/* Initialize the DEC status registers if configured. Return true if
 	   there are no initialization problems, otherwise return false. */
-	virtual bool setup_decstat() throw( std::bad_alloc );
+	virtual bool setup_decstat();
 
-	virtual bool setup_decserial() throw( std::bad_alloc );
+	virtual bool setup_decserial();
 
 	virtual bool setup_rom();
 
@@ -135,34 +140,40 @@ protected:
 	bool load_ecoff (FILE *fp);
 	char *translate_to_host_ram_pointer (uint32 vaddr);
 
-	virtual bool setup_ram() throw (std::bad_alloc);
+	virtual bool setup_ram();
 
-	virtual bool setup_clock() throw (std::bad_alloc);
+	virtual bool setup_clock();
 
 	/* Connect the file or device named NAME to line number L of
 	   console device C, or do nothing if NAME is "off".  */
 	virtual void setup_console_line(int l, char *name,
-		TerminalController *c, const char *c_name) throw();
+		TerminalController *c, const char *c_name);
 
 	/* Initialize the halt device if it is configured. */
-    bool setup_haltdevice() throw( std::bad_alloc );
+    bool setup_haltdevice();
 
 public:
 	void refresh_options(void);
 	vmips(int argc, char **argv);
 
 	/* Cleanup after we are done. */
-	virtual ~vmips() throw();
+	virtual ~vmips();
 	
 	void setup_machine(void);
-	void randomize(void);
+
+	/* Attention key was pressed. */
+	void attn_key(void);
 
 	/* Halt the simulation. */
-	void halt(void) throw();
+	void halt(void);
 
-	/* Return the size of the open file FP, in bytes. */
-	static uint32 get_file_size (FILE *fp) throw ();
+	/* Interact with user. */
+	bool interact(void);
+
 	int host_endian_selftest(void);
+
+	void dump_cpu_info(bool dumpcpu, bool dumpcp0);
+
 	void step(void);
 	int run(void);
 };

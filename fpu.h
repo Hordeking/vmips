@@ -1,5 +1,5 @@
-/* Various file utility functions.
-   Copyright 2004 Brian R. Gaeke.
+/* Definitions for stub floating-point coprocessor.
+   Copyright 2004, 2009 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -17,15 +17,21 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
+#ifndef _FPU_H_
+#define _FPU_H_
 
-#include <cstdio>
 #include "types.h"
 
-bool can_read_file (char *filename);
+class CPU;
 
-// Return the size of the open file FP, in bytes.
-uint32 get_file_size (FILE *fp);
+class FPU
+{
+        CPU *cpu;
+public:
+	FPU (CPU *m) : cpu (m) { }
+        void cpone_emulate (uint32 instr, uint32 pc);
+        uint32 read_reg (uint16 regno);
+	void write_reg (uint16 regno, uint32 word);
+};
 
-#endif // FILEUTILS_H
+#endif /* _FPU_H_ */

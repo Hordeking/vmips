@@ -9,6 +9,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
+datarootdir = @datarootdir@
 datadir = @datadir@
 sysconfdir = @sysconfdir@
 sharedstatedir = @sharedstatedir@
@@ -54,6 +55,10 @@ install: ld.script
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(pkgincludedir)
 	$(INSTALL_DATA) $(srcdir)/ld.script $(DESTDIR)$(pkgdatadir)/ld.script
 	$(INSTALL_DATA) $(srcdir)/asm_regnames.h $(DESTDIR)$(pkgincludedir)/asm_regnames.h
+
+uninstall:
+	-rm -f $(DESTDIR)$(pkgdatadir)/ld.script
+	-rm -f $(DESTDIR)$(pkgincludedir)/asm_regnames.h
 
 clean:
 	-rm -f $(CLEANFILES)

@@ -23,6 +23,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "excnames.h"
 #include "mapper.h"
 #include "memorymodule.h"
+#include "rommodule.h"
 #include "options.h"
 #include "range.h"
 #include "vmips.h"
@@ -74,7 +75,7 @@ Mapper::add_range(Range *r)
  * speed a succession of accesses to the same area of memory.
  */
 Range *
-Mapper::find_mapping_range(uint32 p) throw()
+Mapper::find_mapping_range(uint32 p)
 {
 	if (last_used_mapping && last_used_mapping->incorporates(p))
 		return last_used_mapping;
@@ -219,8 +220,8 @@ Mapper::fetch_word(uint32 addr, int32 mode, bool cacheable, DeviceExc *client)
 		return 0xffffffff;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canRead(offset))) {
-		/* Reads from nonexistent or write-only ranges return ones */
+	if (!l->canRead(offset)) {
+		/* Reads from write-only ranges return ones */
 		return 0xffffffff;
 	}
 	return host_to_mips_word(l->fetch_word(offset, mode, client));
@@ -259,8 +260,8 @@ Mapper::fetch_halfword(uint32 addr, bool cacheable, DeviceExc *client)
 		return 0xffff;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canRead(offset))) {
-		/* Reads from nonexistent or write-only ranges return ones */
+	if (!l->canRead(offset)) {
+		/* Reads from write-only ranges return ones */
 		return 0xffff;
 	}
 	return host_to_mips_halfword(l->fetch_halfword(offset, client));
@@ -288,7 +289,7 @@ Mapper::fetch_byte(uint32 addr, bool cacheable, DeviceExc *client)
 		return 0xff;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canRead(offset))) {
+	if (!l->canRead(offset)) {
 		/* Reads from write-only ranges return ones */
 		return 0xff;
 	}
@@ -320,7 +321,7 @@ Mapper::store_word(uint32 addr, uint32 data, bool cacheable, DeviceExc *client)
 		return;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canWrite(offset))) {
+	if (!l->canWrite(offset)) {
 		fprintf(stderr, "Writing bad memory: 0x%08x\n", addr);
 		return;
 	}
@@ -355,8 +356,8 @@ Mapper::store_halfword(uint32 addr, uint16 data, bool cacheable, DeviceExc
 		return;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canWrite(offset))) {
-		/* Writes to nonexistent or read-only ranges return ones */
+	if (!l->canWrite(offset)) {
+		/* Write to read-only range */
 		fprintf(stderr, "Writing bad memory: 0x%08x\n", addr);
 		return;
 	}
@@ -384,8 +385,8 @@ Mapper::store_byte(uint32 addr, uint8 data, bool cacheable, DeviceExc *client)
 		return;
 	}
 	offset = addr - l->getBase();
-	if (!(l && l->canWrite(offset))) {
-		/* Writes to nonexistent or read-only ranges return ones */
+	if (!l->canWrite(offset)) {
+		/* Write to read-only range */
 		fprintf(stderr, "Writing bad memory: 0x%08x\n", addr);
 		return;
 	}
@@ -421,4 +422,28 @@ Mapper::dump_stack(FILE *f, uint32 stackphys)
 		}
 	}
 	fprintf(f, "\n");
+}
+
+/* Print a hex dump of the first word of memory at physical address
+ * ADDR to the filehandle pointed to by F.
+ */
+void
+Mapper::dump_mem(FILE *f, uint32 phys)
+{
+	Range *l;
+
+	if ((l = find_mapping_range(phys)) == NULL) {
+		fprintf(f, "(points to hole in address space)");
+	} else {
+		if (!(dynamic_cast<MemoryModule *> (l) || dynamic_cast<ROMModule *>(l))) {
+			fprintf(f, "(points to non-memory address space)");
+		} else {
+			uint32 data =
+				((uint32 *) l->
+				 getAddress())[(phys - l->getBase()) / 4];
+			if (byteswapped)
+				data = swap_word (data);
+			fprintf(f, "%08x ", data);
+		}
+	}
 }

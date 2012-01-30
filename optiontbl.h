@@ -310,12 +310,12 @@ static Option nametable[] = {
         setup!) **/
 
     { "tracestartpc", NUM },
-    /** If the tracing option is set, then this is the PC at which tracing
-        will start. Otherwise it has no effect. **/
+    /** If the tracing option is set, then this is the PC value which will
+        trigger the start of tracing.  Otherwise it has no effect. **/
 
     { "traceendpc", NUM },
-    /** If the tracing option is set, then this is the PC at which tracing
-        will stop. Otherwise it has no effect. **/
+    /** If the tracing option is set, then this is the PC value which will
+        trigger the end of tracing. Otherwise it has no effect. **/
 
     { "mipstoolprefix", STR },
     /** vmipstool uses this option to locate your MIPS-targetted cross
@@ -329,16 +329,23 @@ static Option nametable[] = {
 
     { "execname", STR },
     /** Name of executable to be loaded by automatic kernel loader. This
-        is an experimental feature. The option value must be the name of
-        a MIPS ECOFF executable file, or 'none' to disable the option.
-        The executable's headers must specify load addresses in KSEG0
-        or KSEG1 (0x80000000 through 0xbfffffff).  **/
+	is an experimental, unfinished feature. The option value
+	must be the name of a MIPS ECOFF executable file, or 'none'
+	to disable the option.  The executable's headers must specify
+	load addresses in KSEG0 or KSEG1 (0x80000000 through
+	0xbfffffff).  **/
+
+    { "fpu", FLAG },
+    /** True to enable hooks in the CPU to communicate with a
+        floating-point unit as coprocessor 1. The floating-point unit
+	is not implemented, only the hooks in the CPU are. This is an
+	experimental, unfinished feature. **/
 
     { NULL, 0 }
 };
 
 /* This is the official default options list. */
-static char *defaults_table[] = {
+static const char *defaults_table[] = {
     "nohaltdumpcpu", "nohaltdumpcp0", "noexcpriomsg",
     "noexcmsg", "bootmsg", "noinstdump", "nodumpcpu", "nodumpcp0",
     "haltibe", "haltbreak", "haltdevice", "romfile=romfile.rom",
@@ -351,7 +358,7 @@ static char *defaults_table[] = {
     "spimconsole", "notracing", "tracesize=100000", "nobigendian",
     "tracestartpc=0", "traceendpc=0",
     "mipstoolprefix=/nonexistent/mips/bin/mipsel-ecoff-",
-    "execname=none",
+    "execname=none", "nofpu",
     NULL
 };
 

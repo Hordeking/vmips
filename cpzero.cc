@@ -194,16 +194,17 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
     // Use special refill handler vector for user TLB miss.
 	tlb_miss_user = (seg == KUSEG && !match);
 	load_addr_trans_excp_info(vaddr,vpn,match);
+    //fprintf(stderr, "TLB: Miss for vaddr=%x (vpn=%x)\n", vaddr, (vaddr>>12));
 	client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
 	return 0xffffffff;
 }
 
-uint32 CPZero::read_reg(const uint32 r) {
+uint32 CPZero::read_reg(const uint16 r) {
     // This ensures that non-existent CP0 registers read as zero.
     return reg[r] & read_masks[r];
 }
 
-void CPZero::write_reg(const uint32 r, const uint32 data) {
+void CPZero::write_reg(const uint16 r, const uint32 data) {
 	// This preserves the bits which are readable but not writable, and writes
 	// the bits which are writable with new data, thus making it suitable
 	// for mtc0-type operations.  If you want to write all the bits which
@@ -215,25 +216,25 @@ void CPZero::write_reg(const uint32 r, const uint32 data) {
 void
 CPZero::mfc0_emulate(uint32 instr, uint32 pc)
 {
-	cpu->reg[cpu->rt(instr)] = read_reg(cpu->rd(instr));
+	cpu->put_reg (CPU::rt (instr), read_reg (CPU::rd (instr)));
 }
 
 void
 CPZero::mtc0_emulate(uint32 instr, uint32 pc)
 {
-    write_reg(cpu->rd(instr), cpu->reg[cpu->rt(instr)]);
+    write_reg (CPU::rd (instr), cpu->get_reg (CPU::rt (instr)));
 }
 
 void
 CPZero::bc0x_emulate(uint32 instr, uint32 pc)
 {
-	uint16 condition = cpu->rt(instr);
-	switch(condition) {
-	case 0: /* bc0f */ if (! cpCond()) { cpu->branch(instr, pc); } break;
-	case 1: /* bc0t */ if (cpCond()) { cpu->branch(instr, pc); } break;
-	case 2: /* bc0fl - not valid, but not reserved(A-17, H&K) - no-op. */ ;
-	case 3: /* bc0tl - not valid, but not reserved(A-21, H&K) - no-op. */ ;
-	default: cpu->exception(RI); break; /* reserved */
+	uint16 condition = CPU::rt (instr);
+	switch (condition) {
+	case 0: /* bc0f */ if (! cpCond ()) { cpu->branch (instr, pc); } break;
+	case 1: /* bc0t */ if (cpCond ()) { cpu->branch (instr, pc); } break;
+	case 2: /* bc0fl - not valid, but not reserved(A-17, H&K) - no-op. */ break;
+	case 3: /* bc0tl - not valid, but not reserved(A-21, H&K) - no-op. */ break;
+	default: cpu->exception (RI); break; /* reserved */
 	}
 }
 
@@ -251,6 +252,8 @@ CPZero::tlb_write(unsigned index)
 {
 	tlb[index].entryHi = read_reg(EntryHi);
 	tlb[index].entryLo = read_reg(EntryLo);
+    //fprintf(stderr, "TLB: Write ");
+    //dump_tlb_entry(stderr, index, tlb[index]);
 }
 
 void
@@ -286,23 +289,24 @@ CPZero::rfe_emulate(uint32 instr, uint32 pc)
 void
 CPZero::cpzero_emulate(uint32 instr, uint32 pc)
 {
-	if (cpu->rs(instr) > 15) {
-		switch(cpu->funct(instr)) {
-		case 1: tlbr_emulate(instr, pc); break;
-		case 2: tlbwi_emulate(instr, pc); break;
-		case 6: tlbwr_emulate(instr, pc); break;
-		case 8: tlbp_emulate(instr, pc); break;
-		case 16: rfe_emulate(instr, pc); break;
-		default: cpu->exception(RI,ANY,0); break;
+	uint16 rs = CPU::rs (instr);
+	if (CPU::rs (instr) > 15) {
+		switch (CPU::funct (instr)) {
+		case 1: tlbr_emulate (instr, pc); break;
+		case 2: tlbwi_emulate (instr, pc); break;
+		case 6: tlbwr_emulate (instr, pc); break;
+		case 8: tlbp_emulate (instr, pc); break;
+		case 16: rfe_emulate (instr, pc); break;
+		default: cpu->exception (RI, ANY, 0); break;
 		}
 	} else {
-		switch(cpu->rs(instr)) {
-		case 0: mfc0_emulate(instr,pc); break;
-		case 2: cpu->exception(RI,ANY,0); break; /* cfc0 - reserved */
-		case 4: mtc0_emulate(instr,pc); break;
-		case 6: cpu->exception(RI,ANY,0); break; /* ctc0 - reserved */
-		case 8: bc0x_emulate(instr,pc); break;
-		default: cpu->exception(RI,ANY,0); break;
+		switch (rs) {
+		case 0: mfc0_emulate (instr, pc); break;
+		case 2: cpu->exception (RI, ANY, 0); break; /* cfc0 - reserved */
+		case 4: mtc0_emulate (instr, pc); break;
+		case 6: cpu->exception (RI, ANY, 0); break; /* ctc0 - reserved */
+		case 8: bc0x_emulate (instr,pc); break;
+		default: cpu->exception (RI, ANY, 0); break;
 		}
 	}
 }

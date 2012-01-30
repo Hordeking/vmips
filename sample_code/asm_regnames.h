@@ -38,6 +38,40 @@
 #define s8 $30	/* another "saved" reg */
 #define ra $31	/* return address */
 
+/* FPU register names - included for a consistent appearance */
+#define f0 $f0
+#define f1 $f1
+#define f2 $f2
+#define f3 $f3
+#define f4 $f4
+#define f5 $f5
+#define f6 $f6
+#define f7 $f7
+#define f8 $f8
+#define f9 $f9
+#define f10 $f10
+#define f11 $f11
+#define f12 $f12
+#define f13 $f13
+#define f14 $f14
+#define f15 $f15
+#define f16 $f16
+#define f17 $f17
+#define f18 $f18
+#define f19 $f19
+#define f20 $f20
+#define f21 $f21
+#define f22 $f22
+#define f23 $f23
+#define f24 $f24
+#define f25 $f25
+#define f26 $f26
+#define f27 $f27
+#define f28 $f28
+#define f29 $f29
+#define f30 $f30
+#define f31 $f31
+
 /* CP0 reg names - these pertain to address translation and
  * exception handling, and not all of them are implemented on the
  * R3000. (But they have such cool names...)

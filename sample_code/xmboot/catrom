@@ -112,6 +112,9 @@ sub symbolAddress {
 	SYMLOOP: while (<NM>) {
 		my ($symName, $symType, $symAddr) = split (" ");
 		if ($sym eq $symName) {
+			# Some versions of binutils have a very strange bug: they
+			# sign-extend 32-bit addresses to 64 bits!
+			if (length($symAddr) > 8) { $symAddr = substr ($symAddr, 8); }
 			$rv = eval ("0x$symAddr"); # ugh!
 			$found = 1;
 			last SYMLOOP;

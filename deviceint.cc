@@ -45,7 +45,7 @@ char *DeviceInt::strlineno(uint32 line)
 	return buff;
 }
 
-uint32 DeviceInt::num2irq(uint32 num) throw()
+uint32 DeviceInt::num2irq(uint32 num)
 {
 	switch (num) {
 	case 0:
@@ -133,7 +133,7 @@ void DeviceInt::deassertInt(uint32 line)
 }
 
 /* Constructor. */
-DeviceInt::DeviceInt() throw()
+DeviceInt::DeviceInt()
 	: lines_connected(0), lines_asserted(0)
 {
 	opt_reportirq = machine->opt->option("reportirq")->flag;

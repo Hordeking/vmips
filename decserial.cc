@@ -33,8 +33,9 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "deviceexc.h"
 #include "mapper.h"
 #include "vmips.h"
+#include <cassert>
 
-DECSerialDevice::DECSerialDevice (Clock *clock, uint8 deccsr_irq_) throw()
+DECSerialDevice::DECSerialDevice (Clock *clock, uint8 deccsr_irq_)
   : TerminalController (clock, KEYBOARD_POLL_NS, KEYBOARD_REPOLL_NS,
                         DISPLAY_READY_DELAY_NS),
     deccsr_irq (deccsr_irq_)
@@ -46,7 +47,7 @@ DECSerialDevice::DECSerialDevice (Clock *clock, uint8 deccsr_irq_) throw()
 void
 DECSerialDevice::master_clear ()
 {
-  fprintf (stderr, "DZ11 Master clear!\n");
+  /* fprintf (stderr, "DZ11 Master clear!\n"); */
   csr = 0;
   rbuf &= ~DZ_RBUF_DVAL;
   lpr = 0;
@@ -65,11 +66,14 @@ CSR_TLINE (unsigned int Line)
   return (((Line) & 0x03) << 8);
 }
 
+#if 0
+/* presently unused */
 static unsigned int
 GET_CURRENT_CSR_TLINE (uint32 Csr)
 {
   return (((Csr) >> 8) & 0x03);
 }
+#endif
 
 static unsigned int
 RBUF_RLINE (unsigned int Line)
@@ -123,7 +127,7 @@ DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
     break;
   case DZ_MSR:
     rv = msr;
-    fprintf (stderr, "DZ11 MSR read as 0x%x\n", rv);
+    /* fprintf (stderr, "DZ11 MSR read as 0x%x\n", rv); */
     break;
   }
   return machine->physmem->mips_to_host_word(rv);
@@ -146,20 +150,20 @@ DECSerialDevice::store_word (uint32 offset, uint32 data, DeviceExc *client)
   uint16 data16 = data & 0x0ffff;
   switch (offset & 0x18) {
     case DZ_CSR:
-      fprintf (stderr, "DZ11 write CSR as %x\n", data16);
+      /* fprintf (stderr, "DZ11 write CSR as %x\n", data16); */
       csr = data16;
       if (csr & DZ_CSR_CLR)
         master_clear ();
       display_interrupt_enable = (csr & DZ_CSR_TIE);
       keyboard_interrupt_enable = (csr & DZ_CSR_RIE);
-      fprintf (stderr, "DZ11 Keyboard IE is now %s, Display IE now %s, "
+      /* fprintf (stderr, "DZ11 Keyboard IE is now %s, Display IE now %s, "
                "selected tx line now %d\n",
                keyboard_interrupt_enable ? "on" : "off",
                display_interrupt_enable ? "on" : "off",
-               GET_CURRENT_CSR_TLINE (csr));
+               GET_CURRENT_CSR_TLINE (csr)); */
       break;
     case DZ_LPR:
-      fprintf (stderr, "DZ11 write LPR as %x\n", data16);
+      /* fprintf (stderr, "DZ11 write LPR as %x\n", data16); */
       lpr = data16;
       break;
     case DZ_TCR:
@@ -199,23 +203,25 @@ DECSerialDevice::store_word (uint32 offset, uint32 data, DeviceExc *client)
 
 void
 DECSerialDevice::assertCSRInt () {
+  assert (machine->deccsr_device && "DECCSR device required for DECSerial");
   machine->deccsr_device->assertInt (deccsr_irq);
 }
 
 void
 DECSerialDevice::deassertCSRInt () {
+  assert (machine->deccsr_device && "DECCSR device required for DECSerial");
   machine->deccsr_device->deassertInt (deccsr_irq);
 }
 
 void
-DECSerialDevice::unready_display (int line, char data) throw(std::bad_alloc)
+DECSerialDevice::unready_display (int line, char data)
 {
   TerminalController::unready_display (line, data);
   deassertCSRInt();
 }
 
 void
-DECSerialDevice::ready_display (int line) throw()
+DECSerialDevice::ready_display (int line)
 {
   TerminalController::ready_display (line);
   if (displayInterruptReadyForLine(line))
@@ -223,14 +229,14 @@ DECSerialDevice::ready_display (int line) throw()
 }
 
 void
-DECSerialDevice::unready_keyboard (int line) throw()
+DECSerialDevice::unready_keyboard (int line)
 {
   TerminalController::unready_keyboard (line);
   deassertCSRInt();
 }
 
 void
-DECSerialDevice::ready_keyboard (int line) throw()
+DECSerialDevice::ready_keyboard (int line)
 {
   TerminalController::ready_keyboard (line);
   if (keyboardInterruptReadyForLine(line))

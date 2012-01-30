@@ -11,7 +11,7 @@ EXTRA_DIST = VERSION $(REDHAT_PKG_FILES) \
 bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
-CXXFLAGS = -I$(top_srcdir)/libopcodes_mips @CXXFLAGS@ \
+AM_CXXFLAGS = -I$(top_srcdir)/libopcodes_mips \
  -DSYSCONFDIR=\"$(sysconfdir)\" -DPKGDATADIR=\"$(pkgdatadir)\"
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
@@ -22,7 +22,8 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   spimconsole.cc stub-dis.cc vmips.cc \
   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc \
-  decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc \
+  decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc fpu.cc \
+  interactor.cc \
   cpu.h cpzero.h cpzeroreg.h deviceint.h \
   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
   range.h spimconsole.h spimconsreg.h \
@@ -31,7 +32,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
   decstat.h decserial.h decserialreg.h rommodule.h gccattr.h mmapglue.h \
-  types.h endiantest.h fileutils.h
+  types.h endiantest.h fileutils.h fpu.h interactor.h
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # This library contains the subset of libbfd/libopcodes that we use.

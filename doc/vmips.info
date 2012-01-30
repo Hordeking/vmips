@@ -1,14 +1,14 @@
-This is vmips.info, produced by makeinfo version 4.8 from vmips.texi.
+This is vmips.info, produced by makeinfo version 4.13 from vmips.texi.
 
 INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
 * VMIPS: (vmips).                A MIPS R3000 simulator.
 END-INFO-DIR-ENTRY
 
-   This is the VMIPS Programmer's Manual, Fourth Edition, for version
-1.3.
+   This is the VMIPS Programmer's Manual, Fifth Edition, for version
+1.4.
 
-   Copyright (C) 2001, 2002, 2004 Brian R. Gaeke.
+   Copyright (C) 2001, 2002, 2004, 2009 Brian R. Gaeke.
 
 
 File: vmips.info,  Node: Top,  Next: Overview,  Up: (dir)
@@ -16,11 +16,11 @@ File: vmips.info,  Node: Top,  Next: Overview,  Up: (dir)
 VMIPS Programmer's Manual
 *************************
 
-This is the VMIPS Programmer's Manual, Fourth Edition, for version 1.3.
+This is the VMIPS Programmer's Manual, Fifth Edition, for version 1.4.
 
-   Copyright (C) 2001, 2002, 2004 Brian R. Gaeke.  For information
-about copying, modifying or distributing this manual, please see the
-chapter called `Copying'.
+   Copyright (C) 2001, 2002, 2004, 2009 Brian R. Gaeke.  For
+information about copying, modifying or distributing this manual,
+please see the chapter called `Copying'.
 
 * Menu:
 
@@ -56,7 +56,7 @@ File: vmips.info,  Node: Overview,  Next: Getting Started,  Prev: Top,  Up: Top
 **********
 
 VMIPS is a simulator for a machine compatible with the MIPS R3000 RISC
-architecture. VMIPS consists entirely of software; no special hardware
+architecture. VMIPS consists entirely of software. No special hardware
 is required to run programs on VMIPS--that is, VMIPS is a virtual
 machine.
 
@@ -461,11 +461,9 @@ work in EGCS 1.1.1.
 
    If you have a `main()' function in your code, GCC will try to call
 `__main' or some other kind of setup function even if you use
-`-ffreestanding'.  There is probably a way to configure the cross
-compiler so that it won't try to do this;  it will be documented here
-once it is discovered.  A simple workaround is to call the entry
-function `entry' instead of `main'. You can also try defining `void
-__main(void)' to be an empty function.
+`-ffreestanding'.  If you don't want this call made, a simple
+workaround is to call the entry function `entry' instead of `main'. You
+can also try defining `void __main(void)' to be an empty function.
 
 4.6.2 MIPS position-independent code
 ------------------------------------
@@ -896,13 +894,15 @@ FALSE.
 
    `tracestartpc' (type: number)
 
-   If the tracing option is set, then this is the PC at which tracing
-will start. Otherwise it has no effect.  The default value is 0.
+   If the tracing option is set, then this is the PC value which will
+trigger the start of tracing.  Otherwise it has no effect.  The default
+value is 0.
 
    `traceendpc' (type: number)
 
-   If the tracing option is set, then this is the PC at which tracing
-will stop. Otherwise it has no effect.  The default value is 0.
+   If the tracing option is set, then this is the PC value which will
+trigger the end of tracing. Otherwise it has no effect.  The default
+value is 0.
 
    `mipstoolprefix' (type: string)
 
@@ -919,10 +919,17 @@ designed to cause an error.  The default value is
    `execname' (type: string)
 
    Name of executable to be loaded by automatic kernel loader. This is
-an experimental feature. The option value must be the name of a MIPS
-ECOFF executable file, or 'none' to disable the option.  The
+an experimental, unfinished feature. The option value must be the name
+of a MIPS ECOFF executable file, or 'none' to disable the option.  The
 executable's headers must specify load addresses in KSEG0 or KSEG1
 (0x80000000 through 0xbfffffff).   The default value is "none".
+
+   `fpu' (type: Boolean)
+
+   True to enable hooks in the CPU to communicate with a floating-point
+unit as coprocessor 1. The floating-point unit is not implemented, only
+the hooks in the CPU are. This is an experimental, unfinished feature.
+The default value is FALSE.
 
 
 File: vmips.info,  Node: Invoking vmipstool,  Next: Programming,  Prev: Customizing,  Up: Top
@@ -1044,7 +1051,7 @@ that it has to be emulated correctly.
    VMIPS emulates delay slot handling by means of a tiny state machine,
 whose state is called the delay state.  The virtual CPU can be in a
 delay state of `DELAYING', `DELAYSLOT', or `NORMAL' at the beginning of
-the call to `periodic()'. The VMIPS delay slot state machine's state is
+the call to `step()'. The VMIPS delay slot state machine's state is
 displayed when you use the `dumpcpu' option. See the "Summary of
 configuration options" section of the "Customizing" chapter for more
 information about this option.
@@ -1434,8 +1441,8 @@ device's 1Hz clock.  The clock is enabled or disabled with the
 ------------------------------
 
 The standard clock device has 5 registers, configured to be mapped into
-memory at address 0xa1010000. The following table defines the layout of
-the memory-mapped clock device registers:
+memory at physical address 0x01010000. The following table defines the
+layout of the memory-mapped clock device registers:
 
 `offset 0x00'
      real time, seconds
@@ -1457,7 +1464,7 @@ clock's simulated time word sets that component of the simulated time
 if the number written is a non-negative signed integer, otherwise there
 is no effect.
 
-   The control word has 32 bits. Bit 2 of the cotrol word is the
+   The control word has 32 bits. Bit 2 of the control word is the
 interrupt enable bit (`CTL_IE' is defined as 0x00000002) and bit 1 is
 the device ready bit (`CTL_RDY' is defined as 0x00000001). All other
 bits in the control word are currently reserved and read as zero.
@@ -1507,8 +1514,8 @@ halt device is enabled or disabled with the `haltdevice' option.
 ------------------------------
 
 The halt device has 1 register, configured to be mapped into memory at
-address 0x01010024. The following table defines the layout of the
-memory-mapped halt device register:
+physical address 0x01010024. The following table defines the layout of
+the memory-mapped halt device register:
 
 `offset 0x00'
      control word
@@ -1532,17 +1539,17 @@ how to turn them on.
 
    * DECstation 5000/200's Dallas Semiconductor DS1287-based real-time
      clock (RTC) chip (use `-o decrtc' to enable; mapped into memory at
-     address 0xbfe80000)
+     physical address 0x1fe80000)
 
    * DECstation 5000/200's Control/Status register (use `-o deccsr' to
-     enable; mapped into memory at address 0xbff00000)
+     enable; mapped into memory at physical address 0x1ff00000)
 
    * DECstation 5000/200's Check Syndrome (CHKSYN) and Error Address
      (ERRADR) registers (use `-o decstat' to enable; mapped into memory
-     at addresses 0xbfd00000 and 0xbfd80000)
+     at physical addresses 0x1fd00000 and 0x1fd80000 respectively)
 
    * DECstation 5000/200's DZ11-based serial chip (use `-o decserial'
-     to enable; mapped into memory at address 0xbfe00000; note:
+     to enable; mapped into memory at physical address 0x1fe00000; note:
      interrupt-driven I/O does not work well with this device - use
      polling instead)
 
@@ -1572,8 +1579,8 @@ software modules are structured.
 
    The processing of command-line options and of options in your
 `.vmipsrc' is directed by routines in `options.cc' and in class
-`Options'. The default options and the option documentation is all in
-`optiontbl.h'.
+`Options'. The default options and the option documentation are found
+in `optiontbl.h'.
 
    The memory mapping unit has a high-level interface to the rest of
 the code, which is defined in `mapper.cc' and `mapper.h', and in class
@@ -1619,9 +1626,9 @@ is called.
 components of the system together.  This class, and specifically its
 `run()' member function, is responsible for setting up and configuring
 all system components and calling the `step()' member function(s).  The
-vmips class is not a very smart or a very flexible configuration
-mechanism; it will eventually be replaced with a configuration language
-of some sort.
+vmips class is not a very smart or flexible configuration mechanism; it
+eventually ought to be replaced with a configuration language of some
+sort.
 
    The simulator's idea of time is managed by classes in `clock.cc' and
 `clock.h'. VMIPS programs gain access to the simulated clock by using
@@ -1789,7 +1796,7 @@ reason.
 
    One of the jobs of the `CPZero' class is to ensure that attempts to
 write to these registers are only allowed to write to the bits which
-are writable, so if you are interested in implementing read-only  and
+are writable, so if you are interested in implementing read-only and
 read/write registers in your virtual hardware, look through `cpzero.cc'
 for READ_MASKS and WRITE_MASKS.
 
@@ -2084,14 +2091,12 @@ A.1 Prerequisites
 =================
 
 The VMIPS build process assumes that you have a C++ compiler installed
-on the host machine which can deal correctly with template functions.
-In particular, using GCC 2.91.66, also known as EGCS 1.1.2 (the system
-compiler on Red Hat Linux 6.x systems)--or, we suspect, any older
-compiler--is not possible, because the compiler will crash, giving an
-"internal compiler error" message when trying to compile various VMIPS
-subsystems.  For that reason, `configure' checks for the bug in
-question and will print an error message ("your C++ compiler's template
-function handling is buggy") if you attempt to use a deficient compiler.
+on the host machine. Any reasonably recent, ISO C++-compliant compiler
+with working template function handling should work.  Some ancient
+compilers, such as the system compiler on Red Hat Linux 6.x systems,
+will not work. `configure' contains checks for a few known compiler
+problems which will prevent VMIPS from working, and will print an error
+message if it detects such a problem.
 
    If you want to build any of the sample code which is included with
 the VMIPS source distribution, you must have a full set of GNU MIPS
@@ -2116,9 +2121,8 @@ A.2 Building from CVS
 =====================
 
 If you retrieved your sources from the CVS repository, you will need
-Automake version 1.4 or later, Autoconf version 2.13 or later, and
-libtool 1.2f or later. Newer versions of Autoconf (2.52f, 2.53) have
-been tested, and should also work.  You will need perl 5 to build the
+Automake version 1.11.1 or later, Autoconf version 2.68 or later, and
+libtool 2.2.10 or later.  You will need perl 5 to build the
 documentation.  Your distribution will be missing many important files,
 including `configure'. To generate these, run `utils/bootstrap'. To
 automatically run configure once it has been generated, you can run
@@ -2255,22 +2259,27 @@ you wish.
 
    Download a copy of Binutils, from any GNU mirror, or from the URL:
      `ftp://sources.redhat.com/pub/binutils/releases'
-   We recommend getting version 2.11.2 or 2.13.2.1.
+   The most recently-tested version is 2.20.1.
 
-   Build binutils by running the following commands. We recommend
-`--disable-nls' because some recent versions do not build correctly with
-NLS (linking against `libopcodes.a' results in unresolved symbols.)
+   Build binutils by running the following commands.  We recommend
+`--disable-nls' because some versions do not build correctly with NLS
+(linking against `libopcodes.a' results in unresolved symbols.)
 
      ./configure --target=mipsel-ecoff --prefix=/opt/mips \
-      --disable-nls --enable-shared
+      --disable-nls --disable-shared
      make
      make install install-info
 
    Download a copy of the GNU Compiler Collection (`gcc') from any GNU
 mirror, or from the URL:
      `ftp://gcc.gnu.org/pub/gcc/releases'
-   You should be able to use any version from 3.0 through 3.4. We've
-mostly tested with 3.0.4. Our examples (below) will assume 3.0.4.
+
+   Our examples assume that you want to use the ECOFF binary format, so
+we recommend you get gcc version 3.0.4.  If you would prefer to use the
+ELF binary format, pretty much any recent version of gcc will work, but
+note that you will need to pass `--target=mips-elf' instead of
+`--target=mipsel-ecoff' when configuring both binutils and gcc. We have
+most recently tested version 4.2.4 with the ELF format.
 
    You can read the documentation for building the compiler by pointing
 your World-Wide Web browser at `http://gcc.gnu.org/install'.  When you
@@ -2295,7 +2304,8 @@ than the following summary.
 
           ../gcc-3.0.4/configure --target=mipsel-ecoff \
            --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
-           --disable-threads --disable-shared
+           --disable-threads --disable-nls --disable-shared \
+           --enable-languages=c
 
   5. If the configuration step fails, make sure you have a working
      native compiler, and/or try a different version of gcc. Otherwise,
@@ -2325,10 +2335,10 @@ than the following summary.
        1. Download a copy of the GNU debugger from any GNU mirror, or
           from the URL:
                `ftp://ftp.gnu.org/pub/gnu/gdb/'
-          We recommend version 5.2.1. Download the file
-          `gdb-5.2.1.tar.gz'.
+          We recommend version 6.0 or later. Download the file
+          `gdb-6.0.tar.gz'.
 
-       2. Unpack the file and change to the directory `gdb-5.2.1'.
+       2. Unpack the file and change to the directory `gdb-6.0'.
 
        3. Type the following commands to configure and build GDB:
                ./configure --prefix=/opt/mips --target=mipsel-ecoff
@@ -2362,7 +2372,7 @@ than the following summary.
 
      Next, download uClibc from `http://www.uclibc.org', and unpack it
      next to the Linux kernel sources. The last version we tested was
-     0.9.26.  Read the `INSTALL' file in that distribution.
+     0.9.29.  Read the `INSTALL' file in that distribution.
 
      When you configure uClibc with `make config', be sure to pick
      `mips' as your Target Architecture, and `Generic (MIPS I)' as your
@@ -2375,28 +2385,26 @@ than the following summary.
      build ROMs, you will probably want to turn off
      position-independent code and shared library support.  Turn on
      only those other features of uClibc as you expect you will need.
-     For the DEVEL_PREFIX, specify a new empty directory.
 
-     Then run `make CROSS=/opt/mips-elf/bin/mips-elf-' to build uClibc
-     (for CROSS, you should use the same value as you used for
-     CROSS_COMPILE in the Linux Makefile, above) and run `make install'
-     to install it.
+     Create a new directory into which uClibc will be installed.  This
+     will be your PREFIX.
 
-     In the directory you specified for DEVEL_PREFIX when configuring
-     uClibc, above, you will now have `usr/include' and `usr/lib'
-     subdirectories. You will now want to copy these to where your
-     cross compiler can detect and use them. For GCC, the directories
-     are
+     Run `make CROSS=/opt/mips-elf/bin/mips-elf-' to build uClibc. For
+     CROSS, you should use the same value as you used for CROSS_COMPILE
+     in the Linux Makefile, above.
+
+     Run `make CROSS=... PREFIX=... RUNTIME_PREFIX=/ DEVEL_PREFIX=/usr/
+     install' to install it, specifying the same CROSS value and the
+     name of the directory created earlier as PREFIX.  In the directory
+     you specified for PREFIX, you will now have `usr/include' and
+     `usr/lib' subdirectories. You will now want to rebuild GCC,
+     specifying these directories using the `--with-headers' and
+     `--with-libs' options to the GCC `configure' script, respectively.
+     This will cause the directories to be copied to
 
         * PREFIX/TARGET-TRIPLET/lib  (for libraries)
 
         * PREFIX/TARGET-TRIPLET/sys-include  (for includes)
-
-     For example, if you configured GCC for target `mips-unknown-elf'
-     with prefix `/usr/local/mips', you would copy the `usr/include'
-     directory to `/usr/local/mips/mips-unknown-elf/sys-include', and
-     copy the `usr/lib' directory to
-     `/usr/local/mips/mips-unknown-elf/lib'.
 
 
 
@@ -2413,7 +2421,7 @@ the following information:
 
    * your host processor type
 
-   * your C++ and C compiler make and version
+   * your C++ and C compiler type and version
 
    * the version of VMIPS you are using
 
@@ -2449,8 +2457,8 @@ get in touch with us if you think you would be willing to help.
      VMIPS.  There should be some provision for refreshing cached
      option values if the extension language changes them.
 
-   * Modularize the CPU, memory mapper, and devices using a
-     shared-library pluggable module interface.
+   * Modularize the devices, and potentially even the CPU and memory
+     mapper using a shared-library plug-in model.
 
    * Make it so that the debugger can be attached and detached at any
      time, without the user having had to think of it beforehand and
@@ -2461,18 +2469,16 @@ get in touch with us if you think you would be willing to help.
      editing, support for loading, running, and stepping programs, and
      setting breakpoints.
 
-   * Support for loading binary files other than ROMs (and, by
-     implication, for starting off with something other than a Reset.)
-     Lots of people are going to expect to be able to do this, so it
-     seems like a good thing to do. We can probably leverage BFD for
-     most of this.
+   * Extend the current executable loader (in vmips/exeloader.cc) to
+     support:
+        * loading ELF-format files
+
+        * loading files into user space (This will require some sort of
+          built-in TLB-miss handling.)
 
    * Support for non-English languages using NLS.
 
-   * MIPS R3010 FPU emulation.  A good way to get started on building
-     an FPU would be to use SoftFloat:
-
-     `http://www.cs.berkeley.edu/~jhauser/arithmetic/softfloat.html'.
+   * A reasonable FPU emulator.
 
    * ROM monitor network booting support.
 
@@ -2493,7 +2499,23 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Appendix D Release History
 **************************
 
-vmips-1.3.2 was released on 27 March 2007.  User-visible changes in
+vmips-1.4 was released on 29 January 2012.  User-visible changes in
+version 1.4 (since version 1.3.2):
+
+   * A new interaction facility was implemented. This allows you to
+     suspend the simulation, print registers and memory, and then
+     continue by running or single-stepping, without needing to use a
+     full-fledged debugger.
+
+   * Some of the memory-mapped I/O devices have had endianness bugs
+     fixed and debugging printouts removed.
+
+   * Certain coprocessor zero branch instructions no longer
+     unnecessarily cause reserved instruction exceptions.
+
+   * Other minor optimizations.
+
+   vmips-1.3.2 was released on 27 March 2007.  User-visible changes in
 version 1.3.2 (since version 1.3.1):
 
    * A bug was fixed in the code which responded to address-translation
@@ -2611,8 +2633,8 @@ version 1.2 (since version 1.1.3):
      little-endian mode or vice-versa using a command-line option.
 
      	It is now possible to change the name of the configuration file
-     that VMIPS reads on startup using a command-line option. The "-o
-     configfile" option, which never worked, has been removed.
+     that VMIPS reads on startup using a command-line option. The `-o
+     configfile' option, which never worked, has been removed.
 
    * vmipstool now shares command-line processing code with vmips. It
      also has a new -swap-words option that allows you to byteswap all
@@ -2737,8 +2759,7 @@ version 1.1 (since version 1.0.4):
      errors and exceptions.
 
    * VMIPS 1.1 makes it possible to use the 2nd display/keyboard channel
-      of the SPIM-compatible console device, using the `ttydev2'
-     option.
+      of the SPIM-compatible console device, using the `ttydev2' option.
 
    * VMIPS now includes a halt device, which can be used to halt the
      simulator without using a special instruction.
@@ -3010,7 +3031,7 @@ is in the source code distribution in the file `COPYING'.
    VMIPS's documentation is governed by the MIT license.  A copy of
 that license follows:
 
-   Copyright (C) 2001, 2002, 2004 Brian R. Gaeke.
+   Copyright (C) 2001, 2002, 2004, 2009 Brian R. Gaeke.
 
    Permission is hereby granted, free of charge, to any person
 obtaining a copy of this document (the "Document"), to deal in the
@@ -3041,13 +3062,13 @@ Index
 
 * architecture:                          Overview.            (line  11)
 * assembling, using vmipstool:           An Example.          (line  10)
-* break instruction, to halt machine:    Building Programs.   (line  73)
+* break instruction, to halt machine:    Building Programs.   (line  58)
 * C language:                            Building Programs.   (line   9)
 * compiling, using vmipstool:            An Example.          (line  18)
-* configure:                             Installation.        (line  61)
-* configure, creating:                   Installation.        (line  49)
-* configure, missing:                    Installation.        (line  49)
-* configure, options supported by:       Installation.        (line  61)
+* configure:                             Installation.        (line  58)
+* configure, creating:                   Installation.        (line  47)
+* configure, missing:                    Installation.        (line  47)
+* configure, options supported by:       Installation.        (line  58)
 * coprocessor zero:                      Extending.           (line 226)
 * coprocessor zero, branch instructions: Extending.           (line 368)
 * coprocessors, default behavior:        Extending.           (line 243)
@@ -3061,13 +3082,13 @@ Index
 * exceptions, user-space TLB miss:       Building Programs.   (line  90)
 * exceptions, vectors for:               Building Programs.   (line  82)
 * free software:                         Overview.            (line  34)
-* gcc:                                   Installation.        (line 200)
+* gcc:                                   Installation.        (line 197)
 * gdb:                                   Overview.            (line  28)
 * globals pointer, initializing:         Building Programs.   (line  36)
-* GNU Binutils, obtaining:               Installation.        (line 187)
-* GNU Compiler Collection, configuring:  Installation.        (line 217)
-* GNU Compiler Collection, installing:   Installation.        (line 206)
-* GNU Compiler Collection, obtaining:    Installation.        (line 200)
+* GNU Binutils, obtaining:               Installation.        (line 184)
+* GNU Compiler Collection, configuring:  Installation.        (line 219)
+* GNU Compiler Collection, installing:   Installation.        (line 208)
+* GNU Compiler Collection, obtaining:    Installation.        (line 197)
 * GUI, using Insight:                    Debugging.           (line 170)
 * halting simulation:                    An Example.          (line  31)
 * initialization code:                   Building Programs.   (line  24)
@@ -3079,8 +3100,8 @@ Index
 * interrupts, masking:                   Extending.           (line 339)
 * interrupts, request lines for:         Extending.           (line 283)
 * interrupts, reserved for software:     Extending.           (line 325)
-* linking, using vmipstool <1>:          Getting Started.     (line  19)
-* linking, using vmipstool:              An Example.          (line  21)
+* linking, using vmipstool <1>:          An Example.          (line  21)
+* linking, using vmipstool:              Getting Started.     (line  19)
 * main:                                  Building Programs.   (line  51)
 * memory-mapped devices, configuring:    Extending.           (line 261)
 * memory-mapped devices, specifying addresses for: Extending. (line 261)
@@ -3097,13 +3118,13 @@ Index
 * ROM, data in:                          Building Programs.   (line  39)
 * ROM, programs in:                      Building Programs.   (line  17)
 * ROM, selecting file for:               Invoking vmips.      (line  43)
-* sample code, building:                 Installation.        (line  27)
+* sample code, building:                 Installation.        (line  25)
 * setup code:                            Building Programs.   (line  24)
 * simulator:                             Overview.            (line   6)
 * stack pointer, initializing:           Building Programs.   (line  31)
 * startup code:                          Building Programs.   (line  24)
 * system control coprocessor, branch instructions: Extending. (line 368)
-* test suite, running:                   Installation.        (line  41)
+* test suite, running:                   Installation.        (line  39)
 * virtual machine:                       Overview.            (line   6)
 * vmips <1>:                             An Example.          (line   6)
 * vmips:                                 Getting Started.     (line  11)
@@ -3114,25 +3135,25 @@ Index
 
 
 Tag Table:
-Node: Top325
-Node: Overview1894
-Node: Getting Started3715
-Node: An Example5625
-Node: Building Programs6839
-Node: Invoking vmips20886
-Node: Customizing22306
-Node: Invoking vmipstool37840
-Node: Programming41361
-Node: Debugging43200
-Node: Devices50496
-Node: Extending62273
-Node: Test Suite80450
-Node: Installation85866
-Node: Reporting Bugs100670
-Node: Future Directions101362
-Node: Release History103648
-Node: References121140
-Node: Copying124611
-Node: Index126064
+Node: Top331
+Node: Overview1905
+Node: Getting Started3726
+Node: An Example5636
+Node: Building Programs6850
+Node: Invoking vmips20790
+Node: Customizing22210
+Node: Invoking vmipstool38062
+Node: Programming41583
+Node: Debugging43418
+Node: Devices50714
+Node: Extending62559
+Node: Test Suite80735
+Node: Installation86151
+Node: Reporting Bugs100974
+Node: Future Directions101666
+Node: Release History103754
+Node: References121846
+Node: Copying125317
+Node: Index126776
 
 End Tag Table

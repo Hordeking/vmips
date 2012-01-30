@@ -17,12 +17,28 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <cstdio>
+#include "fileutils.h"
+#include <cassert>
 
 bool can_read_file (char *filename) {
+	assert (filename && "Null pointer passed to can_read_file ()");
 	FILE *f = fopen (filename, "r");
 	if (!f)
 		return false;
 	fclose (f);
 	return true;
 }
+
+uint32 get_file_size (FILE *fp) {
+	long orig_pos, here, there; 
+
+	assert (fp && "Null pointer passed to get_file_size ()");
+	orig_pos = ftell (fp);
+	fseek (fp, 0, SEEK_SET);
+	here = ftell (fp);
+	fseek (fp, 0, SEEK_END);
+	there = ftell (fp);
+	fseek (fp, orig_pos, SEEK_SET);
+	return there - here;
+}	  
+

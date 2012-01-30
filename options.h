@@ -41,7 +41,7 @@ union OptionValue {
 };
 
 typedef struct {
-	char *name;
+	const char *name;
 	int type;
 	union OptionValue value;
 } Option; 
@@ -59,23 +59,24 @@ protected:
 
 	void process_defaults(void);
 	void process_one_option(const char *const option);
-	int process_first_option(char **bufptr, int lineno = 0, char *fn = NULL);
-	int process_options_from_file(char *filename);
+	int process_first_option(char **bufptr, int lineno = 0,
+			const char *fn = NULL);
+	int process_options_from_file(const char *filename);
 	int tilde_expand(char *filename);
 	virtual void usage(char *argv0);
-	void set_str_option(char *key, char *value);
-	void set_num_option(char *key, uint32 value);
-	void set_flag_option(char *key, bool value);
-	char *strprefix(char *crack_smoker, char *crack);
-	int find_option_type(char *option);
-	Option *optstruct(char *name, bool install = false);
-	void print_package_version(char *toolname, char *version);
+	void set_str_option(const char *key, const char *value);
+	void set_num_option(const char *key, uint32 value);
+	void set_flag_option(const char *key, bool value);
+	const char *strprefix(const char *crack_smoker, const char *crack);
+	int find_option_type(const char *option);
+	Option *optstruct(const char *name, bool install = false);
+	void print_package_version(const char *toolname, const char *version);
 	void print_config_info(void);
 public:
 	Options () { }
-    virtual ~Options () { }
+	virtual ~Options () { }
 	virtual void process_options(int argc, char **argv);
-	union OptionValue *option(char *name);
+	union OptionValue *option(const char *name);
 };
 
 #endif /* _OPTIONS_H_ */

@@ -1,5 +1,5 @@
 /* Command-line and preferences-file options processing.
-   Copyright 2001, 2003, 2004 Brian R. Gaeke.
+   Copyright 2001, 2003, 2004, 2009 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -25,9 +25,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <cctype>
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <pwd.h>
 #include <string>
 #include <unistd.h>
+#include <limits.h>
 #include <vector>
 
 #define OPTBUFSIZ 1024
@@ -69,7 +72,7 @@ Options::tilde_expand(char *filename)
 void
 Options::process_defaults(void)
 {
-	char **opt;
+	const char **opt;
 
 	for (opt = defaults_table; *opt; opt++) {
 		process_one_option(*opt);
@@ -88,7 +91,7 @@ Options::process_defaults(void)
 }
 
 void
-Options::set_str_option(char *key, char *value)
+Options::set_str_option(const char *key, const char *value)
 {
     int type = STR;
 
@@ -102,7 +105,7 @@ Options::set_str_option(char *key, char *value)
 }
 
 void
-Options::set_num_option(char *key, uint32 value)
+Options::set_num_option(const char *key, uint32 value)
 {
     int type = NUM;
 
@@ -116,7 +119,7 @@ Options::set_num_option(char *key, uint32 value)
 }
 
 void
-Options::set_flag_option(char *key, bool value)
+Options::set_flag_option(const char *key, bool value)
 {
     int type = FLAG;
 
@@ -134,15 +137,15 @@ Options::set_flag_option(char *key, bool value)
  * does not start with CRACK, or a pointer into CRACK_SMOKER
  * after the prefix if it does.
  */
-char *
-Options::strprefix(char *crack_smoker, char *crack)
+const char *
+Options::strprefix(const char *crack_smoker, const char *crack)
 {
 	while (*crack_smoker++ == *crack++);
 	return (*--crack ? NULL : --crack_smoker);
 }
 
 int
-Options::find_option_type(char *option)
+Options::find_option_type(const char *option)
 {
 	Option *o;
 
@@ -155,12 +158,13 @@ Options::find_option_type(char *option)
 void
 Options::process_one_option(const char *const option)
 {
-	char *copy = strdup(option), *equals = NULL, *trailer = NULL;
+	char *copy = strdup(option), *equals = NULL;
 	uint32 num;
 
 	if ((equals = strchr(copy, '=')) == NULL) {
 		/* FLAG option */
-        char *name;
+        const char *trailer = NULL;
+        const char *name;
 		bool value;
 		if ((trailer = strprefix(copy, "no")) == NULL) {
 			/* FLAG set to TRUE */
@@ -226,7 +230,7 @@ Options::process_one_option(const char *const option)
  * be replaced with a Lex rule-set or something...
  */
 int
-Options::process_first_option(char **bufptr, int lineno, char *filename)
+Options::process_first_option(char **bufptr, int lineno, const char *filename)
 {
 	char *out, *in, copybuf[OPTBUFSIZ], char_seen;
 	bool quoting, quotenext, done, string_done;
@@ -284,7 +288,7 @@ Options::process_first_option(char **bufptr, int lineno, char *filename)
 }
 
 int
-Options::process_options_from_file(char *filename)
+Options::process_options_from_file(const char *filename)
 {
 	char *buf = new char[OPTBUFSIZ];
 	if (!buf) {
@@ -395,7 +399,7 @@ Options::process_options(int argc, char **argv)
 }
 
 Option *
-Options::optstruct(char *name, bool install)
+Options::optstruct(const char *name, bool install)
 {
     OptionMap::iterator i = table.find (name);
     if (i == table.end ()) {
@@ -410,7 +414,7 @@ Options::optstruct(char *name, bool install)
 }
 
 union OptionValue *
-Options::option(char *name)
+Options::option(const char *name)
 {
 	Option *o = optstruct(name);
 
@@ -437,11 +441,11 @@ Options::print_config_info(void)
 }
 
 void
-Options::print_package_version(char *toolname, char *version)
+Options::print_package_version(const char *toolname, const char *version)
 {
 	printf(
 "%s %s\n"
-"Copyright (C) 2001, 2002, 2003, 2004 by Brian R. Gaeke and others.\n"
+"Copyright (C) 2001, 2002, 2003, 2004, 2009 by Brian R. Gaeke and others.\n"
 "(See the files `AUTHORS' and `THANKS' in the %s source distribution\n"
 "for a complete list.)\n"
 "\n"

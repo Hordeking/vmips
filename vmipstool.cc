@@ -32,6 +32,9 @@ int getpagesize(void);
 #include "options.h"
 #include <cerrno>
 #include <cstdarg>
+#include <cstring>
+#include <cstdlib>
+#include <limits.h>
 #include <cstdio>
 #include <iostream>
 #include <sys/stat.h>

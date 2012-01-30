@@ -22,7 +22,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 #include <cassert>
 
-HaltDevice::HaltDevice( vmips *machine ) throw()
+HaltDevice::HaltDevice( vmips *machine )
 	: machine( machine )
 {
 	assert( machine );
@@ -31,7 +31,7 @@ HaltDevice::HaltDevice( vmips *machine ) throw()
 	extent = 4;
 }
 
-HaltDevice::~HaltDevice() throw()
+HaltDevice::~HaltDevice()
 {
 }
 
@@ -58,7 +58,7 @@ void HaltDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 	}
 }
 
-char *HaltDevice::descriptor_str()
+const char *HaltDevice::descriptor_str()
 {
 	return "Halt device";
 }

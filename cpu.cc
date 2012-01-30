@@ -1,5 +1,5 @@
 /* MIPS R3000 CPU emulation.
-   Copyright 2001, 2002, 2003 Brian R. Gaeke.
+   Copyright 2001, 2002, 2003, 2004 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -20,6 +20,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpu.h"
 #include "cpzero.h"
 #include "debug.h"
+#include "fpu.h"
 #include "mapper.h"
 #include "vmips.h"
 #include "options.h"
@@ -27,14 +28,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "cpzeroreg.h"
 #include "error.h"
 #include "remotegdb.h"
+#include "fileutils.h"
 #include "stub-dis.h"
+#include <cstring>
 
 /* states of the delay-slot state machine -- see CPU::step() */
-enum {
-  NORMAL,
-  DELAYING,
-  DELAYSLOT
-};
+static const int NORMAL = 0, DELAYING = 1, DELAYSLOT = 2;
 
 /* certain fixed register numbers which are handy to know */
 static const int reg_zero = 0;  /* always zero */
@@ -44,18 +43,20 @@ static const int reg_ra = 31;   /* return address */
 /* pointer to CPU method returning void and taking two uint32's */
 typedef void (CPU::*emulate_funptr)(uint32, uint32);
 
-char *const
-CPU::strdelaystate(const int state)
-{
-	static char *statestr[] = { "NORMAL", "DELAYING", "DELAYSLOT" };
-
+static const char *strdelaystate(const int state) {
+	static const char *const statestr[] = {
+		"NORMAL", "DELAYING", "DELAYSLOT"
+	};
 	return statestr[state];
 }
 
 CPU::CPU (Mapper &m, IntCtrl &i)
   : tracing (false), last_epc (0), last_prio (0), mem (&m),
-    cpzero (new CPZero (this, &i)), delay_state (NORMAL)
+    cpzero (new CPZero (this, &i)), fpu (0), delay_state (NORMAL)
 {
+	opt_fpu = machine->opt->option("fpu")->flag;
+	if (opt_fpu)
+		fpu = new FPU (this);
 	reg[reg_zero] = 0;
 	opt_excmsg = machine->opt->option("excmsg")->flag;
 	opt_reportirq = machine->opt->option("reportirq")->flag;
@@ -68,6 +69,14 @@ CPU::CPU (Mapper &m, IntCtrl &i)
 	opt_tracestartpc = machine->opt->option("tracestartpc")->num;
 	opt_traceendpc = machine->opt->option("traceendpc")->num;
 	opt_bigendian = machine->opt->option("bigendian")->flag;
+	if (opt_tracing)
+		open_trace_file ();
+}
+
+CPU::~CPU ()
+{
+	if (opt_tracing)
+		close_trace_file ();
 }
 
 void
@@ -104,11 +113,9 @@ CPU::dump_regs(FILE *f)
 }
 
 void
-CPU::dump_regs_and_stack(FILE *f)
+CPU::dump_stack(FILE *f)
 {
 	uint32 stackphys;
-
-	dump_regs(f);
 	if (cpzero->debug_tlb_translate(reg[reg_sp], &stackphys)) {
 		mem->dump_stack(f, stackphys);
 	} else {
@@ -117,71 +124,27 @@ CPU::dump_regs_and_stack(FILE *f)
 }
 
 void
+CPU::dump_mem(FILE *f, uint32 addr)
+{
+	uint32 phys;
+        fprintf(f, "0x%08x: ", addr);
+	if (cpzero->debug_tlb_translate(addr, &phys)) {
+		mem->dump_mem(f, phys);
+	} else {
+		fprintf(f, "(not mapped in TLB)");
+	}
+	fprintf(f, "\n");
+}
+
+void
 CPU::cpzero_dump_regs_and_tlb(FILE *f)
 {
 	cpzero->dump_regs_and_tlb(f);
 }
 
-/* Instruction decoding */
-uint16
-CPU::opcode(const uint32 i) const
-{
-	return (i >> 26) & 0x03f;
-}
-
-uint16
-CPU::rs(const uint32 i) const
-{
-	return (i >> 21) & 0x01f;
-}
-
-uint16
-CPU::rt(const uint32 i) const
-{
-	return (i >> 16) & 0x01f;
-}
-
-uint16
-CPU::rd(const uint32 i) const
-{
-	return (i >> 11) & 0x01f;
-}
-
-uint16
-CPU::immed(const uint32 i) const
-{
-	return i & 0x0ffff;
-}
-
-short
-CPU::s_immed(const uint32 i) const
-{
-	return i & 0x0ffff;
-}
-
-uint16
-CPU::shamt(const uint32 i) const
-{
-	return (i >> 6) & 0x01f;
-}
-
-uint16
-CPU::funct(const uint32 i) const
-{
-	return i & 0x03f;
-}
-
-uint32
-CPU::jumptarg(const uint32 i) const
-{
-	return i & 0x03ffffff;
-}
-
 /* exception handling */
-char *const
-CPU::strexccode(const uint16 excCode)
-{
-	char *const exception_strs[] =
+static const char *strexccode(const uint16 excCode) {
+	static const char *const exception_strs[] =
 	{
 		/* 0 */ "Interrupt",
 		/* 1 */ "TLB modification exception",
@@ -222,10 +185,8 @@ CPU::strexccode(const uint16 excCode)
 	return exception_strs[excCode];
 }
 
-char *const
-CPU::strmemmode(const int memmode)
-{
-	char *const memmode_strs[] =
+static const char *strmemmode(const int memmode) {
+	static const char *const memmode_strs[] =
 	{
 		"instruction fetch", /* INSTFETCH */
 		"data load", /* DATALOAD */
@@ -237,10 +198,10 @@ CPU::strmemmode(const int memmode)
 }
 
 int
-CPU::exception_priority(uint16 excCode, int mode)
+CPU::exception_priority(uint16 excCode, int mode) const
 {
 	/* See doc/excprio for an explanation of this table. */
-	struct excPriority *p, prio[] = {
+	static const struct excPriority prio[] = {
 		{1, AdEL, INSTFETCH},
 		{2, TLBL, INSTFETCH}, {2, TLBS, INSTFETCH},
 		{3, IBE, ANY},
@@ -254,6 +215,7 @@ CPU::exception_priority(uint16 excCode, int mode)
 		{9, Int, ANY},
 		{0, ANY, ANY} /* catch-all */
 	};
+	const struct excPriority *p;
 
 	for (p = prio; p->priority != 0; p++) {
 		if (excCode == p->excCode || p->excCode == ANY) {
@@ -401,15 +363,21 @@ CPU::cop_unimpl (int coprocno, uint32 instr, uint32 pc)
 void
 CPU::cpone_emulate(uint32 instr, uint32 pc)
 {
-	/* If it's a cfc1 <reg>, $0 then we copy 0 into reg,
-	 * which is supposed to mean there is NO cp1... 
-	 * for now, though, ANYTHING else asked of cp1 results
-	 * in the default "unimplemented" behavior. */
-	if (cpzero->cop_usable (1) && rs (instr) == 2 && rd (instr) == 0) {
-		reg[rt (instr)] = 0; /* No cp1. */
+	if (opt_fpu) {
+		// FIXME: check cpzero->cop_usable
+		fpu->cpone_emulate (instr, pc);
 	} else {
-		cop_unimpl (1, instr, pc);
-	}
+		/* If it's a cfc1 <reg>, $0 then we copy 0 into reg,
+		 * which is supposed to mean there is NO cp1... 
+		 * for now, though, ANYTHING else asked of cp1 results
+		 * in the default "unimplemented" behavior. */
+		if (cpzero->cop_usable (1) && rs (instr) == 2
+                    && rd (instr) == 0) {
+			reg[rt (instr)] = 0; /* No cp1. */
+		} else {
+			cop_unimpl (1, instr, pc);
+		}
+        }
 }
 
 void
@@ -424,59 +392,73 @@ CPU::cpthree_emulate(uint32 instr, uint32 pc)
 	cop_unimpl (3, instr, pc);
 }
 
-/* Return the address to jump to as a result of the J-format
- * (jump) instruction INSTR at address PC.
- * (PC is the address of the jump instruction, and INSTR is
- * the jump instruction word.)
- */
-uint32
-CPU::calc_jump_target(uint32 instr, uint32 pc)
+void
+CPU::control_transfer (uint32 new_pc)
 {
-	/* Must use address of delay slot (pc + 4) to calculate. */
+	if (!new_pc) warning ("Jumping to zero (PC = 0x%x)\n", pc);
+	delay_state = DELAYING;
+    delay_pc = new_pc;
+}
+
+/// calc_jump_target - Calculate the address to jump to as a result of
+/// the J-format (jump) instruction INSTR at address PC.  (PC is the address
+/// of the jump instruction, and INSTR is the jump instruction word.)
+///
+uint32
+CPU::calc_jump_target (uint32 instr, uint32 pc)
+{
+    // Must use address of delay slot (pc + 4) to calculate.
 	return ((pc + 4) & 0xf0000000) | (jumptarg(instr) << 2);
+}
+
+void
+CPU::jump(uint32 instr, uint32 pc)
+{
+    control_transfer (calc_jump_target (instr, pc));
 }
 
 void
 CPU::j_emulate(uint32 instr, uint32 pc)
 {
-	delay_state = DELAYING;
-	delay_pc = calc_jump_target(instr, pc);
+	jump (instr, pc);
 }
 
 void
 CPU::jal_emulate(uint32 instr, uint32 pc)
 {
-	delay_state = DELAYING;
-	delay_pc = calc_jump_target(instr, pc);
-	/* RA gets addr of instr after delay slot (2 words after this one). */
+    jump (instr, pc);
+	// RA gets addr of instr after delay slot (2 words after this one).
 	reg[reg_ra] = pc + 8;
 }
 
-/* Take the PC-relative branch for which the offset is specified by
- * the immediate field of the branch instruction word INSTR, with
- * the program counter equal to PC.
- */
+/// calc_branch_target - Calculate the address to jump to for the
+/// PC-relative branch for which the offset is specified by the immediate field
+/// of the branch instruction word INSTR, with the program counter equal to PC.
+/// 
+uint32
+CPU::calc_branch_target(uint32 instr, uint32 pc)
+{
+	return (pc + 4) + (s_immed(instr) << 2);
+}
+
 void
 CPU::branch(uint32 instr, uint32 pc)
 {
-	delay_state = DELAYING;
-	delay_pc = (pc + 4) + (s_immed(instr) << 2);
+    control_transfer (calc_branch_target (instr, pc));
 }
 
 void
 CPU::beq_emulate(uint32 instr, uint32 pc)
 {
-	if (reg[rs(instr)] == reg[rt(instr)]) {
-		branch(instr, pc);
-	}
+	if (reg[rs(instr)] == reg[rt(instr)])
+        branch (instr, pc);
 }
 
 void
 CPU::bne_emulate(uint32 instr, uint32 pc)
 {
-	if (reg[rs(instr)] != reg[rt(instr)]) {
-		branch(instr, pc);
-	}
+	if (reg[rs(instr)] != reg[rt(instr)])
+        branch (instr, pc);
 }
 
 void
@@ -484,10 +466,10 @@ CPU::blez_emulate(uint32 instr, uint32 pc)
 {
 	if (rt(instr) != 0) {
 		exception(RI);
-	}
-	if (reg[rs(instr)] == 0 || (reg[rs(instr)] & 0x80000000)) {
+		return;
+    }
+	if (reg[rs(instr)] == 0 || (reg[rs(instr)] & 0x80000000))
 		branch(instr, pc);
-	}
 }
 
 void
@@ -497,9 +479,8 @@ CPU::bgtz_emulate(uint32 instr, uint32 pc)
 		exception(RI);
 		return;
 	}
-	if (reg[rs(instr)] != 0 && (reg[rs(instr)] & 0x80000000) == 0) {
+	if (reg[rs(instr)] != 0 && (reg[rs(instr)] & 0x80000000) == 0)
 		branch(instr, pc);
-	}
 }
 
 void
@@ -1030,7 +1011,35 @@ CPU::swr_emulate(uint32 instr, uint32 pc)
 void
 CPU::lwc1_emulate(uint32 instr, uint32 pc)
 {
-	cop_unimpl (1, instr, pc);
+	if (opt_fpu) {
+		uint32 phys, virt, base, word;
+		int32 offset;
+		bool cacheable;
+
+		/* Calculate virtual address. */
+		base = reg[rs(instr)];
+		offset = s_immed(instr);
+		virt = base + offset;
+
+		/* This virtual address must be word-aligned. */
+		if (virt % 4 != 0) {
+			exception(AdEL,DATALOAD);
+			return;
+		}
+
+		/* Translate virtual address to physical address. */
+		phys = cpzero->address_trans(virt, DATALOAD, &cacheable, this);
+		if (exception_pending) return;
+
+		/* Fetch word. */
+		word = mem->fetch_word(phys, DATALOAD, cacheable, this);
+		if (exception_pending) return;
+
+		/* Load target register with data. */
+		fpu->write_reg (rt (instr), word);
+	} else {
+		cop_unimpl (1, instr, pc);
+	}
 }
 
 void
@@ -1048,7 +1057,34 @@ CPU::lwc3_emulate(uint32 instr, uint32 pc)
 void
 CPU::swc1_emulate(uint32 instr, uint32 pc)
 {
-	cop_unimpl (1, instr, pc);
+	if (opt_fpu) {
+		uint32 phys, virt, base, data;
+		int32 offset;
+		bool cacheable;
+
+		/* Load data from register. */
+		data = fpu->read_reg (rt (instr));
+
+		/* Calculate virtual address. */
+		base = reg[rs(instr)];
+		offset = s_immed(instr);
+		virt = base + offset;
+
+		/* This virtual address must be word-aligned. */
+		if (virt % 4 != 0) {
+			exception(AdES,DATASTORE);
+			return;
+		}
+
+		/* Translate virtual address to physical address. */
+		phys = cpzero->address_trans(virt, DATASTORE, &cacheable, this);
+		if (exception_pending) return;
+
+		/* Store word. */
+		mem->store_word(phys, data, cacheable, this);
+	} else {
+		cop_unimpl (1, instr, pc);
+	}
 }
 
 void
@@ -1128,15 +1164,13 @@ CPU::jr_emulate(uint32 instr, uint32 pc)
 		exception(RI);
 		return;
 	}
-	delay_state = DELAYING;
-	delay_pc = reg[rs(instr)];
+	control_transfer (reg[rs(instr)]);
 }
 
 void
 CPU::jalr_emulate(uint32 instr, uint32 pc)
 {
-	delay_state = DELAYING;
-	delay_pc = reg[rs(instr)];
+	control_transfer (reg[rs(instr)]);
 	/* RA gets addr of instr after delay slot (2 words after this one). */
 	reg[rd(instr)] = pc + 8;
 }
@@ -1396,17 +1430,15 @@ CPU::sltu_emulate(uint32 instr, uint32 pc)
 void
 CPU::bltz_emulate(uint32 instr, uint32 pc)
 {
-	if ((int32)reg[rs(instr)] < 0) {
+	if ((int32)reg[rs(instr)] < 0)
 		branch(instr, pc);
-	}
 }
 
 void
 CPU::bgez_emulate(uint32 instr, uint32 pc)
 {
-	if ((int32)reg[rs(instr)] >= 0) {
+	if ((int32)reg[rs(instr)] >= 0)
 		branch(instr, pc);
-	}
 }
 
 /* As with JAL, BLTZAL and BGEZAL cause RA to get the address of the
@@ -1416,18 +1448,16 @@ void
 CPU::bltzal_emulate(uint32 instr, uint32 pc)
 {
 	reg[reg_ra] = pc + 8;
-	if ((int32)reg[rs(instr)] < 0) {
+	if ((int32)reg[rs(instr)] < 0)
 		branch(instr, pc);
-	}
 }
 
 void
 CPU::bgezal_emulate(uint32 instr, uint32 pc)
 {
 	reg[reg_ra] = pc + 8;
-	if ((int32)reg[rs(instr)] >= 0) {
+	if ((int32)reg[rs(instr)] >= 0)
 		branch(instr, pc);
-	}
 }
 
 /* reserved instruction */
@@ -1438,13 +1468,26 @@ CPU::RI_emulate(uint32 instr, uint32 pc)
 }
 
 void
+CPU::open_trace_file ()
+{
+	char tracefilename[80];
+	for (unsigned i = 0; ; ++i) {
+		sprintf (tracefilename, "traceout%d.txt", i);
+		if (!can_read_file (tracefilename))
+			break;
+	}
+	traceout = fopen (tracefilename, "w");
+}
+
+void
+CPU::close_trace_file ()
+{
+	fclose (traceout);
+}
+
+void
 CPU::write_trace_to_file ()
 {
-	static int count = 0;
-	++count;
-	char filename[80];
-	sprintf (filename, "traceout%d.txt", count);
-	FILE *traceout = fopen (filename, "w");
 	for (Trace::record_iterator ri = current_trace.rbegin (), re =
          current_trace.rend (); ri != re; ++ri) {
         Trace::Record &tr = *ri;
@@ -1495,19 +1538,20 @@ CPU::write_trace_to_file ()
 		}
 	}
 	fprintf (traceout, "))\n");
-	fclose (traceout);
 }
 
 void
-CPU::maybe_dump_trace()
+CPU::flush_trace()
 {
-	if (opt_tracing)
-		write_trace_to_file ();
+	if (!opt_tracing) return;
+	write_trace_to_file ();
+	current_trace.clear ();
 }
 
 void
 CPU::start_tracing()
 {
+	if (!opt_tracing) return;
 	tracing = true;
 	current_trace.clear ();
 }
@@ -1727,9 +1771,8 @@ CPU::write_trace_record_2 (uint32 pc, uint32 instr)
 		}
 	}
 	current_trace.push_back_record (current_trace_record);
-    if (current_trace.record_size () > opt_tracesize) {
-		current_trace.pop_front_record ();
-	}
+    if (current_trace.record_size () > opt_tracesize)
+		flush_trace ();
 }
 
 void
@@ -1742,142 +1785,120 @@ CPU::stop_tracing()
 void
 CPU::step()
 {
-	uint32 real_pc;
-	bool cacheable;
+	// Table of emulation functions.
 	static const emulate_funptr opcodeJumpTable[] = {
-		&CPU::funct_emulate, &CPU::regimm_emulate,
-		&CPU::j_emulate,     &CPU::jal_emulate,
-		&CPU::beq_emulate,   &CPU::bne_emulate,
-		&CPU::blez_emulate,  &CPU::bgtz_emulate,
-		&CPU::addi_emulate,  &CPU::addiu_emulate,
-		&CPU::slti_emulate,  &CPU::sltiu_emulate,
-		&CPU::andi_emulate,  &CPU::ori_emulate,
-		&CPU::xori_emulate,  &CPU::lui_emulate,
-		&CPU::cpzero_emulate,&CPU::cpone_emulate,
-		&CPU::cptwo_emulate, &CPU::cpthree_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::lb_emulate,    &CPU::lh_emulate,
-		&CPU::lwl_emulate,   &CPU::lw_emulate,
-		&CPU::lbu_emulate,   &CPU::lhu_emulate,
-		&CPU::lwr_emulate,   &CPU::RI_emulate,
-		&CPU::sb_emulate,    &CPU::sh_emulate,
-		&CPU::swl_emulate,   &CPU::sw_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::swr_emulate,   &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::lwc1_emulate,
-		&CPU::lwc2_emulate,  &CPU::lwc3_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::swc1_emulate,
-		&CPU::swc2_emulate,  &CPU::swc3_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate,
-		&CPU::RI_emulate,    &CPU::RI_emulate
-	};
+        &CPU::funct_emulate, &CPU::regimm_emulate,  &CPU::j_emulate,
+        &CPU::jal_emulate,   &CPU::beq_emulate,     &CPU::bne_emulate,
+        &CPU::blez_emulate,  &CPU::bgtz_emulate,    &CPU::addi_emulate,
+        &CPU::addiu_emulate, &CPU::slti_emulate,    &CPU::sltiu_emulate,
+        &CPU::andi_emulate,  &CPU::ori_emulate,     &CPU::xori_emulate,
+        &CPU::lui_emulate,   &CPU::cpzero_emulate,  &CPU::cpone_emulate,
+        &CPU::cptwo_emulate, &CPU::cpthree_emulate, &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::lb_emulate,
+        &CPU::lh_emulate,    &CPU::lwl_emulate,     &CPU::lw_emulate,
+        &CPU::lbu_emulate,   &CPU::lhu_emulate,     &CPU::lwr_emulate,
+        &CPU::RI_emulate,    &CPU::sb_emulate,      &CPU::sh_emulate,
+        &CPU::swl_emulate,   &CPU::sw_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::swr_emulate,     &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::lwc1_emulate,    &CPU::lwc2_emulate,
+        &CPU::lwc3_emulate,  &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::swc1_emulate,  &CPU::swc2_emulate,    &CPU::swc3_emulate,
+        &CPU::RI_emulate,    &CPU::RI_emulate,      &CPU::RI_emulate,
+        &CPU::RI_emulate
+    };
 
-	/* Clear exception_pending flag if it was set by a
-	 * prior instruction.
-	 */
+	// Clear exception_pending flag if it was set by a prior instruction.
 	exception_pending = false;
 
-	/* decrement Random register */
+	// Decrement Random register every clock cycle.
 	cpzero->adjust_random();
 
+    // Check whether we should start tracing with this instruction.
 	if (opt_tracing && !tracing && pc == opt_tracestartpc)
 		start_tracing();
 
-	/* save address of instruction responsible for exceptions which may occur */
-	if (delay_state != DELAYSLOT) {
+	// Save address of instruction responsible for exceptions which may occur.
+	if (delay_state != DELAYSLOT)
 		next_epc = pc;
-	}
 
-	/* get physical address of next instruction */
-	real_pc = cpzero->address_trans(pc,INSTFETCH,&cacheable, this);
+	// Get physical address of next instruction.
+	bool cacheable;
+	uint32 real_pc = cpzero->address_trans(pc,INSTFETCH,&cacheable, this);
 	if (exception_pending) {
-		if (opt_excmsg) {
+		if (opt_excmsg)
 			fprintf(stderr,
 				"** PC address translation caused the exception! **\n");
-		}
 		goto out;
 	}
 
-	/* get next instruction */
+	// Fetch next instruction.
 	instr = mem->fetch_word(real_pc,INSTFETCH,cacheable, this);
 	if (exception_pending) {
-		if (opt_excmsg) {
+		if (opt_excmsg)
 			fprintf(stderr, "** Instruction fetch caused the exception! **\n");
-		}
 		goto out;
 	}
 
-	/* diagnostic output - display disassembly of instr */
+	// Disassemble the instruction, if the user requested it.
 	if (opt_instdump) {
 		fprintf(stderr,"PC=0x%08x [%08x]\t%08x ",pc,real_pc,instr);
 		machine->disasm->disassemble(pc,instr);
 	}
 
-	/* first half of trace recording for this instruction */
-	if (opt_tracing && tracing)
+	// Perform first half of trace recording for this instruction.
+	if (tracing)
 		write_trace_record_1 (pc, instr);
 
-	/* Check for a (hardware or software) interrupt */
+
+	// Check for a (hardware or software) interrupt.
 	if (cpzero->interrupt_pending()) {
 		exception(Int);
 		goto out;
 	}
 
-	/* Jump to the appropriate emulation function. */
+	// Emulate the instruction by jumping to the appropriate emulation method.
 	(this->*opcodeJumpTable[opcode(instr)])(instr, pc);
 
 out:
-	/* Register zero must always be zero; this instruction forces this. */
+	// Force register zero to contain zero.
 	reg[reg_zero] = 0;
 
-	/* 2nd half of trace recording for this instruction */
-	if (opt_tracing && tracing) {
+	// Perform second half of trace recording for this instruction.
+	if (tracing) {
 		write_trace_record_2 (pc, instr);
 		if (pc == opt_traceendpc)
 			stop_tracing();
 	}
 
-	/* If there is an exception pending, we return now, so that we don't
-	 * clobber the exception vector.
-	 */
+	// If an exception is pending, then the PC has already been changed to
+    // contain the exception vector.  Return now, so that we don't clobber it.
 	if (exception_pending) {
-		/* Instruction at beginning of exception handler is NOT in
-		 * delay slot, no matter what the last instruction was.
-		 */
+		// Instruction at beginning of exception handler is NOT in delay slot,
+        // no matter what the last instruction was.
 		delay_state = NORMAL;
 		return;
 	}
 
-	/* increment PC */
-	if (delay_state == DELAYING) {
-		/* This instruction caused a branch to be taken.
-		 * The next instruction is in the delay slot.
-		 * The next instruction EPC will be PC - 4.
-		 */
-		delay_state = DELAYSLOT;
-		pc = pc + 4;
-	} else if (delay_state == DELAYSLOT) {
-		/* This instruction was executed in a delay slot.
-		 * The next instruction is on the other end of the branch.
-		 * The next instruction EPC will be PC.
-		 */
-		if (delay_pc == 0)
-			warning ("Jumped to zero (jump was at 0x%x)\n", pc - 4);
-		delay_state = NORMAL;
-		pc = delay_pc;
-	} else if (delay_state == NORMAL) {
-		/* No branch; next instruction is next word.
-		 * Next instruction EPC is PC.
-		 */
-		pc = pc + 4;
-	}
+    // Recall the delay_state values: 0=NORMAL, 1=DELAYING, 2=DELAYSLOT.
+    // This is what the delay_state values mean (at this point in the code):
+	// DELAYING: The last instruction caused a branch to be taken.
+	//  The next instruction is in the delay slot.
+	//  The next instruction EPC will be PC - 4.
+	// DELAYSLOT: The last instruction was executed in a delay slot.
+	//  The next instruction is on the other end of the branch.
+	//  The next instruction EPC will be PC.
+	// NORMAL: No branch was executed; next instruction is at PC + 4.
+	//  Next instruction EPC is PC.
+
+    // Update the pc and delay_state values.
+    pc += 4;
+    if (delay_state == DELAYSLOT)
+      pc = delay_pc;
+    delay_state = (delay_state << 1) & 0x03; // 0->0, 1->2, 2->0
 }
 
 void

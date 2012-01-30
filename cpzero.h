@@ -53,7 +53,7 @@ class CPZero
 	void tlbp_emulate(uint32 instr, uint32 pc);
 	void rfe_emulate(uint32 instr, uint32 pc);
 	void load_addr_trans_excp_info(uint32 va, uint32 vpn, TLBEntry *match);
-	int find_matching_tlb_entry(uint32 asid, uint32 asid);
+	int find_matching_tlb_entry(uint32 vpn, uint32 asid);
 	uint32 tlb_translate(uint32 seg, uint32 vaddr, int mode,
 		bool *cacheable, DeviceExc *client);
 
@@ -65,16 +65,16 @@ public:
 	void tlb_write(unsigned index);
 
     // Return the contents of the readable bits of register REG.
-	uint32 read_reg(uint32 reg);
+	uint32 read_reg(const uint16 regno);
 
-    // Change the contents of the writable bits of register REG to DATA.
-	void write_reg(uint32 reg, uint32 data);
+    // Change the contents of the writable bits of register REG to NEW_DATA.
+	void write_reg(const uint16 regno, const uint32 new_data);
 
 	/* Convention says that CP0's condition is TRUE if the memory
 	   write-back buffer is empty. Because memory writes are fast as far
 	   as the emulation is concerned, the write buffer is always empty
 	   for CP0. */
-	bool cpCond() { return true; }
+	bool cpCond() const { return true; }
 
 	CPZero(CPU *m, IntCtrl *i) : cpu (m), intc (i) { }
 	void reset(void);

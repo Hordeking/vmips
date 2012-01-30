@@ -1,5 +1,5 @@
-/*	Declarations and macros for managing simulated time.
-	Copyright 2002 Paul Twohey.
+/* Declarations and macros for managing simulated time.
+   Copyright 2002, 2004 Paul Twohey and Brian Gaeke.
 
 This file is part of VMIPS.
 
@@ -29,7 +29,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 using namespace std;
 
 
-Clock::Clock( const timespec &start_time ) throw()
+Clock::Clock( const timespec &start_time )
 	: time( start_time ), spill_ns(0)
 {
 	assert( time.tv_sec >= 0 );
@@ -39,7 +39,7 @@ Clock::Clock( const timespec &start_time ) throw()
 	then.tv_nsec = 0;
 }
 
-Clock::~Clock() throw()
+Clock::~Clock()
 {
 	for_each( deferred_tasks.begin(), deferred_tasks.end(),
 		  wipe< DeferredTasks * > );
@@ -70,7 +70,7 @@ void Clock::increment_time( long nanoseconds )
 	}
 }
 
-void Clock::pass_realtime( uint32 timeratio ) throw()
+void Clock::pass_realtime( uint32 timeratio )
 {
 	assert( timeratio > 0 );
 	
@@ -142,12 +142,12 @@ void Clock::add_deferred_task( Task *task, long nanoseconds )
 	deferred_tasks.push_back( tasks );
 }
 
-timespec Clock::get_time() throw()
+timespec Clock::get_time()
 {
 	return time;
 }
 
-void Clock::set_time( const timespec& new_time ) throw()
+void Clock::set_time( const timespec& new_time )
 {
 	assert( new_time.tv_sec >= 0 && new_time.tv_nsec >= 0 );
 
@@ -155,19 +155,19 @@ void Clock::set_time( const timespec& new_time ) throw()
 }
 
 
-Clock::DeferredTasks::DeferredTasks( long nanoseconds_left, Task *task) throw()
+Clock::DeferredTasks::DeferredTasks( long nanoseconds_left, Task *task)
 	: nanoseconds_left( nanoseconds_left )
 {
 	assert( nanoseconds_left > 0 );
 	add_task( task );
 }
 
-Clock::DeferredTasks::~DeferredTasks() throw()
+Clock::DeferredTasks::~DeferredTasks()
 {
 	for_each( tasks.begin(), tasks.end(), wipe< Task * > );
 }
 
-void Clock::DeferredTasks::add_task( Task *task ) throw()
+void Clock::DeferredTasks::add_task( Task *task )
 {
 	assert( task );
 	tasks.push_back( task );
@@ -185,7 +185,7 @@ long Clock::DeferredTasks::pass_time( long nanoseconds )
 	return nanoseconds_left;
 }
 
-inline long Clock::DeferredTasks::get_nanoseconds_left() throw()
+inline long Clock::DeferredTasks::get_nanoseconds_left()
 {
 	return nanoseconds_left;
 }

@@ -24,7 +24,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "vmips.h"
 #include <cassert>
 
-SpimConsoleDevice::SpimConsoleDevice (Clock *clock) throw (std::bad_alloc)
+SpimConsoleDevice::SpimConsoleDevice (Clock *clock)
 	: TerminalController (clock, KEYBOARD_POLL_NS, KEYBOARD_REPOLL_NS,
                           DISPLAY_READY_DELAY_NS),
 	  DeviceMap (36),
@@ -37,7 +37,7 @@ SpimConsoleDevice::SpimConsoleDevice (Clock *clock) throw (std::bad_alloc)
 	clock->add_deferred_task( trigger, CLOCK_TRIGGER_NS );
 }
 
-SpimConsoleDevice::~SpimConsoleDevice() throw()
+SpimConsoleDevice::~SpimConsoleDevice()
 {
 	assert( trigger );
 
@@ -45,39 +45,38 @@ SpimConsoleDevice::~SpimConsoleDevice() throw()
 }
 
 void SpimConsoleDevice::unready_display( int line, char data )
-	throw( std::bad_alloc )
 {
 	TerminalController::unready_display( line, data );
 	deassertInt( line == 0 ? IRQ4 : IRQ6 );	
 }
 
-void SpimConsoleDevice::ready_display( int line ) throw()
+void SpimConsoleDevice::ready_display( int line )
 {
 	TerminalController::ready_display( line );
 	if( display_interrupt_enable[line] )
 		assertInt( line == 0 ? IRQ4 : IRQ6 );
 }
 
-void SpimConsoleDevice::unready_keyboard( int line ) throw()
+void SpimConsoleDevice::unready_keyboard( int line )
 {
 	TerminalController::unready_keyboard( line );
 	deassertInt( line == 0 ? IRQ3 : IRQ5 );
 }
 
-void SpimConsoleDevice::ready_keyboard( int line ) throw()
+void SpimConsoleDevice::ready_keyboard( int line )
 {
 	TerminalController::ready_keyboard( line );
 	if( keyboard_interrupt_enable[line] )
 		assertInt( line == 0 ? IRQ3 : IRQ5 );
 }
 
-void SpimConsoleDevice::unready_clock() throw()
+void SpimConsoleDevice::unready_clock()
 {
 	clock_state = UNREADY;
 	deassertInt( IRQ2 );
 }
 
-void SpimConsoleDevice::ready_clock() throw( std::bad_alloc )
+void SpimConsoleDevice::ready_clock()
 {
 	clock_state = READY;
 
@@ -212,13 +211,12 @@ const char *SpimConsoleDevice::descriptor_str() const
 
 
 SpimConsoleDevice::ClockTrigger::ClockTrigger( SpimConsoleDevice *console )
-	throw()
 	: console( console )
 {
 	assert( console );
 }
 
-SpimConsoleDevice::ClockTrigger::~ClockTrigger() throw()
+SpimConsoleDevice::ClockTrigger::~ClockTrigger()
 {
 }
 

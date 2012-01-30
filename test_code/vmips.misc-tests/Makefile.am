@@ -2,15 +2,14 @@
 # If you make changes here they will go away.
 
 VMIPSTOOL = ../../vmipstool -n -F ../../vmipsrc --ld-script=@top_srcdir@/sample_code/ld.script
-CPP_FLAGS = -I@top_srcdir@ -I@top_srcdir@/sample_code
-CFLAGS = -g $(CPP_FLAGS)
+AM_CFLAGS = -g -I@top_srcdir@ -I@top_srcdir@/sample_code
 SETUP = ../../sample_code/setup.o
 
-# multifile_c sort {sort.c random.c}
-sort_LDFLAGS = $(SETUP)
-sort_SOURCES = sort.c random.c
-sort.rom: sort.exe
-	$(VMIPSTOOL) --make-rom sort.exe sort.rom
+# simple_asm clocker
+# multifile_asm -setup 0 clocker clocker.S
+clocker_SOURCES = clocker.S
+clocker.rom: clocker.exe
+	$(VMIPSTOOL) --make-rom clocker.exe clocker.rom
 
 # simple_c echo
 # multifile_c echo echo.c
@@ -19,23 +18,23 @@ echo_SOURCES = echo.c
 echo.rom: echo.exe
 	$(VMIPSTOOL) --make-rom echo.exe echo.rom
 
-# simple_asm clocker
-# multifile_asm -setup 0 clocker clocker.S
-clocker_SOURCES = clocker.S
-clocker.rom: clocker.exe
-	$(VMIPSTOOL) --make-rom clocker.exe clocker.rom
+# multifile_c sort {sort.c random.c}
+sort_LDFLAGS = $(SETUP)
+sort_SOURCES = sort.c random.c
+sort.rom: sort.exe
+	$(VMIPSTOOL) --make-rom sort.exe sort.rom
 
-noinst_PROGRAMS =  sort echo clocker
+noinst_PROGRAMS =  clocker echo sort
 
-LINK = $(VMIPSTOOL) --link -o $@
-COMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
-ASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
-CCASCOMPILE = $(VMIPSTOOL) --compile $(CFLAGS)
+CCLD = $(VMIPSTOOL) --link
+COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
+ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
+CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 EXEEXT = .exe
 
-CLEANFILES =  sort.rom echo.rom clocker.rom
+CLEANFILES =  clocker.rom echo.rom sort.rom
 
-EXTRA_DIST =  sort.exp echo.exp clocker.exp  sort.par echo.par clocker.par
+EXTRA_DIST =  clocker.exp echo.exp sort.exp  clocker.par echo.par sort.par
 
 # 2 C testcases and 1 asm testcases.
 # 0 custom makefile fragment testcases.

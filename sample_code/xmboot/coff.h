@@ -42,6 +42,6 @@ struct coff_info
 #define MIPSEBMAGIC 0x0160
 #define MIPSELMAGIC 0x0162
 
-int coff_analyze(char *buf, struct coff_info *header);
+int coff_analyze(unsigned char *buf, struct coff_info *header);
 void print_coff_header(struct coff_info *header);
 

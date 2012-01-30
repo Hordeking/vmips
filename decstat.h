@@ -33,10 +33,12 @@ class DECStatDevice : public DeviceMap {
   uint32 erradr_reg;
   bool interrupt;
 public:
-  DECStatDevice () throw ();
+  DECStatDevice ();
   uint32 fetch_word (uint32 offset, int mode, DeviceExc *client);
   void store_word (uint32 offset, uint32 data, DeviceExc *client);
-  const char *descriptor_str () const { return "DECstation 5000/200 CHKSYN & ERRADR"; }
+  const char *descriptor_str () const {
+    return "DECstation 5000/200 CHKSYN & ERRADR";
+  }
 };
 
 #endif /* _DECSTAT_H_ */

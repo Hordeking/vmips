@@ -18,12 +18,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "rommodule.h"
-#include "vmips.h"
+#include "fileutils.h"
 #include "mmapglue.h"
 #include <cerrno>
 
 ROMModule::ROMModule (FILE *fp) : Range (0, 0, 0, MEM_READ) {
-  extent = vmips::get_file_size (fp);
+  extent = get_file_size (fp);
 
   // Try to map the file into memory. We use PROT_READ to indicate
   // read-only access.

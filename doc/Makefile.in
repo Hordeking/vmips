@@ -10,6 +10,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
+datarootdir = @datarootdir@
 datadir = @datadir@
 sysconfdir = @sysconfdir@
 sharedstatedir = @sharedstatedir@
@@ -42,8 +43,7 @@ CHAPTERS = $(srcdir)/to-do
 CLEANFILES = vmips.log vmips.aux vmips.cp vmips.fn vmips.vr \
  vmips.tp vmips.ky vmips.pg vmips.toc vmips.cps vmips.fns vmips.pgs vmips.pod
 DISTCLEANFILES = 
-USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.info vmips.html \
- vmips.pdf $(MANPAGES)
+USERDOCS = $(DOC) $(OPTDOC) $(TOC) vmips.info vmips.html vmips.pdf $(MANPAGES)
 MAINTAINERCLEANFILES = $(USERDOCS) vmips.pod vmipstool.pod
 DISTFILES = Makefile.in to-do vmips.texi invoke.texi \
  $(USERDOCS) options.texi vmipstool.texi texinfo.tex copyright.texi \
@@ -54,10 +54,13 @@ vmips_MANPAGE = vmips.$(MANSECT)
 vmipstool_MANPAGE = vmipstool.$(MANSECT)
 MANPAGES = $(vmips_MANPAGE) $(vmipstool_MANPAGE)
 
-all: $(DOC) dvi info html man pdf
+all: $(DOC) info html man pdf
 
 # Nothing to do here (yet):
 check installcheck:
+
+# dvi no longer supported
+dvi:
 
 install: vmips.info $(MANPAGES)
 	$(mkinstalldirs) $(DESTDIR)$(infodir)
@@ -84,25 +87,20 @@ $(vmipstool_MANPAGE): vmipstool.texi
 	pod2man --release="vmips "`cat $(top_srcdir)/VERSION` \
 		--center="VMIPS Programmer's Manual" vmipstool.pod > $@
 
-ps: vmips.ps
-
-vmips.ps: vmips.dvi
-	cd $(srcdir) && dvips -o vmips.ps vmips.dvi
-
-dvi: vmips.dvi
-
-vmips.dvi: $(srcdir)/vmips.texi $(OPTDOC) texinfo.tex
-	cd $(srcdir) && texi2dvi vmips.texi
+uninstall:
+	-rm -f $(DESTDIR)$(infodir)/`echo vmips.info|sed '$(transform)'`
+	-rm -f $(DESTDIR)$(mandir)/man$(MANSECT)/`echo vmips.$(MANSECT)|sed '$(transform)'`
+	-rm -f $(DESTDIR)$(mandir)/man$(MANSECT)/`echo vmipstool.$(MANSECT)|sed '$(transform)'`
 
 info: vmips.info
 
 vmips.info: $(srcdir)/vmips.texi $(OPTDOC)
-	cd $(srcdir) && makeinfo --no-split vmips.texi
+	makeinfo --no-split $<
 
 html: vmips.html
 
 vmips.html: $(srcdir)/vmips.texi $(OPTDOC)
-	cd $(srcdir) && makeinfo --no-split --html vmips.texi
+	makeinfo --no-split --html $<
 
 $(DOC): $(TOC) $(CHAPTERS)
 	cd $(srcdir) && cat $(TOC) $(CHAPTERS) > $(srcdir)/$(DOC)

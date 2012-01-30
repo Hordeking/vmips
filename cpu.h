@@ -26,6 +26,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 class CPZero;
+class FPU;
 class Mapper;
 class IntCtrl;
 
@@ -107,13 +108,15 @@ public:
 };
 
 class CPU : public DeviceExc {
-private:
-	/* Tracing data. */
+	// Tracing data.
 	bool tracing;
 	Trace current_trace;
 	Trace::Record current_trace_record;
+	FILE *traceout;
 
-	/* Tracing support methods. */
+	// Tracing support methods.
+	void open_trace_file ();
+	void close_trace_file ();
 	void start_tracing ();
 	void write_trace_to_file ();
 	void write_trace_instr_inputs (uint32 instr);
@@ -122,29 +125,28 @@ private:
 	void write_trace_record_2 (uint32 pc, uint32 instr);
 	void stop_tracing ();
 
-	/* Ordinary stuff. */
-	virtual ~CPU () {}
-	friend class CPZero;
-
+	// Important registers:
 	uint32 pc;      // Program counter
 	uint32 reg[32]; // General-purpose registers
 	uint32 instr;   // The current instruction
 	uint32 hi, lo;  // Division and multiplication results
 
-	/* Exception bookkeeping. */
+	// Exception bookkeeping data.
 	uint32 last_epc;
 	int last_prio;
 	uint32 next_epc;
 
-	/* Other components of the VMIPS machine. */
+	// Other components of the VMIPS machine.
 	Mapper *mem;
 	CPZero *cpzero;
+	FPU *fpu;
 
-    /* Delay slot handling. */
+    // Delay slot handling.
 	int delay_state;
 	uint32 delay_pc;
 
-	/* Options used: */
+	// Cached option values that we use in the CPU core.
+	bool opt_fpu;
 	bool opt_excmsg;
 	bool opt_reportirq;
 	bool opt_excpriomsg;
@@ -158,17 +160,22 @@ private:
 	uint32 opt_traceendpc;
 	bool opt_bigendian; // True if CPU in big endian mode.
 
-	int exception_priority(uint16 excCode, int mode);
+	// Miscellaneous shared code. 
+	void control_transfer(uint32 new_pc);
+	void jump(uint32 instr, uint32 pc);
 	uint32 calc_jump_target(uint32 instr, uint32 pc);
-	void branch(uint32 instr, uint32 pc);
+	uint32 calc_branch_target(uint32 instr, uint32 pc);
 	void mult64(uint32 *hi, uint32 *lo, uint32 n, uint32 m);
 	void mult64s(uint32 *hi, uint32 *lo, int32 n, int32 m);
 	void cop_unimpl (int coprocno, uint32 instr, uint32 pc);
+
+	// Unaligned load/store support.
 	uint32 lwr(uint32 regval, uint32 memval, uint8 offset);
 	uint32 lwl(uint32 regval, uint32 memval, uint8 offset);
 	uint32 swl(uint32 regval, uint32 memval, uint8 offset);
 	uint32 swr(uint32 regval, uint32 memval, uint8 offset);
 
+	// Emulation of specific instructions.
 	void funct_emulate(uint32 instr, uint32 pc);
 	void regimm_emulate(uint32 instr, uint32 pc);
 	void j_emulate(uint32 instr, uint32 pc);
@@ -241,42 +248,60 @@ private:
 	void bgezal_emulate(uint32 instr, uint32 pc);
 	void RI_emulate(uint32 instr, uint32 pc);
 
+	// Exception prioritization.
+	int exception_priority(uint16 excCode, int mode) const;
+
 public:
-	uint16 opcode(const uint32 instr) const;
-	uint16 rs(const uint32 instr) const;
-	uint16 rt(const uint32 instr) const;
-	uint16 rd(const uint32 instr) const;
-	uint16 immed(const uint32 instr) const;
-	uint16 shamt(const uint32 instr) const;
-	uint16 funct(const uint32 instr) const;
-	uint32 jumptarg(const uint32 instr) const;
-	int16 s_immed(const uint32 instr) const;
+    // Instruction decoding.
+    static uint16 opcode(const uint32 i) { return (i >> 26) & 0x03f; }
+    static uint16 rs(const uint32 i) { return (i >> 21) & 0x01f; }
+    static uint16 rt(const uint32 i) { return (i >> 16) & 0x01f; }
+    static uint16 rd(const uint32 i) { return (i >> 11) & 0x01f; }
+    static uint16 immed(const uint32 i) { return i & 0x0ffff; }
+    static short s_immed(const uint32 i) { return i & 0x0ffff; }
+    static uint16 shamt(const uint32 i) { return (i >> 6) & 0x01f; }
+    static uint16 funct(const uint32 i) { return i & 0x03f; }
+    static uint32 jumptarg(const uint32 i) { return i & 0x03ffffff; }
 
+	// Constructor & destructor.
 	CPU (Mapper &m, IntCtrl &i);
-	void dump_regs(FILE *f);
-	void dump_regs_and_stack(FILE *f);
-	void cpzero_dump_regs_and_tlb(FILE *f);
-	void step();
-	char *const strexccode(const uint16 excCode);
-	char *const strdelaystate(const int state);
-	char *const strmemmode(const int memmode);
-	void exception(uint16 excCode, int mode = ANY, int coprocno = -1);
-	void reset(void);
+	virtual ~CPU ();
 
-	/* Tracing support functions. */
-	void maybe_dump_trace ();
+	// For printing out the register file, stack, CP0 registers, and TLB
+	// per user request.
+	void dump_regs (FILE *f);
+	void dump_stack (FILE *f);
+	void dump_mem (FILE *f, uint32 addr);
+	void cpzero_dump_regs_and_tlb (FILE *f);
 
-	/* Debug functions. */
-	char *debug_registers_to_packet(void);
-	void debug_packet_to_registers(char *packet);
-	uint8 pending_exception(void);
-	uint32 debug_get_pc(void);
-	void debug_set_pc(uint32 newpc);
-	void debug_packet_push_word(char *packet, uint32 n);
-	void debug_packet_push_byte(char *packet, uint8 n);
-	int debug_fetch_region(uint32 addr, uint32 len, char *packet,
+	// Register file accessors.
+    uint32 get_reg (const unsigned regno) { return reg[regno]; }
+    void put_reg (const unsigned regno, const uint32 new_data) {    
+        reg[regno] = new_data;  
+    }
+
+	// Control-flow methods.
+	void step ();
+	void reset ();
+
+	// Methods which are only for use by the CPU and its coprocessors.
+	void branch (uint32 instr, uint32 pc);
+	void exception (uint16 excCode, int mode = ANY, int coprocno = -1);
+
+	// Public tracing support method.
+	void flush_trace ();
+
+	// Debugger interface support methods.
+	char *debug_registers_to_packet ();
+	void debug_packet_to_registers (char *packet);
+	uint8 pending_exception ();
+	uint32 debug_get_pc ();
+	void debug_set_pc (uint32 newpc);
+	void debug_packet_push_word (char *packet, uint32 n);
+	void debug_packet_push_byte (char *packet, uint8 n);
+	int debug_fetch_region (uint32 addr, uint32 len, char *packet,
 		DeviceExc *client);
-	int debug_store_region(uint32 addr, uint32 len, char *packet,
+	int debug_store_region (uint32 addr, uint32 len, char *packet,
 		DeviceExc *client);
 };
 

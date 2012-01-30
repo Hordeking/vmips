@@ -45,11 +45,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "decserial.h"
 #include "stub-dis.h"
 #include "rommodule.h"
+#include "interactor.h"
 #include <fcntl.h>
 #include <cerrno>
-#include <cassert>
 #include <csignal>
 #include <cstdarg>
+#include <cstring>
 #include <string>
 #include <exception>
 
@@ -97,20 +98,23 @@ vmips::refresh_options(void)
  * configuration files, etc.
  */
 vmips::vmips(int argc, char *argv[])
-	: opt(new Options), halted(false),
+	: opt(new Options), state(HALT),
 	  clock(0), clock_device(0), halt_device(0), spim_console(0),
-	  num_instrs(0)
+	  num_instrs(0), interactor(0)
 {
     opt->process_options (argc, argv);
 	refresh_options();
 }
 
-vmips::~vmips() throw()
+vmips::~vmips()
 {
-	delete spim_console;
-	delete halt_device;
-	delete clock_device;
-	delete clock;
+	if (disasm) delete disasm;
+	if (opt_debug && dbgr) delete dbgr;
+	if (cpu) delete cpu;
+	if (physmem) delete physmem;
+	//if (clock) delete clock;  // crash in this dtor - double free?
+	if (intc) delete intc;
+	if (opt) delete opt;
 }
 
 void
@@ -133,7 +137,7 @@ vmips::setup_machine(void)
  * console device C, or do nothing if NAME is "off".
  */
 void vmips::setup_console_line(int l, char *name, TerminalController *c, const
-char *c_name) throw()
+char *c_name)
 {
 	/* If they said to turn off the tty line, do nothing. */
 	if (strcmp(name, "off") == 0)
@@ -153,7 +157,7 @@ char *c_name) throw()
 	boot_msg("Connected fd %d to %s line %d.\n", ttyfd, c_name, l);
 }
 
-bool vmips::setup_spimconsole() throw( std::bad_alloc )
+bool vmips::setup_spimconsole()
 {
 	/* FIXME: It would be helpful to restore tty modes on a SIGINT or
 	   other abortive exit or when vmips has been foregrounded after
@@ -182,7 +186,7 @@ bool vmips::setup_spimconsole() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_clockdevice() throw( std::bad_alloc )
+bool vmips::setup_clockdevice()
 {
 	if( !opt_clockdevice )
 		return true;
@@ -207,7 +211,7 @@ bool vmips::setup_clockdevice() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_decrtc() throw( std::bad_alloc )
+bool vmips::setup_decrtc()
 {
 	if (!opt_decrtc)
 		return true;
@@ -228,7 +232,7 @@ bool vmips::setup_decrtc() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_deccsr() throw( std::bad_alloc )
+bool vmips::setup_deccsr()
 {
 	if (!opt_deccsr)
 		return true;
@@ -248,7 +252,7 @@ bool vmips::setup_deccsr() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_decstat() throw( std::bad_alloc )
+bool vmips::setup_decstat()
 {
 	if (!opt_decstat)
 		return true;
@@ -262,7 +266,7 @@ bool vmips::setup_decstat() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_decserial() throw( std::bad_alloc )
+bool vmips::setup_decserial()
 {
 	if (!opt_decserial)
 		return true;
@@ -280,7 +284,7 @@ bool vmips::setup_decserial() throw( std::bad_alloc )
 	return true;
 }
 
-bool vmips::setup_haltdevice() throw( std::bad_alloc )
+bool vmips::setup_haltdevice()
 {
 	if( !opt_haltdevice )
 		return true;
@@ -293,7 +297,7 @@ bool vmips::setup_haltdevice() throw( std::bad_alloc )
 	return true;
 }
 
-void vmips::boot_msg( const char *msg, ... ) throw()
+void vmips::boot_msg( const char *msg, ... )
 {
 	if( !opt_bootmsg )
 		return;
@@ -325,22 +329,24 @@ vmips::host_endian_selftest(void)
 }
 
 void
-vmips::halt(void) throw()
+vmips::halt(void)
 {
-	halted = true;
+	state = HALT;
 }
 
-uint32
-vmips::get_file_size (FILE *fp) throw ()
+void
+vmips::attn_key(void)
 {
-	off_t here, there;
+    state = INTERACT;
+}
 
-	assert (fp && "Null pointer passed to vmips::get_file_size ()");
-	here = ftell (fp);
-	fseek (fp, 0, SEEK_END);
-	there = ftell (fp);
-	fseek (fp, here, SEEK_SET);
-	return there - here;
+void vmips::dump_cpu_info(bool dumpcpu, bool dumpcp0) {
+	if (dumpcpu) {
+		cpu->dump_regs (stderr);
+		cpu->dump_stack (stderr);
+	}
+	if (dumpcp0)
+		cpu->cpzero_dump_regs_and_tlb (stderr);
 }
 
 void
@@ -359,10 +365,8 @@ vmips::step(void)
 	   clock->pass_realtime(opt_timeratio);
 
 	/* If user requested it, dump registers from CPU and/or CP0. */
-	if (opt_dumpcpu)
-		cpu->dump_regs_and_stack(stderr);
-	if (opt_dumpcp0)
-		cpu->cpzero_dump_regs_and_tlb(stderr);
+    dump_cpu_info (opt_dumpcpu, opt_dumpcp0);
+
 	num_instrs++;
 }
 
@@ -403,7 +407,7 @@ vmips::setup_rom ()
 }
 
 bool
-vmips::setup_ram () throw( std::bad_alloc )
+vmips::setup_ram ()
 {
   // Make a new RAM module and install it at base physical address 0.
   memmod = new MemoryModule(opt_memsize);
@@ -414,7 +418,7 @@ vmips::setup_ram () throw( std::bad_alloc )
 }
 
 bool
-vmips::setup_clock () throw( std::bad_alloc )
+vmips::setup_clock ()
 {
   /* Set up the clock with the current time. */
   timeval start;
@@ -429,6 +433,26 @@ static void
 halt_machine_by_signal (int sig)
 {
   machine->halt();
+}
+
+/// Interact with user. Returns true if we should continue, false otherwise.
+///
+bool
+vmips::interact ()
+{
+  TerminalController *c;
+  if (opt_spimconsole) c = spim_console;
+  else if (opt_decserial) c = decserial_device;
+  else c = 0;
+  if (c) c->suspend();
+  bool should_continue = true;
+  printf ("\n");
+  if (!interactor) interactor = create_interactor ();
+  interactor->interact ();
+  if (state == INTERACT) state = RUN;
+  if (state == HALT) should_continue = false;
+  if (c) c->reinitialize_terminals ();
+  return should_continue;
 }
 
 int
@@ -475,6 +499,8 @@ vmips::run()
 
     signal (SIGQUIT, halt_machine_by_signal);
 
+	boot_msg( "Hit Ctrl-\\ to halt machine, Ctrl-_ for a debug prompt.\n" );
+
 	/* Reset the CPU. */
 	boot_msg( "\n*************RESET*************\n\n" );
 	cpu->reset();
@@ -486,12 +512,14 @@ vmips::run()
 	if (opt_instcounts)
 		gettimeofday(&start, NULL);
 
-	if (opt_debug) {
-		dbgr->serverloop();
-	} else {
-		while (! halted)
-			step();
-	}
+    state = (opt_debug ? DEBUG : RUN);
+    while (state != HALT) {
+      switch (state) {
+        case RUN: while (state == RUN) { step (); } break;
+        case DEBUG: while (state == DEBUG) { dbgr->serverloop(); } break;
+        case INTERACT: while (state == INTERACT) { interact(); } break;
+      }
+    }
 
 	timeval end;
 	if (opt_instcounts)
@@ -501,15 +529,12 @@ vmips::run()
 	boot_msg( "\n*************HALT*************\n\n" );
 
     /* If we're tracing, dump the trace. */
-    cpu->maybe_dump_trace ();
+    cpu->flush_trace ();
 
 	/* If user requested it, dump registers from CPU and/or CP0. */
 	if (opt_haltdumpcpu || opt_haltdumpcp0) {
 		fprintf(stderr,"Dumping:\n");
-		if (opt_haltdumpcpu)
-			cpu->dump_regs_and_stack(stderr);
-		if (opt_haltdumpcp0)
-			cpu->cpzero_dump_regs_and_tlb(stderr);
+		dump_cpu_info (opt_haltdumpcpu, opt_haltdumpcp0);
 	}
 
 	if (opt_instcounts) {

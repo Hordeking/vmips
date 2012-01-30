@@ -261,16 +261,16 @@ static FILE *gdb_stdout = stderr;
 int remotegdb_backend_error = 0;
 static inline int gdb_flush(FILE *f) { return fflush(f); }
 static inline int max(int i, int j) { return ((i>j) ? i : j); }
-static inline void perror_with_name(char *str) {
+static inline void perror_with_name(const char *str) {
   fprintf(gdb_stdout, "%s: %s\n", str, strerror(errno));
   remotegdb_backend_error++;
 }
-static inline void puts_filtered(char *str) {
+static inline void puts_filtered(const char *str) {
   fputs(str, gdb_stdout); fputc('\n', gdb_stdout);
 }
 static inline int putchar_unfiltered(int c) { return fputc(c, gdb_stdout); }
 #define printf_filtered printf_unfiltered
-static inline int fprintf_unfiltered(FILE *f, char *fmt, ...) {
+static inline int fprintf_unfiltered(FILE *f, const char *fmt, ...) {
   va_list ap;
   int rv;
   va_start(ap, fmt);
@@ -278,7 +278,7 @@ static inline int fprintf_unfiltered(FILE *f, char *fmt, ...) {
   va_end(ap);
   return rv;
 }
-static inline int printf_unfiltered(char *fmt, ...) {
+static inline int printf_unfiltered(const char *fmt, ...) {
   va_list ap;
   int rv;
   va_start(ap, fmt);
@@ -288,7 +288,7 @@ static inline int printf_unfiltered(char *fmt, ...) {
 }
 /* This should not cause an abort, but it will cause a halt. */
 /* Someday we will try to support disconnect/reconnect. */
-static inline void error(char *fmt, ...) {
+static inline void error(const char *fmt, ...) {
   va_list ap;
   int rv;
   va_start(ap, fmt);

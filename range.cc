@@ -24,13 +24,14 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 
 /* Returns true if ADDR is mapped by this Range object; false otherwise. */
 bool
-Range::incorporates(uint32 addr) throw()
+Range::incorporates(uint32 addr)
 {
-	return (addr >= getBase()) && (addr < (getBase() + getExtent()));
+	uint32 base = getBase ();
+	return (addr >= base) && (addr < (base + getExtent()));
 }
 
 bool
-Range::overlaps(Range *r) throw()
+Range::overlaps(Range *r)
 {
 	assert(r);
 	

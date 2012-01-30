@@ -25,6 +25,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "clock.h"
 #include "decrtcreg.h"
 #include "decrtc.h"
+#include "mapper.h"
+#include "vmips.h"
 #include <cstdio>
 #include <cassert>
 
@@ -33,11 +35,14 @@ static const uint32 int_freqs [16] = {
   3906250, 7812500, 15625000, 31250000, 62500000, 125000000,
   250000000, 500000000
 };
+#if 0
+/* presently unused */
 static const char *reg_names [15] = {
   "RTC_SEC", "RTC_ALMS", "RTC_MIN", "RTC_ALMM", "RTC_HOUR",
   "RTC_ALMH", "RTC_DOW", "RTC_DAY", "RTC_MON", "RTC_YEAR",
   "RTC_REGA", "RTC_REGB", "RTC_REGC", "RTC_REGD", "RTC_RAM"
 };
+#endif
 
 DECRTCDevice::DECRTCDevice (Clock *_clock, uint32 _irq) :
   clock(_clock), frequency_ns (0), irq (_irq), interrupt_enable (false)
@@ -84,7 +89,8 @@ DECRTCDevice::fetch_word(uint32 offset, int mode, DeviceExc *client)
     rv = rtc_reg[reg_no];
   if (reg_no == RTC_REGC)
     unready_clock ();
-  return rv;
+
+  return machine->physmem->mips_to_host_word(rv);
 }
 
 void
@@ -102,28 +108,30 @@ DECRTCDevice::update_host_time ()
 void
 DECRTCDevice::store_word(uint32 offset, uint32 data, DeviceExc *client)
 {
+  data = machine->physmem->host_to_mips_word(data);
+
   bool old_interrupt_enable = rtc_reg[RTC_REGB] & REGB_PIE;
   uint32 reg_no = (offset / 4);
-  fprintf (stderr, "RTC %s (%u) written with 0x%x\n",
-	reg_names[(reg_no > 14) ? 14 : reg_no], reg_no, data);
+  /* fprintf (stderr, "RTC %s (%u) written with 0x%x\n",
+	reg_names[(reg_no > 14) ? 14 : reg_no], reg_no, data); */
   if (reg_no < 64)
     rtc_reg[reg_no] = rtc_reg[reg_no] | (((uint8) data) & write_masks[reg_no]);
   if (reg_no == RTC_REGA) {
     /* Maybe they changed the interrupt rate selector. */
     uint8 rate_selector = rtc_reg[RTC_REGA] & REGA_RSX;
-    fprintf (stderr, "RTC rate_selector set to 0x%x (%u)\n", rate_selector,
-	  int_freqs[rate_selector]);
+    /* fprintf (stderr, "RTC rate_selector set to 0x%x (%u)\n", rate_selector,
+	  int_freqs[rate_selector]); */
     frequency_ns = int_freqs[rate_selector];
   }
   if (reg_no == RTC_REGB) {
     /* Maybe they enabled or disabled interrupts. */
     bool new_interrupt_enable = rtc_reg[RTC_REGB] & REGB_PIE;
-    fprintf (stderr, "RTC interrupt_enable set to %d\n", new_interrupt_enable);
+    /* fprintf (stderr, "RTC interrupt_enable set to %d\n", new_interrupt_enable); */
     if ((!old_interrupt_enable) && new_interrupt_enable) {
-      fprintf (stderr, "RTC turning interrupts on\n");
+      /* fprintf (stderr, "RTC turning interrupts on\n"); */
       ready_clock ();
     } else if (old_interrupt_enable && (!new_interrupt_enable)) {
-      fprintf (stderr, "RTC turning interrupts off\n");
+      /* fprintf (stderr, "RTC turning interrupts off\n"); */
     }
     interrupt_enable = new_interrupt_enable;
   }
@@ -135,8 +143,8 @@ DECRTCDevice::ready_clock ()
   static unsigned long counter = 0;
   if (interrupt_enable) {
     counter++;
-    if ((counter % 50000) == 0)
-	  fprintf (stderr, "RTC counted %lu interrupts\n", counter);
+    /* if ((counter % 50000) == 0)
+	   fprintf (stderr, "RTC counted %lu interrupts\n", counter); */
     assertInt (irq);
   }
 
@@ -152,19 +160,19 @@ DECRTCDevice::unready_clock ()
 
 DECRTCDevice::~DECRTCDevice ()
 {
-  assert (clock_trigger);
-
-  clock_trigger->cancel ();
-  clock_trigger = NULL;
+  if (clock_trigger) {
+	  clock_trigger->cancel ();
+	  delete clock_trigger;
+  }
 }
 
-DECRTCDevice::ClockTrigger::ClockTrigger (DECRTCDevice *clock_device) throw ()
+DECRTCDevice::ClockTrigger::ClockTrigger (DECRTCDevice *clock_device)
   : rtc (clock_device)
 {
   assert (rtc);
 }
 
-DECRTCDevice::ClockTrigger::~ClockTrigger () throw ()
+DECRTCDevice::ClockTrigger::~ClockTrigger ()
 {
 }
 

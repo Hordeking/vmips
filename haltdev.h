@@ -26,8 +26,8 @@ class vmips;
 class HaltDevice : public DeviceMap
 {
 public:
-	HaltDevice( vmips *machine ) throw();
-	virtual ~HaltDevice() throw();
+	HaltDevice( vmips *machine );
+	virtual ~HaltDevice();
 
 	/* Ignore vaild reads. */
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
@@ -36,7 +36,7 @@ public:
 	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
 
 	/* Return a string describing the device. */
-	char *descriptor_str();
+	const char *descriptor_str();
 
 protected:
 	vmips	*machine;

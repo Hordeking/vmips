@@ -27,7 +27,6 @@ class Mapper;
 
 class Debug : public DeviceExc {
 private:
-	bool debugger_shutdown;
 	CPU *cpu;
 	Mapper *mem;
 	int signo;
@@ -57,7 +56,7 @@ private:
 	int set_nonblocking(int fd);
 	void print_local_name(int s);
 	void targetloop(void);
-	char *rawpacket(char *str);
+	char *rawpacket(const char *str);
 	char *error_packet(int error_code);
 	char *signal_packet(int signal);
 	char *target_kill(char *pkt);

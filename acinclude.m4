@@ -7,7 +7,7 @@ dnl that a function will never return. Defines HAVE_ATTRIBUTE_NORETURN if it
 dnl works. We assume that if the attribute-adorned function compiles without
 dnl giving a warning, then it is supported.
 
-AC_DEFUN(VMIPS_CXX_ATTRIBUTE_NORETURN,
+AC_DEFUN([VMIPS_CXX_ATTRIBUTE_NORETURN],
 [AC_CACHE_CHECK([whether specifying that a function will never return works],
 [vmips_cv_cxx_attribute_noreturn],
 [if test "x$GXX" = "xyes" 
@@ -40,7 +40,7 @@ dnl HAVE_ATTRIBUTE_PRINTF if it works. As with VMIPS_CXX_ATTRIBUTE_NORETURN,
 dnl we assume that if the attribute-adorned function compiles without giving
 dnl a warning, then it is supported.
 
-AC_DEFUN(VMIPS_CXX_ATTRIBUTE_FORMAT,
+AC_DEFUN([VMIPS_CXX_ATTRIBUTE_FORMAT],
 [AC_CACHE_CHECK([whether specifying that a function takes printf-style arguments works], [vmips_cv_cxx_attribute_format],
 [if test "x$GXX" = "xyes"
 then
@@ -69,7 +69,7 @@ dnl Local macro: VMIPS_CXX_TEMPLATE_FUNCTIONS
 dnl Check for template function handling bug in, for example, pre-2.95 g++.
 dnl Abort with a configuration-time error if the test program doesn't compile.
 
-AC_DEFUN(VMIPS_CXX_TEMPLATE_FUNCTIONS,
+AC_DEFUN([VMIPS_CXX_TEMPLATE_FUNCTIONS],
 [AC_CACHE_CHECK([whether you can pass a template function to a function whose return type is the same as the type of its parameter],
 [vmips_cv_cxx_template_functions],
 [(AC_LANG_CPLUSPLUS
@@ -92,7 +92,7 @@ fi])
 dnl Local macro: VMIPS_TYPE_SOCKLEN_T
 dnl #define socklen_t to int if socklen_t is not in sys/socket.h.
 
-AC_DEFUN(VMIPS_TYPE_SOCKLEN_T,
+AC_DEFUN([VMIPS_TYPE_SOCKLEN_T],
 [AC_CACHE_CHECK([for socklen_t], [vmips_cv_type_socklen_t],
 [AC_TRY_COMPILE(
 [#include <sys/types.h>
@@ -112,7 +112,7 @@ dnl Can libtool compile statically linked programs that call getpwnam()?
 dnl On Solaris the answer is no, and we must dynamically link with libdl.
 dnl Based on AC_TRY_LINK from acgeneral.m4.
 
-AC_DEFUN(VMIPS_LINK_STATIC_GETPWNAM,
+AC_DEFUN([VMIPS_LINK_STATIC_GETPWNAM],
 [AC_CACHE_CHECK([whether programs calling getpwnam can be statically linked],
 [vmips_cv_link_static_getpwnam],[cat > conftest.$ac_ext <<EOF
 [#]line __oline__ "configure"

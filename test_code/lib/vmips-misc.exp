@@ -16,13 +16,14 @@
 # 3. build the ROM file if it is not already built.
 #
 proc misc_test_setup {testcasename} {
-	global testdir testcase timeout vmips romfile srcdir subdir
+	global testdir testcase timeout vmips romfile srcdir subdir objdir
 
 	set testdir $srcdir/$subdir
-	set testbase $testdir/$testcasename
-	set testcase ${testbase}.exp
+	set testobjdir $objdir/$subdir
+	set testobjbase $testobjdir/$testcasename
+	set testcase ${testobjbase}.exp
 	set vmips [vmips_tool_exec_name]
-	set romfile ${testbase}.rom
+	set romfile ${testobjbase}.rom
 	set timeout [vmips_default_timeout]
 	vmips_build_romfile $romfile
 }

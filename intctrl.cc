@@ -22,7 +22,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "intctrl.h"
 #include <cassert>
 
-uint32 IntCtrl::calculateIP() throw()
+uint32 IntCtrl::calculateIP()
 {
 	uint32 IP = 0;
 	for (Devices::iterator i = devs.begin(); i != devs.end(); i++) {

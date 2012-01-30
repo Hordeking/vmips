@@ -40,17 +40,17 @@ public:
 		base(_base), extent(_extent), address(_address), perms(_perms) { }
 	virtual ~Range() { }
 	
-	virtual bool incorporates(uint32 addr) throw();
-	virtual bool overlaps(Range *r) throw();
+	bool incorporates(uint32 addr);
+	bool overlaps(Range *r);
+	uint32 getBase () const { return base; }
+	uint32 getExtent () const { return extent; }
+	void *getAddress () const { return address; }
+	int getPerms () const { return perms; }
+	void setBase (uint32 newBase) { base = newBase; }
+	void setPerms (int newPerms) { perms = newPerms; }
 
-	virtual uint32 getBase () const { return base; }
-	virtual uint32 getExtent () const { return extent; }
-	virtual void *getAddress () const { return address; }
-	virtual int getPerms () const { return perms; }
-	virtual void setBase (uint32 newBase) throw() { base = newBase; }
-	virtual void setPerms (int newPerms) throw() { perms = newPerms; }
-	virtual bool canRead (uint32 offset) throw() { return perms & MEM_READ; }
-	virtual bool canWrite (uint32 offset) throw() { return perms & MEM_WRITE; }
+	virtual bool canRead (uint32 offset) { return perms & MEM_READ; }
+	virtual bool canWrite (uint32 offset) { return perms & MEM_WRITE; }
 
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
 	virtual uint16 fetch_halfword(uint32 offset, DeviceExc *client);

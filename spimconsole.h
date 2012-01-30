@@ -34,19 +34,18 @@ class SpimConsoleDevice : public TerminalController, public DeviceMap,
 public:
 	/* Create a new SPIM-compatible console device with CLOCK as the time
 	   source for the device. */
-	SpimConsoleDevice( Clock *clock ) throw( std::bad_alloc );
+	SpimConsoleDevice( Clock *clock );
 
 	/* Destroy the device and cancel the clock trigger. */
-	virtual ~SpimConsoleDevice() throw();
+	virtual ~SpimConsoleDevice();
 
 	/* Call the routines in TerminalController and then assert or
 	   deassert the appropriate interrupt. */
-	virtual void ready_display( int line ) throw();
-	virtual void unready_display( int line, char data )
-		throw( std::bad_alloc );
-	virtual void unready_keyboard( int line ) throw();
+	virtual void ready_display( int line );
+	virtual void unready_display( int line, char data );
+	virtual void unready_keyboard( int line );
 protected:
-	virtual void ready_keyboard( int line ) throw();
+	virtual void ready_keyboard( int line );
 
 public:
 
@@ -54,11 +53,11 @@ public:
 	   states into the READY state, asserting IRQ2 if clock interrupts
 	   are enabled. Called by ClockTrigger to allow the SPIM console to
 	   mark the passage of time. */
-	virtual void ready_clock() throw( std::bad_alloc );
+	virtual void ready_clock();
 
 	/* Transition the clock component from either the READY or UNREADY
 	   states into the UNREADY state. */
-	virtual void unready_clock() throw();
+	virtual void unready_clock();
 
 	/* Fetch and store console control words. */
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
@@ -71,8 +70,8 @@ protected:
 	class ClockTrigger : public CancelableTask
 	{
 	public:
-		ClockTrigger( SpimConsoleDevice *console ) throw();
-		virtual ~ClockTrigger() throw();
+		ClockTrigger( SpimConsoleDevice *console );
+		virtual ~ClockTrigger();
 
 	protected:
 		virtual void real_task();

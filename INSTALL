@@ -18,14 +18,12 @@ A.1 Prerequisites
 =================
 
 The VMIPS build process assumes that you have a C++ compiler installed
-on the host machine which can deal correctly with template functions.
-In particular, using GCC 2.91.66, also known as EGCS 1.1.2 (the system
-compiler on Red Hat Linux 6.x systems)--or, we suspect, any older
-compiler--is not possible, because the compiler will crash, giving an
-"internal compiler error" message when trying to compile various VMIPS
-subsystems.  For that reason, `configure' checks for the bug in
-question and will print an error message ("your C++ compiler's template
-function handling is buggy") if you attempt to use a deficient compiler.
+on the host machine. Any reasonably recent, ISO C++-compliant compiler
+with working template function handling should work.  Some ancient
+compilers, such as the system compiler on Red Hat Linux 6.x systems,
+will not work. `configure' contains checks for a few known compiler
+problems which will prevent VMIPS from working, and will print an error
+message if it detects such a problem.
 
    If you want to build any of the sample code which is included with
 the VMIPS source distribution, you must have a full set of GNU MIPS
@@ -50,9 +48,8 @@ A.2 Building from CVS
 =====================
 
 If you retrieved your sources from the CVS repository, you will need
-Automake version 1.4 or later, Autoconf version 2.13 or later, and
-libtool 1.2f or later. Newer versions of Autoconf (2.52f, 2.53) have
-been tested, and should also work.  You will need perl 5 to build the
+Automake version 1.11.1 or later, Autoconf version 2.68 or later, and
+libtool 2.2.10 or later.  You will need perl 5 to build the
 documentation.  Your distribution will be missing many important files,
 including `configure'. To generate these, run `utils/bootstrap'. To
 automatically run configure once it has been generated, you can run
@@ -189,22 +186,27 @@ you wish.
 
    Download a copy of Binutils, from any GNU mirror, or from the URL:
      `ftp://sources.redhat.com/pub/binutils/releases'
-   We recommend getting version 2.11.2 or 2.13.2.1.
+   The most recently-tested version is 2.20.1.
 
-   Build binutils by running the following commands. We recommend
-`--disable-nls' because some recent versions do not build correctly with
-NLS (linking against `libopcodes.a' results in unresolved symbols.)
+   Build binutils by running the following commands.  We recommend
+`--disable-nls' because some versions do not build correctly with NLS
+(linking against `libopcodes.a' results in unresolved symbols.)
 
      ./configure --target=mipsel-ecoff --prefix=/opt/mips \
-      --disable-nls --enable-shared
+      --disable-nls --disable-shared
      make
      make install install-info
 
    Download a copy of the GNU Compiler Collection (`gcc') from any GNU
 mirror, or from the URL:
      `ftp://gcc.gnu.org/pub/gcc/releases'
-   You should be able to use any version from 3.0 through 3.4. We've
-mostly tested with 3.0.4. Our examples (below) will assume 3.0.4.
+
+   Our examples assume that you want to use the ECOFF binary format, so
+we recommend you get gcc version 3.0.4.  If you would prefer to use the
+ELF binary format, pretty much any recent version of gcc will work, but
+note that you will need to pass `--target=mips-elf' instead of
+`--target=mipsel-ecoff' when configuring both binutils and gcc. We have
+most recently tested version 4.2.4 with the ELF format.
 
    You can read the documentation for building the compiler by pointing
 your World-Wide Web browser at `http://gcc.gnu.org/install'.  When you
@@ -229,7 +231,8 @@ than the following summary.
 
           ../gcc-3.0.4/configure --target=mipsel-ecoff \
            --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
-           --disable-threads --disable-shared
+           --disable-threads --disable-nls --disable-shared \
+           --enable-languages=c
 
   5. If the configuration step fails, make sure you have a working
      native compiler, and/or try a different version of gcc. Otherwise,
@@ -259,10 +262,10 @@ than the following summary.
        1. Download a copy of the GNU debugger from any GNU mirror, or
           from the URL:
                `ftp://ftp.gnu.org/pub/gnu/gdb/'
-          We recommend version 5.2.1. Download the file
-          `gdb-5.2.1.tar.gz'.
+          We recommend version 6.0 or later. Download the file
+          `gdb-6.0.tar.gz'.
 
-       2. Unpack the file and change to the directory `gdb-5.2.1'.
+       2. Unpack the file and change to the directory `gdb-6.0'.
 
        3. Type the following commands to configure and build GDB:
                ./configure --prefix=/opt/mips --target=mipsel-ecoff
@@ -296,7 +299,7 @@ than the following summary.
 
      Next, download uClibc from `http://www.uclibc.org', and unpack it
      next to the Linux kernel sources. The last version we tested was
-     0.9.26.  Read the `INSTALL' file in that distribution.
+     0.9.29.  Read the `INSTALL' file in that distribution.
 
      When you configure uClibc with `make config', be sure to pick
      `mips' as your Target Architecture, and `Generic (MIPS I)' as your
@@ -309,28 +312,26 @@ than the following summary.
      build ROMs, you will probably want to turn off
      position-independent code and shared library support.  Turn on
      only those other features of uClibc as you expect you will need.
-     For the DEVEL_PREFIX, specify a new empty directory.
 
-     Then run `make CROSS=/opt/mips-elf/bin/mips-elf-' to build uClibc
-     (for CROSS, you should use the same value as you used for
-     CROSS_COMPILE in the Linux Makefile, above) and run `make install'
-     to install it.
+     Create a new directory into which uClibc will be installed.  This
+     will be your PREFIX.
 
-     In the directory you specified for DEVEL_PREFIX when configuring
-     uClibc, above, you will now have `usr/include' and `usr/lib'
-     subdirectories. You will now want to copy these to where your
-     cross compiler can detect and use them. For GCC, the directories
-     are
+     Run `make CROSS=/opt/mips-elf/bin/mips-elf-' to build uClibc. For
+     CROSS, you should use the same value as you used for CROSS_COMPILE
+     in the Linux Makefile, above.
+
+     Run `make CROSS=... PREFIX=... RUNTIME_PREFIX=/ DEVEL_PREFIX=/usr/
+     install' to install it, specifying the same CROSS value and the
+     name of the directory created earlier as PREFIX.  In the directory
+     you specified for PREFIX, you will now have `usr/include' and
+     `usr/lib' subdirectories. You will now want to rebuild GCC,
+     specifying these directories using the `--with-headers' and
+     `--with-libs' options to the GCC `configure' script, respectively.
+     This will cause the directories to be copied to
 
         * PREFIX/TARGET-TRIPLET/lib  (for libraries)
 
         * PREFIX/TARGET-TRIPLET/sys-include  (for includes)
-
-     For example, if you configured GCC for target `mips-unknown-elf'
-     with prefix `/usr/local/mips', you would copy the `usr/include'
-     directory to `/usr/local/mips/mips-unknown-elf/sys-include', and
-     copy the `usr/lib' directory to
-     `/usr/local/mips/mips-unknown-elf/lib'.
 
 
 The remainder of this file represents generic (i.e., not VMIPS-specific)

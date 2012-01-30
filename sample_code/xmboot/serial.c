@@ -1,5 +1,9 @@
-#define SPIM_CONSOLE 0
-#define DZ_CONSOLE 1
+#ifndef SPIM_CONSOLE
+#define SPIM_CONSOLE 1
+#endif
+#ifndef DZ_CONSOLE
+#define DZ_CONSOLE 0
+#endif
 
 #include "spimconsreg.h"
 #include "decserialreg.h"
@@ -50,7 +54,7 @@ internal_write_byte (char out)
 }
 
 int
-read (int fd, unsigned char *buf, int count)
+read (int fd, void *buf, unsigned int count)
 {
   int i;
   char *b = buf;
@@ -63,10 +67,10 @@ read (int fd, unsigned char *buf, int count)
 }
 
 int
-write (int fd, unsigned char *buf, int count)
+write (int fd, const void *buf, unsigned int count)
 {
   int i;
-  char *b = buf;
+  const char *b = buf;
 
   if (fd != 1)
     return 0;

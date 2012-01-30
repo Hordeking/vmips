@@ -7,7 +7,7 @@
 #include "coff.h"
 
 int
-coff_analyze (char *buf, struct coff_info *header)
+coff_analyze (unsigned char *buf, struct coff_info *header)
 {
   int i;
   struct coff_section_header *section = NULL;

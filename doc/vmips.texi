@@ -12,9 +12,9 @@
 @end direntry
 
 @ifinfo
-This is the VMIPS Programmer's Manual, Fourth Edition, for version 1.3.
+This is the VMIPS Programmer's Manual, Fifth Edition, for version 1.4.
 
-Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
+Copyright @copyright{} 2001, 2002, 2004, 2009 Brian R. Gaeke.
 @end ifinfo
 
 @titlepage
@@ -25,9 +25,9 @@ Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
 
 @node Top, Overview, , (dir)
 @top
-This is the VMIPS Programmer's Manual, Fourth Edition, for version 1.3.
+This is the VMIPS Programmer's Manual, Fifth Edition, for version 1.4.
 
-Copyright @copyright{} 2001, 2002, 2004 Brian R. Gaeke.
+Copyright @copyright{} 2001, 2002, 2004, 2009 Brian R. Gaeke.
 For information about copying, modifying or distributing this manual,
 please see the chapter called `Copying'.
 
@@ -67,7 +67,7 @@ please see the chapter called `Copying'.
 @cindex MIPS
 @cindex MIPS R3000
 VMIPS is a simulator for a machine compatible with the MIPS R3000 RISC
-architecture. VMIPS consists entirely of software; no special hardware is
+architecture. VMIPS consists entirely of software. No special hardware is
 required to run programs on VMIPS---that is, VMIPS is a virtual machine.
 
 @cindex RISC
@@ -507,11 +507,10 @@ work, though; it won't work in EGCS 1.1.1.
 
 If you have a @code{main()} function in your code, GCC will try to
 call @code{__main} or some other kind of setup function even if you
-use @option{-ffreestanding}.  There is probably a way to configure the cross
-compiler so that it won't try to do this;  it will be documented here
-once it is discovered.  A simple workaround is to call the entry function
-@code{entry} instead of @code{main}. You can also try defining
-@code{void __main(void)} to be an empty function.
+use @option{-ffreestanding}.  If you don't want this call made, a
+simple workaround is to call the entry function @code{entry} instead
+of @code{main}. You can also try defining @code{void __main(void)}
+to be an empty function.
 
 @subsection MIPS position-independent code
 
@@ -583,7 +582,7 @@ except that it has to be emulated correctly.
 VMIPS emulates delay slot handling by means of a tiny state machine, whose
 state is called the delay state.  The virtual CPU can be in a delay state
 of @code{DELAYING}, @code{DELAYSLOT}, or @code{NORMAL} at the beginning
-of the call to @code{periodic()}. The VMIPS delay slot state machine's state
+of the call to @code{step()}. The VMIPS delay slot state machine's state
 is displayed when you use the @option{dumpcpu} option. See the ``Summary
 of configuration options'' section of the ``Customizing'' chapter for more
 information about this option.
@@ -990,9 +989,9 @@ The clock is enabled or disabled with the @option{clockdevice} option.
 
 @subsection Memory-mapped registers
 
-The standard clock device has 5 registers, configured to be mapped into
-memory at address 0xa1010000. The following table defines the layout of
-the memory-mapped clock device registers:
+The standard clock device has 5 registers, configured to be mapped
+into memory at physical address 0x01010000. The following table
+defines the layout of the memory-mapped clock device registers:
 
 @table @code
 @item offset 0x00
@@ -1015,7 +1014,7 @@ Writing any of the clock's real time words is undefined. Writing a clock's
 simulated time word sets that component of the simulated time if the number
 written is a non-negative signed integer, otherwise there is no effect.
 
-The control word has 32 bits. Bit 2 of the cotrol word is the interrupt
+The control word has 32 bits. Bit 2 of the control word is the interrupt
 enable bit (@code{CTL_IE} is defined as 0x00000002) and bit 1 is the device
 ready bit (@code{CTL_RDY} is defined as 0x00000001). All other bits in the
 control word are currently reserved and read as zero. Writing any of the
@@ -1060,7 +1059,7 @@ halt device is enabled or disabled with the @option{haltdevice} option.
 @subsection Memory-mapped registers
 
 The halt device has 1 register, configured to be mapped into memory at
-address 0x01010024. The following table defines the layout of the
+physical address 0x01010024. The following table defines the layout of the
 memory-mapped halt device register:
 
 @table @code
@@ -1086,17 +1085,17 @@ The following devices are supported:
 @itemize
 @item DECstation 5000/200's Dallas Semiconductor DS1287-based real-time
 clock (RTC) chip (use @option{-o decrtc} to enable; mapped into memory
-at address 0xbfe80000)
+at physical address 0x1fe80000)
 
 @item DECstation 5000/200's Control/Status register (use @option{-o
-deccsr} to enable; mapped into memory at address 0xbff00000)
+deccsr} to enable; mapped into memory at physical address 0x1ff00000)
 
 @item DECstation 5000/200's Check Syndrome (CHKSYN) and Error Address
 (ERRADR) registers (use @option{-o decstat} to enable; mapped into memory
-at addresses 0xbfd00000 and 0xbfd80000)
+at physical addresses 0x1fd00000 and 0x1fd80000 respectively)
 
 @item DECstation 5000/200's DZ11-based serial chip (use @option{-o
-decserial} to enable; mapped into memory at address 0xbfe00000; note:
+decserial} to enable; mapped into memory at physical address 0x1fe00000; note:
 interrupt-driven I/O does not work well with this device -- use polling
 instead)
 @end itemize
@@ -1122,7 +1121,7 @@ software modules are structured.
 
 The processing of command-line options and of options in your
 @file{.vmipsrc} is directed by routines in @file{options.cc} and in class
-@code{Options}. The default options and the option documentation is all
+@code{Options}. The default options and the option documentation are found
 in @file{optiontbl.h}.
 
 The memory mapping unit has a high-level interface to the rest of
@@ -1171,8 +1170,8 @@ The @code{vmips} class, implemented in @file{vmips.cc}, is used to tie
 all the components of the system together.  This class, and specifically
 its @code{run()} member function, is responsible for setting up
 and configuring all system components and calling the @code{step()}
-member function(s).  The vmips class is not a very smart or a very
-flexible configuration mechanism; it will eventually be replaced with
+member function(s).  The vmips class is not a very smart or
+flexible configuration mechanism; it eventually ought to be replaced with
 a configuration language of some sort.
 
 The simulator's idea of time is managed by classes in @file{clock.cc} and
@@ -1347,7 +1346,7 @@ good reason.
 @cindex registers, read-only
 One of the jobs of the @code{CPZero} class is to ensure that attempts to
 write to these registers are only allowed to write to the bits which
-are writable, so if you are interested in implementing read-only  and
+are writable, so if you are interested in implementing read-only and
 read/write registers in your virtual hardware, look through @file{cpzero.cc}
 for @var{read_masks} and @var{write_masks}.
 
@@ -1630,14 +1629,12 @@ for an abridged version.
 @section Prerequisites
 
 The VMIPS build process assumes that you have a C++ compiler installed
-on the host machine which can deal correctly with template functions.
-In particular, using GCC 2.91.66, also known as EGCS 1.1.2 (the system
-compiler on Red Hat Linux 6.x systems)---or, we suspect, any older
-compiler---is not possible, because the compiler will crash, giving an
-``internal compiler error'' message when trying to compile various VMIPS
-subsystems.  For that reason, @command{configure} checks for the bug in
-question and will print an error message (``your C++ compiler's template
-function handling is buggy'') if you attempt to use a deficient compiler.
+on the host machine. Any reasonably recent, ISO C++-compliant compiler
+with working template function handling should work.  Some ancient
+compilers, such as the system compiler on Red Hat Linux 6.x systems,
+will not work. @command{configure} contains checks for a few known compiler
+problems which will prevent VMIPS from working, and will print an error
+message if it detects such a problem.
 
 @cindex sample code, building
 If you want to build any of the sample code which is included with the
@@ -1664,9 +1661,8 @@ VMIPS is compiled, you can type @samp{make check} to run the test suite.
 @cindex configure, missing
 @cindex configure, creating
 If you retrieved your sources from the CVS repository, you will need
-Automake version 1.4 or later, Autoconf version 2.13 or later, and libtool
-1.2f or later. Newer versions of Autoconf (2.52f, 2.53) have been tested,
-and should also work.  You will need perl 5 to build the documentation.
+Automake version 1.11.1 or later, Autoconf version 2.68 or later, and libtool
+2.2.10 or later.  You will need perl 5 to build the documentation.
 Your distribution will be missing many important files, including
 @command{configure}. To generate these, run @command{utils/bootstrap}. To
 automatically run configure once it has been generated, you can run
@@ -1798,15 +1794,15 @@ Download a copy of Binutils, from any GNU mirror, or from the URL:
 @display
 @url{ftp://sources.redhat.com/pub/binutils/releases}
 @end display
-We recommend getting version 2.11.2 or 2.13.2.1.
+The most recently-tested version is 2.20.1.
 
-Build binutils by running the following commands. We recommend
-@code{--disable-nls} because some recent versions do not build correctly with
+Build binutils by running the following commands.  We recommend
+@code{--disable-nls} because some versions do not build correctly with
 NLS (linking against @file{libopcodes.a} results in unresolved symbols.)
 
 @example
 ./configure --target=mipsel-ecoff --prefix=/opt/mips \
- --disable-nls --enable-shared
+ --disable-nls --disable-shared
 make
 make install install-info
 @end example
@@ -1818,8 +1814,14 @@ any GNU mirror, or from the URL:
 @display
 @url{ftp://gcc.gnu.org/pub/gcc/releases}
 @end display
-You should be able to use any version from 3.0 through 3.4. We've mostly
-tested with 3.0.4. Our examples (below) will assume 3.0.4.
+
+Our examples assume that you want to use the ECOFF binary format,
+so we recommend you get gcc version 3.0.4.  If you would prefer to
+use the ELF binary format, pretty much any recent version of gcc
+will work, but note that you will need to pass @code{--target=mips-elf}
+instead of @code{--target=mipsel-ecoff} when configuring both
+binutils and gcc. We have most recently tested version 4.2.4 with
+the ELF format.
 
 @cindex GNU Compiler Collection, installing
 You can read the documentation for building the compiler by pointing
@@ -1847,7 +1849,8 @@ a command on the following line, and are inserted for typesetting purposes.)
 @example
 ../gcc-3.0.4/configure --target=mipsel-ecoff \
  --prefix=/opt/mips --with-gnu-as --with-gnu-ld \
- --disable-threads --disable-shared
+ --disable-threads --disable-nls --disable-shared \
+ --enable-languages=c
 @end example
 
 @item If the configuration step fails, make sure you have a working native
@@ -1883,9 +1886,9 @@ the URL:
 @display
 @url{ftp://ftp.gnu.org/pub/gnu/gdb/}
 @end display
-We recommend version 5.2.1. Download the file @file{gdb-5.2.1.tar.gz}.
+We recommend version 6.0 or later. Download the file @file{gdb-6.0.tar.gz}.
 
-@item Unpack the file and change to the directory @file{gdb-5.2.1}.
+@item Unpack the file and change to the directory @file{gdb-6.0}.
 @item Type the following commands to configure and build GDB:
 @example
 ./configure --prefix=/opt/mips --target=mipsel-ecoff
@@ -1920,7 +1923,7 @@ cross compiler is installed, for example: @samp{/opt/mips-elf/bin/mips-elf-}
 @end itemize
 
 Next, download uClibc from @url{http://www.uclibc.org}, and unpack it
-next to the Linux kernel sources. The last version we tested was 0.9.26.
+next to the Linux kernel sources. The last version we tested was 0.9.29.
 Read the @file{INSTALL} file in that distribution.
 
 When you configure uClibc with @samp{make config}, be sure to pick @samp{mips}
@@ -1932,27 +1935,28 @@ to answer yes to 'Target CPU has a memory management unit (MMU)' and no to
 do not include floating-point support.  If you are intending to use uClibc
 to build ROMs, you will probably want to turn off position-independent code
 and shared library support.  Turn on only those other features of uClibc
-as you expect you will need.  For the @var{DEVEL_PREFIX}, specify a new
-empty directory.
+as you expect you will need.
 
-Then run @samp{make CROSS=/opt/mips-elf/bin/mips-elf-} to build uClibc (for
+Create a new directory into which uClibc will be installed.
+This will be your @var{PREFIX}.
+
+Run @samp{make CROSS=/opt/mips-elf/bin/mips-elf-} to build uClibc. For
 @var{CROSS}, you should use the same value as you used for @var{CROSS_COMPILE}
-in the Linux Makefile, above) and run @samp{make install} to install it.
+in the Linux Makefile, above.
 
-In the directory you specified for @var{DEVEL_PREFIX} when configuring
-uClibc, above, you will now have @file{usr/include} and @file{usr/lib}
-subdirectories. You will now want to copy these to where your cross compiler
-can detect and use them. For GCC, the directories are
+Run @samp{make CROSS=... PREFIX=... RUNTIME_PREFIX=/ DEVEL_PREFIX=/usr/
+install} to install it, specifying the same @var{CROSS} value and
+the name of the directory created earlier as @var{PREFIX}.
+In the directory you specified for @var{PREFIX},
+you will now have @file{usr/include} and @file{usr/lib}
+subdirectories. You will now want to rebuild GCC, specifying these directories
+using the @samp{--with-headers} and @samp{--with-libs} options to the GCC @samp{configure} script, respectively.
+This will cause the directories to be copied to
 
 @itemize
 @item @var{prefix}/@var{target-triplet}/lib  (for libraries)
 @item @var{prefix}/@var{target-triplet}/sys-include  (for includes)
 @end itemize
-
-For example, if you configured GCC for target @samp{mips-unknown-elf}
-with prefix @samp{/usr/local/mips}, you would copy the @file{usr/include}
-directory to @file{/usr/local/mips/mips-unknown-elf/sys-include}, and copy
-the @file{usr/lib} directory to @file{/usr/local/mips/mips-unknown-elf/lib}.
 
 @end enumerate
 
@@ -1966,7 +1970,7 @@ Please include at least the following information:
 @itemize @bullet
 @item your operating system
 @item your host processor type
-@item your C++ and C compiler make and version
+@item your C++ and C compiler type and version
 @item the version of VMIPS you are using
 @item how you configured VMIPS
 @item how to trigger the bug
@@ -1994,8 +1998,8 @@ for example), and type commands interactively to VMIPS.  There should
 be some provision for refreshing cached option values if the extension
 language changes them.
 
-@item Modularize the CPU, memory mapper, and devices using a shared-library
-pluggable module interface.
+@item Modularize the devices, and potentially even the CPU and memory mapper
+using a shared-library plug-in model.
 
 @item Make it so that the debugger can be attached and detached at any
 time, without the user having had to think of it beforehand and supply
@@ -2005,17 +2009,16 @@ connection is received?
 @item Graphical user interface with register and memory display and editing,
 support for loading, running, and stepping programs, and setting breakpoints.
 
-@item Support for loading binary files other than ROMs (and, by
-implication, for starting off with something other than a Reset.) Lots
-of people are going to expect to be able to do this, so it seems like
-a good thing to do. We can probably leverage BFD for most of this.
+@item Extend the current executable loader (in vmips/exeloader.cc) to support:
+@itemize
+@item loading ELF-format files
+@item loading files into user space (This will require some sort of built-in
+TLB-miss handling.)
+@end itemize
 
 @item Support for non-English languages using NLS.
 
-@item MIPS R3010 FPU emulation.  A good way to get started
-on building an FPU would be to use SoftFloat:
-
-@url{http://www.cs.berkeley.edu/~jhauser/arithmetic/softfloat.html}.
+@item A reasonable FPU emulator.
 
 @item ROM monitor network booting support.
 
@@ -2034,13 +2037,31 @@ constants.
 @node Release History, References, Future Directions, Top
 @appendix Release History
 
+vmips-1.4 was released on 29 January 2012.
+User-visible changes in version 1.4 (since version 1.3.2):
+
+@itemize @bullet
+@item A new interaction facility was implemented. This allows you
+to suspend the simulation, print registers and memory, and then
+continue by running or single-stepping, without needing to use a
+full-fledged debugger.
+
+@item Some of the memory-mapped I/O devices have had endianness
+bugs fixed and debugging printouts removed.
+
+@item Certain coprocessor zero branch instructions no longer
+unnecessarily cause reserved instruction exceptions.
+
+@item Other minor optimizations.
+@end itemize
+
 vmips-1.3.2 was released on 27 March 2007.
 User-visible changes in version 1.3.2 (since version 1.3.1):
 
-@itemize
+@itemize @bullet
 @item A bug was fixed in the code which responded to address-translation
 exceptions by loading the CP0 Context register. It was loading the
-wrong virtual page number. 
+wrong virtual page number.
 
 @item Problems compiling VMIPS with gcc 4.1.x have been fixed.
 
@@ -2049,7 +2070,7 @@ wrong virtual page number.
 vmips-1.3.1 was released on 5 January 2005.
 User-visible changes in version 1.3.1 (since version 1.3):
 
-@itemize
+@itemize @bullet
 @item VMIPS now compiles and passes most of its regression tests
 under Microsoft Windows using Cygwin. There is one known failure
 (misc-tests/echo), but the failure stems from the testsuite, not VMIPS;
@@ -2066,7 +2087,7 @@ failures have been fixed.
 vmips-1.3 was released on 8 October 2004.
 User-visible changes in version 1.3 (since version 1.2.2):
 
-@itemize
+@itemize @bullet
 @item The VMIPS code base has been cleaned up substantially. The most
 important visible effect of this is that VMIPS compiles much more quickly now.
 
@@ -2162,8 +2183,8 @@ no longer necessary.
 little-endian mode or vice-versa using a command-line option.
 
 	It is now possible to change the name of the configuration file
-that VMIPS reads on startup using a command-line option. The "-o configfile"
-option, which never worked, has been removed.
+that VMIPS reads on startup using a command-line option. The @option{-o
+configfile} option, which never worked, has been removed.
 
 @item vmipstool now shares command-line processing code with vmips. It also
 has a new --swap-words option that allows you to byteswap all the 4-byte

@@ -1,5 +1,5 @@
-/* Various file utility functions.
-   Copyright 2004 Brian R. Gaeke.
+/* Stubs for floating-point coprocessor.
+   Copyright 2004, 2009 Brian R. Gaeke.
 
 This file is part of VMIPS.
 
@@ -17,15 +17,28 @@ You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
-
+#include "fpu.h"
+#include "cpu.h"
+#include "vmips.h"
+#include "excnames.h"
+#include "stub-dis.h"
 #include <cstdio>
-#include "types.h"
 
-bool can_read_file (char *filename);
+void FPU::cpone_emulate (uint32 instr, uint32 pc)
+{
+    fprintf (stderr, "FPU instruction %x not implemented at pc=0x%x:\n",
+        instr, pc);
+    machine->disasm->disassemble (pc, instr);
+    cpu->exception (CpU, ANY, 1);
+}
 
-// Return the size of the open file FP, in bytes.
-uint32 get_file_size (FILE *fp);
+uint32 FPU::read_reg (uint16 regno)
+{
+    fprintf (stderr, "FPU read from register %u unimplemented\n", regno);
+    return 0xffffffff;
+}
 
-#endif // FILEUTILS_H
+void FPU::write_reg (uint16 regno, uint32 word)
+{
+    fprintf (stderr, "FPU write to register %u unimplemented\n", regno);
+}

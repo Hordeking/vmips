@@ -38,8 +38,9 @@ proc vmips_remove_extension {filename} {
 # turns "foo.S" into "foo.rom".
 #
 proc vmips_get_romfile_name {filename} {
-	set base [vmips_remove_extension $filename]
-	return "${base}.rom"
+	global subdir objdir
+	set base [vmips_basename [vmips_remove_extension $filename]]
+	return "$objdir/$subdir/${base}.rom"
 }
 
 #
@@ -47,11 +48,12 @@ proc vmips_get_romfile_name {filename} {
 # by that name already exists.
 #
 proc vmips_build_romfile {filename} {
+    global subdir objdir
 	if ![file exists $filename] {
 		# First, chdir to the subdir where configure created
 		# the testcase's makefile.
 		set curdir [pwd]
-		cd [file dirname $filename]
+		cd "$objdir/$subdir"
 		exec make [vmips_basename $filename]
 		cd $curdir
 	}

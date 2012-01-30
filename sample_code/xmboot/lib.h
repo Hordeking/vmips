@@ -1,9 +1,14 @@
 #include <stddef.h>
+#include <stdarg.h>
 
 /* Macros */
 #ifndef NULL
 #define NULL ((void *) 0L)
 #endif
+
+/* Type definitions */
+typedef struct __file { char dummy; } FILE;
+extern FILE *stdin, *stdout, *stderr;
 
 /* Terminal modes */
 #define ECHO   0x0001   /* Echo incoming characters */
@@ -17,23 +22,30 @@ void term_enable (int mode);
 void term_disable (int mode);
 int getchar (void);
 int putchar (int ch);
+int fputc (int c, FILE *stream);
+int fputs (const char *s, FILE *stream);
 void puts_nonl (const char *buf);
 char *gets (char *buf);
 int puts (const char *buf);
+int fputs (const char *buf, FILE *stream);
 int strcmp (const char *s1, const char *s2);
 int strncmp (const char *s1, const char *s2, size_t n);
 size_t strlen (const char *s);
-char toupper (char c);
-char tolower (char c);
-int isspace (const char c);
-int isdigit (const char c);
-int isprint (const char c);
+int toupper (int c);
+int tolower (int c);
+int isspace (int c);
+int isdigit (int c);
+int isprint (int c);
 long strtol (const char *s, char **endptr, int radix);
 int printf (const char *fmt, ...);
-char *strcpy (const char *s1, const char *s2);
+int vprintf (const char *fmt, va_list ap);
+int fprintf (FILE *fp, const char *fmt, ...);
+int vfprintf (FILE *fp, const char *fmt, va_list ap);
+char *strcpy (char *s1, const char *s2);
 char *strncpy (char *s1, const char *s2, size_t n);
 void *memcpy (void *dest, const void *src, size_t n);
 void *memmove (void *dest, const void *src, size_t n);
 void *memset(void *s, int c, size_t n);
 char *strcat(char *dest, const char *src);
 int atoi(const char *nptr);
+void *calloc (size_t obj_size, size_t obj_count);

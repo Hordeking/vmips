@@ -67,13 +67,13 @@ DeviceMap::store_byte(uint32 offset, uint8 data, DeviceExc *client)
 }
 
 bool
-DeviceMap::canRead(uint32 offset) throw()
+DeviceMap::canRead(uint32 offset)
 {
     return true;
 }
 
 bool
-DeviceMap::canWrite(uint32 offset) throw()
+DeviceMap::canWrite(uint32 offset)
 {
     return true;
 }

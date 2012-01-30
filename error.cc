@@ -28,7 +28,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  * FILE. Then flush the file.
  */
 static void format_help(FILE *file, const char *pre, const char *post,
-	const char *fmt, va_list ap) throw()
+	const char *fmt, va_list ap)
 {
 	assert(file);
 	assert(fmt);
@@ -44,7 +44,7 @@ static void format_help(FILE *file, const char *pre, const char *post,
 	fflush(file);
 }
 
-void error(const char *msg, ...) throw()
+void error(const char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
@@ -52,7 +52,7 @@ void error(const char *msg, ...) throw()
 	va_end(ap);
 }
 
-void error_exit(const char *msg, ...) throw()
+void error_exit(const char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
@@ -62,7 +62,7 @@ void error_exit(const char *msg, ...) throw()
     exit(1);
 }
 
-void fatal_error(const char *msg, ...) throw()
+void fatal_error(const char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
@@ -72,7 +72,7 @@ void fatal_error(const char *msg, ...) throw()
 	abort();
 }
 
-void warning(const char *msg, ...) throw()
+void warning(const char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);

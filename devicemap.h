@@ -29,8 +29,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  */
 class DeviceMap : public Range {
 protected:
-    DeviceMap() throw() : Range(0, 0, 0, 0) { }
-    DeviceMap(uint32 _extent) throw() : Range(0, _extent, 0, 0) { }
+    DeviceMap() : Range(0, 0, 0, 0) { }
+    DeviceMap(uint32 _extent) : Range(0, _extent, 0, 0) { }
 
 public:
     /* Fetch word at byte offset OFFSET as part of load type MODE, which
@@ -70,8 +70,8 @@ public:
        override these functions, except in the case where a device's mapped
        memory is properly conceived of as being either totally or
        partially read-only. See the definitions in class Range for details.  */
-    virtual bool canRead(uint32 offset) throw();
-    virtual bool canWrite(uint32 offset) throw();
+    virtual bool canRead(uint32 offset);
+    virtual bool canWrite(uint32 offset);
 };
 
 #endif /* _DEVICEMAP_H_ */

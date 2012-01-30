@@ -61,11 +61,10 @@ public:
 	   READY state. */
 	TerminalController( Clock *clock, long keyboard_poll_ns,
 			    long keyboard_repoll_ns,
-			    long display_ready_delay_ns )
-		throw( std::bad_alloc );
+			    long display_ready_delay_ns );
 
 	/* Reset and close all the terminal file descriptors. */
-	virtual ~TerminalController() throw();
+	virtual ~TerminalController();
 
 	/* Connect the terminal with file descriptor TTY_FD to the simulated
 	   terminal line LINE. Save the initial terminal state, then configure
@@ -73,12 +72,16 @@ public:
 	   owns the file descriptor and is responsible for restoring its
 	   state and closing it. Returns true if the terminal was connected
 	   sucessfully, otherwise closes FD and returns false. */
-	virtual bool connect_terminal( int tty_fd, int line ) throw();
+	virtual bool connect_terminal( int tty_fd, int line );
 
 	/* Remove the terminal on line LINE. Has no effect if there is no
 	   terminal on line LINE. Restore the original terminal settings
 	   for the line and then close its associated file descriptor. */
-	virtual void remove_terminal( int line ) throw();
+	virtual void remove_terminal( int line );
+
+	/* Reinitialize terminals to the state they were in when VMIPS started.
+	   This is the opposite of reinitialize_terminals(). */
+	virtual void suspend ();
 
 	/* Return true if line LINE is connected, false otherwise. */
 	bool line_connected (const int line) const {
@@ -86,52 +89,51 @@ public:
     }
 
 	/* Reinitialize terminals to a state suitable for use as part of a
-	   vmips simulation. Usefull for restoring tty settings when vmips
+	   vmips simulation. Useful for restoring tty settings when vmips
 	   is moved to the forground after being backgrounded. */
-	virtual void reinitialize_terminals() throw();
+	virtual void reinitialize_terminals();
 
 	/* Poll all the keyboards for new data to read. If data is available
 	   read it in and adjust the keyboard state accordingly. For each
 	   keyboard with data available, schedule a KeyboardWait object to
 	   enforce the simulated delay between data checks. */
-	virtual void poll_keyboards() throw( std::bad_alloc );
+	virtual void poll_keyboards();
 
 	/* Helper routine to repoll the keyboard. */
-	virtual void repoll_keyboard( int line ) throw( std::bad_alloc );
+	virtual void repoll_keyboard( int line );
 
 	/* Write characater DATA to the terminal on line LINE and transition
 	   the display from the READY and UNREADY states to the UNREADY state.
 	   This should only be called for connected lines. */
-	virtual void unready_display( int line, char data )
-		throw( std::bad_alloc );
+	virtual void unready_display( int line, char data );
 
 	/* Transition the display on line LINE from the UNREADY state into
 	   the READY state. Should only be called for connected lines in the
 	   UNREADY state. */
-	virtual void ready_display( int line ) throw();
+	virtual void ready_display( int line );
 
 	/* Transition the keyboard on line LINE from the READY state into
 	   the UNREADY state. Should only be called for connected lines in
 	   the the READY state. */ 
-	virtual void unready_keyboard( int line ) throw();
+	virtual void unready_keyboard( int line );
 
 protected:
 	/* Transition the keyboard from the READY or UNREADY states to the
 	   READY state. Read data from the keyboard on line LINE. Should only
 	   be called on connected lines. */
-	virtual void ready_keyboard( int line ) throw();
+	virtual void ready_keyboard( int line );
 
 	/* Take connected (or partially connected) line LINE and prepare it
 	   for use as part of a simulated console device. Returns true if the
 	   preparation was sucessful, false otherwise. */
-	virtual bool prepare_tty( int line ) throw();
+	virtual bool prepare_tty( int line );
 
 protected:
 	class DisplayDelay : public CancelableTask
 	{
 	public:
-		DisplayDelay(TerminalController *controller, int line) throw();
-		~DisplayDelay() throw();
+		DisplayDelay(TerminalController *controller, int line);
+		~DisplayDelay();
 
 	protected:
 		/* Make READY display on line LINE on controller CONTROLLER. */
@@ -145,8 +147,8 @@ protected:
 	class KeyboardRepoll : public CancelableTask
 	{
 	public:
-		KeyboardRepoll(TerminalController *controller,int line)throw();
-		virtual ~KeyboardRepoll() throw();
+		KeyboardRepoll(TerminalController *controller,int line);
+		virtual ~KeyboardRepoll();
 
 	protected:
 		/* Repoll keyboard on line LINE of controller CONTROLLER. */
@@ -160,8 +162,8 @@ protected:
 	class KeyboardPoll : public CancelableTask
 	{
 	public:
-		KeyboardPoll(TerminalController *controller) throw();
-		virtual ~KeyboardPoll() throw();
+		KeyboardPoll(TerminalController *controller);
+		virtual ~KeyboardPoll();
 
 	protected:
 		/* Poll all unready keyboards for new data. */

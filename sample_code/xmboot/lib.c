@@ -8,6 +8,8 @@ int errno;
 
 static short modes;
 
+FILE *stdin, *stdout, *stderr;
+
 void
 set_echo (int onoff)
 {
@@ -56,6 +58,20 @@ putchar (int ch)
   if ((modes & ONLCR) && (ch_uchar == '\n'))
     putchar ('\r');
   return ((write (1, &ch_uchar, 1) < 1) ? -1 : 0);
+}
+
+int
+fputc (int c, FILE *stream)
+{
+  putchar ((unsigned char) c);
+  return c;
+}
+
+int
+fputs (const char *s, FILE *stream)
+{
+  puts_nonl (s);
+  return 0;
 }
 
 void
@@ -174,8 +190,8 @@ char_to_digit (const char s)
   return 0;
 }
 
-char
-toupper (char c)
+int
+toupper (int c)
 {
   if (c >= 'a' && c <= 'z')
     {
@@ -185,8 +201,8 @@ toupper (char c)
     return c;
 }
 
-char
-tolower (char c)
+int
+tolower (int c)
 {
   if (c >= 'A' && c <= 'Z')
     {
@@ -209,19 +225,19 @@ digit_to_char (unsigned int digit, unsigned int use_uppercase)
 }
 
 int
-isspace (const char c)
+isspace (int c)
 {
   return (c == ' ') || (c == '\t') || (c == '\r') || (c == '\n');
 }
 
 int
-isdigit (const char c)
+isdigit (int c)
 {
   return ((c >= '0') && (c <= '9'));
 }
 
 int
-isprint (const char c)
+isprint (int c)
 {
   /* this is really crude, but works for most of 7-bit ASCII */
   return ((c >= 32) && (c < 127));
@@ -328,8 +344,35 @@ print_unsigned_int (unsigned int i, unsigned int radix,
 int
 printf (const char *fmt, ...)
 {
-  const char *f = fmt;
   va_list ap;
+  int rc;
+  va_start (ap, fmt);
+  rc = vfprintf (stdout, fmt, ap);
+  va_end (ap);
+  return rc;
+}
+
+int
+vprintf (const char *fmt, va_list ap)
+{
+  return vfprintf (stdout, fmt, ap);
+}
+
+int
+fprintf (FILE *fp, const char *fmt, ...)
+{
+  va_list ap;
+  int rc;
+  va_start (ap, fmt);
+  rc = vfprintf (fp, fmt, ap);
+  va_end (ap);
+  return rc;
+}
+
+int
+vfprintf (FILE *fp, const char *fmt, va_list ap)
+{
+  const char *f = fmt;
   int count = 0;
   int nextarg_is_long = 0;
   int i;
@@ -337,7 +380,6 @@ printf (const char *fmt, ...)
   char c;
   char *s;
 
-  va_start (ap, fmt);
   while (f[0])
     {
       if (f[0] != '%')
@@ -446,11 +488,47 @@ memcpy (void *dest, const void *src, size_t n)
 }
 
 void *
+memmove_aligned_4 (void *dest, const void *src, size_t n)
+{
+  void *rv = dest;
+  unsigned int *dest_c = (unsigned int *) dest;
+  unsigned int *src_c = (unsigned int *) src;
+
+  n /= 4;
+
+  if (dest_c - src_c < 0)
+    {
+      /* Copy forwards. */
+      while (n--)
+        {
+          *dest_c++ = *src_c++;
+        }
+    }
+  else if (dest_c - src_c > 0)
+    {
+      /* Copy backwards. */
+      dest_c += n;
+      src_c += n;
+      while (n--)
+        {
+          *--dest_c = *--src_c;
+        }
+    }
+  return rv;
+}
+
+
+void *
 memmove (void *dest, const void *src, size_t n)
 {
   void *rv = dest;
   unsigned char *dest_c = (unsigned char *) dest;
   unsigned char *src_c = (unsigned char *) src;
+
+  if (((((int)dest) & 0x03) == 0)
+     && ((((int)src) & 0x03) == 0)
+     && ((n & 0x03) == 0))
+    return memmove_aligned_4 (dest, src, n);
 
   if (dest_c - src_c < 0)
     {
@@ -474,11 +552,33 @@ memmove (void *dest, const void *src, size_t n)
 }
 
 void *
+memset_aligned_4 (void *s, int c, size_t n)
+{
+  int *dest_c = (int *) s;
+  void *rv = s;
+  unsigned char c_c = (c & 0x0ff);
+  int c4;
+
+  n /= 4;
+  c4 = (c_c << 24) | (c_c << 16) | (c_c << 8) | c_c;
+
+  while (n--)
+    {
+      *dest_c++ = c4;
+    }
+  return rv;
+}
+
+void *
 memset (void *s, int c, size_t n)
 {
-  unsigned char *dest_c = (char *) s;
+  unsigned char *dest_c = s;
   void *rv = s;
   unsigned char c_c = c;
+
+  if (((((int)s) & 0x03) == 0) 
+     && ((n & 0x03) == 0))
+    return memset_aligned_4 (s, c, n);
 
   while (n--)
     {
@@ -507,9 +607,9 @@ int
 brk (void *end_data_segment)
 {
   if (!mem_brk)
-    mem_brk = _end;
+    mem_brk = (char *) &_end;
 
-  if (mem_brk - _data > data_size_limit) {
+  if (mem_brk - ((char *) &_data) > data_size_limit) {
     return -1;
   } else {
     mem_brk = end_data_segment;
@@ -520,6 +620,8 @@ brk (void *end_data_segment)
 void *
 sbrk (ptrdiff_t increment)
 {
+  if (!mem_brk)
+    mem_brk = (char *) &_end;
   if (brk (mem_brk + increment) == 0)
     return (void *) mem_brk;
   else
@@ -533,14 +635,27 @@ malloc (size_t alloc_size)
   char *cur_brk;
   char *rv;
   if (!next_alloc)
-    next_alloc = _end;
+    next_alloc = (char *)&_end;
+  alloc_size += 4; /* Add space for length word. */
   alloc_size = (alloc_size + 3) & ~3;
   cur_brk = (char *) sbrk (0);
   if (next_alloc + alloc_size > cur_brk)
-    sbrk (cur_brk - (next_alloc + alloc_size));
-  rv = next_alloc;
+    sbrk ((next_alloc + alloc_size) - cur_brk);
+  rv = next_alloc + 4;
+  ((size_t *)next_alloc)[0] = alloc_size; /* Save length of this block. */
   next_alloc += alloc_size;
   return rv;
+}
+
+void *
+calloc (size_t obj_size, size_t obj_count)
+{
+  char *ptr;
+  size_t real_size;
+  real_size = obj_size * obj_count;
+  ptr = malloc (real_size);
+  memset (ptr, 0, real_size);
+  return ptr;
 }
 
 void
@@ -548,4 +663,3 @@ free (void *ptr)
 {
   /* Do nothing */
 }
-

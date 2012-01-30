@@ -20,15 +20,16 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "clock.h"
 #include "error.h"
 #include "terminalcontroller.h"
+#include "vmips.h"
 #include <cassert>
-#include <errno.h>
+#include <cerrno>
+#include <cstring>
 #include <sys/time.h>
 #include <unistd.h>
 
 TerminalController::TerminalController( Clock *clock, long keyboard_poll_ns,
 					long keyboard_repoll_ns,
 					long display_ready_delay_ns )
-	throw( std::bad_alloc )
 	: keyboard_poll_ns( keyboard_poll_ns ),
 	  keyboard_repoll_ns( keyboard_repoll_ns ),
 	  display_ready_delay_ns( display_ready_delay_ns ),
@@ -54,7 +55,7 @@ TerminalController::TerminalController( Clock *clock, long keyboard_poll_ns,
 	clock->add_deferred_task( keyboard_poll, keyboard_poll_ns );
 }
 
-TerminalController::~TerminalController() throw()
+TerminalController::~TerminalController()
 {
 	for( int i = 0; i < MAX_TERMINALS; i++ ) {
 		remove_terminal( i );
@@ -64,7 +65,13 @@ TerminalController::~TerminalController() throw()
 		keyboard_poll->cancel();
 }
 
-bool TerminalController::connect_terminal( int tty_fd, int line ) throw()
+void TerminalController::suspend () {
+  for (int line = 0; line < MAX_TERMINALS; line++)
+    if (line_connected(line))
+      tcsetattr (lines[line].tty_fd, TCSAFLUSH, &lines[line].tty_state);
+}
+
+bool TerminalController::connect_terminal( int tty_fd, int line )
 {
 	// there is already a terminal connected to that line
 	if( line_connected( line ) ) {
@@ -111,7 +118,7 @@ bool TerminalController::connect_terminal( int tty_fd, int line ) throw()
 	return true;
 }
 
-void TerminalController::remove_terminal( int line ) throw()
+void TerminalController::remove_terminal( int line )
 {
 	assert( line >= 0 && line < MAX_TERMINALS );
 
@@ -154,7 +161,7 @@ void TerminalController::remove_terminal( int line ) throw()
 	assert( !line_connected( line ) );
 }
 
-void TerminalController::reinitialize_terminals() throw()
+void TerminalController::reinitialize_terminals()
 {
 	for( int i = 0; i < MAX_TERMINALS; i++ ) {
 		if( !line_connected(i) )
@@ -167,7 +174,7 @@ void TerminalController::reinitialize_terminals() throw()
 	}
 }
 
-void TerminalController::ready_display( int line ) throw()
+void TerminalController::ready_display( int line )
 {
 	assert( line_connected( line ) );
 	assert( lines[line].display_state == UNREADY );
@@ -178,7 +185,6 @@ void TerminalController::ready_display( int line ) throw()
 }
 
 void TerminalController::unready_display( int line, char data )
-	throw( std::bad_alloc )
 {
 	assert( line_connected( line ) );
 
@@ -195,7 +201,7 @@ void TerminalController::unready_display( int line, char data )
 				  display_ready_delay_ns );
 }
 
-void TerminalController::unready_keyboard( int line ) throw()
+void TerminalController::unready_keyboard( int line )
 {
 	assert( line_connected( line ) );
 	assert( lines[line].keyboard_state == READY );
@@ -207,16 +213,20 @@ void TerminalController::unready_keyboard( int line ) throw()
 	lines[line].keyboard_repoll = NULL;
 }
 
-void TerminalController::ready_keyboard( int line ) throw()
+void TerminalController::ready_keyboard( int line )
 {
 	assert( line_connected( line ) );
 
 	lines[line].keyboard_state = READY;
 	FD_CLR( lines[line].tty_fd, &unready_keyboards );
 	read( lines[line].tty_fd, &lines[line].keyboard_char, sizeof(char) );
+    if (lines[line].keyboard_char == 0x1f) {
+      lines[line].keyboard_char = 0;
+      machine->attn_key ();
+    }
 }
 
-void TerminalController::repoll_keyboard( int line ) throw( std::bad_alloc )
+void TerminalController::repoll_keyboard( int line )
 {
 	assert( line_connected( line ) );
 	assert( lines[line].keyboard_state == READY );
@@ -227,7 +237,7 @@ void TerminalController::repoll_keyboard( int line ) throw( std::bad_alloc )
 				  keyboard_repoll_ns );
 }
 
-void TerminalController::poll_keyboards() throw( std::bad_alloc )
+void TerminalController::poll_keyboards()
 {
 	// FIXME: setup new poll only when there is an UNREADY keyboard
 	keyboard_poll = new KeyboardPoll( this );
@@ -259,7 +269,7 @@ void TerminalController::poll_keyboards() throw( std::bad_alloc )
 	}
 }
 
-bool TerminalController::prepare_tty( int line ) throw()
+bool TerminalController::prepare_tty( int line )
 {
 	assert( line_connected( line ) );
 	assert( isatty( lines[line].tty_fd ) );
@@ -288,14 +298,14 @@ bool TerminalController::prepare_tty( int line ) throw()
 }
 
 TerminalController::DisplayDelay::DisplayDelay( TerminalController *controller,
-						int line ) throw()
+						int line )
 	: controller( controller ), line( line )
 {
 	assert( controller );
 	assert( controller->line_connected( line ) );
 }
 
-TerminalController::DisplayDelay::~DisplayDelay() throw()
+TerminalController::DisplayDelay::~DisplayDelay()
 {
 }
 
@@ -306,13 +316,12 @@ void TerminalController::DisplayDelay::real_task()
 
 
 TerminalController::KeyboardPoll::KeyboardPoll(TerminalController *controller) 
-	throw()
 	: controller( controller )
 {
 	assert( controller );
 }
 
-TerminalController::KeyboardPoll::~KeyboardPoll() throw()
+TerminalController::KeyboardPoll::~KeyboardPoll()
 {
 }
 
@@ -324,14 +333,13 @@ void TerminalController::KeyboardPoll::real_task()
 
 TerminalController::KeyboardRepoll::KeyboardRepoll(
 	TerminalController *controller, int line )
-	throw()
 	: controller( controller ), line( line )
 {
 	assert( controller );
 	assert( controller->line_connected( line ) );
 }
 
-TerminalController::KeyboardRepoll::~KeyboardRepoll() throw()
+TerminalController::KeyboardRepoll::~KeyboardRepoll()
 {
 }
 

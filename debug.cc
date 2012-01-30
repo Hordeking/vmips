@@ -26,6 +26,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "vmips.h"
 #include "options.h"
 #include <csignal>
+#include <cstring>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -205,6 +207,7 @@ Debug::setup_listener_socket(void)
 		perror("socket");
 		return -1;
 	}
+	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
 	addr.sin_port = 0;
 	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -262,7 +265,7 @@ Debug::serverloop(void)
 	socklen_t clientaddrlen = sizeof(clientaddr);
 	extern int remote_desc;
 
-	while (! machine->halted) {
+	while (! machine->halted()) {
 		/* Block until a connection is received */
 		fprintf(stderr, "Waiting for connection from debugger.\n");
 		clientsock = accept(listener, (struct sockaddr *) &clientaddr,
@@ -294,7 +297,7 @@ Debug::targetloop(void)
 	char buf[PBUFSIZ];
 	char *result = NULL;
 
-	while (! machine->halted) {
+	while (! machine->halted()) {
 		exception_pending = false;
 		/* Wait for a packet, and when we get it, store it in
 		 * BUF. If we get an error trying to receive a packet,
@@ -330,7 +333,7 @@ Debug::target_kill(char *pkt)
 	/* This is a request from GDB to kill the process being
 	 * debugged. We interpret it as a request to halt the machine.
 	 */
-	machine->halted = true;
+	machine->halt();
 	return rawpacket("OK");
 }
 
@@ -364,7 +367,7 @@ Debug::target_read_registers(char *pkt)
 }
 
 char *
-Debug::rawpacket(char *str)
+Debug::rawpacket(const char *str)
 {
 	char *packet = new char[1 + strlen(str)];
 

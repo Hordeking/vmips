@@ -1,5 +1,5 @@
 /*  ../vmips -o haltdumpcpu -o haltbreak coproc.rom */
-/*  tests instructions: lwc1 lwc2 lwc3 swc1 swc2 swc3 */
+/*  tests instructions: lwc2 lwc3 swc2 swc3 */
 /*  (in the case where they are all unimplemented, that is) */
 /*  should end with:  R10=01010102  R11=02020203  R12=03030304 */
 /*  The trick here is to write an exception handler that simulates */
@@ -17,7 +17,6 @@
 #define NTLBENTRIES		64
 
 	.data
-first: .word 0x01010101
 second: .word 0x02020202
 third: .word 0x03030303
 
@@ -54,19 +53,14 @@ __start:
 	bne t1, t2, 1b		/* if we're not finished, loop. */
 	nop
 
-	la a0,  first
 	la a1,  second
 	la a2,  third
-	lwc1 $10, 0(a0)
 	lwc2 $11, 0(a1)
 	lwc3 $12, 0(a2)
-	addiu $10, $10, 1 
 	addiu $11, $11, 1 
 	addiu $12, $12, 1 
-	swc1 $10, 0(a0)
 	swc2 $11, 0(a1)
 	swc3 $12, 0(a2)
-	lw $10, 0(a0)
 	lw $11, 0(a1)
 	lw $12, 0(a2)
 
@@ -131,14 +125,14 @@ cpuexcp:
     andi t4, t4, 0x01f   /* get rt field into t4 */
     sll t4, t4, 2        /* multiply it by 4 */
     addu t4, t4, sp      /* offset from top of stack */
-    li t2, 49            /* test various opcodes we know */
-    beq t1, t2, load     /* lwc1 */
+    /* li t2, 49 */           /* test various opcodes we know */
+    /* beq t1, t2, load */    /* lwc1 */
     li t2, 50
     beq t1, t2, load     /* lwc2 */
     li t2, 51
     beq t1, t2, load     /* lwc3 */
-    li t2, 57
-    beq t1, t2, store    /* swc1 */
+    /* li t2, 57 */
+    /* beq t1, t2, store */   /* swc1 */
     li t2, 58
     beq t1, t2, store    /* swc2 */
     li t2, 59

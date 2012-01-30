@@ -1,5 +1,5 @@
 /* Definitions of functions for managing simulated time.
-   Copyright 2002 Paul Twohey.
+   Copyright 2002, 2004 Paul Twohey and Brian Gaeke.
 
 This file is part of VMIPS.
 
@@ -32,10 +32,10 @@ class Clock
 public:
 	/* Create a new simulation clock with starting time START_TIME, which
 	   should be a positive starting time. */
-	Clock( const timespec &start_time ) throw();
+	Clock( const timespec &start_time );
 
 	/* Destroy the clock object and delete all queued tasks. */
-	virtual ~Clock() throw();
+	virtual ~Clock();
 
 	/* Move simulated time forward NANOSECONDS nanoseconds and execute
 	   any deferred tasks that have their expiration date before the
@@ -45,7 +45,7 @@ public:
 	/* Increment the simulated clock by the difference from the last
 	   call to pass_realtime() and the current time (as determined by
 	   gettimeofday(2)) divided by timeratio. */
-	virtual void pass_realtime( uint32 timeratio ) throw();
+	virtual void pass_realtime( uint32 timeratio );
 
 	/* Queue task TASK to be executed in NANOSECONDS nanoseconds from the
 	   present time. TASK's task() function will be called and then it
@@ -54,11 +54,11 @@ public:
 	virtual void add_deferred_task( Task *task, long nanoseconds );
 
 	/* Return the simulated time as a timespec. */
-	virtual timespec get_time() throw();
+	virtual timespec get_time();
 
 	/* Set the simulated time to TIME. All components of TIME should be
 	   non-negative. */
-	virtual void set_time( const timespec &time ) throw();
+	virtual void set_time( const timespec &time );
 
 protected:
 	/* Each DeferredTasks object is responsible for maintaining a list of
@@ -71,15 +71,15 @@ protected:
 		   pass_time(). Will execute task TASK and any other tasks
 		   added later via add_task() in a fifo manner when it comes
 		   due. */
-		DeferredTasks( long nanoseconds_left, Task *task ) throw();
+		DeferredTasks( long nanoseconds_left, Task *task );
 
 		/* Destory deferred tasks by delete'ing each managed task. */
-		virtual ~DeferredTasks() throw();
+		virtual ~DeferredTasks();
 
 		/* Add task TASK to the list of tasks to complete when the
 		   deferred tasks come due. TASK will be delete'd after it is
 		   run. */
-		virtual void add_task( Task *task ) throw();
+		virtual void add_task( Task *task );
 	
 		/* Mark the passage of NANOSECONDS nanoseconds. If the
 		   deferred tasks come due then execute the tasks in the order
@@ -92,7 +92,7 @@ protected:
 
 		/* Return the number of nanoseconds of simulated time left
 		   before the the deferred tasks will come due. */
-		inline virtual long get_nanoseconds_left() throw();
+		inline virtual long get_nanoseconds_left();
 
 	protected:
 		long			nanoseconds_left;

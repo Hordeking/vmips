@@ -23,7 +23,6 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <cassert>
 
 ClockDevice::ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
-	throw( std::bad_alloc )
 	: DeviceMap(20), irq(irq), frequency_ns(frequency_ns),
 	  clock(clock), clock_trigger(0), clock_state(UNREADY),
 	  interrupt_enabled(false)
@@ -38,7 +37,7 @@ ClockDevice::ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
 	clock->add_deferred_task( clock_trigger, frequency_ns );
 }
 
-ClockDevice::~ClockDevice() throw()
+ClockDevice::~ClockDevice()
 {
 	assert( clock_trigger );
 	
@@ -46,7 +45,7 @@ ClockDevice::~ClockDevice() throw()
 	clock_trigger = NULL;
 }
 
-void ClockDevice::ready_clock() throw( std::bad_alloc )
+void ClockDevice::ready_clock()
 {
 	clock_state = READY;
  	
@@ -57,7 +56,7 @@ void ClockDevice::ready_clock() throw( std::bad_alloc )
 	clock->add_deferred_task( clock_trigger, frequency_ns );
 }
 
-void ClockDevice::unready_clock() throw()
+void ClockDevice::unready_clock()
 {
 	clock_state = UNREADY;
 	deassertInt( irq );
@@ -135,13 +134,13 @@ const char *ClockDevice::descriptor_str() const
 }
 
 
-ClockDevice::ClockTrigger::ClockTrigger( ClockDevice *clock_device ) throw()
+ClockDevice::ClockTrigger::ClockTrigger( ClockDevice *clock_device )
 	: clock_device( clock_device )
 {
 	assert( clock_device );
 }
 
-ClockDevice::ClockTrigger::~ClockTrigger() throw()
+ClockDevice::ClockTrigger::~ClockTrigger()
 {
 }
 

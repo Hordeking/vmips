@@ -34,18 +34,17 @@ public:
 	/* Create a new clock device that uses CLOCK as its time source and
 	   which reports interrupts on irq IRQ at the regular interval
 	   FREQUENCY_NS nanoseconds. */
-	ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
-		throw( std::bad_alloc );
+	ClockDevice( Clock *clock, uint32 irq, long frequency_ns );
 
 	/* Destroy the clock device and cancel any tasks it may have
 	   waiting to execute on CLOCK. */
-	virtual ~ClockDevice() throw();
+	virtual ~ClockDevice();
 
 	/* Utility function called to trigger a clock interrupt, transitions
 	   the clock to the READY state and asserts an interrupt if they
 	   are enabled. Used in conjunction with class ClockTrigger to make
 	   clock interrupts. */
-	virtual void ready_clock() throw( std::bad_alloc );
+	virtual void ready_clock();
 
 	virtual uint32 fetch_word(uint32 offset, int mode, DeviceExc *client);
 	virtual void store_word(uint32 offset, uint32 data, DeviceExc *client);
@@ -56,15 +55,15 @@ public:
 protected:
 	/* Transition the clock into the UNREADY state and deassert the
 	   clock interrupt. */
-	virtual void unready_clock() throw();
+	virtual void unready_clock();
 
 protected:
 	/* Utility class to trigger interrupts to the clock device. */
 	class ClockTrigger : public CancelableTask
 	{
 	public:
-		ClockTrigger( ClockDevice *clock_device ) throw();
-		virtual ~ClockTrigger() throw();
+		ClockTrigger( ClockDevice *clock_device );
+		virtual ~ClockTrigger();
 
 	protected:
 		virtual void real_task();
