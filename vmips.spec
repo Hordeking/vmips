@@ -1,12 +1,12 @@
 # vmips RPM spec file.
 Name: vmips
 Summary: A MIPS-based virtual machine simulator.
-Version: 1.4
+Version: 1.4.1
 Release: 1
 Copyright: GPL
 Group: Emulators
 URL: http://www.dgate.org/vmips/
-Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-1.4/vmips-1.4.tar.gz
+Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-1.4.1/vmips-1.4.1.tar.gz
 Packager: VMIPS Maintainers <vmips@dgate.org>
 BuildRoot: %{_tmppath}/vmips-buildroot
 
@@ -32,9 +32,13 @@ make
 %{_mandir}/man1/vmipstool.1.gz
 %{_includedir}/vmips/asm_regnames.h
 %{_datadir}/vmips/ld.script
+%{_datadir}/vmips/setup.S
 %config /etc/vmipsrc
 
 %changelog
+* Wed Apr 14 2013 VMIPS Maintainers <vmips@dgate.org>
+- Add setup assembly source files.
+
 * Fri Oct 08 2004 VMIPS Maintainers <vmips@dgate.org>
 - Use _variables instead of hardcoded paths in files section
 - Fix source url

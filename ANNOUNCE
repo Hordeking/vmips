@@ -1,15 +1,14 @@
 
-   VMIPS 1.4 has been released. VMIPS is a MIPS R3000 virtual machine
+   VMIPS 1.4.1 has been released. VMIPS is a MIPS R3000 virtual machine
 simulator with support for a serial console and GNU cross-compiler tools.
-This release incorporates a few features, a few bug fixes and a few
-code cleanups.
+This release incorporates a few bug fixes.
 
-   You can download VMIPS 1.4 from any of the following sites:
+   You can download VMIPS 1.4.1 from any of the following sites:
 
-* ftp://ftp.dgate.org/vmips/releases/vmips-1.4/
+* ftp://ftp.dgate.org/vmips/releases/vmips-1.4.1/
 * http://download.sourceforge.net/vmips/
-* http://www.dgate.org/vmips/releases/vmips-1.4/
-* http://vmips.sourceforge.net/releases/vmips-1.4/
+* http://www.dgate.org/vmips/releases/vmips-1.4.1/
+* http://vmips.sourceforge.net/releases/vmips-1.4.1/
 
    VMIPS is free software available under the GNU General Public
 License; for details, please read the file "COPYING". For installation
@@ -21,24 +20,22 @@ features since the last publically released version are detailed in
    The home page for VMIPS is "http://www.dgate.org/vmips". For bug
 reporting instructions, please see the VMIPS Manual.
 
-   User-visible changes in version 1.4 (since version 1.3.2):
+   User-visible changes in version 1.4.1 (since version 1.4):
 
-   * A new interaction facility was implemented. This allows you to
-     suspend the simulation, print registers and memory, and then
-     continue by running or single-stepping, without needing to use a
-     full-fledged debugger.
+   * Problems compiling VMIPS with gcc 4.7.x have been fixed.
 
-   * Some of the memory-mapped I/O devices have had endianness bugs
-     fixed and debugging printouts removed.
+   * An error has been fixed in the documentation regarding the
+     installed location of the canned setup code.
 
-   * Certain coprocessor zero branch instructions no longer
-     unnecessarily cause reserved instruction exceptions.
+   * An error has been fixed in the Makefiles which was preventing the
+     canned setup code from being installed.
 
-   * Other minor optimizations.
+   * An error has been fixed in the Makefiles which was preventing
+     CFLAGS and LDFLAGS from being set correctly in some cases.
 
    To get the code from CVS as any bug fixes are added, checkout from branch
-"vmips-1_4-branch". VMIPS 1.4 itself can be checked out using the tag
-"release-1-4".
+"vmips-1_4-branch". VMIPS 1.4.1 itself can be checked out using the tag
+"release-1-4-1".
 
    Please refer to the bug reporting instructions in the VMIPS manual
 if you have trouble using the software.

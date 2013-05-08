@@ -4,7 +4,7 @@ AC_INIT(vmips.cc)
 dnl Get the canonical and user-supplied names for the host and target. 
 AC_CANONICAL_SYSTEM
 program_prefix=NONE
-AM_INIT_AUTOMAKE(vmips, 1.4)
+AM_INIT_AUTOMAKE(vmips, 1.4.1)
 AM_CONFIG_HEADER(config.h)
 
 dnl Look for mips tool installation:
@@ -134,11 +134,12 @@ AC_MSG_RESULT($enable_debug)
 AC_ARG_ENABLE(profiling,
 [  --enable-profiling      build profiled VMIPS executable for gprof/gcov])
 AC_MSG_CHECKING([whether to build a profiled version])
+XTRACFLAGS=""
+XTRALDFLAGS=""
 case "x$enable_profiling" in
 xyes) 
-  AM_CXXFLAGS="$AM_CXXFLAGS -pg -fprofile-arcs -ftest-coverage"
-  CFLAGS="$CFLAGS -pg -fprofile-arcs -ftest-coverage"
-  LDFLAGS="$LDFLAGS -pg"
+  XTRACFLAGS="$XTRACFLAGS -pg -fprofile-arcs -ftest-coverage"
+  XTRALDFLAGS="$XTRALDFLAGS -pg"
   enable_profiling="yes"
   ;;
 *)
@@ -152,18 +153,18 @@ if test $enable_profiling = no
 then
   if test $enable_debug = optimized
   then
-    LDFLAGS="$LDFLAGS -s"
+    XTRALDFLAGS="$XTRALDFLAGS -s"
   fi
 fi
-AC_SUBST(LDFLAGS)
 
 AC_PROG_AWK
 AC_PROG_CXX
 if test "x$GXX" = "xyes"
 then
-	AM_CXXFLAGS="$AM_CXXFLAGS -Wall -fno-strict-aliasing"
-	AM_CFLAGS="$AM_CFLAGS -Wall -fno-strict-aliasing"
+	XTRACFLAGS="$XTRACFLAGS -Wall -fno-strict-aliasing"
 fi
+AC_SUBST(XTRACFLAGS)
+AC_SUBST(XTRALDFLAGS)
 VMIPS_CXX_TEMPLATE_FUNCTIONS
 AC_PROG_CPP
 AM_PROG_AS

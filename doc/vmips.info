@@ -108,7 +108,7 @@ the MIPS compiler that VMIPS was installed with, use the `vmipstool
 --compile' command.
 
    Step 2. Link your program with any support code necessary. VMIPS
-comes with some canned support code, in the share/setup directory, or
+comes with some canned support code, in the share/vmips directory, or
 you can write your own support code. VMIPS comes with a linker script
 for simple standalone programs, which you can run with `vmipstool
 --link', or you can write your own linker script.
@@ -2499,7 +2499,21 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Appendix D Release History
 **************************
 
-vmips-1.4 was released on 29 January 2012.  User-visible changes in
+vmips-1.4.1 was released on 7 May 2013.  User-visible changes in
+version 1.4.1 (since version 1.4):
+
+   * Problems compiling VMIPS with gcc 4.7.x have been fixed.
+
+   * An error has been fixed in the documentation regarding the
+     installed location of the canned setup code.
+
+   * An error has been fixed in the Makefiles which was preventing the
+     canned setup code from being installed.
+
+   * An error has been fixed in the Makefiles which was preventing
+     CFLAGS and LDFLAGS from being set correctly in some cases.
+
+   vmips-1.4 was released on 29 January 2012.  User-visible changes in
 version 1.4 (since version 1.3.2):
 
    * A new interaction facility was implemented. This allows you to
@@ -3152,8 +3166,8 @@ Node: Installation86151
 Node: Reporting Bugs100974
 Node: Future Directions101666
 Node: Release History103754
-Node: References121846
-Node: Copying125317
-Node: Index126776
+Node: References122377
+Node: Copying125848
+Node: Index127307
 
 End Tag Table

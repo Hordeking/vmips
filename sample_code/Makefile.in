@@ -54,10 +54,12 @@ dvi check installcheck:
 install: ld.script
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(pkgincludedir)
 	$(INSTALL_DATA) $(srcdir)/ld.script $(DESTDIR)$(pkgdatadir)/ld.script
+	$(INSTALL_DATA) $(srcdir)/setup.S $(DESTDIR)$(pkgdatadir)/setup.S
 	$(INSTALL_DATA) $(srcdir)/asm_regnames.h $(DESTDIR)$(pkgincludedir)/asm_regnames.h
 
 uninstall:
 	-rm -f $(DESTDIR)$(pkgdatadir)/ld.script
+	-rm -f $(DESTDIR)$(pkgdatadir)/setup.S
 	-rm -f $(DESTDIR)$(pkgincludedir)/asm_regnames.h
 
 clean:

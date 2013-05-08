@@ -1,3 +1,460 @@
+2013-05-07 16:17  Brian R. Gaeke <brg@dgate.org>
+
+	* ANNOUNCE: Update announcement for 1.4.1.
+
+2013-05-07 16:13  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL, NEWS: Updated INSTALL and NEWS for vmips-1.4.1.
+
+2013-05-07 16:12  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeINSTALL: Merge v1.3 from trunk.
+
+2013-05-07 16:11  Brian R. Gaeke <brg@dgate.org>
+
+	* INSTALL: Updated using new makeINSTALL.
+
+2013-05-07 16:11  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/makeINSTALL: Remove unnecessary Info page headers during
+	  makeINSTALL.
+
+2013-05-07 15:37  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Merge 1.4.1 changes from trunk.
+
+2013-05-07 15:37  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/vmips.texi: Add 1.4.1 version changes.
+
+2013-04-29 22:57  Brian R. Gaeke <brg@dgate.org>
+
+	* spimconsole.cc: A trivial change to aid in debugging.
+
+2013-04-28 23:48  Brian R. Gaeke <brg@dgate.org>
+
+	* debian/changelog: Update version number to 1.4.1.
+
+2013-04-28 23:46  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, VERSION, configure.in: * Port the
+	  XTRACFLAGS/XTRALDFLAGS hacks from mainline so that the funky
+	  code we have that plays dirty with pointer aliasing will still
+	  work.  * Update version on branch to 1.4.1.
+
+2013-04-21 18:32  Brian R. Gaeke <brg@dgate.org>
+
+	* Makefile.am, configure.in, doc/vmips.texi: A little bit of
+	  configure script cleanup.  1. Replace deprecated autoconf macros
+	  to check for ISC, MINIX and AIX    with the new
+	  AC_USE_SYSTEM_EXTENSIONS.  2. --disable-debug (and all the
+	  machinery it controls) hasn't worked	  for a while. Worse,
+	  automake sort of tries to prevent you from helping	the user
+	  out in this way.  So remove it.  3. Take a stab at making
+	  --enable-profiling work (but without	  the stripping). Define
+	  XTRACFLAGS and XTRALDFLAGS to help in this	process. Also, use
+	  the same mechanism to pass -fno-strict-aliasing    if G++ is
+	  detected.  4. Update the documentation to reflect the demise of
+	  --disable-debug and	 the fact that --enable-profiling doesn't
+	  strip anymore.  Mention the	 sanctioned method for messing with
+	  CFLAGS and CXXFLAGS, and point to    the GNU documentation.
+
+2013-04-21 18:20  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/xmlcl.pl: One major thing I don't like about this is the
+	  UTC timezone. Add a note as to how we might recover the correct
+	  timezone.
+
+2013-04-21 11:41  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in, doc/vmips.texi, freebsd/pkg-plist,
+	  sample_code/Makefile.in: Partial merge of changes from trunk (no
+	  tlbsetup on the 1.4 branch): We have claimed in the manual that
+	  the canned setup code (setup.S) is installed in the share/setup
+	  directory. This was meant to be the share/vmips directory. And it
+	  wasn't installed at all. Fix the makefiles to install it, fix the
+	  documentation to say where it should end up, and update the
+	  packaging files to match.
+
+2013-04-21 11:40  Brian R. Gaeke <brg@dgate.org>
+
+	* clockdev.cc: Merge change from trunk (v1.22): Recent GCCs really
+	  want you to #include <cstddef> to get a definition for NULL.
+
+2013-04-20 18:54  Brian R. Gaeke <brg@dgate.org>
+
+	* utils/xmlcl.pl: Add this new changelog script. I'm trying to
+	  figure out a way to get something better than the FSF-format
+	  changelog output by cvs2cl.
+
+2013-04-18 01:59  Brian R. Gaeke <brg@dgate.org>
+
+	* devicemap.cc: Get rid of strict-aliasing-unsafe code in
+	  DeviceMap.  This was causing accesses to devices using non-word
+	  access sizes, when vmips was compiled with gcc-4.7.1 -g -O2, to
+	  fail. Typically, for stores, devices would get zero instead of
+	  the actually stored data.
+
+2013-04-17 23:56  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.outcheck/: Makefile.am, Makefile.in, dzhello.c,
+	  dzhello.par: Add a new test that seems to demonstrate a bug that
+	  appears when you compile vmips with -g -O2 and goes away when you
+	  compile vmips with -g3.
+
+2013-04-17 23:54  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.spec.in, doc/vmips.texi, freebsd/pkg-plist,
+	  sample_code/Makefile.in: We have claimed in the manual that the
+	  canned setup code (setup.S) is installed in the share/setup
+	  directory. This was meant to be the share/vmips directory. And it
+	  wasn't installed at all. Fix the makefiles to install it, fix the
+	  documentation to say where it should end up, and update the
+	  packaging files to match.  Also, do the same for tlbsetup.S
+	  (which is not yet documented).
+
+2013-04-17 23:49  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/tlbsetup.S: Add a comment.
+
+2013-04-17 23:46  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: A little bit of extra debugging output.
+
+2013-04-17 23:44  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: I don't like "Writing bad memory" for attempts to
+	  write to read-only memory. It's confusing and nonspecific. Change
+	  it to "Attempt to write read-only memory".
+
+2013-04-13 23:24  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/to-do: Now that we implement isolated and swapped caches, we
+	  don't have the problem mentioned here with NetBSD.
+
+2013-04-13 23:22  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/interact-commands: Update the list with commands we still
+	  don't have, in a style closer to the ones we do have.
+
+2013-04-13 22:59  Brian R. Gaeke <brg@dgate.org>
+
+	* THANKS: Add a general thank-you.
+
+2013-04-13 22:54  Brian R. Gaeke <brg@dgate.org>
+
+	* VERSION, configure.in: Mark version as 1.5a for trunk.
+
+2013-04-07 22:48  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: Boot the kernel with an argv[0] of its
+	  own.	Anything is better than nothing at all, but NetBSD really
+	  wants it to be a realistic one, so make it look realistic.
+
+2013-04-07 15:28  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/: boot_setup.S, panic.c: If we're going to
+	  panic in the boot monitor, we might as well enter an infinite
+	  loop afterwards, without incurring any more exceptions (such as
+	  the one caused by the "break" instruction.)
+
+2013-04-07 15:27  Brian R. Gaeke <brg@dgate.org>
+
+	* decrtc.cc: * Put debug messages under #if defined(RTC_DEBUG),
+	  instead of comments.	* Fix a bug which was causing rtc
+	  registers' writable bits not to be   cleared when a zero was
+	  written to them.  * Fix a couple of bugs that seemed to be
+	  preventing   1) the DECRTCDevice from being torn down
+	  successfully.    2) the frequency from being set to 0
+	  successfully.
+
+2013-04-07 15:26  Brian R. Gaeke <brg@dgate.org>
+
+	* cpzero.cc: * If we get a TLB miss and excmsg is on, print the
+	  fault address.  * Whenever the Cause register is read, recompute
+	  the IP field. Don't wait   for an exception to happen.  The
+	  reason is that we might be polling with   interrupts disabled.
+
+2013-04-07 15:25  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc, mapper.h: * Add cache debug messages under #if
+	  defined(CACHE_DEBUG).  * Do not prevent instruction fetches from
+	  reaching main memory	 when the caches are isolated.
+
+2013-04-07 09:18  Brian R. Gaeke <brg@dgate.org>
+
+	* decserial.cc: * Put serial debugging printouts under #if
+	  defined(SERIAL_DEBUG)   instead of in comments.  * Minor
+	  formatting changes.  * Very minor tweak to the way store_word()
+	  handles its data argument.
+
+2013-04-07 09:14  Brian R. Gaeke <brg@dgate.org>
+
+	* interactor.cc: * Print the PC after a step.  * Add a disassembly
+	  command (dis), modeled on the mem command.
+
+2013-04-07 09:12  Brian R. Gaeke <brg@dgate.org>
+
+	* vmips.cc, vmips.h: Formatting changes only.
+
+2013-04-07 09:11  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpu.h: * Add a basic disassembly method (dis_mem()).	*
+	  Revert revision 1.102 (2012-02-12), which prevented executing any
+	  stores when cache isolation is on.	It isn't appropriate now
+	  that we   are trying to model caches.  * Fix some indentation.
+
+2013-04-06 11:14  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cswap.par: I
+	  think cswap needs the TLB set up.
+
+2013-04-04 00:21  Brian R. Gaeke <brg@dgate.org>
+
+	* interactor.cc: Validate argument for interactor "mem" command.
+
+2013-03-28 00:18  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: cisol.S, cswap.S: A little bit of
+	  commenting and rearranging.
+
+2013-03-28 00:07  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cswap.S,
+	  cswap.par: Add a new, basic test for cache swapping+isolation
+	  (filling, reading from, and invalidating items in the I-cache).
+
+2013-03-28 00:05  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Remove some commented-out printfs that are no longer
+	  applicable.
+
+2013-03-05 00:00  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: cisol.S, cisol.par: Also read back
+	  from base, not just base2, following the original test plan.
+
+2013-03-03 21:20  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/ld.script: In elf, rodata can come in sections whose
+	  names start with, but are not exactly equal to, .rodata.  Try
+	  using (.rodata*). It seems to work.
+
+2013-03-03 21:17  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/benchmarks/time_programs.pl: Add code to check format
+	  of timing info, as well as to check correct output against actual
+	  output.  Eventually, I think these should move into the test_code
+	  directory and become part of the testsuite.
+
+2013-03-03 21:16  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/benchmarks/mk_correct.sh: Add script used to make
+	  *.correct files.
+
+2013-03-03 21:16  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/benchmarks/: ackermann.c.correct, ary.c.correct,
+	  fibo.c.correct, matrix.c.correct, methcall.c.correct,
+	  nestedloop.c.correct, objinst.c.correct, sieve.c.correct: Add
+	  correct (i.e., expected) outputs.
+
+2013-03-03 21:13  Brian R. Gaeke <brg@dgate.org>
+
+	* optiontbl.h, terminalcontroller.cc, vmips.cc: Allow ttydev=stdout
+	  to work, even when stdout is not a tty.  This requires some
+	  handling in vmips.cc to recognize "stdout" as a special ttydev,
+	  and some relaxation of assertions and error checking code in
+	  terminalcontroller.cc which insisted that they must never get an
+	  FD which did not refer to a tty.  Update comments and
+	  documentation to mention that "stdout" is acceptable as a special
+	  value of ttydev.
+
+2013-03-03 14:38  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Cache-writing fixes.  1. Make cache_write()
+	  responsible for writing to main memory after	  updating the
+	  cache. Always write back using the data in the    cache.  2. If
+	  the caches are isolated, then we don't write to main memory,
+	  even if the store is not cacheable.  3. Add comments.  4. Make
+	  sure when performing a full-word cacheable store, that the
+	  cache entry is valid and the tag is set afterwards.  5. When
+	  performing a partial-word cacheable store, we need to fill	the
+	  whole word from main memory first, if the entry is not already
+	  valid.
+
+2013-03-02 23:33  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc, mapper.h: Make cache_write take the physical memory
+	  range and the exception sink (client) as parameters.	Move calls
+	  to cache_write before the corresponding store_* calls, rather
+	  than after. Soon, cache_write will do the work of calling store_*
+	  as necessary.
+
+2013-03-02 23:09  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Add comment about cache size (fixed, for now).  Remove
+	  some statements which hardwired the cachability of stores to
+	  true, which were only intended for testing.  Fix some
+	  indentation.
+
+2013-02-25 00:15  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cisol.S,
+	  cisol.par: Add a rudimentary test for cache isolation. Not
+	  working properly yet.
+
+2013-02-17 11:04  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cstore2.S,
+	  cstore2.par: Add test for storing to cached memory and then
+	  reading back from cached memory, modeled on cstore.S.
+
+2013-02-17 00:01  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cstore.S,
+	  cstore.par: Add test for storing through cache and making sure
+	  things look right in uncached space.
+
+2013-02-14 23:40  Brian R. Gaeke <brg@dgate.org>
+
+	* mapper.cc: Fix apparent endianness issue w/ sub-word stores to &
+	  loads from cache.
+
+2013-02-13 23:34  Brian R. Gaeke <brg@dgate.org>
+
+	* clockdev.cc: Recent GCCs really want you to #include <cstddef> to
+	  get a definition for NULL.
+
+2013-01-02 20:10  Brian R. Gaeke <brg@dgate.org>
+
+	* test_code/vmips.regcheck/: Makefile.am, Makefile.in, cload.S,
+	  cload.par: Add a new test for loads and partial loads that either
+	  hit or miss in the cache. Not passing yet. Regenerate makefiles.
+
+2013-01-02 16:08  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/Makefile.in, sample_code/tlbsetup.S,
+	  utils/testcase-maker: * Add a TLB-friendly version of the setup
+	  assembly routine (used in   testcases if you pass -setup 2).
+
+2013-01-02 16:08  Brian R. Gaeke <brg@dgate.org>
+
+	* configure.in, cpu.cc, cpzero.cc, mapper.cc, mapper.h: * Commit
+	  first version of work on cache implementation.  * Reformat part
+	  of cpzero.cc and mapper.h.  * Make swap_word and swap_halfword
+	  methods of Mapper static.  * Add a TLB-friendly version of the
+	  setup assembly routine (used in   testcases if you pass -setup
+	  2).
+
+2013-01-02 12:04  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/setup.S: A little reformatting. Use symbolic names
+	  for CP0 registers.
+
+2013-01-02 12:02  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/diskboot/: Makefile.in, README, boot.c, boot.script,
+	  boot_setup.S, bootenv.c, bootenv.h, build_disk, coff.c, coff.h,
+	  disk.c, disk.h, lib.c, lib.h, panic.c, serial.c, serial.h,
+	  set_status.S, set_status.h, vmips_boot: Remove disk
+	  controller-related boot code.
+
+2012-12-12 00:04  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/mipsel_ecoff_tools.sh: Update this script to work on my
+	  current build machine.
+
+2012-12-11 23:21  Brian R. Gaeke <brg@dgate.org>
+
+	* sample_code/xmboot/boot.c: Declare harry a little earlier, for
+	  the sake of old compilers.
+
+2012-02-12 00:29  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc: For now, don't execute any stores when cache isolation is
+	  in effect.
+
+2012-01-30 21:24  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/Makefile.in, sample_code/Makefile.in: Merge to
+	  vmips-1_4-branch: Make these directories work with
+	  automake-1.11.1's stricter distcheck.  * Get rid of the rules for
+	  dvi and ps because we no longer support them.  * Get rid of some
+	  obsolete comments.  * Don't cd to srcdir before building info or
+	  html.  * Implement uninstall (in both sample_code and doc).
+
+2012-01-30 21:23  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/Makefile.in, sample_code/Makefile.in: Make these directories
+	  work with automake-1.11.1's stricter distcheck.  * Get rid of the
+	  rules for dvi and ps because we no longer support them.  * Get
+	  rid of some obsolete comments.  * Don't cd to srcdir before
+	  building info or html.  * Implement uninstall (in both
+	  sample_code and doc).
+
+2012-01-29 17:47  Brian R. Gaeke <brg@dgate.org>
+
+	* NEWS: Fix 1.4 release date.
+
+2012-01-28 23:59  Brian R. Gaeke <brg@dgate.org>
+
+	* doc/: vmips.texi: Change 1.4 release date.
+
+2012-01-22 22:40  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/linux_notes.txt: Back up this short file. Might remind
+	  me of something important later.
+
+2012-01-22 22:27  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/: mips_elf_tools.sh, mipsel_ecoff_tools.sh,
+	  mipsel_linux_tools.sh: Back up newer versions of these
+	  tool-building scripts, featuring fewer hardcoded paths and
+	  removal of directories needed during building that already exist
+	  prior to building.
+
+2011-05-08 00:23  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpzero.h, debug.cc, debug.h, decrtc.h, exeloader.cc,
+	  haltdev.cc, haltdev.h, interactor.cc, options.cc, options.h,
+	  optiontbl.h, remotegdb.cc, terminalcontroller.cc, vmips.cc,
+	  vmipstool.cc, doc/makeoptdoc: Merge to vmips-1_4-branch: Fix some
+	  problems compiling with gcc-4.5, mostly having to do with header
+	  files not having been included in the right places, duplicate
+	  parameter names, and char * being used for strings where const
+	  char * should have been used instead.
+
+2011-05-08 00:22  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/: mips_elf_tools.sh, mipsel_ecoff_tools.sh: Merge to
+	  vmips-1_4-branch: Make a few changes that helped make these
+	  scripts work on openSUSE 11.3.
+
+2011-05-08 00:12  Brian R. Gaeke <brg@dgate.org>
+
+	* cpu.cc, cpzero.h, debug.cc, debug.h, decrtc.h, exeloader.cc,
+	  haltdev.cc, haltdev.h, interactor.cc, options.cc, options.h,
+	  optiontbl.h, remotegdb.cc, terminalcontroller.cc, vmips.cc,
+	  vmipstool.cc, doc/makeoptdoc: Fix some problems compiling with
+	  gcc-4.5, mostly having to do with header files not having been
+	  included in the right places, duplicate parameter names, and char
+	  * being used for strings where const char * should have been used
+	  instead.
+
+2011-05-08 00:10  Brian R. Gaeke <brg@dgate.org>
+
+	* misc_code/: mips_elf_tools.sh, mipsel_ecoff_tools.sh: Make a few
+	  changes that helped make these scripts work on openSUSE 11.3.
+
+2011-05-01 18:39  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: Merge updated ChangeLog from mainline.
+
+2011-05-01 18:37  Brian R. Gaeke <brg@dgate.org>
+
+	* ChangeLog: Update for 1.4.
+
 2011-05-01 18:28  Brian R. Gaeke <brg@dgate.org>
 
 	* ANNOUNCE: Add release announcement for 1.4

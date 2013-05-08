@@ -12,7 +12,8 @@ bin_PROGRAMS = vmips vmipstool
 
 # Defaults! Defaults for everyone!
 AM_CXXFLAGS = -I$(top_srcdir)/libopcodes_mips \
- -DSYSCONFDIR=\"$(sysconfdir)\" -DPKGDATADIR=\"$(pkgdatadir)\"
+ -DSYSCONFDIR=\"$(sysconfdir)\" -DPKGDATADIR=\"$(pkgdatadir)\" $(XTRACFLAGS)
+AM_LDFLAGS = $(XTRALDFLAGS)
 MOSTLYCLEANFILES = errs memdump.bin
 CLEANFILES = romfile.rom vmips.out
 

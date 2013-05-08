@@ -21,6 +21,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "devreg.h"
 
 #include <cassert>
+#include <cstddef>
 
 ClockDevice::ClockDevice( Clock *clock, uint32 irq, long frequency_ns )
 	: DeviceMap(20), irq(irq), frequency_ns(frequency_ns),
