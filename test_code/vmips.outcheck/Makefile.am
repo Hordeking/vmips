@@ -7,13 +7,34 @@ SETUP = ../../sample_code/setup.o
 
 # empty 
 
+# simple_asm poke2
+# multifile_asm -setup 0 poke2 poke2.S
+poke2_SOURCES = poke2.S
+poke2.rom: poke2.exe
+	$(VMIPSTOOL) --make-rom poke2.exe poke2.rom
+
+# simple_asm simpledis
+# multifile_asm -setup 0 simpledis simpledis.S
+simpledis_SOURCES = simpledis.S
+simpledis.rom: simpledis.exe
+	$(VMIPSTOOL) --make-rom simpledis.exe simpledis.rom
+
 # empty 
 
-# simple_asm bdexcp
-# multifile_asm -setup 0 bdexcp bdexcp.S
-bdexcp_SOURCES = bdexcp.S
-bdexcp.rom: bdexcp.exe
-	$(VMIPSTOOL) --make-rom bdexcp.exe bdexcp.rom
+# simple_asm sb-print
+# multifile_asm -setup 0 sb-print sb-print.S
+sb_print_SOURCES = sb-print.S
+sb-print.rom: sb-print.exe
+	$(VMIPSTOOL) --make-rom sb-print.exe sb-print.rom
+
+# simple_c hello2
+# multifile_c hello2 hello2.c
+hello2_LDFLAGS = $(SETUP)
+hello2_SOURCES = hello2.c
+hello2.rom: hello2.exe
+	$(VMIPSTOOL) --make-rom hello2.exe hello2.rom
+
+# empty 
 
 # simple_c emptymain
 # multifile_c emptymain emptymain.c
@@ -35,18 +56,17 @@ hello_SOURCES = hello.c
 hello.rom: hello.exe
 	$(VMIPSTOOL) --make-rom hello.exe hello.rom
 
-# simple_c hello2
-# multifile_c hello2 hello2.c
-hello2_LDFLAGS = $(SETUP)
-hello2_SOURCES = hello2.c
-hello2.rom: hello2.exe
-	$(VMIPSTOOL) --make-rom hello2.exe hello2.rom
-
 # simple_asm instcounts
 # multifile_asm -setup 0 instcounts instcounts.S
 instcounts_SOURCES = instcounts.S
 instcounts.rom: instcounts.exe
 	$(VMIPSTOOL) --make-rom instcounts.exe instcounts.rom
+
+# simple_asm unaligned
+# multifile_asm -setup 0 unaligned unaligned.S
+unaligned_SOURCES = unaligned.S
+unaligned.rom: unaligned.exe
+	$(VMIPSTOOL) --make-rom unaligned.exe unaligned.rom
 
 # makefile_fragment loser
 loser_SOURCES = loser.S
@@ -55,33 +75,20 @@ loser.rom: loser.exe
 	dd if=loser.tmp bs=4 count=1 of=loser.rom >/dev/null 2>&1
 	rm loser.tmp
 
-# empty 
+# simple_asm bdexcp
+# multifile_asm -setup 0 bdexcp bdexcp.S
+bdexcp_SOURCES = bdexcp.S
+bdexcp.rom: bdexcp.exe
+	$(VMIPSTOOL) --make-rom bdexcp.exe bdexcp.rom
 
-# simple_asm poke2
-# multifile_asm -setup 0 poke2 poke2.S
-poke2_SOURCES = poke2.S
-poke2.rom: poke2.exe
-	$(VMIPSTOOL) --make-rom poke2.exe poke2.rom
+# simple_c dzhello
+# multifile_c dzhello dzhello.c
+dzhello_LDFLAGS = $(SETUP)
+dzhello_SOURCES = dzhello.c
+dzhello.rom: dzhello.exe
+	$(VMIPSTOOL) --make-rom dzhello.exe dzhello.rom
 
-# simple_asm sb-print
-# multifile_asm -setup 0 sb-print sb-print.S
-sb_print_SOURCES = sb-print.S
-sb-print.rom: sb-print.exe
-	$(VMIPSTOOL) --make-rom sb-print.exe sb-print.rom
-
-# simple_asm simpledis
-# multifile_asm -setup 0 simpledis simpledis.S
-simpledis_SOURCES = simpledis.S
-simpledis.rom: simpledis.exe
-	$(VMIPSTOOL) --make-rom simpledis.exe simpledis.rom
-
-# simple_asm unaligned
-# multifile_asm -setup 0 unaligned unaligned.S
-unaligned_SOURCES = unaligned.S
-unaligned.rom: unaligned.exe
-	$(VMIPSTOOL) --make-rom unaligned.exe unaligned.rom
-
-noinst_PROGRAMS =  bdexcp emptymain exception hello hello2 instcounts loser poke2 sb-print simpledis unaligned
+noinst_PROGRAMS =  poke2 simpledis sb-print hello2 emptymain exception hello instcounts unaligned loser bdexcp dzhello
 
 CCLD = $(VMIPSTOOL) --link
 COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
@@ -89,9 +96,9 @@ ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 EXEEXT = .exe
 
-CLEANFILES =  bdexcp.rom emptymain.rom exception.rom hello.rom hello2.rom instcounts.rom loser.rom poke2.rom sb-print.rom simpledis.rom unaligned.rom
+CLEANFILES =  poke2.rom simpledis.rom sb-print.rom hello2.rom emptymain.rom exception.rom hello.rom instcounts.rom unaligned.rom loser.rom bdexcp.rom dzhello.rom
 
-EXTRA_DIST =  outcheck.exp  badargs.par badoption.par bdexcp.par emptymain.par exception.par hello.par hello2.par instcounts.par loser.par nonexistent.par poke2.par sb-print.par simpledis.par unaligned.par
+EXTRA_DIST =  outcheck.exp  nonexistent.par poke2.par simpledis.par badoption.par sb-print.par hello2.par badargs.par emptymain.par exception.par hello.par instcounts.par unaligned.par loser.par bdexcp.par dzhello.par
 
-# 3 C testcases and 7 asm testcases.
+# 4 C testcases and 7 asm testcases.
 # 4 custom makefile fragment testcases.

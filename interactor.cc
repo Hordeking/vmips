@@ -4,11 +4,13 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
+#include <climits>
 #include "interactor.h"
 #include "cpu.h"
 #include "vmips.h"
 
-/*--------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
 class SimpleInteractor;
 
@@ -32,7 +34,7 @@ public:
     void register_command(func_t func, const char *name);
 };
 
-/*--------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
 void go_fn (SimpleInteractor *in, int argc, char **argv)
 {
@@ -43,6 +45,7 @@ void go_fn (SimpleInteractor *in, int argc, char **argv)
 void step_fn (SimpleInteractor *in, int argc, char **argv)
 {
     machine->step();
+    printf("PC is now 0x%x\n", machine->cpu->debug_get_pc());
 }
 
 void regs_fn (SimpleInteractor *in, int argc, char **argv)
@@ -60,17 +63,70 @@ void stack_fn (SimpleInteractor *in, int argc, char **argv)
     machine->cpu->dump_stack (stdout);
 }
 
+static int parse_address (const char *cmd, const char *addr_str, uint32 *result)
+{
+    unsigned long addr;
+    char *endptr = NULL;
+    errno = 0;
+    addr = strtoul(addr_str, &endptr, 0);
+    if ((addr == 0) && (endptr == addr_str)) {
+	printf("%s: Can't parse address.\n", cmd);
+	return -1;
+    }
+    if (((errno == ERANGE) && (addr == ULONG_MAX))
+#if (SIZEOF_LONG > 4)
+	|| (addr > 0xffffffffUL)
+#endif
+	)
+    {
+	printf("%s: Address out of range.\n", cmd);
+	return -1;
+    }
+    *result = (uint32) addr;
+    return 0;
+}
+
 void mem_fn (SimpleInteractor *in, int argc, char **argv)
 {
     uint32 addr;
+    char *endptr = NULL;
     if (argc != 2) {
         printf("mem: usage: mem <addr>\n");
         return;
     }
-    addr = strtoul(argv[1], NULL, 0);
+    if (parse_address("mem", argv[1], &addr) < 0) {
+	return;
+    }
+    if (addr & 3) {
+	printf("mem: Address not word-aligned.\n");
+	return;
+    }
     uint32 nwords = 8;
     while (nwords--) {
         machine->cpu->dump_mem (stdout, addr);
+        addr += 4;
+    }
+}
+
+void dis_fn (SimpleInteractor *in, int argc, char **argv)
+{
+    uint32 addr;
+    char *endptr = NULL;
+    if (argc != 2) {
+        printf("dis: usage: dis <addr>\n");
+        return;
+    }
+    if (parse_address("dis", argv[1], &addr) < 0) {
+	return;
+    }
+    if (addr & 3) {
+	printf("dis: Address not word-aligned.\n");
+	return;
+    }
+    uint32 nwords = 8;
+    while (nwords--) {
+	// FIXME: disasm can only go to stderr! Lame.
+        machine->cpu->dis_mem (stderr, addr);
         addr += 4;
     }
 }
@@ -92,12 +148,13 @@ void help_fn (SimpleInteractor *in, int argc, char **argv)
      "quit   - same as halt (*)\n"
      "regs   - print CPU registers\n"
      "cp0    - print CP0 registers and TLB\n"
-     "mem A  - print first few words of memory at address A\n"
+     "mem A  - print first few words of memory at word address A\n"
+     "dis A  - disassemble first few words of memory at word address A\n"
      "stack  - print first few words of stack\n"
      "help   - print this command list\n");
 }
 
-/*--------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
 std::vector<char *> SimpleInteractor::parse_string(char *buf)
 {
@@ -183,6 +240,7 @@ Interactor *create_interactor()
     in->register_command(regs_fn, "regs");
     in->register_command(cp0_fn, "cp0");
     in->register_command(mem_fn, "mem");
+    in->register_command(dis_fn, "dis");
     in->register_command(stack_fn, "stack");
     in->register_command(halt_fn, "halt");
     in->register_command(halt_fn, "quit");

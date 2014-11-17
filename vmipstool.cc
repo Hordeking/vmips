@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* For later: ways to get page size:
 long sysconf(_SC_PAGE_SIZE);
@@ -32,9 +32,9 @@ int getpagesize(void);
 #include "options.h"
 #include <cerrno>
 #include <cstdarg>
-#include <cstring>
+#include <climits>
 #include <cstdlib>
-#include <limits.h>
+#include <cstring>
 #include <cstdio>
 #include <iostream>
 #include <sys/stat.h>

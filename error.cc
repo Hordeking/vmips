@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include <cstdio>
 #include <cstdarg>
@@ -34,12 +34,12 @@ static void format_help(FILE *file, const char *pre, const char *post,
 	assert(fmt);
 
 	if (pre)
-		fprintf(file, pre);
+		fputs(pre, file);
 	
 	vfprintf(file, fmt, ap);
 
 	if (post)
-		fprintf(file, post);
+		fputs(post, file);
 
 	fflush(file);
 }

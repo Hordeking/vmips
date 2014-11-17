@@ -27,7 +27,8 @@ the delay slot state of the virtual CPU, and states
 what type of memory access the exception was caused by,
 if applicable. Interrupt exceptions are only printed if
 @option{reportirq} is also set; when they occur, they also have Cause
-and Status register information printed.  The default value is FALSE.
+and Status register information printed. TLB misses will have fault
+address and user/kernel mode information printed.  The default value is FALSE.
 
 @option{bootmsg} (type: Boolean)
 
@@ -189,7 +190,9 @@ SPIM-compatible console device's Keyboard 1 will take their data, and
 to which writes to Display 1 will send their data. If the OS supports
 ttyname(3), that call will be used to guess the default pathname.
 If the pathname is the single word @samp{off}, then the device will be
-disconnected.  The default value is "/dev/tty".
+disconnected.
+If the pathname is the single word @samp{stdout}, then the device
+will be connected to standard output, and input will be disabled.  The default value is "/dev/tty".
 
 @option{ttydev2} (type: string)
 
@@ -203,6 +206,11 @@ be enabled in the virtual machine. This will cause the machine to
 wait for gdb to attach and @samp{continue} before booting the ROM file.
 If debug is not set, then the machine will boot the ROM file
 without pausing.  The default value is FALSE.
+
+@option{debugport} (type: number)
+
+ If debugport is set to something nonzero, then the gdb remote
+serial protocol backend will use the specified TCP port.  The default value is 0.
 
 @option{realtime} (type: Boolean)
 
@@ -328,6 +336,13 @@ load addresses in KSEG0 or KSEG1 (0x80000000 through
 
  True to enable hooks in the CPU to communicate with a
 floating-point unit as coprocessor 1. The floating-point unit
-is not implemented, only the hooks in the CPU are. This is an
+is not implemented; only the hooks in the CPU are. This is an
 experimental, unfinished feature.  The default value is FALSE.
+
+@option{testdev} (type: Boolean)
+
+ True to enable a memory-mapped device that is used to test
+the memory-mapped device interface. The VMIPS test suite turns
+this device on as necessary; you should not normally need
+to enable it.  The default value is FALSE.
 

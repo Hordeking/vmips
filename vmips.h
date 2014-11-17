@@ -16,7 +16,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _VMIPS_H_
 #define _VMIPS_H_
@@ -40,6 +40,7 @@ class DECRTCDevice;
 class DECCSRDevice;
 class DECStatDevice;
 class DECSerialDevice;
+class TestDev;
 class Disassembler;
 class Interactor;
 
@@ -59,7 +60,6 @@ public:
 	Debug	*dbgr;
 	Disassembler	*disasm;
 	bool		host_bigendian;
-	DECCSRDevice	*deccsr_device;
 
 	int			state;
 	bool halted() const { return (state == HALT); }
@@ -69,8 +69,10 @@ public:
 	HaltDevice	*halt_device;
 	SpimConsoleDevice	*spim_console;
 	DECRTCDevice	*decrtc_device;
+	DECCSRDevice	*deccsr_device;
 	DECStatDevice	*decstat_device;
 	DECSerialDevice	*decserial_device;
+	TestDev		*test_device;
 
 	/* Cached versions of options: */
 	bool		opt_bootmsg;
@@ -89,6 +91,7 @@ public:
 	bool		opt_decstat;
 	bool		opt_decserial;
 	bool		opt_spimconsole;
+	bool		opt_testdev;
 	uint32		opt_clockspeed;
 	uint32		clock_nanos;
 	uint32		opt_clockintr;
@@ -114,6 +117,9 @@ private:
 	   configured terminal lines. */
 	virtual bool setup_spimconsole();
 
+	/* Initialize the test-only device. */
+	virtual bool setup_testdev();
+
 	/* Initialize the clock device if it is configured. Return true if
 	   there are no initialization problems, otherwise return false. */
 	virtual bool setup_clockdevice();
@@ -130,6 +136,8 @@ private:
 	   there are no initialization problems, otherwise return false. */
 	virtual bool setup_decstat();
 
+	/* Initialize the DEC serial device if it is configured. Return true if
+	   there are no initialization problems, otherwise return false. */
 	virtual bool setup_decserial();
 
 	virtual bool setup_rom();
@@ -150,7 +158,7 @@ private:
 		TerminalController *c, const char *c_name);
 
 	/* Initialize the halt device if it is configured. */
-    bool setup_haltdevice();
+	bool setup_haltdevice();
 
 public:
 	void refresh_options(void);

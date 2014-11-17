@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* DZ11 serial device as implemented the DECstation 5000/200
  * 
@@ -25,7 +25,12 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
  *
  * This version does not support the CSR<MAINT> (loopback enable) bit.
  * 
+ * If you are having trouble, try recompiling with the SERIAL_DEBUG macro
+ * defined; see below. This will spew a large amount of stuff, some of which
+ * may be helpful.
  */
+
+/* #define SERIAL_DEBUG 1 */
 
 #include "cpu.h"
 #include "deccsr.h"
@@ -47,7 +52,9 @@ DECSerialDevice::DECSerialDevice (Clock *clock, uint8 deccsr_irq_)
 void
 DECSerialDevice::master_clear ()
 {
-  /* fprintf (stderr, "DZ11 Master clear!\n"); */
+#if defined(SERIAL_DEBUG)
+  fprintf (stderr, "DZ11 Master clear!\n");
+#endif
   csr = 0;
   rbuf &= ~DZ_RBUF_DVAL;
   lpr = 0;
@@ -66,8 +73,7 @@ CSR_TLINE (unsigned int Line)
   return (((Line) & 0x03) << 8);
 }
 
-#if 0
-/* presently unused */
+#if defined(SERIAL_DEBUG)
 static unsigned int
 GET_CURRENT_CSR_TLINE (uint32 Csr)
 {
@@ -107,7 +113,7 @@ DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
           csr |= CSR_TLINE(line);
         }
       }
-	rv = csr;
+    rv = csr;
     break;
   case DZ_RBUF:
     rbuf &= ~DZ_RBUF_DVAL;
@@ -123,12 +129,20 @@ DECSerialDevice::fetch_word (uint32 offset, int mode, DeviceExc *client)
     break;
   case DZ_TCR:
     rv = tcr;
-    /* fprintf (stderr, "DZ11 TCR read as 0x%x\n", rv); */
+#if defined(SERIAL_DEBUG)
+    fprintf (stderr, "PC=0x%x DZ11 TCR read as 0x%x\n",
+	    machine->cpu->debug_get_pc(), rv);
+#endif
     break;
   case DZ_MSR:
     rv = msr;
-    /* fprintf (stderr, "DZ11 MSR read as 0x%x\n", rv); */
+#if defined(SERIAL_DEBUG)
+    fprintf (stderr, "DZ11 MSR read as 0x%x\n", rv);
+#endif
     break;
+  }
+  if (machine->cpu->is_bigendian()) {
+      rv <<= 16;
   }
   return machine->physmem->mips_to_host_word(rv);
 }
@@ -144,30 +158,53 @@ DECSerialDevice::displayInterruptReadyForLine (const int line) const {
 }
 
 void
-DECSerialDevice::store_word (uint32 offset, uint32 data, DeviceExc *client)
+DECSerialDevice::store_word (uint32 offset, uint32 odata, DeviceExc *client)
 {
-  data = machine->physmem->host_to_mips_word(data);
+  uint32 data = machine->physmem->host_to_mips_word(odata);
+#if defined(SERIAL_DEBUG)
+  fprintf(stderr,"DZ11 Store(0x%08x) got 0x%08x, storing 0x%08x\n", offset,odata,data);
+#endif
+  // For testing purposes, we would like this device to work even when the
+  // machine is in big-endian mode. The issues are: (0) This is not
+  // necessarily true of the actual hardware.  (1) The hardware contains
+  // 16-bit registers, but we only implement store_word. (2) The DeviceMap
+  // class only implements store_byte and store_halfword in terms of
+  // store_word; it makes no provision for implementing store_byte and
+  // store_word in terms of store_halfword. So, hack it to work by peeking at
+  // the CPU endianness, and shifting the data if we are in big-endian mode.
+  if (machine->cpu->is_bigendian()) {
+      data >>= 16;
+  }
   uint16 data16 = data & 0x0ffff;
   switch (offset & 0x18) {
     case DZ_CSR:
-      /* fprintf (stderr, "DZ11 write CSR as %x\n", data16); */
+#if defined(SERIAL_DEBUG)
+      fprintf (stderr, "DZ11 write CSR as %x\n", data16);
+#endif
       csr = data16;
       if (csr & DZ_CSR_CLR)
         master_clear ();
       display_interrupt_enable = (csr & DZ_CSR_TIE);
       keyboard_interrupt_enable = (csr & DZ_CSR_RIE);
-      /* fprintf (stderr, "DZ11 Keyboard IE is now %s, Display IE now %s, "
+#if defined(SERIAL_DEBUG)
+      fprintf (stderr, "DZ11 Keyboard IE is now %s, Display IE now %s, "
                "selected tx line now %d\n",
                keyboard_interrupt_enable ? "on" : "off",
                display_interrupt_enable ? "on" : "off",
-               GET_CURRENT_CSR_TLINE (csr)); */
+               GET_CURRENT_CSR_TLINE (csr));
+#endif
       break;
     case DZ_LPR:
-      /* fprintf (stderr, "DZ11 write LPR as %x\n", data16); */
+#if defined(SERIAL_DEBUG)
+      fprintf (stderr, "DZ11 write LPR as %x\n", data16);
+#endif
       lpr = data16;
       break;
     case DZ_TCR:
-      /* fprintf (stderr, "DZ11 write TCR as %x\n", data16); */
+#if defined(SERIAL_DEBUG)
+      fprintf (stderr, "PC=0x%x DZ11 write TCR as %x (%x)\n",
+	      machine->cpu->debug_get_pc(), data16, odata);
+#endif
       tcr = data16;
       break;
     case DZ_TDR: {

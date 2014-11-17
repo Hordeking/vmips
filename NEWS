@@ -2,7 +2,59 @@
 Appendix D Release History
 **************************
 
-vmips-1.4.1 was released on 7 May 2013.  User-visible changes in
+vmips-1.5 was released on 17 November 2014.  User-visible changes in
+version 1.5 (since version 1.4.1):
+
+   * New features/improvements:
+
+   * VMIPS now includes a basic direct-mapped cache simulation. The
+     cache isolation and cache swap bits in the CP0 Status register are
+     now honored.
+
+   * The boot monitor distributed with VMIPS now sets up a dummy
+     `argv[0]' value for the loaded program. Also, it halts by entering
+     an infinite loop rather than attempting to execute a `break'
+     instruction when it encounters an unexpected exception.
+
+   * The setup assembly routine distributed with VMIPS has been made
+     more TLB-friendly. Identity virtual-to-physical mappings for the
+     first few pages of physical RAM are installed in the TLB at program
+     start time.
+
+   * When `-o excmsg' is on, TLB miss addresses will be printed to
+     stderr.
+
+   * When `-o ttydev=stdout' is specified, simulated program output
+     will be sent to VMIPS's standard output, even if it is not a tty.
+
+   * The interactor can now disassemble memory. Also, stepping in the
+     interactor now prints the PC after each step.
+
+   * VMIPS now supports more of the GDB remote serial protocol, in
+     support of the GDB `info threads' and `detach' commands. The debug
+     protocol TCP port is now configurable via the `-o debugport'
+     option. Also, if something halts the program while the debugger
+     interface is active, VMIPS will tell GDB that the program exited.
+
+   * Bug fixes:
+
+   * A bug was fixed in the debugger interface where disconnecting from
+     the debugger socket could cause vmips to enter an infinite loop.
+
+   * The interactor will refuse to dump raw memory words at
+     non-word-aligned addresses.
+
+   * The CP0 Cause register IP field is now recomputed whenever the
+     register is read, rather than only when exceptions happen. This
+     makes polling loops with interrupts disabled work correctly.
+
+   * A bug was fixed in the DECstation-compatible clock device which was
+     preventing some of its registers from being zeroed properly.
+
+   * Some endianness bugs were fixed in the generic memory-mapped device
+     code and in the DECstation-compatible serial device.
+
+   vmips-1.4.1 was released on 7 May 2013.  User-visible changes in
 version 1.4.1 (since version 1.4):
 
    * Problems compiling VMIPS with gcc 4.7.x have been fixed.

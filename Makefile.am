@@ -2,8 +2,9 @@
 
 SUBDIRS = libopcodes_mips . sample_code @TESTCODE_DIR@ doc
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
-DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
- debian/copyright debian/dirs debian/docs debian/info debian/rules
+DEBIAN_PKG_FILES = debian/changelog debian/compat debian/control \
+ debian/copyright debian/dirs debian/docs debian/info debian/rules \
+ debian/source/format
 EXTRA_DIST = VERSION $(REDHAT_PKG_FILES) \
  $(sysconf_DATA) $(DEBIAN_PKG_FILES)
 
@@ -24,7 +25,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc \
   decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc fpu.cc \
-  interactor.cc \
+  interactor.cc testdev.cc \
   cpu.h cpzero.h cpzeroreg.h deviceint.h \
   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
   range.h spimconsole.h spimconsreg.h \
@@ -33,7 +34,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
   decstat.h decserial.h decserialreg.h rommodule.h gccattr.h mmapglue.h \
-  types.h endiantest.h fileutils.h fpu.h interactor.h
+  types.h endiantest.h fileutils.h fpu.h interactor.h testdev.h
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
 # This library contains the subset of libbfd/libopcodes that we use.

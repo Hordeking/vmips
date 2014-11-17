@@ -141,7 +141,7 @@ lowlevelpanic:
 	mfc0 a2, EPC
 	mfc0 a3, BadVAddr
 	jal uncaught /* print a panic message */
-	break 0x0 /* halt when we get here. */
+1:	j 1b /* loop forever (halt) when we get here. */
 
 	.globl reset
 	.ent reset

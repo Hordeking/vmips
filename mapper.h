@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _MAPPER_H_
 #define _MAPPER_H_
@@ -25,15 +25,32 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <vector>
 class DeviceExc;
 
+class Cache {
+public:
+        Cache(unsigned int bits_);
+        ~Cache();
+
+        struct Entry {
+                bool valid;
+                uint32 tag;
+                uint32 data;
+        };
+
+        uint32 bits;
+        uint32 size;
+        uint32 mask;
+        Entry *entries;
+};
+
 class Mapper {
 public:
 	struct BusErrorInfo {
-	  bool valid;
-	  DeviceExc *client;
-	  int32 mode;
-	  uint32 addr;
-	  int32 width;
-	  uint32 data;
+		bool valid;
+		DeviceExc *client;
+		int32 mode;
+		uint32 addr;
+		int32 width;
+		uint32 data;
 	};
 
 private:
@@ -51,7 +68,7 @@ private:
 	/* A list of all currently mapped ranges. */
 	Ranges ranges;
 
-	/* Cached option values. */
+	/* Saved option values. */
 	bool opt_bigendian;
 	bool byteswapped;
 
@@ -66,6 +83,34 @@ private:
 	void bus_error (DeviceExc *client, int32 mode, uint32 addr, int32 width,
 		uint32 data = 0xffffffff);
 
+	/* Cache configuration. */
+	bool caches_isolated;
+	bool caches_swapped;
+
+	/* Cache objects. */
+	Cache *icache;
+	Cache *dcache;
+
+	/* Cache implementation. */
+	bool cache_use_entry(const Cache::Entry *const entry, uint32 tag,
+		int32 mode) const;
+
+	bool cache_hit(bool cacheable, int32 mode, uint32 &tag, uint32 &addr,
+		Cache::Entry *&entry);
+
+	uint32 cache_get_data_from_entry(const Cache::Entry *const entry,
+			int size, uint32 addr);
+
+	void cache_set_data_into_entry(Cache::Entry *const entry,
+			int size, uint32 addr, uint32 data);
+
+	uint32 cache_do_fill(Cache::Entry *const entry, uint32 tag,
+			Range *l, uint32 offset, int32 mode, DeviceExc *client,
+			int32 size, uint32 addr);
+
+	void cache_write(int size, uint32 addr, uint32 data, Range *l,
+		DeviceExc *client);
+
 public:
 	Mapper();
 	~Mapper();
@@ -76,10 +121,10 @@ public:
 		r->setBase (pa); return add_range (r);
 	}
 
-	/* Byte-swapping routines, which act according to the current
-	   setting of the 'bigendian' option.  */
-	uint32 swap_word(uint32 w);
-	uint16 swap_halfword(uint16 h);
+	/* Byte-swapping routines. The mips_to_host and host_to_mips routines
+	   act according to the current setting of the 'bigendian' option.  */
+	static uint32 swap_word(uint32 w);
+	static uint16 swap_halfword(uint16 h);
 	uint32 mips_to_host_word(uint32 w);
 	uint32 host_to_mips_word(uint32 w);
 	uint16 mips_to_host_halfword(uint16 h);
@@ -121,6 +166,10 @@ public:
 
 	/* Copy information about the most recent bus error to INFO. */
 	void get_last_berr_info (BusErrorInfo &info) { info = last_berr_info; }
+
+	/* Set the cache control bits to the given values. */
+	void cache_set_control_bits(bool isolated, bool swapped);
+
 };
 
 #endif /* _MAPPER_H_ */

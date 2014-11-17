@@ -15,8 +15,9 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#include <string.h>
 #include "cpu.h"
 #include "cpzero.h"
 #include "debug.h"
@@ -134,6 +135,25 @@ CPU::dump_mem(FILE *f, uint32 addr)
 		fprintf(f, "(not mapped in TLB)");
 	}
 	fprintf(f, "\n");
+}
+
+/* Disassemble a word at addr and print the result to f.
+ * FIXME: currently, f must be stderr, for the disassembler.
+ */
+void
+CPU::dis_mem(FILE *f, uint32 addr)
+{
+	uint32 phys;
+	uint32 instr;
+	if (cpzero->debug_tlb_translate(addr, &phys)) {
+		fprintf(f,"PC=0x%08x [%08x]      %s",addr,phys,(addr==pc?"=>":"  "));
+		instr = mem->fetch_word(phys,INSTFETCH,false, this);
+		fprintf(f,"%08x ",instr);
+		machine->disasm->disassemble(addr,instr);
+	} else {
+		fprintf(f,"PC=0x%08x [%08x]      %s",addr,phys,(addr==pc?"=>":"  "));
+		fprintf(f, "(not mapped in TLB)\n");
+	}
 }
 
 void
@@ -335,6 +355,8 @@ void
 CPU::cpzero_emulate(uint32 instr, uint32 pc)
 {
 	cpzero->cpzero_emulate(instr, pc);
+	mem->cache_set_control_bits(cpzero->caches_isolated(),
+		cpzero->caches_swapped());
 }
 
 /* Called when the program wants to use coprocessor COPROCNO, and there
@@ -1853,7 +1875,6 @@ CPU::step()
 	if (tracing)
 		write_trace_record_1 (pc, instr);
 
-
 	// Check for a (hardware or software) interrupt.
 	if (cpzero->interrupt_pending()) {
 		exception(Int);
@@ -1875,16 +1896,16 @@ out:
 	}
 
 	// If an exception is pending, then the PC has already been changed to
-    // contain the exception vector.  Return now, so that we don't clobber it.
+	// contain the exception vector.  Return now, so that we don't clobber it.
 	if (exception_pending) {
 		// Instruction at beginning of exception handler is NOT in delay slot,
-        // no matter what the last instruction was.
+		// no matter what the last instruction was.
 		delay_state = NORMAL;
 		return;
 	}
 
-    // Recall the delay_state values: 0=NORMAL, 1=DELAYING, 2=DELAYSLOT.
-    // This is what the delay_state values mean (at this point in the code):
+	// Recall the delay_state values: 0=NORMAL, 1=DELAYING, 2=DELAYSLOT.
+	// This is what the delay_state values mean (at this point in the code):
 	// DELAYING: The last instruction caused a branch to be taken.
 	//  The next instruction is in the delay slot.
 	//  The next instruction EPC will be PC - 4.
@@ -1894,11 +1915,11 @@ out:
 	// NORMAL: No branch was executed; next instruction is at PC + 4.
 	//  Next instruction EPC is PC.
 
-    // Update the pc and delay_state values.
-    pc += 4;
-    if (delay_state == DELAYSLOT)
-      pc = delay_pc;
-    delay_state = (delay_state << 1) & 0x03; // 0->0, 1->2, 2->0
+	// Update the pc and delay_state values.
+	pc += 4;
+	if (delay_state == DELAYSLOT)
+		pc = delay_pc;
+	delay_state = (delay_state << 1) & 0x03; // 0->0, 1->2, 2->0
 }
 
 void
@@ -1984,7 +2005,7 @@ CPU::debug_registers_to_packet(void)
 	packet[0] = '\0';
 	r = 0;
 	for (i = 0; i < 32; i++) {
-	  debug_packet_push_word(packet, reg[i]); r++;
+		debug_packet_push_word(packet, reg[i]); r++;
 	}
 	uint32 sr, bad, cause;
 	cpzero->read_debug_info(&sr, &bad, &cause);
@@ -1994,8 +2015,9 @@ CPU::debug_registers_to_packet(void)
 	debug_packet_push_word(packet, bad); r++;
 	debug_packet_push_word(packet, cause); r++;
 	debug_packet_push_word(packet, pc); r++;
-	for (; r < 90; r++) /* unimplemented regs at end */
-	  debug_packet_push_word(packet, 0);
+	for (; r < 90; r++) { /* unimplemented regs at end */
+		debug_packet_push_word(packet, 0);
+	}
 	return packet;
 }
 
@@ -2049,8 +2071,9 @@ CPU::debug_get_pc(void)
 void
 CPU::debug_packet_push_word(char *packet, uint32 n)
 {
-	if (!opt_bigendian)
-		n = mem->swap_word(n);
+	if (!opt_bigendian) {
+		n = Mapper::swap_word(n);
+	}
 	char packetpiece[10];
 	sprintf(packetpiece, "%08x", n);
 	strcat(packet, packetpiece);

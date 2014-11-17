@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
@@ -38,6 +38,7 @@ private:
 	typedef std::set<uint32> wordset;
 	wordset bp_set;
 	bool opt_bigendian;
+	bool debug_verbose;
 
 public:
 	Debug (CPU &c_, Mapper &m_);
@@ -49,7 +50,7 @@ public:
 
 	int setup(uint32 baseaddr, uint32 nwords);
 	int serverloop(void);
-    void exception(uint16 excCode, int mode, int coprocno);
+	void exception(uint16 excCode, int mode, int coprocno);
 
 private:
 	int setup_listener_socket(void);
@@ -57,16 +58,20 @@ private:
 	void print_local_name(int s);
 	void targetloop(void);
 	char *rawpacket(const char *str);
+	char *hexpacket(const char *str);
 	char *error_packet(int error_code);
 	char *signal_packet(int signal);
+	char *target_query(char *pkt);
 	char *target_kill(char *pkt);
 	char *target_set_thread(char *pkt);
+	char *target_poll_thread(char *pkt);
 	char *target_read_registers(char *pkt);
 	char *target_write_registers(char *pkt);
 	char *target_read_memory(char *pkt);
 	char *target_write_memory(char *pkt);
 	uint8 single_step(void);
 	char *target_continue(char *pkt);
+	char *target_detach(char *pkt);
 	char *target_step(char *pkt);
 	char *target_last_signal(char *pkt);
 	char *target_unimplemented(char *pkt);

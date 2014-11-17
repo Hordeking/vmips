@@ -89,12 +89,6 @@
 /* Define to 1 if you have the `vprintf' function. */
 #undef HAVE_VPRINTF
 
-/* Define to initialize registers to random values instead of zero. */
-#undef INTENTIONAL_CONFUSION
-
-/* Define if you don't want any assertions checked at runtime. */
-#undef NDEBUG
-
 /* Name of package */
 #undef PACKAGE
 

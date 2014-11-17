@@ -16,7 +16,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _OPTIONTBL_H_
 #define _OPTIONTBL_H_
@@ -74,7 +74,8 @@ static Option nametable[] = {
         what type of memory access the exception was caused by,
         if applicable. Interrupt exceptions are only printed if
         @option{reportirq} is also set; when they occur, they also have Cause
-        and Status register information printed. **/
+        and Status register information printed. TLB misses will have fault
+        address and user/kernel mode information printed. **/
 
     { "bootmsg", FLAG },
     /** Controls whether boot-time and halt-time messages will be printed.
@@ -220,7 +221,9 @@ static Option nametable[] = {
         to which writes to Display 1 will send their data. If the OS supports
         ttyname(3), that call will be used to guess the default pathname.
         If the pathname is the single word @samp{off}, then the device will be
-        disconnected. **/
+        disconnected.
+        If the pathname is the single word @samp{stdout}, then the device
+	will be connected to standard output, and input will be disabled. **/
 
     { "ttydev2", STR },
     /** See @option{ttydev} option; this one is just like it, but pertains
@@ -232,6 +235,10 @@ static Option nametable[] = {
         wait for gdb to attach and @samp{continue} before booting the ROM file.
         If debug is not set, then the machine will boot the ROM file
         without pausing. **/
+
+    { "debugport", NUM },
+    /** If debugport is set to something nonzero, then the gdb remote
+        serial protocol backend will use the specified TCP port. **/
 
     { "realtime", FLAG },
     /** If @option{realtime} is set, then the clock device will cause simulated
@@ -337,9 +344,15 @@ static Option nametable[] = {
 
     { "fpu", FLAG },
     /** True to enable hooks in the CPU to communicate with a
-        floating-point unit as coprocessor 1. The floating-point unit
-	is not implemented, only the hooks in the CPU are. This is an
+	floating-point unit as coprocessor 1. The floating-point unit
+	is not implemented; only the hooks in the CPU are. This is an
 	experimental, unfinished feature. **/
+
+    { "testdev", FLAG },
+    /** True to enable a memory-mapped device that is used to test
+	the memory-mapped device interface. The VMIPS test suite turns
+	this device on as necessary; you should not normally need
+	to enable it. **/
 
     { NULL, 0 }
 };
@@ -352,14 +365,17 @@ static const char *defaults_table[] = {
     "loadaddr=0xbfc00000", "noinstcounts",
     "memsize=0x100000", "nomemdump", "memdumpfile=memdump.bin",
     "noreportirq", "ttydev=/dev/tty", "ttydev2=off",
-    "nodebug", "norealtime", "timeratio=1", "clockspeed=250000",
+    "nodebug", "debugport=0", "norealtime", "timeratio=1", "clockspeed=250000",
     "clockintr=200000000", "clockdeviceirq=7", "clockdevice",
     "nodbemsg", "nodecrtc", "nodeccsr", "nodecstat", "nodecserial",
     "spimconsole", "notracing", "tracesize=100000", "nobigendian",
     "tracestartpc=0", "traceendpc=0",
     "mipstoolprefix=/nonexistent/mips/bin/mipsel-ecoff-",
-    "execname=none", "nofpu",
+    "execname=none", "nofpu", "notestdev",
     NULL
 };
+
+/* If you add or remove an option, or modify an option's default value,
+ * you should update vmipsrc.in to match. */
 
 #endif /* _OPTIONTBL_H_ */

@@ -1,5 +1,5 @@
 
-12 Test Suite
+14 Test Suite
 *************
 
 VMIPS has a test suite with a small number of regression tests.  It
@@ -7,8 +7,8 @@ uses the DejaGNU test framework, which is written in the Expect
 language.  Expect was written by Don Libes, and is a dialect of Tcl,
 the Tool Command Language by Ousterhout et al.
 
-12.0.1 How to run the test suite
---------------------------------
+14.1 How to run the test suite
+==============================
 
 In order to run the test suite or add tests to it, you will need to have
 Expect and DejaGNU installed.  Any version of DejaGNU later than 1.3
@@ -35,8 +35,8 @@ directory in the source tree and running `runtest --tool vmips'.
    As a general rule, no tests should fail in a released version of
 VMIPS; however, CVS builds may have test failures from time to time.
 
-12.0.2 Test suite frameworks
-----------------------------
+14.2 Test suite frameworks
+==========================
 
 VMIPS has two comprehensive testing frameworks: the `regcheck'
 framework, whose tests live in the `vmips.regcheck' directory, and the
@@ -63,8 +63,8 @@ test from among the `regcheck' tests, specify its `.par' file after an
 equal sign. For example, you might type: `runtest --tool vmips
 regcheck.exp=mumble.par' to run only the `mumble.par' `regcheck' test.
 
-12.0.3 How to add a test to the test suite
-------------------------------------------
+14.3 How to add a test to the test suite
+========================================
 
 To write a new test case, first decide whether it is easier to have
 your test case print out something or to look at the `haltdumpcpu'
@@ -84,16 +84,16 @@ frameworks. Adding a test to `vmips.misc-tests' is tricky - you may be
 able to make progress by looking at the other `.exp' files in that
 directory.
 
-12.0.4 Common problems
-----------------------
+14.4 Common problems
+====================
 
 You can get screenfuls of `endian_option was not set' errors if you run
 `runtest' without first making a DejaGNU `site.exp' configuration file
 first.  To make a `site.exp' file, just run `make site.exp' in the
 `test_code' directory.
 
-12.0.5 Additional test cases needed
------------------------------------
+14.5 Additional test cases needed
+=================================
 
 Test cases should probably be added for the following categories of
 VMIPS behaviors. (This list is from 2002; it is probably a good start,

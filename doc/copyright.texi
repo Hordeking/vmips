@@ -2,7 +2,7 @@
 @c with "Document" or "this document" substituted for "Software".
 @c To see why we use the MIT license instead of the FDL, see:
 @c http://home.twcny.rr.com/nerode/neroden/fdl.html
-Copyright @copyright{} 2001, 2002, 2004, 2009 Brian R. Gaeke.
+Copyright @copyright{} 2001, 2002, 2004, 2009, 2014 Brian R. Gaeke.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this document (the "Document"), to deal in the Document without

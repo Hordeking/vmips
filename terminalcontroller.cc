@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "clock.h"
 #include "error.h"
@@ -81,18 +81,14 @@ bool TerminalController::connect_terminal( int tty_fd, int line )
 	assert( !lines[line].keyboard_repoll );
 	assert( !lines[line].display_delay );
 
-	if( !isatty( tty_fd ) ) {
-		error( "attempt to connect non tty to line %d", line );
-		while( close( tty_fd ) == -1 && errno == EINTR );
+	if (isatty(tty_fd)) {
+	    // save the old terminal state
+	    if (tcgetattr(tty_fd, &lines[line].tty_state) == -1) {
+		error("cannot get terminal state on line %d: %s",
+		      line, strerror(errno));
+		close(tty_fd);
 		return false;
-	}
-
-	// save the old terminal state
-	if( tcgetattr( tty_fd, &lines[line].tty_state ) == -1 ) {
-		error( "cannot get terminal state on line %d: %s",
-		       line, strerror(errno) );
-		while( close( tty_fd ) == -1 && errno == EINTR );
-		return false;
+	    }
 	}
 
 	// prepare to call prepare_tty()
@@ -128,16 +124,17 @@ void TerminalController::remove_terminal( int line )
 		assert( !lines[line].display_delay );
 		return;
 	}
-	assert( isatty( lines[line].tty_fd ) );
 
 	// invalidate this line
 	lines[line].tty_fd = -1;
 	FD_CLR( tty_fd, &unready_keyboards );
 
-	// reset the original terminal settings
-	if( tcsetattr( tty_fd, TCSAFLUSH, &lines[line].tty_state ) == -1 )
-		error( "cannot restore state for terminal on line %d", line );
-	
+	if (isatty(tty_fd)) {
+	    // reset the original terminal settings
+	    if (tcsetattr(tty_fd, TCSAFLUSH, &lines[line].tty_state) == -1)
+		    error("cannot restore state for terminal on line %d", line);
+	}
+
 	// make sure to cancel tasks which refer to this line
 	if( lines[line].keyboard_repoll ) {
 		lines[line].keyboard_repoll->cancel();
@@ -272,7 +269,9 @@ void TerminalController::poll_keyboards()
 bool TerminalController::prepare_tty( int line )
 {
 	assert( line_connected( line ) );
-	assert( isatty( lines[line].tty_fd ) );
+	if (!isatty(lines[line].tty_fd)) {
+		return true;
+	}
 
 	int tty_fd = lines[line].tty_fd;
 

@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* Dallas Semiconductor DS1287 real-time clock chip, as implemented
  * as a memory-mapped device in the DEC 5000/200 (KN02).
@@ -35,8 +35,8 @@ static const uint32 int_freqs [16] = {
   3906250, 7812500, 15625000, 31250000, 62500000, 125000000,
   250000000, 500000000
 };
-#if 0
-/* presently unused */
+
+#if defined(RTC_DEBUG)
 static const char *reg_names [15] = {
   "RTC_SEC", "RTC_ALMS", "RTC_MIN", "RTC_ALMM", "RTC_HOUR",
   "RTC_ALMH", "RTC_DOW", "RTC_DAY", "RTC_MON", "RTC_YEAR",
@@ -74,6 +74,9 @@ DECRTCDevice::fetch_word(uint32 offset, int mode, DeviceExc *client)
 {
   uint32 reg_no = (offset / 4);
   uint32 rv = 0;
+#if defined(RTC_DEBUG)
+  fprintf(stderr, "RTC fetch word, offset=0x%x\n", offset);
+#endif
   if (reg_no == RTC_REGA) {
     // Fake "update in progress" once a second
     time_t real_nanos = clock->get_time().tv_nsec;
@@ -87,8 +90,12 @@ DECRTCDevice::fetch_word(uint32 offset, int mode, DeviceExc *client)
     update_host_time ();
   if (reg_no < 64)
     rv = rtc_reg[reg_no];
-  if (reg_no == RTC_REGC)
+  if (reg_no == RTC_REGC) {
+#if defined(RTC_DEBUG)
+    fprintf(stderr, "RTC read REGC -- deassert IRQ\n");
+#endif
     unready_clock ();
+  }
 
   return machine->physmem->mips_to_host_word(rv);
 }
@@ -112,26 +119,37 @@ DECRTCDevice::store_word(uint32 offset, uint32 data, DeviceExc *client)
 
   bool old_interrupt_enable = rtc_reg[RTC_REGB] & REGB_PIE;
   uint32 reg_no = (offset / 4);
-  /* fprintf (stderr, "RTC %s (%u) written with 0x%x\n",
-	reg_names[(reg_no > 14) ? 14 : reg_no], reg_no, data); */
+#if defined(RTC_DEBUG)
+  fprintf (stderr, "RTC %s (%u) written with 0x%x\n",
+	reg_names[(reg_no > 14) ? 14 : reg_no], reg_no, data);
+#endif
   if (reg_no < 64)
-    rtc_reg[reg_no] = rtc_reg[reg_no] | (((uint8) data) & write_masks[reg_no]);
+    rtc_reg[reg_no] = (rtc_reg[reg_no] & ~write_masks[reg_no])
+	| (((uint8) data) & write_masks[reg_no]);
   if (reg_no == RTC_REGA) {
     /* Maybe they changed the interrupt rate selector. */
     uint8 rate_selector = rtc_reg[RTC_REGA] & REGA_RSX;
-    /* fprintf (stderr, "RTC rate_selector set to 0x%x (%u)\n", rate_selector,
-	  int_freqs[rate_selector]); */
+#if defined(RTC_DEBUG)
+    fprintf (stderr, "RTC rate_selector set to 0x%x (%u)\n", rate_selector,
+	  int_freqs[rate_selector]);
+#endif
     frequency_ns = int_freqs[rate_selector];
-  }
-  if (reg_no == RTC_REGB) {
+  } else if (reg_no == RTC_REGB) {
     /* Maybe they enabled or disabled interrupts. */
     bool new_interrupt_enable = rtc_reg[RTC_REGB] & REGB_PIE;
-    /* fprintf (stderr, "RTC interrupt_enable set to %d\n", new_interrupt_enable); */
+#if defined(RTC_DEBUG)
+    fprintf (stderr, "RTC interrupt_enable set to %d\n", new_interrupt_enable);
+#endif
     if ((!old_interrupt_enable) && new_interrupt_enable) {
-      /* fprintf (stderr, "RTC turning interrupts on\n"); */
+#if defined(RTC_DEBUG)
+      fprintf (stderr, "RTC turning interrupts on\n");
+#endif
       ready_clock ();
     } else if (old_interrupt_enable && (!new_interrupt_enable)) {
-      /* fprintf (stderr, "RTC turning interrupts off\n"); */
+#if defined(RTC_DEBUG)
+      fprintf (stderr, "RTC turning interrupts off\n");
+#endif
+      unready_clock ();
     }
     interrupt_enable = new_interrupt_enable;
   }
@@ -140,16 +158,22 @@ DECRTCDevice::store_word(uint32 offset, uint32 data, DeviceExc *client)
 void
 DECRTCDevice::ready_clock ()
 {
-  static unsigned long counter = 0;
   if (interrupt_enable) {
+#if defined(RTC_DEBUG)
+    static unsigned long counter = 0;
     counter++;
-    /* if ((counter % 50000) == 0)
-	   fprintf (stderr, "RTC counted %lu interrupts\n", counter); */
+    if ((counter % 50000) == 0)
+	   fprintf (stderr, "RTC counted %lu interrupts\n", counter);
+#endif
     assertInt (irq);
   }
 
-  clock_trigger = new ClockTrigger (this);
-  clock->add_deferred_task (clock_trigger, frequency_ns);
+  if (frequency_ns > 0) {
+      clock_trigger = new ClockTrigger (this);
+      clock->add_deferred_task (clock_trigger, frequency_ns);
+  } else {
+      clock_trigger = NULL;
+  }
 }
 
 void
@@ -162,7 +186,12 @@ DECRTCDevice::~DECRTCDevice ()
 {
   if (clock_trigger) {
 	  clock_trigger->cancel ();
-	  delete clock_trigger;
+	  //delete clock_trigger;
+	  // If the clock_trigger exists, it will have been added to
+	  // a DeferredTasks list, and so the destruction of the
+	  // Clock will cause it to be deleted.
+	  // So don't delete it here; otherwise, we risk a crash
+	  // due to double deletion.
   }
 }
 

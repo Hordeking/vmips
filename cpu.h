@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _CPU_H_
 #define _CPU_H_
@@ -32,22 +32,22 @@ class IntCtrl;
 
 /* Exception priority information -- see exception_priority(). */
 struct excPriority {
-    int priority;
+	int priority;
 	int excCode;
 	int mode;
 };
 
 struct last_change {
-    uint32 pc;
-    uint32 instr;
-    uint32 old_value;
-    last_change () { }
-    last_change (uint32 pc_, uint32 instr_, uint32 old_value_) :
-        pc(pc_), instr(instr_), old_value(old_value_) { }
-    static last_change make (uint32 pc_, uint32 instr_, uint32 old_value_) {
-        last_change rv (pc_, instr_, old_value_);
-        return rv;
-    }
+	uint32 pc;
+	uint32 instr;
+	uint32 old_value;
+	last_change () { }
+	last_change (uint32 pc_, uint32 instr_, uint32 old_value_) :
+		pc(pc_), instr(instr_), old_value(old_value_) { }
+	static last_change make (uint32 pc_, uint32 instr_, uint32 old_value_) {
+		last_change rv (pc_, instr_, old_value_);
+		return rv;
+	}
 };
 
 class Trace {
@@ -72,8 +72,8 @@ public:
 	};
 	struct Record {
 		typedef std::vector<Operand> OperandListType;
-        OperandListType inputs;
-        OperandListType outputs;
+		OperandListType inputs;
+		OperandListType outputs;
 		uint32 pc;
 		uint32 instr;
 		uint32 saved_reg[32];
@@ -96,13 +96,13 @@ public:
 private:
 	RecordListType records;
 public:
-    std::map <int, last_change> last_change_for_reg;
+	std::map <int, last_change> last_change_for_reg;
 	record_iterator rbegin () { return records.begin (); }
 	record_iterator rend () { return records.end (); }
-    void clear () { records.clear (); last_change_for_reg.clear (); }
-    size_t record_size () const { return records.size (); }
-    void pop_front_record () { records.pop_front (); }
-    void push_back_record (Trace::Record &r) { records.push_back (r); }
+	void clear () { records.clear (); last_change_for_reg.clear (); }
+	size_t record_size () const { return records.size (); }
+	void pop_front_record () { records.pop_front (); }
+	void push_back_record (Trace::Record &r) { records.push_back (r); }
 	bool exception_happened;
 	int last_exception_code;
 };
@@ -141,7 +141,7 @@ class CPU : public DeviceExc {
 	CPZero *cpzero;
 	FPU *fpu;
 
-    // Delay slot handling.
+	// Delay slot handling.
 	int delay_state;
 	uint32 delay_pc;
 
@@ -252,16 +252,16 @@ class CPU : public DeviceExc {
 	int exception_priority(uint16 excCode, int mode) const;
 
 public:
-    // Instruction decoding.
-    static uint16 opcode(const uint32 i) { return (i >> 26) & 0x03f; }
-    static uint16 rs(const uint32 i) { return (i >> 21) & 0x01f; }
-    static uint16 rt(const uint32 i) { return (i >> 16) & 0x01f; }
-    static uint16 rd(const uint32 i) { return (i >> 11) & 0x01f; }
-    static uint16 immed(const uint32 i) { return i & 0x0ffff; }
-    static short s_immed(const uint32 i) { return i & 0x0ffff; }
-    static uint16 shamt(const uint32 i) { return (i >> 6) & 0x01f; }
-    static uint16 funct(const uint32 i) { return i & 0x03f; }
-    static uint32 jumptarg(const uint32 i) { return i & 0x03ffffff; }
+	// Instruction decoding.
+	static uint16 opcode(const uint32 i) { return (i >> 26) & 0x03f; }
+	static uint16 rs(const uint32 i) { return (i >> 21) & 0x01f; }
+	static uint16 rt(const uint32 i) { return (i >> 16) & 0x01f; }
+	static uint16 rd(const uint32 i) { return (i >> 11) & 0x01f; }
+	static uint16 immed(const uint32 i) { return i & 0x0ffff; }
+	static short s_immed(const uint32 i) { return i & 0x0ffff; }
+	static uint16 shamt(const uint32 i) { return (i >> 6) & 0x01f; }
+	static uint16 funct(const uint32 i) { return i & 0x03f; }
+	static uint32 jumptarg(const uint32 i) { return i & 0x03ffffff; }
 
 	// Constructor & destructor.
 	CPU (Mapper &m, IntCtrl &i);
@@ -272,13 +272,14 @@ public:
 	void dump_regs (FILE *f);
 	void dump_stack (FILE *f);
 	void dump_mem (FILE *f, uint32 addr);
+	void dis_mem (FILE *f, uint32 addr);
 	void cpzero_dump_regs_and_tlb (FILE *f);
 
 	// Register file accessors.
-    uint32 get_reg (const unsigned regno) { return reg[regno]; }
-    void put_reg (const unsigned regno, const uint32 new_data) {    
-        reg[regno] = new_data;  
-    }
+	uint32 get_reg (const unsigned regno) { return reg[regno]; }
+	void put_reg (const unsigned regno, const uint32 new_data) {    
+		reg[regno] = new_data;  
+	}
 
 	// Control-flow methods.
 	void step ();
@@ -303,6 +304,8 @@ public:
 		DeviceExc *client);
 	int debug_store_region (uint32 addr, uint32 len, char *packet,
 		DeviceExc *client);
+
+	bool is_bigendian() const { return opt_bigendian; }
 };
 
 #endif /* _CPU_H_ */

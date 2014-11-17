@@ -6,6 +6,8 @@
 # clockdeviceirq=7
 # clockintr=200000000
 # clockspeed=250000
+# debugport=0
+# execname=none
 # haltbreak
 # haltdevice
 # haltibe
@@ -22,14 +24,15 @@
 # nodumpcpu
 # noexcmsg
 # noexcpriomsg
+# nofpu
 # nohaltdumpcp0
 # nohaltdumpcpu
-# nohaltjrra
 # noinstcounts
 # noinstdump
 # nomemdump
 # norealtime
 # noreportirq
+# notestdev
 # notracing
 # romfile=romfile.rom
 # spimconsole

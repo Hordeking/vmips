@@ -45,6 +45,6 @@ void uncaught (unsigned int cause, unsigned int status, unsigned int epc,
 	int kernelMode = !(status & Status_KUc_MASK);
 	int excCode = (cause & Cause_ExcCode_MASK) >> 2;
 	printf ("\nBoot ROM caught %s exception %d (%s) EPC=%x Status=%x "
-			"Cause=%x BadVAddr=%x\n", kernelMode ? "Kernel" : "User",
+			"Cause=%x BadVAddr=%x\nHalting\n", kernelMode ? "Kernel" : "User",
 			excCode, exception_strs[excCode], epc, status, cause, badvaddr);
 }

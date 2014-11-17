@@ -1,5 +1,5 @@
 /* vmips boot monitor
- * $Date: 2004/09/07 00:10:43 $
+ * $Date: 2013/04/08 05:48:45 $
  * by Brian R. Gaeke
  */
 
@@ -340,13 +340,14 @@ int
 do_call (int argc, char **argv)
 {
   unsigned long address;
+  entry_type harry;
   if (argc < 2)
     {
       puts ("Usage: call addr [args...]");
       return -1;
     }
   address = (unsigned long) strtol (argv[1], NULL, 0);
-  entry_type harry = (entry_type) address;
+  harry = (entry_type) address;
   set_bev (0);
   return harry(argc - 2, argv + 2);
 }
@@ -388,10 +389,10 @@ entry (void)
   set_cause (0);
   if ((recv_buffer != orig_recv_buffer) && (recv_size != -1))
     {
-      char *newargv[] = { "boot", NULL };
+      char *newargv[] = { "boot", "5/rz0/netbsd", NULL };
       printf ("Autobooting preloaded ROM file at %x\n",
               (unsigned int) recv_buffer);
-      boot (1, newargv);
+      boot (2, newargv);
     }
   while (!halted)
     {

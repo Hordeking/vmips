@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "debug.h"
 #include "remotegdb.h"
@@ -28,6 +28,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <csignal>
 #include <cstring>
 #include <cstdlib>
+#include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -38,7 +39,8 @@ extern int remotegdb_backend_error;
 
 Debug::Debug (CPU &cpu_, Mapper &mem_)
   : cpu (&cpu_), mem (&mem_), listener (-1), threadno_step (-1),
-    threadno_gen (-1), rom_baseaddr (0), rom_nwords (0), got_interrupt (false) {
+    threadno_gen (-1), rom_baseaddr (0), rom_nwords (0), got_interrupt (false),
+    debug_verbose (false) {
 	/* Upon connecting to our socket, gdb will ask for the current
 	 * signal; so we set the current signal to the breakpoint signal.
 	 */
@@ -172,7 +174,7 @@ Debug::packet_pop_word(char **packet)
 	val = strtoul(valstr, NULL, 16);
 	if (!opt_bigendian)
 		val = machine->physmem->swap_word(val);
-    *packet = p;
+	*packet = p;
 	return val;
 }
 
@@ -191,7 +193,7 @@ Debug::packet_pop_byte(char **packet)
 	}
 	*q++ = '\0';
 	val = (uint8) strtoul(valstr, NULL, 16);
-    *packet = p;
+	*packet = p;
 	return val;
 }
 
@@ -201,6 +203,7 @@ Debug::setup_listener_socket(void)
 	int sock;
 	struct sockaddr_in addr;
 	int value;
+	unsigned int port;
 
 	sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock < 0) {
@@ -209,7 +212,8 @@ Debug::setup_listener_socket(void)
 	}
 	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
-	addr.sin_port = 0;
+	port = machine->opt->option("debugport")->num;
+	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	value = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value,
@@ -246,7 +250,7 @@ Debug::print_local_name(int s)
 	struct sockaddr_in addr;
 	socklen_t addrlen = sizeof(addr);
 
-    if (getsockname(s, (struct sockaddr *) &addr, &addrlen) < 0) {
+	if (getsockname(s, (struct sockaddr *) &addr, &addrlen) < 0) {
 		perror("getsockname");
 		return;
 	}
@@ -272,6 +276,10 @@ Debug::serverloop(void)
 			&clientaddrlen);
 		if (clientsock < 0) {
 			perror ("accept");
+			if (errno == EINTR) {
+			    /* Maybe the user attempted a ^C. */
+			    machine->halt();
+			}
 			return clientsock;
 		}
 
@@ -283,6 +291,15 @@ Debug::serverloop(void)
 		remote_desc = clientsock;
 
 		targetloop();
+
+		/* We halt if the targetloop returned because of a remotegdb
+		 * error.
+		 */
+		if (remotegdb_backend_error) {
+		    remotegdb_backend_error = 0;
+		    machine->halt();
+		}
+
 		close(clientsock);
 		clientno++;
 	}
@@ -304,27 +321,55 @@ Debug::targetloop(void)
 		 * give up.
 		 */
 		getpkt(buf, 1); if (remotegdb_backend_error) return;
+		if (debug_verbose) {
+			fprintf(stderr, "<==(%03d) \"%s\"\n", packetno, buf);
+		}
 		switch(buf[0]) {
 			case 'g': result = target_read_registers(buf); break;
 			case 'G': result = target_write_registers(buf); break;
 			case 'm': result = target_read_memory(buf); break;
 			case 'M': result = target_write_memory(buf); break;
 			case 'c': result = target_continue(buf); break;
+			case 'D': result = target_detach(buf); break;
 			case 's': result = target_step(buf); break;
 			case 'k': result = target_kill(buf); break;
 			case 'H': result = target_set_thread(buf); break;
+			case 'T': result = target_poll_thread(buf); break;
 			case '?': result = target_last_signal(buf); break;
-			case 'Z': result = target_set_or_remove_breakpoint(buf, true);
-                      break;
-			case 'z': result = target_set_or_remove_breakpoint(buf, false);
-                      break;
+			case 'Z': result = target_set_or_remove_breakpoint(buf, true); break;
+			case 'z': result = target_set_or_remove_breakpoint(buf, false); break;
+			case 'q': result = target_query(buf); break;
 			default:  result = target_unimplemented(buf); break;
+		}
+		if (debug_verbose) {
+			fprintf(stderr, "==>(%03d) \"%s\"\n", packetno, result);
 		}
 		packetno++;
 		putpkt(result); if (remotegdb_backend_error) return;
 		free(result);
 	}
 	return;
+}
+
+char *
+Debug::target_query(char *pkt)
+{
+	/* Implement just enough of the query packets to make it look like
+	 * we have exactly one thread, with an ID of 1, called "Simulated 
+	 * Thread".
+	 */
+	++pkt;
+	if (strcmp(pkt, "C")==0) {
+		return rawpacket("QC 1");
+	} else if (strcmp(pkt, "fThreadInfo")==0) {
+		return rawpacket("m 1");
+	} else if (strcmp(pkt, "sThreadInfo")==0) {
+		return rawpacket("l");
+	} else if (strcmp(pkt, "ThreadExtraInfo,1")==0) {
+		return hexpacket("Simulated Thread");
+	} else {
+		return rawpacket("");
+	}
 }
 
 char *
@@ -350,6 +395,13 @@ Debug::target_set_thread(char *pkt)
 	 * used to control step and continue operations. Otherwise, it is
 	 * used to control general operations.
 	 */
+	if ((threadno < -1) || (threadno > 1)) {
+	    	/* We only have one actual thread, and its number is one.
+		 * Besides that, the any-thread (0) or all-thread (-1)
+		 * designators are ok.
+		 */
+	    	return error_packet(1);
+	}
 	if (thread_for_step) {
 		threadno_step = threadno;
 	} else {
@@ -359,18 +411,41 @@ Debug::target_set_thread(char *pkt)
 }
 
 char *
+Debug::target_poll_thread(char *pkt)
+{
+	long threadno = strtol(&pkt[1], NULL, 16);
+	/* This is a request from GDB to check whether a thread is alive. */
+	if (threadno != 1) {
+	    	/* We only have one thread, and its number is one. */
+	    	return error_packet(1);
+	}
+	return rawpacket("OK");
+}
+
+char *
 Debug::target_read_registers(char *pkt)
 {
-	/* fprintf(stderr, "STUB: Read registers\n"); */
-
 	return cpu->debug_registers_to_packet();
+}
+
+char *
+Debug::hexpacket(const char *str)
+{
+	int len = strlen(str);
+	char *packet = new char[2 * len + 3];
+	for (int i = 0; i <= len; ++i) {
+	    	char c = str[i];
+		packet[2*i + 0] = tohex((c>>4) & 0xf);
+		packet[2*i + 1] = tohex((c>>0) & 0xf);
+	}
+	packet[2*len + 2] = '\0';
+	return packet;
 }
 
 char *
 Debug::rawpacket(const char *str)
 {
 	char *packet = new char[1 + strlen(str)];
-
 	strcpy(packet, str);
 	return packet;
 }
@@ -378,10 +453,7 @@ Debug::rawpacket(const char *str)
 char * 
 Debug::target_write_registers(char *pkt)
 {
-	/* fprintf(stderr, "STUB: Write registers [%s]\n", &pkt[1]); */
-	
 	cpu->debug_packet_to_registers(&pkt[1]);
-
 	return rawpacket("OK");
 }
 
@@ -448,38 +520,37 @@ Debug::target_write_memory(char *pkt)
 	uint32 addr, len;
 	if (! lenstr) {
 		/* This write-memory request is malformed, because the comma is
-         * missing.  Send back an error packet. */
+		 * missing.  Send back an error packet. */
 		return error_packet(1);
 	}
 	lenstr[0] = 0;
 	lenstr++;
 	if (! datastr) {
 		/* This write-memory request is malformed, because the colon is
-         * missing.  Send back an error packet. */
+		 * missing.  Send back an error packet. */
 		return error_packet(1);
 	}
 	datastr[0] = 0;
 	datastr++;
-	/* At this point we have found all the arguments: the address, the length
-     * of data, and the data itself. We must translate the first two into
-     * integers, and then do some special handling for ROM breakpoint
-     * support.
-     */
-
+	/* At this point we have found all the arguments: the address, the
+	 * length of data, and the data itself. We must translate the first
+	 * two into integers, and then do some special handling for ROM
+	 * breakpoint support.
+	 */
 	addr = strtoul(addrstr, NULL, 16);
 	len = strtoul(lenstr, NULL, 16);
 
 	if ((len == 4) && address_in_rom(addr) && is_breakpoint_insn(datastr)) {
 		/* If attempting to write a word to ROM which is a breakpoint
-         * instruction, assume GDB is trying to set a breakpoint. 
-         */
+		 * instruction, assume GDB is trying to set a breakpoint. 
+		 */
 		declare_breakpoint(addr);
 	} else if ((len == 4) && address_in_rom(addr) &&
 	           breakpoint_exists(addr) && !is_breakpoint_insn(datastr)) {
-		/* If attempting to write a word to ROM which is not a breakpoint
-         * instruction, and GDB previously set a breakpoint there, assume GDB
-         * is trying to clear a breakpoint. 
-         */
+		/* If attempting to write a word to ROM which is not a
+		 * breakpoint instruction, and GDB previously set a breakpoint
+		 * there, assume GDB is trying to clear a breakpoint.
+		 */
 		remove_breakpoint(addr);
 	} else {
 		if (cpu->debug_store_region(addr, len, datastr, this) < 0) {
@@ -518,7 +589,12 @@ Debug::target_continue(char *pkt)
 	}
 	do {
 		exccode = single_step();
-		if (got_interrupt && (exccode == Bp)) {
+		if (machine->halted()) {
+			/* Something happened to terminate execution. 
+			 * Tell GDB that the program exited.
+			 */
+			return rawpacket("W00");
+		} else if (got_interrupt && (exccode == Bp)) {
 			got_interrupt = false;
 			return signal_packet (exccode_to_signal (Bp));
 		} else if (exccode != 0) {
@@ -526,6 +602,12 @@ Debug::target_continue(char *pkt)
 			return signal_packet(signo);
 		}
 	} while (true);
+}
+
+char * 
+Debug::target_detach(char *pkt)
+{
+	return rawpacket("OK");
 }
 
 char * 
@@ -577,16 +659,16 @@ Debug::target_set_or_remove_breakpoint(char *pkt, bool setting)
 	len = strtoul(lenstr, NULL, 16);
 	switch (type) {
 	case 0: /* software breakpoint */
-    case 1: /* hardware breakpoint */
+	case 1: /* hardware breakpoint */
 		if (setting) {
 			declare_breakpoint (addr);
 		} else {
 			remove_breakpoint (addr);
 		}
 		return rawpacket("OK");
-    case 2: /* write watchpoint */
-    case 3: /* read watchpoint */
-    case 4: /* access watchpoint */
+	case 2: /* write watchpoint */
+	case 3: /* read watchpoint */
+	case 4: /* access watchpoint */
 	default:
 		return rawpacket(""); /* Not supported. */
 	}

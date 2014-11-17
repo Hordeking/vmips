@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VMIPS 1"
-.TH VMIPS 1 "2013-05-07" "vmips 1.4.1" "VMIPS Programmer's Manual"
+.TH VMIPS 1 "2014-11-17" "vmips 1.5" "VMIPS Programmer's Manual"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -244,7 +244,7 @@ version of \s-1VMIPS\s0.
 .PP
 \&\fBexcmsg\fR (type: Boolean)
 .PP
-.Vb 8
+.Vb 9
 \& Controls whether every exception will cause a message
 \&to be printed. The message gives the exception code, a
 \&short explanation of the exception code, its priority,
@@ -252,7 +252,8 @@ version of \s-1VMIPS\s0.
 \&what type of memory access the exception was caused by,
 \&if applicable. Interrupt exceptions are only printed if
 \&B<reportirq> is also set; when they occur, they also have Cause
-\&and Status register information printed.  The default value is FALSE.
+\&and Status register information printed. TLB misses will have fault
+\&address and user/kernel mode information printed.  The default value is FALSE.
 .Ve
 .PP
 \&\fBbootmsg\fR (type: Boolean)
@@ -437,13 +438,15 @@ uppercase if on, lowercase if off.
 .PP
 \&\fBttydev\fR (type: string)
 .PP
-.Vb 6
+.Vb 8
 \& This pathname will be used as the device from which reads from the
 \&SPIM\-compatible console device\*(Aqs Keyboard 1 will take their data, and
 \&to which writes to Display 1 will send their data. If the OS supports
 \&ttyname(3), that call will be used to guess the default pathname.
 \&If the pathname is the single word B<off>, then the device will be
-\&disconnected.  The default value is "/dev/tty".
+\&disconnected.
+\&If the pathname is the single word B<stdout>, then the device
+\&will be connected to standard output, and input will be disabled.  The default value is "/dev/tty".
 .Ve
 .PP
 \&\fBttydev2\fR (type: string)
@@ -461,6 +464,13 @@ uppercase if on, lowercase if off.
 \&wait for gdb to attach and B<continue> before booting the ROM file.
 \&If debug is not set, then the machine will boot the ROM file
 \&without pausing.  The default value is FALSE.
+.Ve
+.PP
+\&\fBdebugport\fR (type: number)
+.PP
+.Vb 2
+\& If debugport is set to something nonzero, then the gdb remote
+\&serial protocol backend will use the specified TCP port.  The default value is 0.
 .Ve
 .PP
 \&\fBrealtime\fR (type: Boolean)
@@ -624,8 +634,17 @@ uppercase if on, lowercase if off.
 .Vb 4
 \& True to enable hooks in the CPU to communicate with a
 \&floating\-point unit as coprocessor 1. The floating\-point unit
-\&is not implemented, only the hooks in the CPU are. This is an
+\&is not implemented; only the hooks in the CPU are. This is an
 \&experimental, unfinished feature.  The default value is FALSE.
+.Ve
+.PP
+\&\fBtestdev\fR (type: Boolean)
+.PP
+.Vb 4
+\& True to enable a memory\-mapped device that is used to test
+\&the memory\-mapped device interface. The VMIPS test suite turns
+\&this device on as necessary; you should not normally need
+\&to enable it.  The default value is FALSE.
 .Ve
 .SH "BUGS"
 .IX Header "BUGS"
@@ -648,7 +667,7 @@ file vmips.texi.
 \&\s-1VMIPS\s0 was written by Brian Gaeke.
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
-Copyright (c) 2001, 2002, 2004, 2009 Brian R. Gaeke.
+Copyright (c) 2001, 2002, 2004, 2009, 2014 Brian R. Gaeke.
 .PP
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this document (the \*(L"Document\*(R"), to deal in the Document without

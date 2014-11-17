@@ -57,8 +57,7 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(srcdir)/vmips.spec.in $(srcdir)/vmipsrc.in \
-	$(top_srcdir)/configure $(top_srcdir)/doc/Makefile.in \
-	$(top_srcdir)/sample_code/Makefile.in \
+	$(top_srcdir)/configure $(top_srcdir)/sample_code/Makefile.in \
 	$(top_srcdir)/sample_code/xmboot/Makefile.in AUTHORS COPYING \
 	ChangeLog INSTALL NEWS THANKS config.guess config.sub depcomp \
 	install-sh missing mkinstalldirs
@@ -71,8 +70,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = vmips.spec vmipsrc doc/Makefile \
-	sample_code/Makefile sample_code/xmboot/Makefile
+CONFIG_CLEAN_FILES = vmips.spec vmipsrc sample_code/Makefile \
+	sample_code/xmboot/Makefile
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -84,7 +83,8 @@ am_vmips_OBJECTS = cpu.$(OBJEXT) cpzero.$(OBJEXT) devicemap.$(OBJEXT) \
 	clock.$(OBJEXT) terminalcontroller.$(OBJEXT) haltdev.$(OBJEXT) \
 	decrtc.$(OBJEXT) deccsr.$(OBJEXT) decstat.$(OBJEXT) \
 	decserial.$(OBJEXT) rommodule.$(OBJEXT) fileutils.$(OBJEXT) \
-	exeloader.$(OBJEXT) fpu.$(OBJEXT) interactor.$(OBJEXT)
+	exeloader.$(OBJEXT) fpu.$(OBJEXT) interactor.$(OBJEXT) \
+	testdev.$(OBJEXT)
 vmips_OBJECTS = $(am_vmips_OBJECTS)
 vmips_DEPENDENCIES = libopcodes_mips/libopcodes_mips.a
 am_vmipstool_OBJECTS = vmipstool.$(OBJEXT) options.$(OBJEXT) \
@@ -316,8 +316,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = libopcodes_mips . sample_code @TESTCODE_DIR@ doc
 REDHAT_PKG_FILES = vmips.spec vmips.spec.in
-DEBIAN_PKG_FILES = debian/changelog debian/conffiles debian/control \
- debian/copyright debian/dirs debian/docs debian/info debian/rules
+DEBIAN_PKG_FILES = debian/changelog debian/compat debian/control \
+ debian/copyright debian/dirs debian/docs debian/info debian/rules \
+ debian/source/format
 
 EXTRA_DIST = VERSION $(REDHAT_PKG_FILES) \
  $(sysconf_DATA) $(DEBIAN_PKG_FILES)
@@ -338,7 +339,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   deviceint.cc debug.cc remotegdb.cc clockdev.cc error.cc \
   clock.cc terminalcontroller.cc haltdev.cc decrtc.cc deccsr.cc \
   decstat.cc decserial.cc rommodule.cc fileutils.cc exeloader.cc fpu.cc \
-  interactor.cc \
+  interactor.cc testdev.cc \
   cpu.h cpzero.h cpzeroreg.h deviceint.h \
   devicemap.h intctrl.h mapper.h memorymodule.h options.h optiontbl.h \
   range.h spimconsole.h spimconsreg.h \
@@ -347,7 +348,7 @@ vmips_SOURCES = cpu.cc cpzero.cc devicemap.cc \
   clock.h task.h terminalcontroller.h haltdev.h devreg.h clockreg.h \
   haltreg.h wipe.h stub-dis.h decrtc.h decrtcreg.h deccsr.h deccsrreg.h \
   decstat.h decserial.h decserialreg.h rommodule.h gccattr.h mmapglue.h \
-  types.h endiantest.h fileutils.h fpu.h interactor.h
+  types.h endiantest.h fileutils.h fpu.h interactor.h testdev.h
 
 vmips_LDADD = libopcodes_mips/libopcodes_mips.a
 
@@ -416,8 +417,6 @@ distclean-hdr:
 vmips.spec: $(top_builddir)/config.status $(srcdir)/vmips.spec.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 vmipsrc: $(top_builddir)/config.status $(srcdir)/vmipsrc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-doc/Makefile: $(top_builddir)/config.status $(top_srcdir)/doc/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 sample_code/Makefile: $(top_builddir)/config.status $(top_srcdir)/sample_code/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -502,6 +501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spimconsole.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stub-dis.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/terminalcontroller.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testdev.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vmips.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vmipstool.Po@am__quote@
 
@@ -819,7 +819,7 @@ distcheck: dist
 	*.zip*) \
 	  unzip $(distdir).zip ;;\
 	esac
-	chmod -R a-w $(distdir); chmod u+w $(distdir)
+	chmod -R a-w $(distdir); chmod a+w $(distdir)
 	mkdir $(distdir)/_build
 	mkdir $(distdir)/_inst
 	chmod a-w $(distdir)

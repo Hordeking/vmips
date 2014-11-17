@@ -16,7 +16,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "clock.h"
 #include "clockdev.h"
@@ -43,6 +43,7 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "deccsrreg.h"
 #include "decstat.h"
 #include "decserial.h"
+#include "testdev.h"
 #include "stub-dis.h"
 #include "rommodule.h"
 #include "interactor.h"
@@ -86,12 +87,13 @@ vmips::refresh_options(void)
 	opt_execname = opt->option("execname")->str;
 	opt_ttydev = opt->option("ttydev")->str;
 	opt_ttydev2 = opt->option("ttydev2")->str;
-	opt_spimconsole = opt->option("spimconsole")->flag;
 
 	opt_decrtc = opt->option("decrtc")->flag;
 	opt_deccsr = opt->option("deccsr")->flag;
 	opt_decstat = opt->option("decstat")->flag;
 	opt_decserial = opt->option("decserial")->flag;
+	opt_spimconsole = opt->option("spimconsole")->flag;
+	opt_testdev = opt->option("testdev")->flag;
 }
 
 /* Set up some machine globals, and process command line arguments,
@@ -135,6 +137,7 @@ vmips::setup_machine(void)
 
 /* Connect the file or device named NAME to line number L of
  * console device C, or do nothing if NAME is "off".
+ * If NAME is "stdout", then the device will be connected to stdout.
  */
 void vmips::setup_console_line(int l, char *name, TerminalController *c, const
 char *c_name)
@@ -143,13 +146,20 @@ char *c_name)
 	if (strcmp(name, "off") == 0)
 		return;
 
-	/* Open the file or device in question. */
-	int ttyfd = open(name, O_RDWR | O_NONBLOCK);
-	if (ttyfd == -1) {
-		/* If we can't open it, warn and use stdout instead. */
-		error("Opening %s (terminal %d): %s", name, l, strerror(errno));
-		warning("using stdout, input disabled\n");
+	int ttyfd;
+	if (strcmp(name, "stdout") == 0) {
+		/* If they asked for stdout, give them stdout. */
 		ttyfd = fileno(stdout);
+	} else {
+		/* Open the file or device in question. */
+		ttyfd = open(name, O_RDWR | O_NONBLOCK);
+		if (ttyfd == -1) {
+			/* If we can't open it, warn and use stdout instead. */
+			error("Opening %s (terminal %d): %s", name, l,
+				strerror(errno));
+			warning("using stdout, input disabled\n");
+			ttyfd = fileno(stdout);
+		}
 	}
 
 	/* Connect it to the SPIM-compatible console device. */
@@ -180,9 +190,9 @@ bool vmips::setup_spimconsole()
 	boot_msg("Connected IRQ2-IRQ6 to %s\n",spim_console->descriptor_str());
 
 	setup_console_line(0, opt_ttydev, spim_console,
-      spim_console->descriptor_str ());
+		spim_console->descriptor_str ());
 	setup_console_line(1, opt_ttydev2, spim_console,
-      spim_console->descriptor_str ());
+		spim_console->descriptor_str ());
 	return true;
 }
 
@@ -281,6 +291,18 @@ bool vmips::setup_decserial()
 	// Use printer line for console.
 	setup_console_line (3, opt_ttydev, decserial_device,
       decserial_device->descriptor_str ());
+	return true;
+}
+
+bool vmips::setup_testdev()
+{
+	if (!opt_testdev)
+		return true;
+
+	test_device = new TestDev();
+	physmem->map_at_physical_address(test_device, TEST_BASE);
+	boot_msg("Mapping %s to physical address 0x%08x\n",
+		 test_device->descriptor_str(), TEST_BASE);
 	return true;
 }
 
@@ -497,7 +519,10 @@ vmips::run()
 	if (!setup_spimconsole ())
 	  return 1;
 
-    signal (SIGQUIT, halt_machine_by_signal);
+	if (!setup_testdev ())
+	  return 1;
+
+	signal (SIGQUIT, halt_machine_by_signal);
 
 	boot_msg( "Hit Ctrl-\\ to halt machine, Ctrl-_ for a debug prompt.\n" );
 
@@ -512,14 +537,20 @@ vmips::run()
 	if (opt_instcounts)
 		gettimeofday(&start, NULL);
 
-    state = (opt_debug ? DEBUG : RUN);
-    while (state != HALT) {
-      switch (state) {
-        case RUN: while (state == RUN) { step (); } break;
-        case DEBUG: while (state == DEBUG) { dbgr->serverloop(); } break;
-        case INTERACT: while (state == INTERACT) { interact(); } break;
-      }
-    }
+	state = (opt_debug ? DEBUG : RUN);
+	while (state != HALT) {
+		switch (state) {
+			case RUN:
+			    	while (state == RUN) { step (); }
+				break;
+			case DEBUG:
+				while (state == DEBUG) { dbgr->serverloop(); }
+				break;
+			case INTERACT:
+				while (state == INTERACT) { interact(); }
+				break;
+		}
+	}
 
 	timeval end;
 	if (opt_instcounts)
@@ -528,8 +559,8 @@ vmips::run()
 	/* Halt! */
 	boot_msg( "\n*************HALT*************\n\n" );
 
-    /* If we're tracing, dump the trace. */
-    cpu->flush_trace ();
+	/* If we're tracing, dump the trace. */
+	cpu->flush_trace ();
 
 	/* If user requested it, dump registers from CPU and/or CP0. */
 	if (opt_haltdumpcpu || opt_haltdumpcp0) {

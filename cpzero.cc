@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* Code to implement MIPS coprocessor zero (the "system control
  * coprocessor"), which provides for address translation and
@@ -30,6 +30,8 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include "intctrl.h"
 #include "deviceexc.h"
 #include "error.h"
+#include "vmips.h"
+#include "options.h"
 
 static uint32 read_masks[] = {
 	Index_MASK, Random_MASK, EntryLo_MASK, 0, Context_MASK,
@@ -85,7 +87,6 @@ void
 CPZero::dump_regs(FILE *f)
 {
 	int x;
-
 	fprintf(f, "CP0 Dump Registers: [       ");
 	for (x = 0; x < 16; x++) {
 		fprintf(f," R%02d=%08x ",x,reg[x]);
@@ -96,7 +97,9 @@ CPZero::dump_regs(FILE *f)
 	fprintf(f, "]\n");
 }
 
-static void dump_tlb_entry(FILE *f, int index, const TLBEntry &e) {
+static void
+dump_tlb_entry(FILE *f, int index, const TLBEntry &e)
+{
 	fprintf(f,"Entry %02d: (%08x%08x) V=%05x A=%02x P=%05x %c%c%c%c\n", index,
 		e.entryHi, e.entryLo, e.vpn()>>12, e.asid()>>6, e.pfn()>>12,
 		e.noncacheable()?'N':'n', e.dirty()?'D':'d',
@@ -107,7 +110,6 @@ void
 CPZero::dump_tlb(FILE *f)
 {
 	int x;
-
 	fprintf(f, "Dump TLB: [\n");
 	for (x = 0; x < TLB_ENTRIES; ++x)
 		dump_tlb_entry(f, x, tlb[x]);
@@ -175,7 +177,7 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 {
 	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
 	uint32 vpn = vaddr & EntryHi_VPN_MASK;
-    int index = find_matching_tlb_entry(vpn, asid);
+	int index = find_matching_tlb_entry(vpn, asid);
 	TLBEntry *match = (index == -1) ? 0 : &tlb[index];
 	tlb_miss_user = false;
 	if (match && match->valid()) {
@@ -190,25 +192,38 @@ CPZero::tlb_translate(uint32 seg, uint32 vaddr, int mode, bool *cacheable,
 			return match->pfn() | (vaddr & ~EntryHi_VPN_MASK);
 		}
 	}
-    // If we got here, then there was no matching tlb entry, or it wasn't valid.
-    // Use special refill handler vector for user TLB miss.
+	/* If we got here, then there was no matching tlb entry, or it wasn't
+	 * valid. Use special refill handler vector for user TLB miss. */
 	tlb_miss_user = (seg == KUSEG && !match);
 	load_addr_trans_excp_info(vaddr,vpn,match);
-    //fprintf(stderr, "TLB: Miss for vaddr=%x (vpn=%x)\n", vaddr, (vaddr>>12));
 	client->exception(mode == DATASTORE ? TLBS : TLBL, mode);
+	if (machine->opt->option("excmsg")->flag) {
+		/* If exception spew is on, print the fault address. It
+		 * is just too handy to have. */
+	    	fprintf(stderr, " %s TLB miss at address 0x%x\n",
+			tlb_miss_user ? "User" : "Kernel", vaddr);
+	}
 	return 0xffffffff;
 }
 
-uint32 CPZero::read_reg(const uint16 r) {
-    // This ensures that non-existent CP0 registers read as zero.
-    return reg[r] & read_masks[r];
+uint32
+CPZero::read_reg(const uint16 r)
+{
+        if (r == Cause) {
+		/* Update IP field of Cause register. */
+		reg[Cause] = (reg[Cause] & ~Cause_IP_MASK) | getIP();
+	}
+	/* This ensures that non-existent CP0 registers read as zero. */
+	return reg[r] & read_masks[r];
 }
 
-void CPZero::write_reg(const uint16 r, const uint32 data) {
-	// This preserves the bits which are readable but not writable, and writes
-	// the bits which are writable with new data, thus making it suitable
-	// for mtc0-type operations.  If you want to write all the bits which
-	// are _connected_, use: reg[r] = new_data & write_masks[r]; .
+void
+CPZero::write_reg(const uint16 r, const uint32 data)
+{
+	/* This preserves the bits which are readable but not writable, and writes
+	 * the bits which are writable with new data, thus making it suitable
+	 * for mtc0-type operations.  If you want to write all the bits which
+	 * are _connected_, use: reg[r] = new_data & write_masks[r]; . */
 	reg[r] = (reg[r] & (read_masks[r] & ~write_masks[r]))
 	         | (data & write_masks[r]);
 }
@@ -222,7 +237,7 @@ CPZero::mfc0_emulate(uint32 instr, uint32 pc)
 void
 CPZero::mtc0_emulate(uint32 instr, uint32 pc)
 {
-    write_reg (CPU::rd (instr), cpu->get_reg (CPU::rt (instr)));
+	write_reg (CPU::rd (instr), cpu->get_reg (CPU::rt (instr)));
 }
 
 void
@@ -252,20 +267,18 @@ CPZero::tlb_write(unsigned index)
 {
 	tlb[index].entryHi = read_reg(EntryHi);
 	tlb[index].entryLo = read_reg(EntryLo);
-    //fprintf(stderr, "TLB: Write ");
-    //dump_tlb_entry(stderr, index, tlb[index]);
 }
 
 void
 CPZero::tlbwi_emulate(uint32 instr, uint32 pc)
 {
-    tlb_write ((reg[Index] & Index_Index_MASK) >> 8);
+	tlb_write ((reg[Index] & Index_Index_MASK) >> 8);
 }
 
 void
 CPZero::tlbwr_emulate(uint32 instr, uint32 pc)
 {
-    tlb_write ((reg[Random] & Random_Random_MASK) >> 8);
+	tlb_write ((reg[Random] & Random_Random_MASK) >> 8);
 }
 
 void
@@ -273,11 +286,11 @@ CPZero::tlbp_emulate(uint32 instr, uint32 pc)
 {
 	uint32 vpn = reg[EntryHi] & EntryHi_VPN_MASK;
 	uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
-    int idx = find_matching_tlb_entry (vpn, asid);
-    if (idx != -1)
-      reg[Index] = (idx << 8);
-    else
-      reg[Index] = (1 << 31);
+	int idx = find_matching_tlb_entry (vpn, asid);
+	if (idx != -1)
+		reg[Index] = (idx << 8);
+	else
+		reg[Index] = (1 << 31);
 }
 
 void
@@ -438,10 +451,10 @@ CPZero::debug_tlb_translate(uint32 vaddr, uint32 *paddr)
 	} else if (kernel_mode() && (vaddr & KSEG_SELECT_MASK) == KSEG1) {
 		*paddr = vaddr - KSEG1_CONST_TRANSLATION;
 	} else /* KUSEG */ {
-	    uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
-    	uint32 vpn = vaddr & EntryHi_VPN_MASK;
-        int index = find_matching_tlb_entry (vpn, asid);
-	    TLBEntry *match = (index == -1) ? 0 : &tlb[index];
+		uint32 asid = reg[EntryHi] & EntryHi_ASID_MASK;
+		uint32 vpn = vaddr & EntryHi_VPN_MASK;
+		int index = find_matching_tlb_entry (vpn, asid);
+		TLBEntry *match = (index == -1) ? 0 : &tlb[index];
 		if (!match || !match->valid()) {
 			*paddr = 0xffffffff;
 			rv = false;

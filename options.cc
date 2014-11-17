@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "error.h"
 #include "fileutils.h"
@@ -24,13 +24,13 @@ with VMIPS; if not, write to the Free Software Foundation, Inc.,
 #include <cassert>
 #include <cctype>
 #include <cerrno>
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <pwd.h>
 #include <string>
 #include <unistd.h>
-#include <limits.h>
 #include <vector>
 
 #define OPTBUFSIZ 1024
@@ -445,9 +445,9 @@ Options::print_package_version(const char *toolname, const char *version)
 {
 	printf(
 "%s %s\n"
-"Copyright (C) 2001, 2002, 2003, 2004, 2009 by Brian R. Gaeke and others.\n"
-"(See the files `AUTHORS' and `THANKS' in the %s source distribution\n"
-"for a complete list.)\n"
+"Copyright (C) 2001, 2002, 2003, 2004, 2009, 2012, 2013 by Brian R. Gaeke\n"
+"and others. (See the files `AUTHORS' and `THANKS' in the %s source\n"
+"distribution for a complete list.)\n"
 "\n"
 "%s is free software; you can redistribute it and/or modify it\n"
 "under the terms of the GNU General Public License as published by the\n"
@@ -461,7 +461,7 @@ Options::print_package_version(const char *toolname, const char *version)
 "\n"
 "You should have received a copy of the GNU General Public License along\n"
 "with %s; if not, write to the Free Software Foundation, Inc.,\n"
-"59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.\n",
+"51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.\n",
 	toolname, version, toolname, toolname, toolname, toolname);
 }
 

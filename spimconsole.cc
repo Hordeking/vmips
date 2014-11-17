@@ -15,7 +15,7 @@ for more details.
 
 You should have received a copy of the GNU General Public License along
 with VMIPS; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "clock.h"
 #include "mapper.h"
@@ -152,10 +152,10 @@ uint32 SpimConsoleDevice::fetch_word( uint32 offset, int mode,
 	return machine->physmem->mips_to_host_word(word);
 }
 
-void SpimConsoleDevice::store_word( uint32 offset, uint32 data,
+void SpimConsoleDevice::store_word( uint32 offset, uint32 odata,
 				    DeviceExc *client )
 {
-	data = machine->physmem->host_to_mips_word(data);
+	uint32 data = machine->physmem->host_to_mips_word(odata);
 
 	switch( offset / 4 ) {
 	case 0:		// keyboard 1 control

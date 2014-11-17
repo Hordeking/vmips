@@ -3,28 +3,27 @@ Name: vmips
 Summary: A MIPS-based virtual machine simulator.
 Version: @VERSION@
 Release: 1
-Copyright: GPL
+License: GPL-2.0+
 Group: Emulators
 URL: http://www.dgate.org/vmips/
 Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-@VERSION@/vmips-@VERSION@.tar.gz
-Packager: VMIPS Maintainers <vmips@dgate.org>
-BuildRoot: %{_tmppath}/vmips-buildroot
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 
 %description
 VMIPS is a software simulator for a virtual machine based on a MIPS R3000 CPU.
 
 %prep
 %setup -q
-%configure --sysconfdir=/etc
+%configure --with-mips=/not-configured/mips
 
 %build
 make
 
 %install
-%makeinstall sysconfdir=$RPM_BUILD_ROOT/etc
+%makeinstall 
 
 %files
-%doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS VERSION
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README THANKS VERSION doc/vmips.pdf
 %{_bindir}/vmips
 %{_bindir}/vmipstool
 %{_infodir}/vmips.info.gz
@@ -33,9 +32,18 @@ make
 %{_includedir}/vmips/asm_regnames.h
 %{_datadir}/vmips/ld.script
 %{_datadir}/vmips/setup.S
-%config /etc/vmipsrc
+%config(noreplace) %{_sysconfdir}/vmipsrc
 
 %changelog
+* Wed May  8 2013 VMIPS Maintainers <vmips@dgate.org>
+- Replace Copyright with License
+- Remove Packager
+- Change BuildRoot to be something a little more modern
+- No longer force sysconfdir to /etc. rpm handles this now
+- Explicitly specify a nonexistent mips tool directory (user can edit this)
+- Install pdf manual
+- Make /etc/vmipsrc noreplace
+
 * Wed Apr 14 2013 VMIPS Maintainers <vmips@dgate.org>
 - Add setup assembly source files.
 
