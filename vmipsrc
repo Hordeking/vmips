@@ -45,5 +45,5 @@
 ##
 ## The following options have defaults set by `configure':
 ##
-nobigendian
-mipstoolprefix='/home/brg/mips-tools/mipsel-ecoff/bin/mipsel-ecoff-'
+bigendian
+mipstoolprefix='/home/brg/mips-tools/mips-elf/bin/mips-elf-'

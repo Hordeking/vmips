@@ -673,7 +673,6 @@ AMTAR
 am__leading_dot
 SET_MAKE
 AWK
-mkdir_p
 MKDIR_P
 INSTALL_STRIP_PROGRAM
 STRIP
@@ -3256,7 +3255,7 @@ fi
 # Define the identity of the package.
 
  PACKAGE=vmips
- VERSION=1.5
+ VERSION=1.5.1
 
 
 cat >>confdefs.h <<_ACEOF
@@ -3284,7 +3283,6 @@ AUTOHEADER=${AUTOHEADER-"${am_missing_run}autoheader"}
 
 MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
-mkdir_p="$MKDIR_P"
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
 # Always define AMTAR for backward compatibility.  Yes, it's still used

@@ -1,12 +1,12 @@
 # vmips RPM spec file.
 Name: vmips
 Summary: A MIPS-based virtual machine simulator.
-Version: 1.5
+Version: 1.5.1
 Release: 1
 License: GPL-2.0+
 Group: Emulators
 URL: http://www.dgate.org/vmips/
-Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-1.5/vmips-1.5.tar.gz
+Source: ftp://ftp.dgate.org/pub/vmips/releases/vmips-1.5.1/vmips-1.5.1.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 
 %description

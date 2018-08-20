@@ -8,7 +8,7 @@ END-INFO-DIR-ENTRY
    This is the VMIPS Programmer's Manual, Sixth Edition, for version
 1.5.
 
-   Copyright (C) 2001, 2002, 2004, 2009, 2014 Brian R. Gaeke.
+   Copyright (C) 2001, 2002, 2004, 2009, 2014, 2018 Brian R. Gaeke.
 
 
 File: vmips.info,  Node: Top,  Next: Overview,  Up: (dir)
@@ -18,8 +18,8 @@ VMIPS Programmer's Manual
 
 This is the VMIPS Programmer's Manual, Sixth Edition, for version 1.5.
 
-   Copyright (C) 2001, 2002, 2004, 2009, 2014 Brian R. Gaeke.  For
-information about copying, modifying or distributing this manual,
+   Copyright (C) 2001, 2002, 2004, 2009, 2014, 2018 Brian R. Gaeke.
+For information about copying, modifying or distributing this manual,
 please see the chapter called `Copying'.
 
 * Menu:
@@ -2727,7 +2727,16 @@ File: vmips.info,  Node: Release History,  Next: References,  Prev: Future Direc
 Appendix D Release History
 **************************
 
-vmips-1.5 was released on 17 November 2014.  User-visible changes in
+vmips-1.5.1 was released on 20 August 2018.  User-visible changes in
+version 1.5 (since version 1.5.1):
+
+   * Bug fixes:
+
+   * A pair of time calculations in the clock device were revised to
+     avoid triggering compile-time errors in newer C++11-compliant
+     compilers.
+
+   vmips-1.5 was released on 17 November 2014.  User-visible changes in
 version 1.5 (since version 1.4.1):
 
    * New features/improvements:
@@ -3439,27 +3448,27 @@ Index
 
 
 Tag Table:
-Node: Top337
-Node: Overview2058
-Node: Getting Started3879
-Node: An Example5789
-Node: Building Programs7003
-Node: Invoking vmips21113
-Node: Customizing22533
-Node: Invoking vmipstool39026
-Node: Programming42547
-Node: Debugging44382
-Node: Interaction52586
-Node: Devices54299
-Node: Monitor66144
-Node: Extending70369
-Node: Test Suite88669
-Node: Installation94065
-Node: Reporting Bugs108564
-Node: Future Directions109256
-Node: Release History111344
-Node: References132181
-Node: Copying135652
-Node: Index137117
+Node: Top343
+Node: Overview2069
+Node: Getting Started3890
+Node: An Example5800
+Node: Building Programs7014
+Node: Invoking vmips21124
+Node: Customizing22544
+Node: Invoking vmipstool39037
+Node: Programming42558
+Node: Debugging44393
+Node: Interaction52597
+Node: Devices54310
+Node: Monitor66155
+Node: Extending70380
+Node: Test Suite88680
+Node: Installation94076
+Node: Reporting Bugs108575
+Node: Future Directions109267
+Node: Release History111355
+Node: References132470
+Node: Copying135941
+Node: Index137406
 
 End Tag Table

@@ -106,7 +106,9 @@ void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 		if( (int32)data < 0 )
 			return;
 
-		timespec time = { data, clock->get_time().tv_nsec };
+		timespec time;
+		time.tv_sec = data;
+		time.tv_nsec = clock->get_time().tv_nsec;
 		clock->set_time( time );
 		return;
 	}
@@ -115,7 +117,9 @@ void ClockDevice::store_word( uint32 offset, uint32 data, DeviceExc *client )
 		if( (int32)data < 0 )
 			return;
 
-		timespec time =  { clock->get_time().tv_sec, data };
+		timespec time;
+		time.tv_sec = clock->get_time().tv_sec;
+		time.tv_nsec = data;
 		clock->set_time( time );
 		return;
 	}

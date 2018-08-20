@@ -1,4 +1,233 @@
 ================================================================================
+[brg]  Sun, 19 Aug 2018 20:27:08 UTC  vmips-1_5-branch
+  cvs rdiff -r1.1.12.2 -r1.1.12.3 vmips/ANNOUNCE
+  cvs rdiff -r1.26.2.1 -r1.26.2.2 vmips/NEWS
+  cvs rdiff -r1.14.2.1 -r1.14.2.2 vmips/VERSION
+  cvs rdiff -r1.99.2.1 -r1.99.2.2 vmips/configure.in
+  cvs rdiff -r1.11.2.1 -r1.11.2.2 vmips/debian/changelog
+  cvs rdiff -r1.130.2.1 -r1.130.2.2 vmips/doc/vmips.texi
+--------------------------------------------------------------------------------
+Update release branch with 1.5.1 version number, release date, and release
+notes.
+
+================================================================================
+[brg]  Fri, 03 Aug 2018 06:39:04 UTC  vmips-1_5-branch
+  cvs rdiff -r1.23 -r1.23.2.1 vmips/clockdev.cc
+--------------------------------------------------------------------------------
+Merge change from r1.24 to vmips-1_5-branch:
+To work around some stricter semantics of initializer lists in c++11
+leading to a warning on freebsd-i386, use assignments instead of
+an initializer list to initialize the timespec local variables in clockdev.
+
+================================================================================
+[brg]  Fri, 03 Aug 2018 06:20:19 UTC  trunk
+  cvs rdiff -r1.9 -r1.10 vmips/ChangeLog
+--------------------------------------------------------------------------------
+Update ChangeLog.
+
+================================================================================
+[brg]  Thu, 02 Aug 2018 07:41:35 UTC  trunk
+  cvs rdiff -r1.56 -r1.57 vmips/doc/Makefile.in
+  cvs rdiff -r1.14 -r1.15 vmips/libopcodes_mips/Makefile.in
+  cvs rdiff -r1.76 -r1.77 vmips/test_code/Makefile.in
+  cvs rdiff -r1.31 -r1.32 vmips/test_code/vmips.misc-tests/Makefile.in
+  cvs rdiff -r1.35 -r1.36 vmips/test_code/vmips.outcheck/Makefile.in
+  cvs rdiff -r1.40 -r1.41 vmips/test_code/vmips.regcheck/Makefile.in
+--------------------------------------------------------------------------------
+Regenerate subdir Makefiles using autoreconf because the ones that were checked
+in did not work when dependency files didn't exist -- as they initially
+do not when you check out vmips from CVS.
+
+================================================================================
+[brg]  Thu, 02 Aug 2018 07:39:54 UTC  trunk
+  cvs rdiff -r1.9 -r1.10 vmips/doc/texi2pod.pl
+--------------------------------------------------------------------------------
+Apply a small patch to a regular expression to make this script
+limp along with perl 5.26.
+
+================================================================================
+[brg]  Thu, 02 Aug 2018 07:34:12 UTC  trunk
+  cvs rdiff -r1.23 -r1.24 vmips/clockdev.cc
+--------------------------------------------------------------------------------
+To work around some stricter semantics of initializer lists in c++11
+leading to a warning on freebsd-i386, use assignments instead of
+an initializer list to initialize the timespec local variables in clockdev.
+
+================================================================================
+[brg]  Tue, 26 Apr 2016 07:45:15 UTC  trunk
+  cvs rdiff -r1.185 -r1.186 vmips/doc/to-do
+--------------------------------------------------------------------------------
+The new website design has been put into effect.
+
+================================================================================
+[brg]  Fri, 11 Dec 2015 07:09:41 UTC  trunk
+  cvs rdiff -r1.14 -r1.15 vmips/fpu.cc
+  cvs rdiff -r1.10 -r1.11 vmips/fpu.h
+--------------------------------------------------------------------------------
+Implement rest of main fpu instruction decoder.
+
+================================================================================
+[brg]  Fri, 04 Dec 2015 07:24:24 UTC  trunk
+  cvs rdiff -r1.4 -r1.5 vmips/utils/xmlcl.pl
+--------------------------------------------------------------------------------
+Make the toplevel module name a variable, so that it can eventually
+become a command-line parameter or be auto-detected.
+
+================================================================================
+[brg]  Sun, 18 Oct 2015 05:39:37 UTC  trunk
+  cvs rdiff -r1.13 -r1.14 vmips/fpu.cc
+--------------------------------------------------------------------------------
+Fill in lwc1/swc1 guts in FPU class.
+Put stuff that is disabled in the FPU under #if FPU_DISABLED.
+
+================================================================================
+[brg]  Fri, 16 Oct 2015 07:48:03 UTC  trunk
+  cvs rdiff -r1.41 -r1.42 vmips/cpzero.cc
+--------------------------------------------------------------------------------
+I noticed a call to exception() from cpzero which wasn't setting the
+coprocno. This might not matter, but let's set it anyway.
+
+================================================================================
+[brg]  Fri, 16 Oct 2015 07:46:06 UTC  trunk
+  cvs rdiff -r1.12 -r1.13 vmips/fpu.cc
+  cvs rdiff -r1.9 -r1.10 vmips/fpu.h
+--------------------------------------------------------------------------------
+Start to flesh out instruction decoding for fpu.
+
+================================================================================
+[brg]  Fri, 16 Oct 2015 07:43:55 UTC  trunk
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/config.h
+--------------------------------------------------------------------------------
+Do not unnecessarily enable NLS, which requires libintl.h, which might not
+be available everywhere.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 07:00:10 UTC  trunk
+  cvs rdiff -r1.184 -r1.185 vmips/doc/to-do
+--------------------------------------------------------------------------------
+Upgrading libopcodes_mips is done.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 06:58:14 UTC  trunk
+  cvs rdiff -r1.8 -r1.9 vmips/ChangeLog
+--------------------------------------------------------------------------------
+Update ChangeLog.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 06:54:42 UTC  trunk
+  cvs rdiff -r1.88 -r1.89 vmips/Makefile.am
+  cvs rdiff -r1.11 -r1.12 vmips/fpu.cc
+  cvs rdiff -r1.8 -r1.9 vmips/fpu.h
+  cvs add vmips/fpureg.h
+--------------------------------------------------------------------------------
+Commit work in progress on revamping FPU.
+Try to make "make maintainer-clean" work again by defining DIST_SUBDIRS.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 06:53:59 UTC  trunk
+  cvs rdiff -r1.3 -r1.4 vmips/missing
+--------------------------------------------------------------------------------
+Update to version distributed with automake-1.13.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 06:46:29 UTC  trunk
+  cvs rdiff -r1.6 -r1.7 vmips/stub-dis.h
+--------------------------------------------------------------------------------
+Update stub-dis.h so that it is compatible with the binutils-2.14a
+interface to the disassembler.
+
+================================================================================
+[brg]  Fri, 02 Oct 2015 06:45:13 UTC  trunk
+  cvs rdiff -r1.1 -r1.2 vmips/libopcodes_mips/README
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/ansidecl.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/bfd.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/bfdlink.h
+  cvs rdiff -r1.1 -r1.2 vmips/libopcodes_mips/config.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/dis-asm.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/elf-bfd.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/libbfd.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/mips-dis.c
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/mips-opc.c
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/opintl.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/sysdep.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/elf/common.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/elf/internal.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/elf/mips.h
+  cvs rdiff -r1.2 -r1.3 vmips/libopcodes_mips/opcode/mips.h
+--------------------------------------------------------------------------------
+Update libopcodes_mips to the binutils-2.14a version.
+Put much more information in the README about how this library came to be.
+
+================================================================================
+[brg]  Sat, 03 Jan 2015 06:31:49 UTC  trunk
+  cvs rdiff -r1.13 -r1.14 vmips/doc/rel-checklist.txt
+  cvs rdiff -r1.183 -r1.184 vmips/doc/to-do
+--------------------------------------------------------------------------------
+Insert reminder to follow checklist when checking rpm specfile.
+
+================================================================================
+[brg]  Sat, 03 Jan 2015 05:58:34 UTC  trunk
+  cvs rdiff -r1.182 -r1.183 vmips/doc/to-do
+--------------------------------------------------------------------------------
+Merge todo list into CVS todo list
+
+================================================================================
+[brg]  Sat, 03 Jan 2015 05:58:22 UTC  trunk
+  cvs add vmips/doc/rpm_checks.txt
+--------------------------------------------------------------------------------
+Checklist specifically about the RPM spec file
+
+================================================================================
+[brg]  Sat, 03 Jan 2015 05:46:08 UTC  trunk
+  cvs rdiff -r1.12 -r1.13 vmips/doc/rel-checklist.txt
+--------------------------------------------------------------------------------
+Add notes to release checklist about updating ports
+
+================================================================================
+[brg]  Sat, 03 Jan 2015 05:36:31 UTC  trunk
+  cvs rdiff -r1.52 -r1.53 vmips/options.cc
+  cvs rdiff -r1.28 -r1.29 vmips/options.h
+  cvs rdiff -r1.13 -r1.14 vmips/terminalcontroller.cc
+  cvs rdiff -r1.21 -r1.22 vmips/vmips.spec.in
+--------------------------------------------------------------------------------
+* Fix some indentation/spacing.
+* Add some FIXMEs to Options methods that could leak memory.
+* Allow a string-valued Option to be set to an empty string without an error.
+* In Options::optstruct, there is no need to explicitly default-construct an
+  Option before returning it. operator[] should do that for us.
+* Update copyright dates printed in version message.
+* There is no need to typedef an anonymous struct to Option. This is C++
+  so we can just say struct Option and thereafter refer to it as Option.
+* Add an UNKNOWN option type.
+* sizeof(char) is 1, so just say 1.
+* Fix a couple of vmips specfile issues.
+
+================================================================================
+[brg]  Tue, 18 Nov 2014 08:52:12 UTC  trunk
+  cvs rdiff -r1.20 -r1.21 vmips/vmips.spec.in
+--------------------------------------------------------------------------------
+Fix vmips and vmipstool being listed twice after my recent edit to add %attrs.
+
+================================================================================
+[brg]  Tue, 18 Nov 2014 08:49:51 UTC  trunk
+  cvs rdiff -r1.19 -r1.20 vmips/vmips.spec.in
+--------------------------------------------------------------------------------
+Put version in latest changelog entry.
+Fix group to something that rpmlint knows, at least on this openSUSE system.
+
+================================================================================
+[brg]  Tue, 18 Nov 2014 08:19:44 UTC  trunk
+  cvs rdiff -r1.18 -r1.19 vmips/vmips.spec.in
+--------------------------------------------------------------------------------
+Fix some rpmlint errors.
+
+================================================================================
+[brg]  Mon, 17 Nov 2014 09:27:42 UTC  vmips-1_5-branch
+  cvs rdiff -r1.7 -r1.7.2.1 vmips/ChangeLog
+--------------------------------------------------------------------------------
+Updated ChangeLog on 1.5 branch.
+
+================================================================================
 [brg]  Mon, 17 Nov 2014 09:26:36 UTC  vmips-1_5-branch
   cvs rdiff -r1.1.12.1 -r1.1.12.2 vmips/ANNOUNCE
 --------------------------------------------------------------------------------

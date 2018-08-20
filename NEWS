@@ -2,7 +2,16 @@
 Appendix D Release History
 **************************
 
-vmips-1.5 was released on 17 November 2014.  User-visible changes in
+vmips-1.5.1 was released on 20 August 2018.  User-visible changes in
+version 1.5 (since version 1.5.1):
+
+   * Bug fixes:
+
+   * A pair of time calculations in the clock device were revised to
+     avoid triggering compile-time errors in newer C++11-compliant
+     compilers.
+
+   vmips-1.5 was released on 17 November 2014.  User-visible changes in
 version 1.5 (since version 1.4.1):
 
    * New features/improvements:

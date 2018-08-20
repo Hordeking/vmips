@@ -54,8 +54,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = endian-test$(EXEEXT) echo$(EXEEXT) sort$(EXEEXT) \
-	clocker$(EXEEXT)
+noinst_PROGRAMS = clocker$(EXEEXT) echo$(EXEEXT) endian-test$(EXEEXT) \
+	sort$(EXEEXT)
 subdir = test_code/vmips.misc-tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/depcomp $(top_srcdir)/mkinstalldirs
@@ -201,7 +201,6 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mipsbin = @mipsbin@
-mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -223,28 +222,28 @@ VMIPSTOOL = ../../vmipstool -n -F ../../vmipsrc --ld-script=@top_srcdir@/sample_
 AM_CFLAGS = -g -I@top_srcdir@ -I@top_srcdir@/sample_code
 SETUP = ../../sample_code/setup.o
 
-# simple_asm endian-test
-# multifile_asm -setup 0 endian-test endian-test.S
-endian_test_SOURCES = endian-test.S
+# simple_asm clocker
+# multifile_asm -setup 0 clocker clocker.S
+clocker_SOURCES = clocker.S
 
 # simple_c echo
 # multifile_c echo echo.c
 echo_LDFLAGS = $(SETUP)
 echo_SOURCES = echo.c
 
+# simple_asm endian-test
+# multifile_asm -setup 0 endian-test endian-test.S
+endian_test_SOURCES = endian-test.S
+
 # multifile_c sort {sort.c random.c}
 sort_LDFLAGS = $(SETUP)
 sort_SOURCES = sort.c random.c
-
-# simple_asm clocker
-# multifile_asm -setup 0 clocker clocker.S
-clocker_SOURCES = clocker.S
 CCLD = $(VMIPSTOOL) --link
 COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
-CLEANFILES = endian-test.rom echo.rom sort.rom clocker.rom
-EXTRA_DIST = sort.exp endian-test.exp clocker.exp echo.exp  endian-test.par echo.par sort.par clocker.par
+CLEANFILES = clocker.rom echo.rom endian-test.rom sort.rom
+EXTRA_DIST = clocker.exp echo.exp endian-test.exp sort.exp  clocker.par echo.par endian-test.par sort.par
 all: all-am
 
 .SUFFIXES:
@@ -550,14 +549,14 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-endian-test.rom: endian-test.exe
-	$(VMIPSTOOL) --make-rom endian-test.exe endian-test.rom
-echo.rom: echo.exe
-	$(VMIPSTOOL) --make-rom echo.exe echo.rom
-sort.rom: sort.exe
-	$(VMIPSTOOL) --make-rom sort.exe sort.rom
 clocker.rom: clocker.exe
 	$(VMIPSTOOL) --make-rom clocker.exe clocker.rom
+echo.rom: echo.exe
+	$(VMIPSTOOL) --make-rom echo.exe echo.rom
+endian-test.rom: endian-test.exe
+	$(VMIPSTOOL) --make-rom endian-test.exe endian-test.rom
+sort.rom: sort.exe
+	$(VMIPSTOOL) --make-rom sort.exe sort.rom
 
 # 2 C testcases and 2 asm testcases.
 # 0 custom makefile fragment testcases.

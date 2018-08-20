@@ -54,10 +54,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = poke2$(EXEEXT) simpledis$(EXEEXT) sb-print$(EXEEXT) \
-	hello2$(EXEEXT) emptymain$(EXEEXT) exception$(EXEEXT) \
-	hello$(EXEEXT) instcounts$(EXEEXT) unaligned$(EXEEXT) \
-	loser$(EXEEXT) bdexcp$(EXEEXT) dzhello$(EXEEXT)
+noinst_PROGRAMS = bdexcp$(EXEEXT) dzhello$(EXEEXT) emptymain$(EXEEXT) \
+	exception$(EXEEXT) hello$(EXEEXT) hello2$(EXEEXT) \
+	instcounts$(EXEEXT) loser$(EXEEXT) poke2$(EXEEXT) \
+	sb-print$(EXEEXT) simpledis$(EXEEXT) unaligned$(EXEEXT)
 subdir = test_code/vmips.outcheck
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/depcomp $(top_srcdir)/mkinstalldirs
@@ -236,7 +236,6 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mipsbin = @mipsbin@
-mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -260,26 +259,16 @@ SETUP = ../../sample_code/setup.o
 
 # empty 
 
-# simple_asm poke2
-# multifile_asm -setup 0 poke2 poke2.S
-poke2_SOURCES = poke2.S
-
-# simple_asm simpledis
-# multifile_asm -setup 0 simpledis simpledis.S
-simpledis_SOURCES = simpledis.S
-
 # empty 
 
-# simple_asm sb-print
-# multifile_asm -setup 0 sb-print sb-print.S
-sb_print_SOURCES = sb-print.S
+# simple_asm bdexcp
+# multifile_asm -setup 0 bdexcp bdexcp.S
+bdexcp_SOURCES = bdexcp.S
 
-# simple_c hello2
-# multifile_c hello2 hello2.c
-hello2_LDFLAGS = $(SETUP)
-hello2_SOURCES = hello2.c
-
-# empty 
+# simple_c dzhello
+# multifile_c dzhello dzhello.c
+dzhello_LDFLAGS = $(SETUP)
+dzhello_SOURCES = dzhello.c
 
 # simple_c emptymain
 # multifile_c emptymain emptymain.c
@@ -295,31 +284,41 @@ exception_SOURCES = exception.S
 hello_LDFLAGS = $(SETUP)
 hello_SOURCES = hello.c
 
+# simple_c hello2
+# multifile_c hello2 hello2.c
+hello2_LDFLAGS = $(SETUP)
+hello2_SOURCES = hello2.c
+
 # simple_asm instcounts
 # multifile_asm -setup 0 instcounts instcounts.S
 instcounts_SOURCES = instcounts.S
 
-# simple_asm unaligned
-# multifile_asm -setup 0 unaligned unaligned.S
-unaligned_SOURCES = unaligned.S
-
 # makefile_fragment loser
 loser_SOURCES = loser.S
 
-# simple_asm bdexcp
-# multifile_asm -setup 0 bdexcp bdexcp.S
-bdexcp_SOURCES = bdexcp.S
+# empty 
 
-# simple_c dzhello
-# multifile_c dzhello dzhello.c
-dzhello_LDFLAGS = $(SETUP)
-dzhello_SOURCES = dzhello.c
+# simple_asm poke2
+# multifile_asm -setup 0 poke2 poke2.S
+poke2_SOURCES = poke2.S
+
+# simple_asm sb-print
+# multifile_asm -setup 0 sb-print sb-print.S
+sb_print_SOURCES = sb-print.S
+
+# simple_asm simpledis
+# multifile_asm -setup 0 simpledis simpledis.S
+simpledis_SOURCES = simpledis.S
+
+# simple_asm unaligned
+# multifile_asm -setup 0 unaligned unaligned.S
+unaligned_SOURCES = unaligned.S
 CCLD = $(VMIPSTOOL) --link
 COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
-CLEANFILES = poke2.rom simpledis.rom sb-print.rom hello2.rom emptymain.rom exception.rom hello.rom instcounts.rom unaligned.rom loser.rom bdexcp.rom dzhello.rom
-EXTRA_DIST = outcheck.exp  nonexistent.par poke2.par simpledis.par badoption.par sb-print.par hello2.par badargs.par emptymain.par exception.par hello.par instcounts.par unaligned.par loser.par bdexcp.par dzhello.par
+CLEANFILES = bdexcp.rom dzhello.rom emptymain.rom exception.rom hello.rom hello2.rom instcounts.rom loser.rom poke2.rom sb-print.rom simpledis.rom unaligned.rom
+EXTRA_DIST = outcheck.exp  badargs.par badoption.par bdexcp.par dzhello.par emptymain.par exception.par hello.par hello2.par instcounts.par loser.par nonexistent.par poke2.par sb-print.par simpledis.par unaligned.par
 all: all-am
 
 .SUFFIXES:
@@ -656,32 +655,32 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-poke2.rom: poke2.exe
-	$(VMIPSTOOL) --make-rom poke2.exe poke2.rom
-simpledis.rom: simpledis.exe
-	$(VMIPSTOOL) --make-rom simpledis.exe simpledis.rom
-sb-print.rom: sb-print.exe
-	$(VMIPSTOOL) --make-rom sb-print.exe sb-print.rom
-hello2.rom: hello2.exe
-	$(VMIPSTOOL) --make-rom hello2.exe hello2.rom
+bdexcp.rom: bdexcp.exe
+	$(VMIPSTOOL) --make-rom bdexcp.exe bdexcp.rom
+dzhello.rom: dzhello.exe
+	$(VMIPSTOOL) --make-rom dzhello.exe dzhello.rom
 emptymain.rom: emptymain.exe
 	$(VMIPSTOOL) --make-rom emptymain.exe emptymain.rom
 exception.rom: exception.exe
 	$(VMIPSTOOL) --make-rom exception.exe exception.rom
 hello.rom: hello.exe
 	$(VMIPSTOOL) --make-rom hello.exe hello.rom
+hello2.rom: hello2.exe
+	$(VMIPSTOOL) --make-rom hello2.exe hello2.rom
 instcounts.rom: instcounts.exe
 	$(VMIPSTOOL) --make-rom instcounts.exe instcounts.rom
-unaligned.rom: unaligned.exe
-	$(VMIPSTOOL) --make-rom unaligned.exe unaligned.rom
 loser.rom: loser.exe
 	$(VMIPSTOOL) --make-rom loser.exe loser.tmp
 	dd if=loser.tmp bs=4 count=1 of=loser.rom >/dev/null 2>&1
 	rm loser.tmp
-bdexcp.rom: bdexcp.exe
-	$(VMIPSTOOL) --make-rom bdexcp.exe bdexcp.rom
-dzhello.rom: dzhello.exe
-	$(VMIPSTOOL) --make-rom dzhello.exe dzhello.rom
+poke2.rom: poke2.exe
+	$(VMIPSTOOL) --make-rom poke2.exe poke2.rom
+sb-print.rom: sb-print.exe
+	$(VMIPSTOOL) --make-rom sb-print.exe sb-print.rom
+simpledis.rom: simpledis.exe
+	$(VMIPSTOOL) --make-rom simpledis.exe simpledis.rom
+unaligned.rom: unaligned.exe
+	$(VMIPSTOOL) --make-rom unaligned.exe unaligned.rom
 
 # 4 C testcases and 7 asm testcases.
 # 4 custom makefile fragment testcases.

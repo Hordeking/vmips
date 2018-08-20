@@ -54,16 +54,16 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = lwl$(EXEEXT) store$(EXEEXT) sltiu$(EXEEXT) \
-	xor$(EXEEXT) shift$(EXEEXT) cswap$(EXEEXT) swl$(EXEEXT) \
-	bltzal$(EXEEXT) syscall$(EXEEXT) handler5$(EXEEXT) \
-	coproc$(EXEEXT) cload$(EXEEXT) swr$(EXEEXT) tester$(EXEEXT) \
-	cstore2$(EXEEXT) tlbwr$(EXEEXT) addi$(EXEEXT) bgezal$(EXEEXT) \
-	mthi_lo$(EXEEXT) sub$(EXEEXT) multu$(EXEEXT) add$(EXEEXT) \
-	blez$(EXEEXT) cstore$(EXEEXT) divu$(EXEEXT) jalr$(EXEEXT) \
-	srlv$(EXEEXT) bgtz$(EXEEXT) load$(EXEEXT) haltdev$(EXEEXT) \
-	mumble$(EXEEXT) cisol$(EXEEXT) slti$(EXEEXT) lwr$(EXEEXT) \
-	logical$(EXEEXT) bc0$(EXEEXT) bltz$(EXEEXT)
+noinst_PROGRAMS = add$(EXEEXT) addi$(EXEEXT) bc0$(EXEEXT) \
+	bgezal$(EXEEXT) bgtz$(EXEEXT) blez$(EXEEXT) bltz$(EXEEXT) \
+	bltzal$(EXEEXT) cisol$(EXEEXT) cload$(EXEEXT) coproc$(EXEEXT) \
+	cstore$(EXEEXT) cstore2$(EXEEXT) cswap$(EXEEXT) divu$(EXEEXT) \
+	haltdev$(EXEEXT) handler5$(EXEEXT) jalr$(EXEEXT) load$(EXEEXT) \
+	logical$(EXEEXT) lwl$(EXEEXT) lwr$(EXEEXT) mthi_lo$(EXEEXT) \
+	multu$(EXEEXT) mumble$(EXEEXT) shift$(EXEEXT) slti$(EXEEXT) \
+	sltiu$(EXEEXT) srlv$(EXEEXT) store$(EXEEXT) sub$(EXEEXT) \
+	swl$(EXEEXT) swr$(EXEEXT) syscall$(EXEEXT) tester$(EXEEXT) \
+	tlbwr$(EXEEXT) xor$(EXEEXT)
 subdir = test_code/vmips.regcheck
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/depcomp $(top_srcdir)/mkinstalldirs
@@ -346,7 +346,6 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mipsbin = @mipsbin@
-mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -368,169 +367,169 @@ VMIPSTOOL = ../../vmipstool -n -F ../../vmipsrc --ld-script=@top_srcdir@/sample_
 AM_CFLAGS = -g -I@top_srcdir@ -I@top_srcdir@/sample_code
 SETUP = ../../sample_code/setup.o
 
-# simple_asm lwl
-# multifile_asm -setup 0 lwl lwl.S
-lwl_SOURCES = lwl.S
-
-# simple_asm -setup 1 store
-# multifile_asm -setup 1 store store.S
-store_LDFLAGS = $(SETUP)
-store_SOURCES = store.S
-
-# simple_asm sltiu
-# multifile_asm -setup 0 sltiu sltiu.S
-sltiu_SOURCES = sltiu.S
-
-# simple_asm xor
-# multifile_asm -setup 0 xor xor.S
-xor_SOURCES = xor.S
-
-# simple_asm shift
-# multifile_asm -setup 0 shift shift.S
-shift_SOURCES = shift.S
-
-# simple_asm -setup 1 cswap
-# multifile_asm -setup 1 cswap cswap.S
-cswap_LDFLAGS = $(SETUP)
-cswap_SOURCES = cswap.S
-
-# simple_asm -setup 1 swl
-# multifile_asm -setup 1 swl swl.S
-swl_LDFLAGS = $(SETUP)
-swl_SOURCES = swl.S
-
-# simple_asm bltzal
-# multifile_asm -setup 0 bltzal bltzal.S
-bltzal_SOURCES = bltzal.S
-
-# simple_asm syscall
-# multifile_asm -setup 0 syscall syscall.S
-syscall_SOURCES = syscall.S
-
-# simple_asm handler5
-# multifile_asm -setup 0 handler5 handler5.S
-handler5_SOURCES = handler5.S
-
-# simple_asm coproc
-# multifile_asm -setup 0 coproc coproc.S
-coproc_SOURCES = coproc.S
-
-# simple_asm -setup 1 cload
-# multifile_asm -setup 1 cload cload.S
-cload_LDFLAGS = $(SETUP)
-cload_SOURCES = cload.S
-
-# simple_asm -setup 1 swr
-# multifile_asm -setup 1 swr swr.S
-swr_LDFLAGS = $(SETUP)
-swr_SOURCES = swr.S
-
-# simple_c tester
-# multifile_c tester tester.c
-tester_LDFLAGS = $(SETUP)
-tester_SOURCES = tester.c
-
-# simple_asm -setup 1 cstore2
-# multifile_asm -setup 1 cstore2 cstore2.S
-cstore2_LDFLAGS = $(SETUP)
-cstore2_SOURCES = cstore2.S
-
-# simple_asm -setup 1 tlbwr
-# multifile_asm -setup 1 tlbwr tlbwr.S
-tlbwr_LDFLAGS = $(SETUP)
-tlbwr_SOURCES = tlbwr.S
+# simple_asm add
+# multifile_asm -setup 0 add add.S
+add_SOURCES = add.S
 
 # simple_asm addi
 # multifile_asm -setup 0 addi addi.S
 addi_SOURCES = addi.S
 
+# simple_asm bc0
+# multifile_asm -setup 0 bc0 bc0.S
+bc0_SOURCES = bc0.S
+
 # simple_asm bgezal
 # multifile_asm -setup 0 bgezal bgezal.S
 bgezal_SOURCES = bgezal.S
-
-# simple_asm mthi_lo
-# multifile_asm -setup 0 mthi_lo mthi_lo.S
-mthi_lo_SOURCES = mthi_lo.S
-
-# simple_asm sub
-# multifile_asm -setup 0 sub sub.S
-sub_SOURCES = sub.S
-
-# simple_asm multu
-# multifile_asm -setup 0 multu multu.S
-multu_SOURCES = multu.S
-
-# simple_asm add
-# multifile_asm -setup 0 add add.S
-add_SOURCES = add.S
-
-# simple_asm blez
-# multifile_asm -setup 0 blez blez.S
-blez_SOURCES = blez.S
-
-# simple_asm -setup 1 cstore
-# multifile_asm -setup 1 cstore cstore.S
-cstore_LDFLAGS = $(SETUP)
-cstore_SOURCES = cstore.S
-
-# simple_asm divu
-# multifile_asm -setup 0 divu divu.S
-divu_SOURCES = divu.S
-
-# simple_asm jalr
-# multifile_asm -setup 0 jalr jalr.S
-jalr_SOURCES = jalr.S
-
-# simple_asm srlv
-# multifile_asm -setup 0 srlv srlv.S
-srlv_SOURCES = srlv.S
 
 # simple_asm bgtz
 # multifile_asm -setup 0 bgtz bgtz.S
 bgtz_SOURCES = bgtz.S
 
-# simple_asm load
-# multifile_asm -setup 0 load load.S
-load_SOURCES = load.S
+# simple_asm blez
+# multifile_asm -setup 0 blez blez.S
+blez_SOURCES = blez.S
 
-# simple_asm haltdev
-# multifile_asm -setup 0 haltdev haltdev.S
-haltdev_SOURCES = haltdev.S
+# simple_asm bltz
+# multifile_asm -setup 0 bltz bltz.S
+bltz_SOURCES = bltz.S
 
-# simple_asm mumble
-# multifile_asm -setup 0 mumble mumble.S
-mumble_SOURCES = mumble.S
+# simple_asm bltzal
+# multifile_asm -setup 0 bltzal bltzal.S
+bltzal_SOURCES = bltzal.S
 
 # simple_asm -setup 1 cisol
 # multifile_asm -setup 1 cisol cisol.S
 cisol_LDFLAGS = $(SETUP)
 cisol_SOURCES = cisol.S
 
-# simple_asm slti
-# multifile_asm -setup 0 slti slti.S
-slti_SOURCES = slti.S
+# simple_asm -setup 1 cload
+# multifile_asm -setup 1 cload cload.S
+cload_LDFLAGS = $(SETUP)
+cload_SOURCES = cload.S
 
-# simple_asm lwr
-# multifile_asm -setup 0 lwr lwr.S
-lwr_SOURCES = lwr.S
+# simple_asm coproc
+# multifile_asm -setup 0 coproc coproc.S
+coproc_SOURCES = coproc.S
+
+# simple_asm -setup 1 cstore
+# multifile_asm -setup 1 cstore cstore.S
+cstore_LDFLAGS = $(SETUP)
+cstore_SOURCES = cstore.S
+
+# simple_asm -setup 1 cstore2
+# multifile_asm -setup 1 cstore2 cstore2.S
+cstore2_LDFLAGS = $(SETUP)
+cstore2_SOURCES = cstore2.S
+
+# simple_asm -setup 1 cswap
+# multifile_asm -setup 1 cswap cswap.S
+cswap_LDFLAGS = $(SETUP)
+cswap_SOURCES = cswap.S
+
+# simple_asm divu
+# multifile_asm -setup 0 divu divu.S
+divu_SOURCES = divu.S
+
+# simple_asm haltdev
+# multifile_asm -setup 0 haltdev haltdev.S
+haltdev_SOURCES = haltdev.S
+
+# simple_asm handler5
+# multifile_asm -setup 0 handler5 handler5.S
+handler5_SOURCES = handler5.S
+
+# simple_asm jalr
+# multifile_asm -setup 0 jalr jalr.S
+jalr_SOURCES = jalr.S
+
+# simple_asm load
+# multifile_asm -setup 0 load load.S
+load_SOURCES = load.S
 
 # simple_asm logical
 # multifile_asm -setup 0 logical logical.S
 logical_SOURCES = logical.S
 
-# simple_asm bc0
-# multifile_asm -setup 0 bc0 bc0.S
-bc0_SOURCES = bc0.S
+# simple_asm lwl
+# multifile_asm -setup 0 lwl lwl.S
+lwl_SOURCES = lwl.S
 
-# simple_asm bltz
-# multifile_asm -setup 0 bltz bltz.S
-bltz_SOURCES = bltz.S
+# simple_asm lwr
+# multifile_asm -setup 0 lwr lwr.S
+lwr_SOURCES = lwr.S
+
+# simple_asm mthi_lo
+# multifile_asm -setup 0 mthi_lo mthi_lo.S
+mthi_lo_SOURCES = mthi_lo.S
+
+# simple_asm multu
+# multifile_asm -setup 0 multu multu.S
+multu_SOURCES = multu.S
+
+# simple_asm mumble
+# multifile_asm -setup 0 mumble mumble.S
+mumble_SOURCES = mumble.S
+
+# simple_asm shift
+# multifile_asm -setup 0 shift shift.S
+shift_SOURCES = shift.S
+
+# simple_asm slti
+# multifile_asm -setup 0 slti slti.S
+slti_SOURCES = slti.S
+
+# simple_asm sltiu
+# multifile_asm -setup 0 sltiu sltiu.S
+sltiu_SOURCES = sltiu.S
+
+# simple_asm srlv
+# multifile_asm -setup 0 srlv srlv.S
+srlv_SOURCES = srlv.S
+
+# simple_asm -setup 1 store
+# multifile_asm -setup 1 store store.S
+store_LDFLAGS = $(SETUP)
+store_SOURCES = store.S
+
+# simple_asm sub
+# multifile_asm -setup 0 sub sub.S
+sub_SOURCES = sub.S
+
+# simple_asm -setup 1 swl
+# multifile_asm -setup 1 swl swl.S
+swl_LDFLAGS = $(SETUP)
+swl_SOURCES = swl.S
+
+# simple_asm -setup 1 swr
+# multifile_asm -setup 1 swr swr.S
+swr_LDFLAGS = $(SETUP)
+swr_SOURCES = swr.S
+
+# simple_asm syscall
+# multifile_asm -setup 0 syscall syscall.S
+syscall_SOURCES = syscall.S
+
+# simple_c tester
+# multifile_c tester tester.c
+tester_LDFLAGS = $(SETUP)
+tester_SOURCES = tester.c
+
+# simple_asm -setup 1 tlbwr
+# multifile_asm -setup 1 tlbwr tlbwr.S
+tlbwr_LDFLAGS = $(SETUP)
+tlbwr_SOURCES = tlbwr.S
+
+# simple_asm xor
+# multifile_asm -setup 0 xor xor.S
+xor_SOURCES = xor.S
 CCLD = $(VMIPSTOOL) --link
 COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
-CLEANFILES = lwl.rom store.rom sltiu.rom xor.rom shift.rom cswap.rom swl.rom bltzal.rom syscall.rom handler5.rom coproc.rom cload.rom swr.rom tester.rom cstore2.rom tlbwr.rom addi.rom bgezal.rom mthi_lo.rom sub.rom multu.rom add.rom blez.rom cstore.rom divu.rom jalr.rom srlv.rom bgtz.rom load.rom haltdev.rom mumble.rom cisol.rom slti.rom lwr.rom logical.rom bc0.rom bltz.rom
-EXTRA_DIST = regcheck.exp  lwl.par store.par sltiu.par xor.par shift.par cswap.par swl.par bltzal.par syscall.par handler5.par coproc.par cload.par swr.par tester.par cstore2.par tlbwr.par addi.par bgezal.par mthi_lo.par sub.par multu.par add.par blez.par cstore.par divu.par jalr.par srlv.par bgtz.par load.par haltdev.par mumble.par cisol.par slti.par lwr.par logical.par bc0.par bltz.par
+CLEANFILES = add.rom addi.rom bc0.rom bgezal.rom bgtz.rom blez.rom bltz.rom bltzal.rom cisol.rom cload.rom coproc.rom cstore.rom cstore2.rom cswap.rom divu.rom haltdev.rom handler5.rom jalr.rom load.rom logical.rom lwl.rom lwr.rom mthi_lo.rom multu.rom mumble.rom shift.rom slti.rom sltiu.rom srlv.rom store.rom sub.rom swl.rom swr.rom syscall.rom tester.rom tlbwr.rom xor.rom
+EXTRA_DIST = regcheck.exp  add.par addi.par bc0.par bgezal.par bgtz.par blez.par bltz.par bltzal.par cisol.par cload.par coproc.par cstore.par cstore2.par cswap.par divu.par haltdev.par handler5.par jalr.par load.par logical.par lwl.par lwr.par mthi_lo.par multu.par mumble.par shift.par slti.par sltiu.par srlv.par store.par sub.par swl.par swr.par syscall.par tester.par tlbwr.par xor.par
 all: all-am
 
 .SUFFIXES:
@@ -967,80 +966,80 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-lwl.rom: lwl.exe
-	$(VMIPSTOOL) --make-rom lwl.exe lwl.rom
-store.rom: store.exe
-	$(VMIPSTOOL) --make-rom store.exe store.rom
-sltiu.rom: sltiu.exe
-	$(VMIPSTOOL) --make-rom sltiu.exe sltiu.rom
-xor.rom: xor.exe
-	$(VMIPSTOOL) --make-rom xor.exe xor.rom
-shift.rom: shift.exe
-	$(VMIPSTOOL) --make-rom shift.exe shift.rom
-cswap.rom: cswap.exe
-	$(VMIPSTOOL) --make-rom cswap.exe cswap.rom
-swl.rom: swl.exe
-	$(VMIPSTOOL) --make-rom swl.exe swl.rom
-bltzal.rom: bltzal.exe
-	$(VMIPSTOOL) --make-rom bltzal.exe bltzal.rom
-syscall.rom: syscall.exe
-	$(VMIPSTOOL) --make-rom syscall.exe syscall.rom
-handler5.rom: handler5.exe
-	$(VMIPSTOOL) --make-rom handler5.exe handler5.rom
-coproc.rom: coproc.exe
-	$(VMIPSTOOL) --make-rom coproc.exe coproc.rom
-cload.rom: cload.exe
-	$(VMIPSTOOL) --make-rom cload.exe cload.rom
-swr.rom: swr.exe
-	$(VMIPSTOOL) --make-rom swr.exe swr.rom
-tester.rom: tester.exe
-	$(VMIPSTOOL) --make-rom tester.exe tester.rom
-cstore2.rom: cstore2.exe
-	$(VMIPSTOOL) --make-rom cstore2.exe cstore2.rom
-tlbwr.rom: tlbwr.exe
-	$(VMIPSTOOL) --make-rom tlbwr.exe tlbwr.rom
-addi.rom: addi.exe
-	$(VMIPSTOOL) --make-rom addi.exe addi.rom
-bgezal.rom: bgezal.exe
-	$(VMIPSTOOL) --make-rom bgezal.exe bgezal.rom
-mthi_lo.rom: mthi_lo.exe
-	$(VMIPSTOOL) --make-rom mthi_lo.exe mthi_lo.rom
-sub.rom: sub.exe
-	$(VMIPSTOOL) --make-rom sub.exe sub.rom
-multu.rom: multu.exe
-	$(VMIPSTOOL) --make-rom multu.exe multu.rom
 add.rom: add.exe
 	$(VMIPSTOOL) --make-rom add.exe add.rom
-blez.rom: blez.exe
-	$(VMIPSTOOL) --make-rom blez.exe blez.rom
-cstore.rom: cstore.exe
-	$(VMIPSTOOL) --make-rom cstore.exe cstore.rom
-divu.rom: divu.exe
-	$(VMIPSTOOL) --make-rom divu.exe divu.rom
-jalr.rom: jalr.exe
-	$(VMIPSTOOL) --make-rom jalr.exe jalr.rom
-srlv.rom: srlv.exe
-	$(VMIPSTOOL) --make-rom srlv.exe srlv.rom
-bgtz.rom: bgtz.exe
-	$(VMIPSTOOL) --make-rom bgtz.exe bgtz.rom
-load.rom: load.exe
-	$(VMIPSTOOL) --make-rom load.exe load.rom
-haltdev.rom: haltdev.exe
-	$(VMIPSTOOL) --make-rom haltdev.exe haltdev.rom
-mumble.rom: mumble.exe
-	$(VMIPSTOOL) --make-rom mumble.exe mumble.rom
-cisol.rom: cisol.exe
-	$(VMIPSTOOL) --make-rom cisol.exe cisol.rom
-slti.rom: slti.exe
-	$(VMIPSTOOL) --make-rom slti.exe slti.rom
-lwr.rom: lwr.exe
-	$(VMIPSTOOL) --make-rom lwr.exe lwr.rom
-logical.rom: logical.exe
-	$(VMIPSTOOL) --make-rom logical.exe logical.rom
+addi.rom: addi.exe
+	$(VMIPSTOOL) --make-rom addi.exe addi.rom
 bc0.rom: bc0.exe
 	$(VMIPSTOOL) --make-rom bc0.exe bc0.rom
+bgezal.rom: bgezal.exe
+	$(VMIPSTOOL) --make-rom bgezal.exe bgezal.rom
+bgtz.rom: bgtz.exe
+	$(VMIPSTOOL) --make-rom bgtz.exe bgtz.rom
+blez.rom: blez.exe
+	$(VMIPSTOOL) --make-rom blez.exe blez.rom
 bltz.rom: bltz.exe
 	$(VMIPSTOOL) --make-rom bltz.exe bltz.rom
+bltzal.rom: bltzal.exe
+	$(VMIPSTOOL) --make-rom bltzal.exe bltzal.rom
+cisol.rom: cisol.exe
+	$(VMIPSTOOL) --make-rom cisol.exe cisol.rom
+cload.rom: cload.exe
+	$(VMIPSTOOL) --make-rom cload.exe cload.rom
+coproc.rom: coproc.exe
+	$(VMIPSTOOL) --make-rom coproc.exe coproc.rom
+cstore.rom: cstore.exe
+	$(VMIPSTOOL) --make-rom cstore.exe cstore.rom
+cstore2.rom: cstore2.exe
+	$(VMIPSTOOL) --make-rom cstore2.exe cstore2.rom
+cswap.rom: cswap.exe
+	$(VMIPSTOOL) --make-rom cswap.exe cswap.rom
+divu.rom: divu.exe
+	$(VMIPSTOOL) --make-rom divu.exe divu.rom
+haltdev.rom: haltdev.exe
+	$(VMIPSTOOL) --make-rom haltdev.exe haltdev.rom
+handler5.rom: handler5.exe
+	$(VMIPSTOOL) --make-rom handler5.exe handler5.rom
+jalr.rom: jalr.exe
+	$(VMIPSTOOL) --make-rom jalr.exe jalr.rom
+load.rom: load.exe
+	$(VMIPSTOOL) --make-rom load.exe load.rom
+logical.rom: logical.exe
+	$(VMIPSTOOL) --make-rom logical.exe logical.rom
+lwl.rom: lwl.exe
+	$(VMIPSTOOL) --make-rom lwl.exe lwl.rom
+lwr.rom: lwr.exe
+	$(VMIPSTOOL) --make-rom lwr.exe lwr.rom
+mthi_lo.rom: mthi_lo.exe
+	$(VMIPSTOOL) --make-rom mthi_lo.exe mthi_lo.rom
+multu.rom: multu.exe
+	$(VMIPSTOOL) --make-rom multu.exe multu.rom
+mumble.rom: mumble.exe
+	$(VMIPSTOOL) --make-rom mumble.exe mumble.rom
+shift.rom: shift.exe
+	$(VMIPSTOOL) --make-rom shift.exe shift.rom
+slti.rom: slti.exe
+	$(VMIPSTOOL) --make-rom slti.exe slti.rom
+sltiu.rom: sltiu.exe
+	$(VMIPSTOOL) --make-rom sltiu.exe sltiu.rom
+srlv.rom: srlv.exe
+	$(VMIPSTOOL) --make-rom srlv.exe srlv.rom
+store.rom: store.exe
+	$(VMIPSTOOL) --make-rom store.exe store.rom
+sub.rom: sub.exe
+	$(VMIPSTOOL) --make-rom sub.exe sub.rom
+swl.rom: swl.exe
+	$(VMIPSTOOL) --make-rom swl.exe swl.rom
+swr.rom: swr.exe
+	$(VMIPSTOOL) --make-rom swr.exe swr.rom
+syscall.rom: syscall.exe
+	$(VMIPSTOOL) --make-rom syscall.exe syscall.rom
+tester.rom: tester.exe
+	$(VMIPSTOOL) --make-rom tester.exe tester.rom
+tlbwr.rom: tlbwr.exe
+	$(VMIPSTOOL) --make-rom tlbwr.exe tlbwr.rom
+xor.rom: xor.exe
+	$(VMIPSTOOL) --make-rom xor.exe xor.rom
 
 # 1 C testcases and 36 asm testcases.
 # 0 custom makefile fragment testcases.

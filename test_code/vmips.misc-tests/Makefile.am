@@ -5,11 +5,11 @@ VMIPSTOOL = ../../vmipstool -n -F ../../vmipsrc --ld-script=@top_srcdir@/sample_
 AM_CFLAGS = -g -I@top_srcdir@ -I@top_srcdir@/sample_code
 SETUP = ../../sample_code/setup.o
 
-# simple_asm endian-test
-# multifile_asm -setup 0 endian-test endian-test.S
-endian_test_SOURCES = endian-test.S
-endian-test.rom: endian-test.exe
-	$(VMIPSTOOL) --make-rom endian-test.exe endian-test.rom
+# simple_asm clocker
+# multifile_asm -setup 0 clocker clocker.S
+clocker_SOURCES = clocker.S
+clocker.rom: clocker.exe
+	$(VMIPSTOOL) --make-rom clocker.exe clocker.rom
 
 # simple_c echo
 # multifile_c echo echo.c
@@ -18,19 +18,19 @@ echo_SOURCES = echo.c
 echo.rom: echo.exe
 	$(VMIPSTOOL) --make-rom echo.exe echo.rom
 
+# simple_asm endian-test
+# multifile_asm -setup 0 endian-test endian-test.S
+endian_test_SOURCES = endian-test.S
+endian-test.rom: endian-test.exe
+	$(VMIPSTOOL) --make-rom endian-test.exe endian-test.rom
+
 # multifile_c sort {sort.c random.c}
 sort_LDFLAGS = $(SETUP)
 sort_SOURCES = sort.c random.c
 sort.rom: sort.exe
 	$(VMIPSTOOL) --make-rom sort.exe sort.rom
 
-# simple_asm clocker
-# multifile_asm -setup 0 clocker clocker.S
-clocker_SOURCES = clocker.S
-clocker.rom: clocker.exe
-	$(VMIPSTOOL) --make-rom clocker.exe clocker.rom
-
-noinst_PROGRAMS =  endian-test echo sort clocker
+noinst_PROGRAMS =  clocker echo endian-test sort
 
 CCLD = $(VMIPSTOOL) --link
 COMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
@@ -38,9 +38,9 @@ ASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 CPPASCOMPILE = $(VMIPSTOOL) --compile $(AM_CFLAGS)
 EXEEXT = .exe
 
-CLEANFILES =  endian-test.rom echo.rom sort.rom clocker.rom
+CLEANFILES =  clocker.rom echo.rom endian-test.rom sort.rom
 
-EXTRA_DIST =  sort.exp endian-test.exp clocker.exp echo.exp  endian-test.par echo.par sort.par clocker.par
+EXTRA_DIST =  clocker.exp echo.exp endian-test.exp sort.exp  clocker.par echo.par endian-test.par sort.par
 
 # 2 C testcases and 2 asm testcases.
 # 0 custom makefile fragment testcases.

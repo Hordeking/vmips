@@ -1,8 +1,8 @@
-vmips (1.5-1) unstable; urgency=low
+vmips (1.5.1-1) unstable; urgency=low
 
-  * Created debian package for version 1.5.
+  * Created debian package for version 1.5.1.
 
- -- Brian Gaeke <vmips@dgate.org>  Sun, 16 Nov 2014 00:17:17 -0800
+ -- Brian Gaeke <vmips@dgate.org>  Mon, 20 Aug 2018 23:43:33 -0700
 
 Local variables:
 mode: debian-changelog
